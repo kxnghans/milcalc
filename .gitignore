@@ -1,21 +1,27 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
+.pnp.*
 .pnp.js
 pnpm-lock.yaml
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
-# testing
-/coverage
-
-# build outputs
+# Build outputs
 /build
 /dist
-/.next/
 /out/
 
-# misc
+# Testing
+/coverage
+
+# Misc
 .DS_Store
 *.pem
 *.log
@@ -24,15 +30,40 @@ pnpm-lock.yaml
 .env.*.local
 .vscode/
 
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-# turbo
+# Turborepo
 .turbo
 
+# Next.js
+/.next/
+next-env.d.ts
+*.tsbuildinfo
+.vercel
+
 # React Native
+# Xcode
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+**/.xcode.env.local
 .expo/
 *.jks
 *.keystore
@@ -47,10 +78,30 @@ ios/.xcode.env.local
 ios/*.xcworkspace
 ios/.xccheckout
 ios/DerivedData
-ios/Mobile.xcodeproj/project.xcworkspace
-ios/Mobile.xcodeproj/xcuserdata
-ios/Mobile.xcworkspace
-ios/Mobile.xcworkspace/xcuserdata
+ios/mobile.xcodeproj/project.xcworkspace
+ios/mobile.xcodeproj/xcuserdata
+ios/mobile.xcworkspace
+ios/mobile.xcworkspace/xcuserdata
 
-# Next.js
-next-env.d.ts
+# Android/IntelliJ
+.idea
+*.iml
+*.hprof
+.cxx/
+!debug.keystore
+.kotlin/
+
+# Metro
+.metro-health-check*
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Bundle artifact
+*.jsbundle
+
+# Ruby/CocoaPods
+/vendor/bundle/
