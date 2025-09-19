@@ -1,20 +1,61 @@
-# Military Calculator
+# My Turborepo
 
-This is a monorepo for the Military Calculator project, containing a mobile app, a web app, and shared libraries.
+This is a minimal Turborepo with a Next.js web app and a React Native mobile app.
 
-## 🚀 What's Inside?
+## Getting Started
 
-- `apps/mobile`: A React Native (Expo) application for iOS and Android.
-- `apps/web`: A Next.js application for the web interface.
-- `libs/shared/logic`: Shared business logic and functions (e.g., calculations, API clients).
-- `libs/shared/types`: Shared TypeScript types and interfaces.
-- `libs/shared/ui`: Shared React components for the web application.
+### Prerequisites
 
-## ✨ Tech Stack
+- Node.js (v18 or later)
+- npm
 
-- **Monorepo:** [NX](https://nx.dev)
-- **Package Manager:** [pnpm](https://pnpm.io)
-- **Mobile:** [React Native](https://reactnative.dev/) / [Expo](https://expo.dev/)
-- **Web:** [Next.js](https://nextjs.org/)
-- **Backend:** [Supabase](https://supabase.com)
-- **Language:** [TypeScript](https://www.typescriptlang.org/)
+### Installation
+
+1.  Clone the repository.
+2.  Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+### Running the applications
+
+#### Web (Next.js)
+
+To start the development server for the web app, run:
+
+```bash
+npm run dev -- --filter=web
+```
+
+The web app will be available at `http://localhost:3000`.
+
+#### Mobile (React Native)
+
+To run the mobile app, you need to have the React Native development environment set up.
+
+1.  Navigate to the mobile app directory:
+
+    ```bash
+    cd packages/mobile
+    ```
+
+2.  Start the Metro bundler:
+
+    ```bash
+    npx react-native start
+    ```
+
+3.  In a separate terminal, run the app on your desired platform:
+
+    -   For Android:
+
+        ```bash
+        npx react-native run-android
+        ```
+
+    -   For iOS:
+
+        ```bash
+        npx react-native run-ios
+        ```
