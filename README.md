@@ -1,61 +1,130 @@
-# My Turborepo
+# unpack
 
-This is a minimal Turborepo with a Next.js web app and a React Native mobile app.
+your travel buddy that gets it out the groupchat
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+- [Node.js](https://nodejs.org/en/) (v18 or higher)
+- [pnpm](https://pnpm.io/)
 
-- Node.js (v18 or later)
-- npm
+## 🚀 Get started
 
-### Installation
+1. **Install dependencies**
 
-1.  Clone the repository.
-2.  Install dependencies:
+   ```bash
+   pnpm install
+   ```
 
-    ```bash
-    npm install
-    ```
+2. **Run the app**
 
-### Running the applications
+   This will start the web and mobile apps in parallel.
 
-#### Web (Next.js)
+   ```bash
+   pnpm dev
+   ```
 
-To start the development server for the web app, run:
+## 👀 Viewing the apps
 
-```bash
-npm run dev -- --filter=web
+After running `pnpm dev`, you will see output from both the web and mobile apps.
+
+### Web
+
+To view the web app, open the URL provided in the terminal. It will look something like this:
+
+```
+http://localhost:3000
 ```
 
-The web app will be available at `http://localhost:3000`.
+### Mobile
 
-#### Mobile (React Native)
+To view the mobile app on your device, you can use the Expo Go app.
 
-To run the mobile app, you need to have the React Native development environment set up.
+1. **Install the Expo Go app**
 
-1.  Navigate to the mobile app directory:
+   - [Android](https://play.google.com/store/apps/details?id=host.exp.exponent)
+   - [iOS](https://apps.apple.com/us/app/expo-go/id982107779)
 
-    ```bash
-    cd packages/mobile
-    ```
+2. **Connect to the same Wi-Fi network**
 
-2.  Start the Metro bundler:
+   Ensure your mobile device is connected to the same Wi-Fi network as your computer.
 
-    ```bash
-    npx react-native start
-    ```
+3. **Scan the QR code**
 
-3.  In a separate terminal, run the app on your desired platform:
+   When you run `pnpm dev`, a QR code will be displayed in the terminal. Scan this QR code with the Expo Go app to open the app on your device.
 
-    -   For Android:
+## 📂 Project Structure
 
-        ```bash
-        npx react-native run-android
-        ```
+This is a monorepo with the following structure:
 
-    -   For iOS:
+- `apps/web`: Next.js app
+- `apps/mobile`: Expo app
+- `packages/ui`: Shared UI components
+- `packages/utils`: Shared utility functions
+- `packages/config`: Shared configuration (e.g. ESLint, TypeScript)
 
-        ```bash
-        npx react-native run-ios
-        ```
+## File Structure
+
+Here is a brief overview of the project's file structure:
+
+```
+.
+├── apps
+│   ├── mobile
+│   │   ├── app
+│   │   │   ├── index.tsx
+│   │   │   ├── itinerary.tsx
+│   │   │   ├── onboarding.tsx
+│   │   │   └── packing.tsx
+│   │   ├── assets
+│   │   ├── App.tsx
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── web
+│       ├── app
+│       │   ├── page.tsx
+│       │   └── styles
+│       ├── public
+│       ├── package.json
+│       └── tsconfig.json
+├── packages
+│   ├── config
+│   │   ├── src
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   ├── ui
+│   │   ├── src
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── utils
+│       ├── src
+│       │   ├── api.ts
+│       │   ├── date.ts
+│       │   ├── index.ts
+│       │   └── packing.ts
+│       ├── package.json
+│       └── tsconfig.json
+├── .gitignore
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── README.md
+└── tsconfig.json
+```
+
+- **apps/**: Contains the source code for the applications.
+  - **mobile/**: The Expo mobile application.
+  - **web/**: The Next.js web application.
+- **packages/**: Contains the shared packages used by the applications.
+  - **config/**: Shared configuration files (ESLint, TypeScript, etc.).
+  - **ui/**: Shared UI components.
+  - **utils/**: Shared utility functions.
+- **.gitignore**: Specifies which files and directories to ignore in version control.
+- **package.json**: Contains the project's dependencies and scripts.
+- **pnpm-lock.yaml**: The lockfile for pnpm, ensuring consistent dependency versions.
+- **pnpm-workspace.yaml**: The configuration file for the pnpm workspace.
+- **README.md**: This file.
+- **tsconfig.json**: The root TypeScript configuration file.
