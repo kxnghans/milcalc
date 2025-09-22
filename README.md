@@ -1,6 +1,11 @@
-# unpack
+# MilCalc
 
-your travel buddy that gets it out the groupchat
+A collection of tools for military personnel and travel enthusiasts.
+
+## Features
+
+- **Air Force PT Calculator**: Calculate your score for the US Air Force Physical Fitness Test.
+- **Travel Buddy**: Plan your trips and get out of the group chat (formerly "unpack").
 
 ## Prerequisites
 
@@ -35,6 +40,8 @@ To view the web app, open the URL provided in the terminal. It will look somethi
 http://localhost:3000
 ```
 
+The PT Calculator is available at `/pt-calculator`.
+
 ### Mobile
 
 To view the mobile app on your device, you can use the Expo Go app.
@@ -61,70 +68,3 @@ This is a monorepo with the following structure:
 - `packages/ui`: Shared UI components
 - `packages/utils`: Shared utility functions
 - `packages/config`: Shared configuration (e.g. ESLint, TypeScript)
-
-## File Structure
-
-Here is a brief overview of the project's file structure:
-
-```
-.
-├── apps
-│   ├── mobile
-│   │   ├── app
-│   │   │   ├── index.tsx
-│   │   │   ├── itinerary.tsx
-│   │   │   ├── onboarding.tsx
-│   │   │   └── packing.tsx
-│   │   ├── assets
-│   │   ├── App.tsx
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   └── web
-│       ├── app
-│       │   ├── page.tsx
-│       │   └── styles
-│       ├── public
-│       ├── package.json
-│       └── tsconfig.json
-├── packages
-│   ├── config
-│   │   ├── src
-│   │   │   └── index.ts
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   ├── ui
-│   │   ├── src
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   └── index.ts
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   └── utils
-│       ├── src
-│       │   ├── api.ts
-│       │   ├── date.ts
-│       │   ├── index.ts
-│       │   └── packing.ts
-│       ├── package.json
-│       └── tsconfig.json
-├── .gitignore
-├── package.json
-├── pnpm-lock.yaml
-├── pnpm-workspace.yaml
-├── README.md
-└── tsconfig.json
-```
-
-- **apps/**: Contains the source code for the applications.
-  - **mobile/**: The Expo mobile application.
-  - **web/**: The Next.js web application.
-- **packages/**: Contains the shared packages used by the applications.
-  - **config/**: Shared configuration files (ESLint, TypeScript, etc.).
-  - **ui/**: Shared UI components.
-  - **utils/**: Shared utility functions.
-- **.gitignore**: Specifies which files and directories to ignore in version control.
-- **package.json**: Contains the project's dependencies and scripts.
-- **pnpm-lock.yaml**: The lockfile for pnpm, ensuring consistent dependency versions.
-- **pnpm-workspace.yaml**: The configuration file for the pnpm workspace.
-- **README.md**: This file.
-- **tsconfig.json**: The root TypeScript configuration file.
