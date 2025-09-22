@@ -9,13 +9,15 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
+    "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "expo": "^54.0.7",
     "expo-constants": "~16.0.2",
-    "expo-linking": "~6.3.1",
-    "expo-router": "~3.5.17",
-    "expo-status-bar": "~1.12.1",
+    "expo-linking": "~8.0.8",
+    "expo-router": "~6.0.7",
+    "expo-status-bar": "~3.0.8",
     "react": "18.2.0",
-    "react-native": "0.74.3",
-    "@repo/ui": "workspace:*"
+    "react-native": "0.81.4",
+    "@react-native-picker/picker": "^2.7.7"
   }
 }
