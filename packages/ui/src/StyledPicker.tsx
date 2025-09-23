@@ -1,70 +1,35 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 import { theme } from './theme';
 import { Picker } from '@react-native-picker/picker';
+import { PickerProps } from '@react-native-picker/picker';
 
-interface StyledPickerProps {
-  selectedValue: string;
-  onValueChange: (itemValue: string, itemIndex: number) => void;
+interface StyledPickerProps extends PickerProps {
   items: { label: string; value: string }[];
+  placeholder?: string;
 }
 
-export const StyledPicker = ({ selectedValue, onValueChange, items }: StyledPickerProps) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const selectedLabel = items.find(item => item.value === selectedValue)?.label;
-
+export const StyledPicker = ({ selectedValue, onValueChange, items, placeholder, style, ...props }: StyledPickerProps) => {
   return (
-    <>
-      <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
-        <Text style={styles.text}>{selectedLabel}</Text>
-      </TouchableOpacity>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <SafeAreaView style={styles.modalContainer}>
-            <View style={styles.pickerContainer}>
-                <Picker
-                    selectedValue={selectedValue}
-                    onValueChange={(itemValue, itemIndex) => {
-                        onValueChange(itemValue, itemIndex);
-                        setModalVisible(false);
-                    }}
-                >
-                    {items.map((item) => (
-                        <Picker.Item key={item.value} label={item.label} value={item.value} />
-                    ))}
-                </Picker>
-            </View>
-        </SafeAreaView>
-      </Modal>
-    </>
+    <Picker
+        selectedValue={selectedValue}
+        onValueChange={onValueChange}
+        style={[styles.picker, style]}
+        {...props}
+    >
+        {placeholder && <Picker.Item label={placeholder} value={null} enabled={false} />}
+        {items.map((item) => (
+            <Picker.Item key={item.value} label={item.label} value={item.value} />
+        ))}
+    </Picker>
   );
 };
 
 const styles = StyleSheet.create({
-    button: {
+    picker: {
         backgroundColor: theme.colors.surface,
         borderWidth: 1,
         borderColor: theme.colors.border,
         borderRadius: theme.borderRadius.m,
-        padding: theme.spacing.m,
-        justifyContent: 'center',
-    },
-    text: {
-        fontSize: theme.typography.body.fontSize,
-        color: theme.colors.text,
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    pickerContainer: {
-        backgroundColor: theme.colors.surface,
     },
 });

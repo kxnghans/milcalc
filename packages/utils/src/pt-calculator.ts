@@ -1,8 +1,12 @@
-import data from '../../ui/src/pt-data.json';
+import data from '../../ui/src/data/pt-data.json';
 
 const timeToSeconds = (time: string) => {
-    const [minutes, seconds] = time.split(':').map(Number);
-    return minutes * 60 + seconds;
+    if (!time) return 0;
+    const parts = time.split(':').map(Number);
+    if (parts.length === 2) {
+        return parts[0] * 60 + parts[1];
+    }
+    return 0;
 };
 
 const getAgeGroup = (age: number, sex: string) => {
@@ -25,6 +29,7 @@ const getAgeGroup = (age: number, sex: string) => {
 const getCardioScore = (ageGroup: any, component: string, performance: any) => {
     if (component === 'run') {
         const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
+        if (runTimeInSeconds === 0) return 0;
         for (const bracket of ageGroup.cardiorespiratory.run_time_brackets) {
             const bracketTime = bracket.run_time.replace('*', '');
             if (bracketTime.includes('≤')) {
@@ -66,6 +71,7 @@ const getMuscularFitnessScore = (ageGroup: any, component: string, reps: number)
 
 const getPlankScore = (ageGroup: any, performance: any) => {
     const plankTimeInSeconds = performance.minutes * 60 + performance.seconds;
+    if (plankTimeInSeconds === 0) return 0;
     const table = ageGroup.muscular_fitness.parsed_top_rows['forearm_plank_time'];
     if (!table) return 0;
 
@@ -84,9 +90,41 @@ const getPlankScore = (ageGroup: any, performance: any) => {
     return 0;
 };
 
+export const getMinMaxValues = (age: number, gender: string, component: string) => {
+    const ageGroup = getAgeGroup(age, gender);
+    if (!ageGroup) return { min: 0, max: 0 };
+
+    if (component === 'run') {
+        const brackets = ageGroup.cardiorespiratory.run_time_brackets;
+        const maxTimeString = brackets[0].run_time.replace('≤ ', '');
+        const minTimeString = brackets[brackets.length - 1].run_time.split(' - ')[1].replace('*','');
+        return { min: timeToSeconds(minTimeString), max: timeToSeconds(maxTimeString) };
+    }
+
+    const muscularFitnessComponent = component.includes('pushups') ? 'push_ups_1min' : (component.includes('situps') ? 'sit_ups_1min' : 'cross_leg_reverse_crunch_2min');
+    const table = ageGroup.muscular_fitness.parsed_top_rows[muscularFitnessComponent];
+    if (!table || table.length === 0) return { min: 0, max: 0 };
+
+    const maxReps = parseInt(String(table[0].reps).replace('>= ', '').replace('> ', ''));
+    
+    // This is a workaround as the full table is not available.
+    // We are looking for the minimum points for passing, which is not 0.
+    // The provided data only has top rows, so we find the lowest reps in the provided data.
+    let minReps = 0;
+    for(let i = table.length - 1; i >= 0; i--) {
+        if(table[i].points > 0) {
+            minReps = parseInt(String(table[i].reps));
+            break;
+        }
+    }
+
+    return { min: minReps, max: maxReps };
+}
+
 export const calculatePtScore = (inputs: any) => {
     const ageGroup = getAgeGroup(inputs.age, inputs.gender);
-    if (!ageGroup) return { totalScore: 0 };
+    if (!inputs.age || !inputs.gender) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false };
+    if (!ageGroup) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false };
 
     const cardioScore = getCardioScore(ageGroup, inputs.cardioComponent, {
         minutes: inputs.runMinutes,

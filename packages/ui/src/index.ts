@@ -3,3 +3,5 @@ export * from './theme';
 export * from './StyledTextInput';
 export * from './StyledButton';
 export * from './StyledPicker';
+export * from './ProgressBar';
+export * from './SegmentedSelector';

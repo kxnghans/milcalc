@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "unpack-mobile",
-    "slug": "unpack-mobile",
+    "name": "milcalc-mobile",
+    "slug": "milcalc-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "myapp",
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.unpack-mobile",
+      "bundleIdentifier": "com.anonymous.milcalc-mobile",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses your location to show your position on the map.",
         "NSDocumentsFolderUsageDescription": "This app needs access to your documents to allow you to upload them.",
@@ -24,7 +24,7 @@
       "newArchEnabled": true
     },
     "android": {
-      "package": "dev.unpack.mobile",
+      "package": "dev.milcalc.mobile",
       "config": {
         "googleMaps": {
           "apiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"

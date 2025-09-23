@@ -7,6 +7,8 @@ export const theme = {
     text: '#000000',
     border: '#C7C7CC',
     error: '#FF3B30',
+    success: '#34C759',
+    ninetyPlus: '#5856D6',
   },
   spacing: {
     s: 8,
@@ -15,20 +17,30 @@ export const theme = {
     xl: 40,
   },
   typography: {
-    h1: {
-      fontSize: 34,
-      fontWeight: 'bold',
+    header: {
+      fontSize: 24,
+      fontWeight: '700',
+      fontFamily: 'System',
     },
-    h2: {
-      fontSize: 28,
-      fontWeight: 'bold',
+    title: {
+      fontSize: 18,
+      fontWeight: '700',
+      fontFamily: 'System',
+    },
+    subtitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      fontFamily: 'System',
     },
     body: {
-      fontSize: 17,
+      fontSize: 13,
+      fontWeight: '400',
+      fontFamily: 'System',
     },
-    label: {
-      fontSize: 15,
-      fontWeight: '600',
+    caption: {
+      fontSize: 11,
+      fontWeight: '400',
+      fontFamily: 'System',
     },
   },
   borderRadius: {
