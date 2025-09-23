@@ -1,16 +1,17 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps, StyleProp, ViewStyle } from 'react-native';
 import { theme } from './theme';
 
 interface StyledButtonProps extends TouchableOpacityProps {
   title: string;
   variant?: 'primary' | 'secondary';
+  style?: StyleProp<ViewStyle>;
 }
 
-export const StyledButton = ({ title, variant = 'primary', ...props }: StyledButtonProps) => {
+export const StyledButton = ({ title, variant = 'primary', style, ...props }: StyledButtonProps) => {
   return (
     <TouchableOpacity
-      style={[styles.button, styles[variant]]}
+      style={[styles.button, styles[variant], style]}
       {...props}
     >
       <Text style={[styles.text, styles[`${variant}Text`]]}>{title}</Text>

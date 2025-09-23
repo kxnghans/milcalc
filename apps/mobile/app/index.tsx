@@ -1,8 +1,35 @@
 
 import * as React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { Card, theme, StyledTextInput, StyledButton, StyledPicker } from "@repo/ui";
-import { calculatePtScore } from "@repo/utils";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native";
+import { Card, theme, StyledTextInput, StyledButton, ProgressBar, SegmentedSelector } from "@repo/ui";
+import { calculatePtScore, getMinMaxValues, getDisplayComponent } from "@repo/utils";
+
+const GenderSelector = ({ gender, setGender }) => (
+    <View style={styles.genderSelectorContainer}>
+        <StyledButton
+            title="Male"
+            onPress={() => setGender("male")}
+            variant={gender === 'male' ? 'primary' : 'secondary'}
+            style={{ flex: 1 }}
+        />
+        <StyledButton
+            title="Female"
+            onPress={() => setGender("female")}
+            variant={gender === 'female' ? 'primary' : 'secondary'}
+            style={{ flex: 1, marginLeft: theme.spacing.s }}
+        />
+    </View>
+);
+
+const ScoreDisplay = ({ score }) => {
+    const scoreColor = score.isPass ? (score.totalScore >= 90 ? theme.colors.ninetyPlus : theme.colors.success) : theme.colors.error;
+    return (
+        <View style={styles.scoreContainer}>
+            <Text style={[styles.scoreText, { color: scoreColor }]}>{score.totalScore.toFixed(2)}</Text>
+            <Text style={styles.scoreBreakdownText}>Cardio: {score.cardioScore} | Push-ups: {score.pushupScore} | Core: {score.coreScore}</Text>
+        </View>
+    );
+};
 
 export default function RootIndex() {
   const [age, setAge] = React.useState("");
@@ -23,11 +50,19 @@ export default function RootIndex() {
   const [plankSeconds, setPlankSeconds] = React.useState("");
 
   const [score, setScore] = React.useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false });
+  const [minMax, setMinMax] = React.useState({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
 
   React.useEffect(() => {
+    const ageNum = parseInt(age);
+    if (ageNum && gender) {
+        const pushupValues = getMinMaxValues(ageNum, gender, pushupComponent);
+        const coreValues = getMinMaxValues(ageNum, gender, coreComponent === 'situps_1min' ? 'sit_ups_1min' : 'cross_leg_reverse_crunch_2min');
+        setMinMax({pushups: pushupValues, core: coreValues});
+    }
+
     const calculateScore = () => {
         const result = calculatePtScore({
-            age: parseInt(age) || 0,
+            age: ageNum || 0,
             gender,
             cardioComponent,
             runMinutes: parseInt(runMinutes) || 0,
@@ -46,118 +81,93 @@ export default function RootIndex() {
     calculateScore();
   }, [age, gender, cardioComponent, runMinutes, runSeconds, shuttles, pushupComponent, pushups, coreComponent, situps, reverseCrunches, plankMinutes, plankSeconds]);
 
+  const showProgressBars = age && gender;
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Text style={styles.title}>Air Force PT Calculator</Text>
-      <Card>
-        <Text style={styles.cardTitle}>Enter Your Information</Text>
-
-        <View style={styles.inputGroup}>
-            <Text style={styles.label}>Age</Text>
-            <StyledTextInput value={age} onChangeText={setAge} placeholder="Enter your age" keyboardType="numeric" />
-        </View>
-
-        <View style={styles.inputGroup}>
-            <Text style={styles.label}>Gender</Text>
-            <StyledPicker
-                selectedValue={gender}
-                onValueChange={(itemValue) => setGender(itemValue)}
-                items={[{ label: "Male", value: "male" }, { label: "Female", value: "female" }]}
-            />
-        </View>
-
-        <View style={styles.separator} />
-
-        <View style={styles.inputGroup}>
-            <Text style={styles.label}>Cardio Component</Text>
-            <StyledPicker
-                selectedValue={cardioComponent}
-                onValueChange={(itemValue) => setCardioComponent(itemValue)}
-                items={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }]}
-            />
-        </View>
-
-        {cardioComponent === "run" && (
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>1.5-Mile Run Time</Text>
+    <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.contentContainer}>
+            <Text style={styles.title}>Air Force PT Calculator</Text>
+            <ScoreDisplay score={score} />
+            <Card>
                 <View style={styles.inlineInputContainer}>
-                    <StyledTextInput value={runMinutes} onChangeText={setRunMinutes} placeholder="Minutes" keyboardType="numeric" style={{flex: 1}} />
-                    <Text style={styles.inlineInputSeparator}>:</Text>
-                    <StyledTextInput value={runSeconds} onChangeText={setRunSeconds} placeholder="Seconds" keyboardType="numeric" style={{flex: 1}} />
+                    <View style={{width: 80, marginRight: theme.spacing.m}}>
+                        <Text style={styles.subtitle}>Age</Text>
+                        <StyledTextInput value={age} onChangeText={setAge} placeholder="" keyboardType="numeric" />
+                    </View>
+                    <View style={{flex: 1}}>
+                        <Text style={styles.subtitle}>Gender</Text>
+                        <GenderSelector gender={gender} setGender={setGender} />
+                    </View>
                 </View>
-            </View>
-        )}
-        {cardioComponent === "shuttles" && (
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Shuttles</Text>
-                <StyledTextInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" keyboardType="numeric" />
-            </View>
-        )}
 
-        <View style={styles.separator} />
-
-        <View style={styles.inputGroup}>
-            <Text style={styles.label}>Push-up Component</Text>
-            <StyledPicker
-                selectedValue={pushupComponent}
-                onValueChange={(itemValue) => setPushupComponent(itemValue)}
-                items={[{ label: "1-min Push-ups", value: "pushups_1min" }, { label: "2-min Hand-Release Push-ups", value: "hand_release_pushups_2min" }]}
-            />
-        </View>
-        <View style={styles.inputGroup}>
-            <Text style={styles.label}>Push-up Repetitions</Text>
-            <StyledTextInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" keyboardType="numeric" />
-        </View>
-
-        <View style={styles.separator} />
-
-        <View style={styles.inputGroup}>
-            <Text style={styles.label}>Core Component</Text>
-            <StyledPicker
-                selectedValue={coreComponent}
-                onValueChange={(itemValue) => setCoreComponent(itemValue)}
-                items={[
-                    { label: "1-min Sit-ups", value: "situps_1min" },
-                    { label: "2-min Cross-Leg Reverse Crunch", value: "cross_leg_reverse_crunch_2min" },
-                    { label: "Forearm Plank", value: "forearm_plank_time" },
-                ]}
-            />
-        </View>
-
-        {coreComponent === "situps_1min" && (
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Sit-up Repetitions</Text>
-                <StyledTextInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" keyboardType="numeric" />
-            </View>
-        )}
-        {coreComponent === "cross_leg_reverse_crunch_2min" && (
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Reverse Crunches</Text>
-                <StyledTextInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" keyboardType="numeric" />
-            </View>
-        )}
-        {coreComponent === "forearm_plank_time" && (
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Plank Time</Text>
-                <View style={styles.inlineInputContainer}>
-                    <StyledTextInput value={plankMinutes} onChangeText={setPlankMinutes} placeholder="Minutes" keyboardType="numeric" style={{flex: 1}} />
-                    <Text style={styles.inlineInputSeparator}>:</Text>
-                    <StyledTextInput value={plankSeconds} onChangeText={setPlankSeconds} placeholder="Seconds" keyboardType="numeric" style={{flex: 1}} />
+                <View style={styles.separator} />
+                
+                <View style={styles.componentHeader}>
+                    <Text style={styles.cardTitle}>Strength</Text>
+                    {showProgressBars && <ProgressBar progress={(parseInt(pushups) || 0) / minMax.pushups.max} markers={[{value: minMax.pushups.min/minMax.pushups.max, label: `${minMax.pushups.min}`}, {value: 1, label: `${minMax.pushups.max}`}]} />}
                 </View>
-            </View>
-        )}
+                <SegmentedSelector
+                    options={[{ label: "1-min Push-ups", value: "pushups_1min" }, { label: "2-min Hand-Release Push-ups", value: "hand_release_pushups_2min" }]}
+                    selectedValue={pushupComponent}
+                    onValueChange={setPushupComponent}
+                />
+                <StyledTextInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" keyboardType="numeric" />
 
-        <View style={styles.scoreContainer}>
-            <Text style={styles.scoreText}>Your Score: {score.totalScore}</Text>
-            <Text style={styles.scoreBreakdownText}>Cardio: {score.cardioScore}</Text>
-            <Text style={styles.scoreBreakdownText}>Push-ups: {score.pushupScore}</Text>
-            <Text style={styles.scoreBreakdownText}>Core: {score.coreScore}</Text>
-            <Text style={score.isPass ? styles.passText : styles.failText}>
-              {score.isPass ? "Pass" : "Fail"}
-            </Text>
-        </View>
-      </Card>
-    </ScrollView>
+                <View style={styles.separator} />
+
+                <View style={styles.componentHeader}>
+                    <Text style={styles.cardTitle}>Core</Text>
+                    {showProgressBars && (coreComponent === "situps_1min" || coreComponent === "cross_leg_reverse_crunch_2min") && (
+                        <ProgressBar progress={(parseInt(coreComponent === "situps_1min" ? situps : reverseCrunches) || 0) / minMax.core.max} markers={[{value: minMax.core.min/minMax.core.max, label: `${minMax.core.min}`}, {value: 1, label: `${minMax.core.max}`}]} />
+                    )}
+                </View>
+                <SegmentedSelector
+                    options={[
+                        { label: "1-min Sit-ups", value: "situps_1min" },
+                        { label: "2-min Cross-Leg Reverse Crunch", value: "cross_leg_reverse_crunch_2min" },
+                        { label: "Forearm Plank", value: "forearm_plank_time" },
+                    ]}
+                    selectedValue={coreComponent}
+                    onValueChange={setCoreComponent}
+                />
+                {coreComponent === "situps_1min" && (
+                    <StyledTextInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" keyboardType="numeric" />
+                )}
+                {coreComponent === "cross_leg_reverse_crunch_2min" && (
+                    <StyledTextInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" keyboardType="numeric" />
+                )}
+                {coreComponent === "forearm_plank_time" && (
+                    <View style={styles.timeInputContainer}>
+                        <StyledTextInput value={plankMinutes} onChangeText={setPlankMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
+                        <Text style={styles.timeInputSeparator}>:</Text>
+                        <StyledTextInput value={plankSeconds} onChangeText={setPlankSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                    </View>
+                )}
+
+                <View style={styles.separator} />
+
+                <View style={styles.componentHeader}>
+                    <Text style={styles.cardTitle}>Cardio</Text>
+                </View>
+                <SegmentedSelector
+                    options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }]}
+                    selectedValue={cardioComponent}
+                    onValueChange={setCardioComponent}
+                />
+                {cardioComponent === "run" && (
+                    <View style={styles.timeInputContainer}>
+                        <StyledTextInput value={runMinutes} onChangeText={setRunMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
+                        <Text style={styles.timeInputSeparator}>:</Text>
+                        <StyledTextInput value={runSeconds} onChangeText={setRunSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                    </View>
+                )}
+                {cardioComponent === "shuttles" && (
+                    <StyledTextInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" keyboardType="numeric" />
+                )}
+
+            </Card>
+        </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -170,62 +180,77 @@ const styles = StyleSheet.create({
         padding: theme.spacing.m,
     },
     title: {
-        ...theme.typography.h1,
+        ...theme.typography.header,
         color: theme.colors.text,
-        marginBottom: theme.spacing.l,
+        marginBottom: theme.spacing.m,
         textAlign: "center",
     },
     cardTitle: {
-        ...theme.typography.h2,
+        ...theme.typography.title,
         color: theme.colors.text,
-        marginBottom: theme.spacing.l,
-    },
-    inputGroup: {
-        marginBottom: theme.spacing.m,
-    },
-    label: {
-        ...theme.typography.label,
-        color: theme.colors.text,
-        marginBottom: theme.spacing.s,
     },
     separator: {
         height: 1,
         backgroundColor: theme.colors.border,
-        marginVertical: theme.spacing.l,
+        marginVertical: theme.spacing.m,
     },
     inlineInputContainer: {
         flexDirection: "row",
         alignItems: "center",
-    },
-    inlineInputSeparator: {
-        ...theme.typography.h1,
-        color: theme.colors.border,
-        marginHorizontal: theme.spacing.s,
+        marginBottom: theme.spacing.s,
     },
     scoreContainer: {
-        marginTop: theme.spacing.l,
+        marginBottom: theme.spacing.m,
         padding: theme.spacing.m,
-        backgroundColor: theme.colors.secondary,
+        backgroundColor: theme.colors.surface,
         borderRadius: theme.borderRadius.m,
         alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     scoreText: {
-        ...theme.typography.h2,
-        color: theme.colors.primary,
+        ...theme.typography.header,
     },
     scoreBreakdownText: {
-        ...theme.typography.body,
+        ...theme.typography.subtitle,
         color: theme.colors.text,
         marginTop: theme.spacing.s,
     },
-    passText: {
-        ...theme.typography.h2,
-        color: 'green',
-        marginTop: theme.spacing.m,
+    genderSelectorContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
     },
-    failText: {
-        ...theme.typography.h2,
-        color: theme.colors.error,
-        marginTop: theme.spacing.m,
+    componentHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: theme.spacing.s,
     },
+    timeInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        borderRadius: theme.borderRadius.m,
+        padding: theme.spacing.s,
+    },
+    timeInput: {
+        flex: 1,
+        borderWidth: 0,
+    },
+    timeInputSeparator: {
+        ...theme.typography.body,
+        marginHorizontal: theme.spacing.s,
+    },
+    subtitle: {
+        ...theme.typography.subtitle,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.s,
+    }
 });
