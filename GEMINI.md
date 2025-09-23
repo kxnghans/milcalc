@@ -1,0 +1,61 @@
+# Gemini Project Context: MilCalc
+
+This document provides context for the Gemini AI assistant to understand the MilCalc project.
+
+## Project Overview
+
+MilCalc is a monorepo application built with pnpm workspaces. It includes:
+
+-   `apps/web`: A Next.js web application.
+-   `apps/mobile`: A React Native mobile application using Expo.
+-   `packages/ui`: A shared UI component library.
+-   `packages/eslint-config`: Shared ESLint configurations.
+-   `packages/typescript-config`: Shared TypeScript configurations.
+
+The project combines features for military personnel, such as an Air Force PT Calculator, and a travel planning tool. The mobile app features a dynamic theme system with light, dark, and automatic modes. It also includes progress bars for all physical training components to provide users with immediate feedback on their performance. A new "Best Score" page has been added to help users track their personal bests. The main screen now includes icons for navigating to the "Best Score" page, linking to official PT documents, and switching the theme.
+
+## Building and Running
+
+The project uses `pnpm` as the package manager and `turbo` as the monorepo build tool.
+
+-   **Install dependencies:**
+    ```bash
+    pnpm install
+    ```
+
+-   **Run development servers:**
+    This command starts both the web and mobile app development servers.
+    ```bash
+    pnpm dev
+    ```
+
+-   **Build for production:**
+    ```bash
+    pnpm build
+    ```
+
+### Web App
+
+-   **Run:** `pnpm --filter unpack-web dev`
+-   **Access:** http://localhost:3000
+-   **PT Calculator:** http://localhost:3000/pt-calculator
+
+### Mobile App
+
+-   **Run:** `pnpm --filter unpack-mobile dev`
+-   **Access:** Use the Expo Go app and scan the QR code from the terminal.
+
+## Development Conventions
+
+-   **Code Style:** The project uses a shared ESLint configuration (`packages/eslint-config`) to enforce a consistent coding style.
+-   **TypeScript:** Shared TypeScript configurations (`packages/typescript-config`) are used across the monorepo.
+-   **Commenting:** All new files must be commented to explain their purpose and functionality.
+-   **Code Reuse:** Maximize code reuse across the applications by creating shared components and utilities in the `packages` directory.
+-   **Focus:** Current development is focused on the mobile application first.
+-   **Documentation:** When modifying the project, always consider whether the `GEMINI.md` file needs to be updated to reflect the changes.
+-   **Version Control:** Ensure that any necessary files are added to the `.gitignore` file to avoid committing unnecessary files.
+
+## Data Sources
+
+-   **`packages/ui/src/pt-data.json`**: This file contains the scoring data for the PT calculator. It should never be changed.
+-   **`packages/ui/src/data/walk-standards.json`**: This file contains the walk standards for the 2-kilometer walk, separated by gender and age group.

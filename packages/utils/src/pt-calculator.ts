@@ -17,9 +17,9 @@ const getAgeGroup = (age: number, sex: string) => {
             const maxAge = parseInt(group.age_range.replace('<', ''));
             return age < maxAge;
         }
-        if (group.age_range.includes('over')) {
-            const minAge = parseInt(group.age_range.replace('over ', ''));
-            return age > minAge;
+        if (group.age_range.includes('+')) {
+            const minAge = parseInt(group.age_range.replace('+', ''));
+            return age >= minAge;
         }
         const [min, max] = group.age_range.split('-').map(Number);
         return age >= min && age <= max;
@@ -36,9 +36,35 @@ const getCardioScore = (ageGroup: any, component: string, performance: any) => {
                 if (runTimeInSeconds <= timeToSeconds(bracketTime.replace('≤ ', ''))) {
                     return bracket.points;
                 }
-            } else if (bracketTime.includes('-')) {
+            } else if (bracketTime.includes('<')) {
+                if (runTimeInSeconds < timeToSeconds(bracketTime.replace('< ', ''))) {
+                    return bracket.points;
+                }
+            } else if (bracketTime.includes(' - ')) {
                 const [start, end] = bracketTime.split(' - ').map(timeToSeconds);
                 if (runTimeInSeconds >= start && runTimeInSeconds <= end) {
+                    return bracket.points;
+                }
+            }
+        }
+    } else if (component === 'shuttles') {
+        const shuttles = performance.shuttles;
+        if (shuttles === 0) return 0;
+        for (const bracket of ageGroup.cardiorespiratory.run_time_brackets) {
+            const shuttleRange = bracket.shuttles_range.replace('*', '');
+            if (shuttleRange.includes('>')) {
+                const minShuttles = parseInt(shuttleRange.replace('> ', ''));
+                if (shuttles > minShuttles) {
+                    return bracket.points;
+                }
+            } else if (shuttleRange.includes(' - ')) {
+                const [start, end] = shuttleRange.split(' - ').map(Number);
+                if (shuttles >= start && shuttles <= end) {
+                    return bracket.points;
+                }
+            } else if (shuttleRange.includes('≥')) {
+                const minShuttles = parseInt(shuttleRange.replace('≥ ', ''));
+                if (shuttles >= minShuttles) {
                     return bracket.points;
                 }
             }
@@ -48,22 +74,21 @@ const getCardioScore = (ageGroup: any, component: string, performance: any) => {
 };
 
 const getMuscularFitnessScore = (ageGroup: any, component: string, reps: number) => {
-    const table = ageGroup.muscular_fitness.parsed_top_rows[component];
-    if (!table) return 0;
+    const table = ageGroup.muscular_fitness[component];
+    if (!table || !reps) return 0;
 
     for (const row of table) {
-        if (typeof row.reps === 'string') {
-            if (row.reps.includes('>=')) {
-                if (reps >= parseInt(row.reps.replace('>= ', ''))) {
-                    return row.points;
-                }
-            } else if (row.reps.includes('>')) {
-                if (reps > parseInt(row.reps.replace('> ', ''))) {
-                    return row.points;
-                }
+        const rowRepsString = String(row.reps).replace(/[^0-9]/g, '');
+        const rowReps = parseInt(rowRepsString);
+
+        if (String(row.reps).includes('>') || String(row.reps).includes('≥')) {
+            if (reps >= rowReps) {
+                return row.points;
             }
-        } else if (reps === row.reps) {
-            return row.points;
+        } else {
+            if (reps >= rowReps) {
+                return row.points;
+            }
         }
     }
     return 0;
@@ -72,69 +97,35 @@ const getMuscularFitnessScore = (ageGroup: any, component: string, reps: number)
 const getPlankScore = (ageGroup: any, performance: any) => {
     const plankTimeInSeconds = performance.minutes * 60 + performance.seconds;
     if (plankTimeInSeconds === 0) return 0;
-    const table = ageGroup.muscular_fitness.parsed_top_rows['forearm_plank_time'];
+    const table = ageGroup.muscular_fitness['forearm_plank_time'];
     if (!table) return 0;
 
     for (const row of table) {
-        const bracketTime = row.time.replace('*', '');
-        if (bracketTime.includes('>')) {
-            if (plankTimeInSeconds > timeToSeconds(bracketTime.replace('> ', ''))) {
-                return row.points;
-            }
-        } else {
-            if (plankTimeInSeconds >= timeToSeconds(bracketTime)) {
-                return row.points;
-            }
+        const bracketTime = row.time.replace(/[*≥>]/g, '').trim();
+        const rowSeconds = timeToSeconds(bracketTime);
+
+        if (plankTimeInSeconds >= rowSeconds) {
+            return row.points;
         }
     }
     return 0;
 };
 
-export const getMinMaxValues = (age: number, gender: string, component: string) => {
-    const ageGroup = getAgeGroup(age, gender);
-    if (!ageGroup) return { min: 0, max: 0 };
-
-    if (component === 'run') {
-        const brackets = ageGroup.cardiorespiratory.run_time_brackets;
-        const maxTimeString = brackets[0].run_time.replace('≤ ', '');
-        const minTimeString = brackets[brackets.length - 1].run_time.split(' - ')[1].replace('*','');
-        return { min: timeToSeconds(minTimeString), max: timeToSeconds(maxTimeString) };
-    }
-
-    const muscularFitnessComponent = component.includes('pushups') ? 'push_ups_1min' : (component.includes('situps') ? 'sit_ups_1min' : 'cross_leg_reverse_crunch_2min');
-    const table = ageGroup.muscular_fitness.parsed_top_rows[muscularFitnessComponent];
-    if (!table || table.length === 0) return { min: 0, max: 0 };
-
-    const maxReps = parseInt(String(table[0].reps).replace('>= ', '').replace('> ', ''));
-    
-    // This is a workaround as the full table is not available.
-    // We are looking for the minimum points for passing, which is not 0.
-    // The provided data only has top rows, so we find the lowest reps in the provided data.
-    let minReps = 0;
-    for(let i = table.length - 1; i >= 0; i--) {
-        if(table[i].points > 0) {
-            minReps = parseInt(String(table[i].reps));
-            break;
-        }
-    }
-
-    return { min: minReps, max: maxReps };
-}
-
 export const calculatePtScore = (inputs: any) => {
+    if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false };
     const ageGroup = getAgeGroup(inputs.age, inputs.gender);
-    if (!inputs.age || !inputs.gender) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false };
     if (!ageGroup) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false };
 
     const cardioScore = getCardioScore(ageGroup, inputs.cardioComponent, {
         minutes: inputs.runMinutes,
         seconds: inputs.runSeconds,
+        shuttles: inputs.shuttles,
     });
 
     const pushupScore = getMuscularFitnessScore(ageGroup, inputs.pushupComponent, inputs.pushups);
 
     let coreScore = 0;
-    if (inputs.coreComponent === 'situps_1min') {
+    if (inputs.coreComponent === 'sit_ups_1min') {
         coreScore = getMuscularFitnessScore(ageGroup, 'sit_ups_1min', inputs.situps);
     } else if (inputs.coreComponent === 'cross_leg_reverse_crunch_2min') {
         coreScore = getMuscularFitnessScore(ageGroup, 'cross_leg_reverse_crunch_2min', inputs.reverseCrunches);
@@ -151,4 +142,63 @@ export const calculatePtScore = (inputs: any) => {
         coreScore,
         isPass: totalScore >= 75,
     };
+};
+
+export const getMinMaxValues = (age: number, sex: string, component: string) => {
+    const ageGroup = getAgeGroup(age, sex);
+    if (!ageGroup) return { min: 0, max: 0 };
+
+    const table = ageGroup.muscular_fitness[component];
+    if (!table || table.length === 0) return { min: 0, max: 0 };
+
+    const reps = table.map(row => {
+        if (typeof row.reps === 'string') {
+            const match = row.reps.replace(/[^0-9]/g, '');
+            return match ? parseInt(match, 10) : 0;
+        }
+        return row.reps;
+    });
+
+    const min = Math.min(...reps.filter(r => r > 0));
+    const max = Math.max(...reps);
+
+    return { min, max };
+};
+
+export const getCardioMinMaxValues = (age: number, sex: string, component: string) => {
+    const ageGroup = getAgeGroup(age, sex);
+    if (!ageGroup) return { min: 0, max: 0 };
+
+    const brackets = ageGroup.cardiorespiratory.run_time_brackets;
+    if (!brackets || brackets.length === 0) return { min: 0, max: 0 };
+
+    if (component === 'run') {
+        const times = brackets.map(bracket => {
+            const timeString = bracket.run_time.replace(/[≤*<>]/g, '').trim();
+            if (timeString.includes(' - ')) {
+                return timeToSeconds(timeString.split(' - ')[1]);
+            }
+            return timeToSeconds(timeString);
+        }).filter(t => t > 0);
+
+        return {
+            min: Math.max(...times), // Slowest time
+            max: Math.min(...times), // Fastest time
+        };
+    } else if (component === 'shuttles') {
+        const shuttleCounts = brackets.map(bracket => {
+            const shuttleString = bracket.shuttles_range.replace(/[≥*<>]/g, '').trim();
+            if (shuttleString.includes(' - ')) {
+                return parseInt(shuttleString.split(' - ')[1], 10);
+            }
+            return parseInt(shuttleString, 10);
+        }).filter(s => !isNaN(s));
+
+        return {
+            min: Math.min(...shuttleCounts.filter(s => s > 0)),
+            max: Math.max(...shuttleCounts),
+        };
+    }
+
+    return { min: 0, max: 0 };
 };

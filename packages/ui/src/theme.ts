@@ -1,15 +1,29 @@
+export const lightColors = {
+  primary: '#007AFF',
+  secondary: '#E5E5EA',
+  background: '#F2F2F7',
+  surface: '#FFFFFF',
+  text: '#000000',
+  border: '#C7C7CC',
+  error: '#FF3B30',
+  success: '#34C759',
+  ninetyPlus: '#007AFF',
+};
+
+export const darkColors = {
+  primary: '#007AFF',
+  secondary: '#3A3A3C',
+  background: '#000000',
+  surface: '#1C1C1E',
+  text: '#FFFFFF',
+  border: '#2C2C2E',
+  error: '#FF3B30',
+  success: '#34C759',
+  ninetyPlus: '#007AFF',
+};
+
 export const theme = {
-  colors: {
-    primary: '#007AFF',
-    secondary: '#E5E5EA',
-    background: '#F2F2F7',
-    surface: '#FFFFFF',
-    text: '#000000',
-    border: '#C7C7CC',
-    error: '#FF3B30',
-    success: '#34C759',
-    ninetyPlus: '#5856D6',
-  },
+  colors: lightColors,
   spacing: {
     s: 8,
     m: 16,
