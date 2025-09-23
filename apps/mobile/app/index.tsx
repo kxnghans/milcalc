@@ -1,37 +1,40 @@
 
 import * as React from "react";
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native";
-import { Card, theme, StyledTextInput, StyledButton, ProgressBar, SegmentedSelector } from "@repo/ui";
-import { calculatePtScore, getMinMaxValues, getDisplayComponent } from "@repo/utils";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Linking } from "react-native";
+import { Link } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Card, StyledTextInput, StyledButton, ProgressBar, SegmentedSelector } from "@repo/ui";
+import { calculatePtScore, getMinMaxValues, getCardioMinMaxValues } from "@repo/utils";
+import { useTheme } from "../contexts/ThemeContext";
 
-const GenderSelector = ({ gender, setGender }) => (
-    <View style={styles.genderSelectorContainer}>
-        <StyledButton
-            title="Male"
-            onPress={() => setGender("male")}
-            variant={gender === 'male' ? 'primary' : 'secondary'}
-            style={{ flex: 1 }}
-        />
-        <StyledButton
-            title="Female"
-            onPress={() => setGender("female")}
-            variant={gender === 'female' ? 'primary' : 'secondary'}
-            style={{ flex: 1, marginLeft: theme.spacing.s }}
-        />
-    </View>
-);
-
-const ScoreDisplay = ({ score }) => {
-    const scoreColor = score.isPass ? (score.totalScore >= 90 ? theme.colors.ninetyPlus : theme.colors.success) : theme.colors.error;
-    return (
-        <View style={styles.scoreContainer}>
-            <Text style={[styles.scoreText, { color: scoreColor }]}>{score.totalScore.toFixed(2)}</Text>
-            <Text style={styles.scoreBreakdownText}>Cardio: {score.cardioScore} | Push-ups: {score.pushupScore} | Core: {score.coreScore}</Text>
-        </View>
-    );
+const getScoreColor = (score, maxScore) => {
+    const { theme } = useTheme();
+    if (score === 0) return theme.colors.error;
+    if (score >= maxScore * 0.9) {
+        return theme.colors.ninetyPlus;
+    }
+    return theme.colors.success;
 };
 
+const getProgressBarColor = (percentage, minPercentage) => {
+    const { theme } = useTheme();
+    if (percentage < minPercentage) {
+        return theme.colors.error;
+    }
+    if (percentage >= 0.9) {
+        return theme.colors.ninetyPlus;
+    }
+    return theme.colors.success;
+};
+
+const secondsToTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
 export default function RootIndex() {
+  const { theme, themeMode, toggleTheme } = useTheme();
   const [age, setAge] = React.useState("");
   const [gender, setGender] = React.useState("male");
 
@@ -40,10 +43,10 @@ export default function RootIndex() {
   const [runSeconds, setRunSeconds] = React.useState("");
   const [shuttles, setShuttles] = React.useState("");
 
-  const [pushupComponent, setPushupComponent] = React.useState("pushups_1min");
+  const [pushupComponent, setPushupComponent] = React.useState("push_ups_1min");
   const [pushups, setPushups] = React.useState("");
 
-  const [coreComponent, setCoreComponent] = React.useState("situps_1min");
+  const [coreComponent, setCoreComponent] = React.useState("sit_ups_1min");
   const [situps, setSitups] = React.useState("");
   const [reverseCrunches, setReverseCrunches] = React.useState("");
   const [plankMinutes, setPlankMinutes] = React.useState("");
@@ -51,13 +54,28 @@ export default function RootIndex() {
 
   const [score, setScore] = React.useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false });
   const [minMax, setMinMax] = React.useState({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
+  const [cardioMinMax, setCardioMinMax] = React.useState({ min: 0, max: 0 });
+
+  const getThemeIcon = () => {
+    if (themeMode === 'light') {
+        return 'weather-sunny';
+    } else if (themeMode === 'dark') {
+        return 'weather-night';
+    }
+    return 'brightness-auto';
+  };
 
   React.useEffect(() => {
     const ageNum = parseInt(age);
     if (ageNum && gender) {
         const pushupValues = getMinMaxValues(ageNum, gender, pushupComponent);
-        const coreValues = getMinMaxValues(ageNum, gender, coreComponent === 'situps_1min' ? 'sit_ups_1min' : 'cross_leg_reverse_crunch_2min');
+        let coreValues = {min: 0, max: 0};
+        if (coreComponent !== 'forearm_plank_time') {
+            coreValues = getMinMaxValues(ageNum, gender, coreComponent);
+        }
+        const cardioValues = getCardioMinMaxValues(ageNum, gender, cardioComponent);
         setMinMax({pushups: pushupValues, core: coreValues});
+        setCardioMinMax(cardioValues);
     }
 
     const calculateScore = () => {
@@ -83,95 +101,7 @@ export default function RootIndex() {
 
   const showProgressBars = age && gender;
 
-  return (
-    <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.contentContainer}>
-            <Text style={styles.title}>Air Force PT Calculator</Text>
-            <ScoreDisplay score={score} />
-            <Card>
-                <View style={styles.inlineInputContainer}>
-                    <View style={{width: 80, marginRight: theme.spacing.m}}>
-                        <Text style={styles.subtitle}>Age</Text>
-                        <StyledTextInput value={age} onChangeText={setAge} placeholder="" keyboardType="numeric" />
-                    </View>
-                    <View style={{flex: 1}}>
-                        <Text style={styles.subtitle}>Gender</Text>
-                        <GenderSelector gender={gender} setGender={setGender} />
-                    </View>
-                </View>
-
-                <View style={styles.separator} />
-                
-                <View style={styles.componentHeader}>
-                    <Text style={styles.cardTitle}>Strength</Text>
-                    {showProgressBars && <ProgressBar progress={(parseInt(pushups) || 0) / minMax.pushups.max} markers={[{value: minMax.pushups.min/minMax.pushups.max, label: `${minMax.pushups.min}`}, {value: 1, label: `${minMax.pushups.max}`}]} />}
-                </View>
-                <SegmentedSelector
-                    options={[{ label: "1-min Push-ups", value: "pushups_1min" }, { label: "2-min Hand-Release Push-ups", value: "hand_release_pushups_2min" }]}
-                    selectedValue={pushupComponent}
-                    onValueChange={setPushupComponent}
-                />
-                <StyledTextInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" keyboardType="numeric" />
-
-                <View style={styles.separator} />
-
-                <View style={styles.componentHeader}>
-                    <Text style={styles.cardTitle}>Core</Text>
-                    {showProgressBars && (coreComponent === "situps_1min" || coreComponent === "cross_leg_reverse_crunch_2min") && (
-                        <ProgressBar progress={(parseInt(coreComponent === "situps_1min" ? situps : reverseCrunches) || 0) / minMax.core.max} markers={[{value: minMax.core.min/minMax.core.max, label: `${minMax.core.min}`}, {value: 1, label: `${minMax.core.max}`}]} />
-                    )}
-                </View>
-                <SegmentedSelector
-                    options={[
-                        { label: "1-min Sit-ups", value: "situps_1min" },
-                        { label: "2-min Cross-Leg Reverse Crunch", value: "cross_leg_reverse_crunch_2min" },
-                        { label: "Forearm Plank", value: "forearm_plank_time" },
-                    ]}
-                    selectedValue={coreComponent}
-                    onValueChange={setCoreComponent}
-                />
-                {coreComponent === "situps_1min" && (
-                    <StyledTextInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" keyboardType="numeric" />
-                )}
-                {coreComponent === "cross_leg_reverse_crunch_2min" && (
-                    <StyledTextInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" keyboardType="numeric" />
-                )}
-                {coreComponent === "forearm_plank_time" && (
-                    <View style={styles.timeInputContainer}>
-                        <StyledTextInput value={plankMinutes} onChangeText={setPlankMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
-                        <Text style={styles.timeInputSeparator}>:</Text>
-                        <StyledTextInput value={plankSeconds} onChangeText={setPlankSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
-                    </View>
-                )}
-
-                <View style={styles.separator} />
-
-                <View style={styles.componentHeader}>
-                    <Text style={styles.cardTitle}>Cardio</Text>
-                </View>
-                <SegmentedSelector
-                    options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }]}
-                    selectedValue={cardioComponent}
-                    onValueChange={setCardioComponent}
-                />
-                {cardioComponent === "run" && (
-                    <View style={styles.timeInputContainer}>
-                        <StyledTextInput value={runMinutes} onChangeText={setRunMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
-                        <Text style={styles.timeInputSeparator}>:</Text>
-                        <StyledTextInput value={runSeconds} onChangeText={setRunSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
-                    </View>
-                )}
-                {cardioComponent === "shuttles" && (
-                    <StyledTextInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" keyboardType="numeric" />
-                )}
-
-            </Card>
-        </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
+  const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.background,
@@ -197,7 +127,7 @@ const styles = StyleSheet.create({
     inlineInputContainer: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: theme.spacing.s,
+        marginBottom: theme.spacing.m,
     },
     scoreContainer: {
         marginBottom: theme.spacing.m,
@@ -213,6 +143,12 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
+    },
+    scoreBreakdownContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+        marginTop: theme.spacing.s,
     },
     scoreText: {
         ...theme.typography.header,
@@ -230,7 +166,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: theme.spacing.s,
+        marginBottom: theme.spacing.m,
     },
     timeInputContainer: {
         flexDirection: 'row',
@@ -238,11 +174,17 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: theme.colors.border,
         borderRadius: theme.borderRadius.m,
-        padding: theme.spacing.s,
+        padding: theme.spacing.m,
+        backgroundColor: theme.colors.surface,
     },
     timeInput: {
         flex: 1,
         borderWidth: 0,
+        padding: 0,
+        margin: 0,
+        fontSize: theme.typography.body.fontSize,
+        color: theme.colors.text,
+        backgroundColor: 'transparent',
     },
     timeInputSeparator: {
         ...theme.typography.body,
@@ -252,5 +194,208 @@ const styles = StyleSheet.create({
         ...theme.typography.subtitle,
         color: theme.colors.text,
         marginBottom: theme.spacing.s,
-    }
+    },
+    iconContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginVertical: theme.spacing.m,
+    },
 });
+
+const GenderSelector = ({ gender, setGender }) => (
+    <View style={styles.genderSelectorContainer}>
+        <StyledButton
+            title="Male"
+            onPress={() => setGender("male")}
+            variant={gender === 'male' ? 'primary' : 'secondary'}
+            style={{ flex: 1 }}
+        />
+        <StyledButton
+            title="Female"
+            onPress={() => setGender("female")}
+            variant={gender === 'female' ? 'primary' : 'secondary'}
+            style={{ flex: 1, marginLeft: theme.spacing.s }}
+        />
+    </View>
+);
+
+const ScoreDisplay = ({ score }) => {
+    const scoreColor = score.isPass ? (score.totalScore >= 90 ? theme.colors.ninetyPlus : theme.colors.success) : theme.colors.error;
+
+    return (
+        <View style={styles.scoreContainer}>
+            <Text style={[styles.scoreText, { color: scoreColor }]}>{score.totalScore.toFixed(2)}</Text>
+            <View style={styles.scoreBreakdownContainer}>
+                <View style={{flexDirection: 'row'}}>
+                    <Text style={styles.scoreBreakdownText}>Strength: </Text>
+                    <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.pushupScore, 20) }]}>{score.pushupScore}</Text>
+                </View>
+                <Text style={styles.scoreBreakdownText}>|</Text>
+                <View style={{flexDirection: 'row'}}>
+                    <Text style={styles.scoreBreakdownText}>Core: </Text>
+                    <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.coreScore, 20) }]}>{score.coreScore}</Text>
+                </View>
+                <Text style={styles.scoreBreakdownText}>|</Text>
+                <View style={{flexDirection: 'row'}}>
+                    <Text style={styles.scoreBreakdownText}>Cardio: </Text>
+                    <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.cardioScore, 60) }]}>{score.cardioScore}</Text>
+                </View>
+            </View>
+        </View>
+    );
+};
+
+  return (
+    <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.contentContainer}>
+            <Text style={styles.title}>Air Force PT Calculator</Text>
+            <ScoreDisplay score={score} />
+            <View style={styles.iconContainer}>
+                <Link href="/best-score" asChild>
+                    <TouchableOpacity>
+                        <MaterialCommunityIcons name="file-chart-outline" size={24} color={theme.colors.text} />
+                    </TouchableOpacity>
+                </Link>
+                <TouchableOpacity onPress={() => Linking.openURL('https://www.afpc.af.mil/Portals/7/documents/FITNESS/5%20Year%20Chart%20Scoring%20Including%20Optional%20Component%20Standards%20-%2020211111%200219.pdf')}>
+                    <MaterialCommunityIcons name="file-pdf-box" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => Linking.openURL('https://www.afpc.af.mil/Portals/7/documents/FITNESS/DAFMAN36-2905.pdf')}>
+                    <MaterialCommunityIcons name="file-pdf-box" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={toggleTheme}>
+                    <MaterialCommunityIcons name={getThemeIcon()} size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+            </View>
+            <Card>
+                <View style={styles.inlineInputContainer}>
+                    <View style={{width: 80, marginRight: theme.spacing.m}}>
+                        <Text style={[styles.cardTitle, {marginBottom: theme.spacing.s}]}>Age</Text>
+                        <StyledTextInput value={age} onChangeText={setAge} placeholder="" keyboardType="numeric" />
+                    </View>
+                    <View style={{flex: 1}}>
+                        <Text style={[styles.cardTitle, {textAlign: 'center', marginBottom: theme.spacing.s}]}>Gender</Text>
+                        <GenderSelector gender={gender} setGender={setGender} />
+                    </View>
+                </View>
+
+                <View style={styles.separator} />
+
+                <View style={styles.componentHeader}>
+                    <Text style={styles.cardTitle}>Strength</Text>
+                    {showProgressBars && (() => {
+                        const pushupProgress = minMax.pushups.max > 0 ? (parseInt(pushups) || 0) / minMax.pushups.max : 0;
+                        return (
+                            <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                                <ProgressBar 
+                                    progress={pushupProgress} 
+                                    markers={[{value: minMax.pushups.min/minMax.pushups.max, label: `${minMax.pushups.min}`}, {value: 1, label: `${minMax.pushups.max}`}]} 
+                                    color={getProgressBarColor(pushupProgress, minMax.pushups.min / minMax.pushups.max)}
+                                />
+                            </View>
+                        );
+                    })()}
+                </View>
+                <SegmentedSelector
+                    style={{marginBottom: theme.spacing.m}}
+                    options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min Hand-Release Push-ups", value: "hand_release_pushups_2min" }]} 
+                    selectedValue={pushupComponent}
+                    onValueChange={setPushupComponent}
+                />
+                <StyledTextInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" keyboardType="numeric" />
+
+                <View style={styles.separator} />
+
+                <View style={styles.componentHeader}>
+                    <Text style={styles.cardTitle}>Core</Text>
+                    {showProgressBars && (coreComponent === "sit_ups_1min" || coreComponent === "cross_leg_reverse_crunch_2min") && (() => {
+                        const coreProgress = minMax.core.max > 0 ? (parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0) / minMax.core.max : 0;
+                        return (
+                            <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                                <ProgressBar 
+                                    progress={coreProgress} 
+                                    markers={[{value: minMax.core.min/minMax.core.max, label: `${minMax.core.min}`}, {value: 1, label: `${minMax.core.max}`}]} 
+                                    color={getProgressBarColor(coreProgress, minMax.core.min / minMax.core.max)}
+                                />
+                            </View>
+                        );
+                    })()}
+                </View>
+                <SegmentedSelector
+                    style={{marginBottom: theme.spacing.m}}
+                    options={[
+                        { label: "1-min Sit-ups", value: "sit_ups_1min" },
+                        { label: "2-min Cross-Leg Reverse Crunch", value: "cross_leg_reverse_crunch_2min" },
+                        { label: "Forearm Plank", value: "forearm_plank_time" },
+                    ]}
+                    selectedValue={coreComponent}
+                    onValueChange={setCoreComponent}
+                />
+                {coreComponent === "sit_ups_1min" && (
+                    <StyledTextInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" keyboardType="numeric" />
+                )}
+                {coreComponent === "cross_leg_reverse_crunch_2min" && (
+                    <StyledTextInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" keyboardType="numeric" />
+                )}
+                {coreComponent === "forearm_plank_time" && (
+                    <View style={styles.timeInputContainer}>
+                        <StyledTextInput value={plankMinutes} onChangeText={setPlankMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
+                        <Text style={styles.timeInputSeparator}>:</Text>
+                        <StyledTextInput value={plankSeconds} onChangeText={setPlankSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                    </View>
+                )}
+
+                <View style={styles.separator} />
+
+                <View style={styles.componentHeader}>
+                    <Text style={styles.cardTitle}>Cardio</Text>
+                    {showProgressBars && (() => {
+                        if (cardioComponent === 'run') {
+                            const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
+                            const progress = cardioMinMax.min > 0 && (cardioMinMax.min - cardioMinMax.max) > 0 ? (cardioMinMax.min - runTimeInSeconds) / (cardioMinMax.min - cardioMinMax.max) : 0;
+
+                            return (
+                                <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                                    <ProgressBar
+                                        progress={progress}
+                                        markers={[{value: 0, label: secondsToTime(cardioMinMax.min)}, {value: 1, label: secondsToTime(cardioMinMax.max)}]}
+                                        color={getProgressBarColor(progress, 0)}
+                                    />
+                                </View>
+                            );
+                        } else {
+                            const shuttleProgress = cardioMinMax.max > 0 ? (parseInt(shuttles) || 0) / cardioMinMax.max : 0;
+
+                            return (
+                                <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                                    <ProgressBar
+                                        progress={shuttleProgress}
+                                        markers={[{value: cardioMinMax.min/cardioMinMax.max, label: `${cardioMinMax.min}`}, {value: 1, label: `${cardioMinMax.max}`}]}
+                                        color={getProgressBarColor(shuttleProgress, cardioMinMax.min / cardioMinMax.max)}
+                                    />
+                                </View>
+                            );
+                        }
+                    })()}
+                </View>
+                <SegmentedSelector
+                    style={{marginBottom: theme.spacing.m}}
+                    options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }]} 
+                    selectedValue={cardioComponent}
+                    onValueChange={setCardioComponent}
+                />
+                {cardioComponent === "run" && (
+                    <View style={styles.timeInputContainer}>
+                        <StyledTextInput value={runMinutes} onChangeText={setRunMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
+                        <Text style={styles.timeInputSeparator}>:</Text>
+                        <StyledTextInput value={runSeconds} onChangeText={setRunSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                    </View>
+                )}
+                {cardioComponent === "shuttles" && (
+                    <StyledTextInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" keyboardType="numeric" />
+                )}
+
+            </Card>
+        </ScrollView>
+    </SafeAreaView>
+  );
+}

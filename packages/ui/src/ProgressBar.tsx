@@ -5,13 +5,14 @@ import { theme } from './theme';
 interface ProgressBarProps {
   progress: number; // 0 to 1
   markers: { value: number; label: string }[];
+  color?: string;
 }
 
-export const ProgressBar = ({ progress, markers }: ProgressBarProps) => {
+export const ProgressBar = ({ progress, markers, color }: ProgressBarProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.bar}>
-        <View style={[styles.progress, { width: `${progress * 100}%` }]} />
+        <View style={[styles.progress, { width: `${progress * 100}%`, backgroundColor: color || theme.colors.primary }]} />
       </View>
       <View style={styles.markersContainer}>
         {markers.map((marker, index) => (
@@ -36,7 +37,6 @@ const styles = StyleSheet.create({
   },
   progress: {
     height: '100%',
-    backgroundColor: theme.colors.primary,
   },
   markersContainer: {
     flexDirection: 'row',

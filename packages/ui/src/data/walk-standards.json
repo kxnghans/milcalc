@@ -1,0 +1,46 @@
+{
+  "male": [
+    {
+      "age_range": "<30",
+      "max_time": "16:16"
+    },
+    {
+      "age_range": "30-39",
+      "max_time": "16:18"
+    },
+    {
+      "age_range": "40-49",
+      "max_time": "16:23"
+    },
+    {
+      "age_range": "50-59",
+      "max_time": "16:40"
+    },
+    {
+      "age_range": "60+",
+      "max_time": "16:58"
+    }
+  ],
+  "female": [
+    {
+      "age_range": "<30",
+      "max_time": "17:22"
+    },
+    {
+      "age_range": "30-39",
+      "max_time": "17:28"
+    },
+    {
+      "age_range": "40-49",
+      "max_time": "17:49"
+    },
+    {
+      "age_range": "50-59",
+      "max_time": "18:11"
+    },
+    {
+      "age_range": "60+",
+      "max_time": "18:53"
+    }
+  ]
+}
