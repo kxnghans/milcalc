@@ -1,4 +1,5 @@
 import data from '../../ui/src/data/pt-data.json';
+import walkStandards from '../../ui/src/data/walk-standards.json';
 
 const timeToSeconds = (time: string) => {
     if (!time) return 0;
@@ -111,16 +112,45 @@ const getPlankScore = (ageGroup: any, performance: any) => {
     return 0;
 };
 
+const getAgeGroupIndex = (age: number) => {
+    if (age < 30) return 0;
+    if (age >= 30 && age <= 39) return 1;
+    if (age >= 40 && age <= 49) return 2;
+    if (age >= 50 && age <= 59) return 3;
+    if (age >= 60) return 4;
+    return -1;
+}
+
+export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number) => {
+    const ageIndex = getAgeGroupIndex(age);
+    if (ageIndex === -1) return false;
+
+    const standards = walkStandards[gender];
+    if (!standards) return false;
+    const maxTime = standards[ageIndex].max_time;
+    const maxTimeInSeconds = timeToSeconds(maxTime);
+    const userTimeInSeconds = minutes * 60 + seconds;
+
+    return userTimeInSeconds <= maxTimeInSeconds;
+};
+
 export const calculatePtScore = (inputs: any) => {
     if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false };
     const ageGroup = getAgeGroup(inputs.age, inputs.gender);
     if (!ageGroup) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false };
 
-    const cardioScore = getCardioScore(ageGroup, inputs.cardioComponent, {
-        minutes: inputs.runMinutes,
-        seconds: inputs.runSeconds,
-        shuttles: inputs.shuttles,
-    });
+    let cardioScore = 0;
+    let walkPassed = false;
+
+    if (inputs.cardioComponent === 'walk') {
+        walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds);
+    } else {
+        cardioScore = getCardioScore(ageGroup, inputs.cardioComponent, {
+            minutes: inputs.runMinutes,
+            seconds: inputs.runSeconds,
+            shuttles: inputs.shuttles,
+        });
+    }
 
     const pushupScore = getMuscularFitnessScore(ageGroup, inputs.pushupComponent, inputs.pushups);
 
@@ -135,12 +165,18 @@ export const calculatePtScore = (inputs: any) => {
 
     const totalScore = cardioScore + pushupScore + coreScore;
 
+    let isPass = totalScore >= 75;
+    if (inputs.cardioComponent === 'walk') {
+        isPass = walkPassed;
+    }
+
+
     return {
         totalScore,
         cardioScore,
         pushupScore,
         coreScore,
-        isPass: totalScore >= 75,
+        isPass,
     };
 };
 

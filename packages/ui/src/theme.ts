@@ -8,6 +8,8 @@ export const lightColors = {
   error: '#FF3B30',
   success: '#34C759',
   ninetyPlus: '#007AFF',
+  placeholder: '#C7C7CC',
+  primaryText: '#FFFFFF',
 };
 
 export const darkColors = {
@@ -20,6 +22,8 @@ export const darkColors = {
   error: '#FF3B30',
   success: '#34C759',
   ninetyPlus: '#007AFF',
+  placeholder: '#8E8E93',
+  primaryText: '#FFFFFF',
 };
 
 export const theme = {
@@ -48,6 +52,11 @@ export const theme = {
     },
     body: {
       fontSize: 13,
+      fontWeight: '400',
+      fontFamily: 'System',
+    },
+      label: {
+      fontSize: 15,
       fontWeight: '400',
       fontFamily: 'System',
     },

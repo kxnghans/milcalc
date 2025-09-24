@@ -9,15 +9,17 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
+    "@react-native-picker/picker": "^2.7.7",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
     "expo": "^54.0.7",
+    "expo-blur": "^15.0.7",
     "expo-constants": "~16.0.2",
+    "expo-haptics": "^15.0.7",
     "expo-linking": "~8.0.8",
     "expo-router": "~6.0.7",
     "expo-status-bar": "~3.0.8",
     "react": "18.2.0",
-    "react-native": "0.81.4",
-    "@react-native-picker/picker": "^2.7.7"
+    "react-native": "0.81.4"
   }
 }

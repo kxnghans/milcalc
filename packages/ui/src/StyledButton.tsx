@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps, StyleProp, ViewStyle } from 'react-native';
-import { theme } from './theme';
+import { useTheme } from './contexts/ThemeContext';
 
 interface StyledButtonProps extends TouchableOpacityProps {
   title: string;
@@ -9,6 +9,34 @@ interface StyledButtonProps extends TouchableOpacityProps {
 }
 
 export const StyledButton = ({ title, variant = 'primary', style, ...props }: StyledButtonProps) => {
+  const { theme } = useTheme();
+
+  const styles = StyleSheet.create({
+    button: {
+      paddingVertical: theme.spacing.m,
+      paddingHorizontal: theme.spacing.l,
+      borderRadius: theme.borderRadius.m,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    primary: {
+      backgroundColor: theme.colors.primary,
+    },
+    secondary: {
+      backgroundColor: theme.colors.secondary,
+    },
+    text: {
+      fontSize: theme.typography.body.fontSize,
+      fontWeight: '600',
+    },
+    primaryText: {
+      color: theme.colors.primaryText,
+    },
+    secondaryText: {
+      color: theme.colors.primary,
+    },
+  });
+
   return (
     <TouchableOpacity
       style={[styles.button, styles[variant], style]}
@@ -18,29 +46,3 @@ export const StyledButton = ({ title, variant = 'primary', style, ...props }: St
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    paddingVertical: theme.spacing.m,
-    paddingHorizontal: theme.spacing.l,
-    borderRadius: theme.borderRadius.m,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primary: {
-    backgroundColor: theme.colors.primary,
-  },
-  secondary: {
-    backgroundColor: theme.colors.secondary,
-  },
-  text: {
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: '600',
-  },
-  primaryText: {
-    color: theme.colors.surface,
-  },
-  secondaryText: {
-    color: theme.colors.primary,
-  },
-});

@@ -1,11 +1,13 @@
 
 import * as React from "react";
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Linking } from "react-native";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Linking, Modal } from "react-native";
 import { Link } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Card, StyledTextInput, StyledButton, ProgressBar, SegmentedSelector } from "@repo/ui";
+import { Card, StyledTextInput, StyledButton, ProgressBar, SegmentedSelector, IconRow } from "@repo/ui";
 import { calculatePtScore, getMinMaxValues, getCardioMinMaxValues } from "@repo/utils";
-import { useTheme } from "../contexts/ThemeContext";
+import { useTheme } from "@repo/ui/src/contexts/ThemeContext";
+import * as Haptics from "expo-haptics";
+import { BlurView } from "expo-blur";
 
 const getScoreColor = (score, maxScore) => {
     const { theme } = useTheme();
@@ -42,6 +44,8 @@ export default function RootIndex() {
   const [runMinutes, setRunMinutes] = React.useState("");
   const [runSeconds, setRunSeconds] = React.useState("");
   const [shuttles, setShuttles] = React.useState("");
+  const [walkMinutes, setWalkMinutes] = React.useState("");
+  const [walkSeconds, setWalkSeconds] = React.useState("");
 
   const [pushupComponent, setPushupComponent] = React.useState("push_ups_1min");
   const [pushups, setPushups] = React.useState("");
@@ -55,6 +59,7 @@ export default function RootIndex() {
   const [score, setScore] = React.useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false });
   const [minMax, setMinMax] = React.useState({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
   const [cardioMinMax, setCardioMinMax] = React.useState({ min: 0, max: 0 });
+  const [isModalVisible, setModalVisible] = React.useState(false);
 
   const getThemeIcon = () => {
     if (themeMode === 'light') {
@@ -86,6 +91,8 @@ export default function RootIndex() {
             runMinutes: parseInt(runMinutes) || 0,
             runSeconds: parseInt(runSeconds) || 0,
             shuttles: parseInt(shuttles) || 0,
+            walkMinutes: parseInt(walkMinutes) || 0,
+            walkSeconds: parseInt(walkSeconds) || 0,
             pushupComponent,
             pushups: parseInt(pushups) || 0,
             coreComponent,
@@ -97,7 +104,7 @@ export default function RootIndex() {
         setScore(result);
     };
     calculateScore();
-  }, [age, gender, cardioComponent, runMinutes, runSeconds, shuttles, pushupComponent, pushups, coreComponent, situps, reverseCrunches, plankMinutes, plankSeconds]);
+  }, [age, gender, cardioComponent, runMinutes, runSeconds, shuttles, walkMinutes, walkSeconds, pushupComponent, pushups, coreComponent, situps, reverseCrunches, plankMinutes, plankSeconds]);
 
   const showProgressBars = age && gender;
 
@@ -174,7 +181,7 @@ export default function RootIndex() {
         borderWidth: 1,
         borderColor: theme.colors.border,
         borderRadius: theme.borderRadius.m,
-        padding: theme.spacing.m,
+        paddingVertical: theme.spacing.m,
         backgroundColor: theme.colors.surface,
     },
     timeInput: {
@@ -182,9 +189,10 @@ export default function RootIndex() {
         borderWidth: 0,
         padding: 0,
         margin: 0,
-        fontSize: theme.typography.body.fontSize,
+        ...theme.typography.label,
         color: theme.colors.text,
         backgroundColor: 'transparent',
+        textAlign: 'center',
     },
     timeInputSeparator: {
         ...theme.typography.body,
@@ -199,6 +207,59 @@ export default function RootIndex() {
         flexDirection: 'row',
         justifyContent: 'space-around',
         marginVertical: theme.spacing.m,
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: theme.colors.surface,
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+        marginBottom: 10,
+    },
+    buttonClose: {
+        backgroundColor: "#2196F3",
+    },
+    textStyle: {
+        color: theme.colors.text,
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center",
+        color: theme.colors.text
+    },
+    exerciseBlock: {
+        minHeight: 120,
+        justifyContent: 'center',
+    },
+    iconBlock: {
+        backgroundColor: theme.colors.secondary,
+        borderRadius: theme.borderRadius.m,
+        padding: theme.spacing.s,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 60,
+        height: 60,
     },
 });
 
@@ -247,25 +308,67 @@ const ScoreDisplay = ({ score }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isModalVisible}
+            onRequestClose={() => {
+                setModalVisible(!isModalVisible);
+            }}
+        >
+            <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                    <Text style={styles.modalText}>Select a PDF to open:</Text>
+                    {[{
+                        name: "5 Year Chart Scoring",
+                        url: 'https://www.afpc.af.mil/Portals/7/documents/FITNESS/5%20Year%20Chart%20Scoring%20Including%20Optional%20Component%20Standards%20-%2020211111%200219.pdf'
+                    }, {
+                        name: "DAFMAN 36-2905",
+                        url: 'https://www.afpc.af.mil/Portals/7/documents/FITNESS/DAFMAN36-2905.pdf'
+                    }, {
+                        name: "Altitude Adjustments",
+                        url: 'https://www.afpc.af.mil/Portals/7/documents/FITNESS/DAFMAN36-2905.pdf#page=57'
+                    }, {
+                        name: "Walk Standards",
+                        url: 'https://www.afpc.af.mil/Portals/7/documents/FITNESS/DAFMAN36-2905.pdf#page=23'
+                    }].map((pdf, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            style={styles.button}
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                Linking.openURL(pdf.url);
+                            }}
+                        >
+                            <Text style={styles.textStyle}>{pdf.name}</Text>
+                        </TouchableOpacity>
+                    ))}
+                    <TouchableOpacity
+                        style={[styles.button, styles.buttonClose]}
+                        onPress={() => setModalVisible(!isModalVisible)}
+                    >
+                        <Text style={styles.textStyle}>Close</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
         <ScrollView contentContainerStyle={styles.contentContainer}>
             <Text style={styles.title}>Air Force PT Calculator</Text>
             <ScoreDisplay score={score} />
-            <View style={styles.iconContainer}>
-                <Link href="/best-score" asChild>
-                    <TouchableOpacity>
-                        <MaterialCommunityIcons name="file-chart-outline" size={24} color={theme.colors.text} />
-                    </TouchableOpacity>
-                </Link>
-                <TouchableOpacity onPress={() => Linking.openURL('https://www.afpc.af.mil/Portals/7/documents/FITNESS/5%20Year%20Chart%20Scoring%20Including%20Optional%20Component%20Standards%20-%2020211111%200219.pdf')}>
-                    <MaterialCommunityIcons name="file-pdf-box" size={24} color={theme.colors.text} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => Linking.openURL('https://www.afpc.af.mil/Portals/7/documents/FITNESS/DAFMAN36-2905.pdf')}>
-                    <MaterialCommunityIcons name="file-pdf-box" size={24} color={theme.colors.text} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={toggleTheme}>
-                    <MaterialCommunityIcons name={getThemeIcon()} size={24} color={theme.colors.text} />
-                </TouchableOpacity>
-            </View>
+            <IconRow icons={[
+                {
+                    name: "file-chart-outline",
+                    href: "/best-score",
+                },
+                {
+                    name: "file-pdf-box",
+                    onPress: () => setModalVisible(true),
+                },
+                {
+                    name: getThemeIcon(),
+                    onPress: toggleTheme,
+                },
+            ]} />
             <Card>
                 <View style={styles.inlineInputContainer}>
                     <View style={{width: 80, marginRight: theme.spacing.m}}>
@@ -279,121 +382,142 @@ const ScoreDisplay = ({ score }) => {
                 </View>
 
                 <View style={styles.separator} />
-
-                <View style={styles.componentHeader}>
-                    <Text style={styles.cardTitle}>Strength</Text>
-                    {showProgressBars && (() => {
-                        const pushupProgress = minMax.pushups.max > 0 ? (parseInt(pushups) || 0) / minMax.pushups.max : 0;
-                        return (
-                            <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
-                                <ProgressBar 
-                                    progress={pushupProgress} 
-                                    markers={[{value: minMax.pushups.min/minMax.pushups.max, label: `${minMax.pushups.min}`}, {value: 1, label: `${minMax.pushups.max}`}]} 
-                                    color={getProgressBarColor(pushupProgress, minMax.pushups.min / minMax.pushups.max)}
-                                />
-                            </View>
-                        );
-                    })()}
-                </View>
-                <SegmentedSelector
-                    style={{marginBottom: theme.spacing.m}}
-                    options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min Hand-Release Push-ups", value: "hand_release_pushups_2min" }]} 
-                    selectedValue={pushupComponent}
-                    onValueChange={setPushupComponent}
-                />
-                <StyledTextInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" keyboardType="numeric" />
-
-                <View style={styles.separator} />
-
-                <View style={styles.componentHeader}>
-                    <Text style={styles.cardTitle}>Core</Text>
-                    {showProgressBars && (coreComponent === "sit_ups_1min" || coreComponent === "cross_leg_reverse_crunch_2min") && (() => {
-                        const coreProgress = minMax.core.max > 0 ? (parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0) / minMax.core.max : 0;
-                        return (
-                            <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
-                                <ProgressBar 
-                                    progress={coreProgress} 
-                                    markers={[{value: minMax.core.min/minMax.core.max, label: `${minMax.core.min}`}, {value: 1, label: `${minMax.core.max}`}]} 
-                                    color={getProgressBarColor(coreProgress, minMax.core.min / minMax.core.max)}
-                                />
-                            </View>
-                        );
-                    })()}
-                </View>
-                <SegmentedSelector
-                    style={{marginBottom: theme.spacing.m}}
-                    options={[
-                        { label: "1-min Sit-ups", value: "sit_ups_1min" },
-                        { label: "2-min Cross-Leg Reverse Crunch", value: "cross_leg_reverse_crunch_2min" },
-                        { label: "Forearm Plank", value: "forearm_plank_time" },
-                    ]}
-                    selectedValue={coreComponent}
-                    onValueChange={setCoreComponent}
-                />
-                {coreComponent === "sit_ups_1min" && (
-                    <StyledTextInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" keyboardType="numeric" />
-                )}
-                {coreComponent === "cross_leg_reverse_crunch_2min" && (
-                    <StyledTextInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" keyboardType="numeric" />
-                )}
-                {coreComponent === "forearm_plank_time" && (
-                    <View style={styles.timeInputContainer}>
-                        <StyledTextInput value={plankMinutes} onChangeText={setPlankMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
-                        <Text style={styles.timeInputSeparator}>:</Text>
-                        <StyledTextInput value={plankSeconds} onChangeText={setPlankSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
-                    </View>
-                )}
-
-                <View style={styles.separator} />
-
-                <View style={styles.componentHeader}>
-                    <Text style={styles.cardTitle}>Cardio</Text>
-                    {showProgressBars && (() => {
-                        if (cardioComponent === 'run') {
-                            const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
-                            const progress = cardioMinMax.min > 0 && (cardioMinMax.min - cardioMinMax.max) > 0 ? (cardioMinMax.min - runTimeInSeconds) / (cardioMinMax.min - cardioMinMax.max) : 0;
-
+                <View style={styles.exerciseBlock}>
+                    <View style={styles.componentHeader}>
+                        <Text style={styles.cardTitle}>Strength</Text>
+                        {showProgressBars && (() => {
+                            const pushupProgress = minMax.pushups.max > 0 ? (parseInt(pushups) || 0) / minMax.pushups.max : 0;
                             return (
                                 <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
-                                    <ProgressBar
-                                        progress={progress}
-                                        markers={[{value: 0, label: secondsToTime(cardioMinMax.min)}, {value: 1, label: secondsToTime(cardioMinMax.max)}]}
-                                        color={getProgressBarColor(progress, 0)}
+                                    <ProgressBar 
+                                        progress={pushupProgress} 
+                                        markers={[{value: minMax.pushups.min/minMax.pushups.max, label: `${minMax.pushups.min}`}, {value: 1, label: `${minMax.pushups.max}`}]} 
+                                        color={getProgressBarColor(pushupProgress, minMax.pushups.min / minMax.pushups.max)}
                                     />
                                 </View>
                             );
-                        } else {
-                            const shuttleProgress = cardioMinMax.max > 0 ? (parseInt(shuttles) || 0) / cardioMinMax.max : 0;
+                        })()}
+                    </View>
+                    <SegmentedSelector
+                        style={{marginBottom: theme.spacing.m}}
+                        options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min HR Push-ups", value: "hand_release_pushups_2min" }]} 
+                        selectedValue={pushupComponent}
+                        onValueChange={setPushupComponent}
+                    />
+                    <StyledTextInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" keyboardType="numeric" />
+                </View>
 
+                <View style={styles.separator} />
+                <View style={styles.exerciseBlock}>
+                    <View style={styles.componentHeader}>
+                        <Text style={styles.cardTitle}>Core</Text>
+                        {showProgressBars && (coreComponent === "sit_ups_1min" || coreComponent === "cross_leg_reverse_crunch_2min") && (() => {
+                            const coreProgress = minMax.core.max > 0 ? (parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0) / minMax.core.max : 0;
                             return (
                                 <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
-                                    <ProgressBar
-                                        progress={shuttleProgress}
-                                        markers={[{value: cardioMinMax.min/cardioMinMax.max, label: `${cardioMinMax.min}`}, {value: 1, label: `${cardioMinMax.max}`}]}
-                                        color={getProgressBarColor(shuttleProgress, cardioMinMax.min / cardioMinMax.max)}
+                                    <ProgressBar 
+                                        progress={coreProgress} 
+                                        markers={[{value: minMax.core.min/minMax.core.max, label: `${minMax.core.min}`}, {value: 1, label: `${minMax.core.max}`}]} 
+                                        color={getProgressBarColor(coreProgress, minMax.core.min / minMax.core.max)}
                                     />
                                 </View>
                             );
-                        }
-                    })()}
-                </View>
-                <SegmentedSelector
-                    style={{marginBottom: theme.spacing.m}}
-                    options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }]} 
-                    selectedValue={cardioComponent}
-                    onValueChange={setCardioComponent}
-                />
-                {cardioComponent === "run" && (
-                    <View style={styles.timeInputContainer}>
-                        <StyledTextInput value={runMinutes} onChangeText={setRunMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
-                        <Text style={styles.timeInputSeparator}>:</Text>
-                        <StyledTextInput value={runSeconds} onChangeText={setRunSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                        })()}
                     </View>
-                )}
-                {cardioComponent === "shuttles" && (
-                    <StyledTextInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" keyboardType="numeric" />
-                )}
+                    <SegmentedSelector
+                        style={{marginBottom: theme.spacing.m}}
+                        options={[
+                            { label: "1-min Sit-ups", value: "sit_ups_1min" },
+                            { label: "2-min Cross-Leg Crunch", value: "cross_leg_reverse_crunch_2min" },
+                            { label: "Forearm Plank", value: "forearm_plank_time" },
+                        ]}
+                        selectedValue={coreComponent}
+                        onValueChange={setCoreComponent}
+                    />
+                    {coreComponent === "sit_ups_1min" && (
+                        <StyledTextInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" keyboardType="numeric" />
+                    )}
+                    {coreComponent === "cross_leg_reverse_crunch_2min" && (
+                        <StyledTextInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" keyboardType="numeric" />
+                    )}
+                    {coreComponent === "forearm_plank_time" && (
+                        <View style={styles.timeInputContainer}>
+                            <StyledTextInput value={plankMinutes} onChangeText={setPlankMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
+                            <Text style={styles.timeInputSeparator}>:</Text>
+                            <StyledTextInput value={plankSeconds} onChangeText={setPlankSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                        </View>
+                    )}
+                </View>
 
+                <View style={styles.separator} />
+                <View style={styles.exerciseBlock}>
+                    <View style={styles.componentHeader}>
+                        <Text style={styles.cardTitle}>Cardio</Text>
+                        {showProgressBars && (() => {
+                            if (cardioComponent === 'run') {
+                                const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
+                                const progress = cardioMinMax.min > 0 && (cardioMinMax.min - cardioMinMax.max) > 0 ? (cardioMinMax.min - runTimeInSeconds) / (cardioMinMax.min - cardioMinMax.max) : 0;
+
+                                return (
+                                    <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                                        <ProgressBar
+                                            progress={progress}
+                                            markers={[{value: 0, label: secondsToTime(cardioMinMax.min)}, {value: 1, label: secondsToTime(cardioMinMax.max)}]}
+                                            color={getProgressBarColor(progress, 0)}
+                                        />
+                                    </View>
+                                );
+                            } else if (cardioComponent === 'walk') {
+                                const walkTimeInSeconds = (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0);
+                                const progress = cardioMinMax.min > 0 && (cardioMinMax.min - cardioMinMax.max) > 0 ? (cardioMinMax.min - walkTimeInSeconds) / (cardioMinMax.min - cardioMinMax.max) : 0;
+
+                                return (
+                                    <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                                        <ProgressBar
+                                            progress={progress}
+                                            markers={[{value: 0, label: secondsToTime(cardioMinMax.min)}, {value: 1, label: secondsToTime(cardioMinMax.max)}]}
+                                            color={getProgressBarColor(progress, 0)}
+                                        />
+                                    </View>
+                                );
+                            } else {
+                                const shuttleProgress = cardioMinMax.max > 0 ? (parseInt(shuttles) || 0) / cardioMinMax.max : 0;
+
+                                return (
+                                    <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                                        <ProgressBar
+                                            progress={shuttleProgress}
+                                            markers={[{value: cardioMinMax.min/cardioMinMax.max, label: `${cardioMinMax.min}`}, {value: 1, label: `${cardioMinMax.max}`}]}
+                                            color={getProgressBarColor(shuttleProgress, cardioMinMax.min / cardioMinMax.max)}
+                                        />
+                                    </View>
+                                );
+                            }
+                        })()}
+                    </View>
+                    <SegmentedSelector
+                        style={{marginBottom: theme.spacing.m}}
+                        options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}                        selectedValue={cardioComponent}
+                        onValueChange={setCardioComponent}
+                    />
+                    {cardioComponent === "run" && (
+                        <View style={styles.timeInputContainer}>
+                            <StyledTextInput value={runMinutes} onChangeText={setRunMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
+                            <Text style={styles.timeInputSeparator}>:</Text>
+                            <StyledTextInput value={runSeconds} onChangeText={setRunSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                        </View>
+                    )}
+                    {cardioComponent === "shuttles" && (
+                        <StyledTextInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" keyboardType="numeric" />
+                    )}
+                    {cardioComponent === "walk" && (
+                        <View style={styles.timeInputContainer}>
+                            <StyledTextInput value={walkMinutes} onChangeText={setWalkMinutes} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
+                            <Text style={styles.timeInputSeparator}>:</Text>
+                            <StyledTextInput value={walkSeconds} onChangeText={setWalkSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                        </View>
+                    )}
+                </View>
             </Card>
         </ScrollView>
     </SafeAreaView>
