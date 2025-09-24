@@ -1,14 +1,16 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from './contexts/ThemeContext';
 
 interface SegmentedSelectorProps {
   options: { label: string; value: string }[];
   selectedValue: string;
   onValueChange: (value: string) => void;
+  style?: StyleProp<ViewStyle>;
+  onLayout?: (event: any) => void;
 }
 
-export const SegmentedSelector = ({ options, selectedValue, onValueChange }: SegmentedSelectorProps) => {
+export const SegmentedSelector = ({ options, selectedValue, onValueChange, style, onLayout }: SegmentedSelectorProps) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -40,7 +42,7 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange }: Seg
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]} onLayout={onLayout}>
       {options.map((option) => (
         <TouchableOpacity
           key={option.value}

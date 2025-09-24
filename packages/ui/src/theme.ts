@@ -36,7 +36,7 @@ export const theme = {
   },
   typography: {
     header: {
-      fontSize: 24,
+      fontSize: 20,
       fontWeight: '700',
       fontFamily: 'System',
     },
