@@ -1,5 +1,5 @@
 import { Slot } from "expo-router";
-import { ThemeProvider } from "../contexts/ThemeContext";
+import { ThemeProvider } from "@repo/ui/src/contexts/ThemeContext";
 
 export default function Layout() {
   return (
