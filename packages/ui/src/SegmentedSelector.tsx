@@ -21,7 +21,7 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange }: Seg
     segment: {
       flex: 1,
       paddingVertical: theme.spacing.s,
-      paddingHorizontal: theme.spacing.m,
+      paddingHorizontal: theme.spacing.s,
       justifyContent: 'center',
       alignItems: 'center',
     },
