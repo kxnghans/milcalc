@@ -6,3 +6,4 @@ export * from './StyledPicker';
 export * from './ProgressBar';
 export * from './SegmentedSelector';
 export * from './IconRow';
+export * from './contexts/ThemeContext';

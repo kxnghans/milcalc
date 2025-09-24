@@ -20,13 +20,13 @@ export const IconRow = ({ icons }: IconRowProps) => {
     iconContainer: {
       flexDirection: 'row',
       justifyContent: 'space-evenly',
-      marginVertical: theme.spacing.m,
+      marginVertical: theme.spacing.s,
       gap: theme.spacing.m,
     },
     iconBlock: {
       backgroundColor: theme.colors.surface,
       borderRadius: theme.borderRadius.l,
-      padding: theme.spacing.m,
+      padding: theme.spacing.s + 2,
       alignItems: 'center',
       justifyContent: 'center',
     },
