@@ -5,7 +5,8 @@
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./card": "./src/card.tsx"
+    "./card": "./src/card.tsx",
+    "./icons": "./src/icons.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

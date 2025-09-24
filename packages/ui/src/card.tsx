@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ViewStyle } from "react-native";
 import { useTheme } from "./contexts/ThemeContext";
 
-export function Card({ children }: { children: ReactNode }): JSX.Element {
+export function Card({ children, style }: { children: ReactNode, style?: ViewStyle }): JSX.Element {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -15,5 +15,5 @@ export function Card({ children }: { children: ReactNode }): JSX.Element {
     },
   });
 
-  return <View style={styles.card}>{children}</View>;
+  return <View style={[styles.card, style]}>{children}</View>;
 }

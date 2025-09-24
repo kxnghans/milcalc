@@ -41,7 +41,7 @@ export const theme = {
       fontFamily: 'System',
     },
     title: {
-      fontSize: 18,
+      fontSize: 17,
       fontWeight: '700',
       fontFamily: 'System',
     },
