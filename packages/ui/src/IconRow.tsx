@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Icons from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useTheme } from './contexts/ThemeContext';
 
@@ -9,6 +9,7 @@ interface IconRowProps {
     name: string;
     onPress?: () => void;
     href?: string;
+    iconSet?: keyof typeof Icons;
   }[];
 }
 
@@ -18,15 +19,18 @@ export const IconRow = ({ icons }: IconRowProps) => {
   const styles = StyleSheet.create({
     iconContainer: {
       flexDirection: 'row',
+      justifyContent: 'space-evenly',
       marginVertical: theme.spacing.m,
       gap: theme.spacing.m,
     },
     iconBlock: {
       backgroundColor: theme.colors.surface,
       borderRadius: theme.borderRadius.l,
-      padding: theme.spacing.s,
+      padding: theme.spacing.m,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    touchable: {
       flex: 1,
     },
   });
@@ -34,22 +38,23 @@ export const IconRow = ({ icons }: IconRowProps) => {
   return (
     <View style={styles.iconContainer}>
       {icons.map((icon, index) => {
+        const Icon = Icons[icon.iconSet || 'MaterialCommunityIcons'];
         const iconContent = (
           <View style={styles.iconBlock}>
-            <MaterialCommunityIcons name={icon.name} size={30} color={theme.colors.text} />
+            <Icon name={icon.name} size={25} color={theme.colors.text} />
           </View>
         );
 
         if (icon.href) {
           return (
             <Link href={icon.href} asChild key={index}>
-              <TouchableOpacity>{iconContent}</TouchableOpacity>
+              <TouchableOpacity style={styles.touchable}>{iconContent}</TouchableOpacity>
             </Link>
           );
         }
 
         return (
-          <TouchableOpacity onPress={icon.onPress} key={index}>
+          <TouchableOpacity onPress={icon.onPress} key={index} style={styles.touchable}>
             {iconContent}
           </TouchableOpacity>
         );

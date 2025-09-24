@@ -1,5 +1,5 @@
-import data from '../../ui/src/data/pt-data.json';
-import walkStandards from '../../ui/src/data/walk-standards.json';
+import data from '../../ui/src/pt_data/pt-data.json';
+import walkStandards from '../../ui/src/pt_data/walk-standards.json';
 
 const timeToSeconds = (time: string) => {
     if (!time) return 0;

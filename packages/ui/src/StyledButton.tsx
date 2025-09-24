@@ -1,15 +1,20 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps, StyleProp, ViewStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps, StyleProp, ViewStyle, View } from 'react-native';
 import { useTheme } from './contexts/ThemeContext';
+import * as Icons from '@expo/vector-icons';
 
 interface StyledButtonProps extends TouchableOpacityProps {
   title: string;
   variant?: 'primary' | 'secondary';
   style?: StyleProp<ViewStyle>;
+  icon?: string;
+  iconSet?: keyof typeof Icons;
+  iconSize?: number;
 }
 
-export const StyledButton = ({ title, variant = 'primary', style, ...props }: StyledButtonProps) => {
+export const StyledButton = ({ title, variant = 'primary', style, icon, iconSet = 'MaterialCommunityIcons', iconSize = 20, ...props }: StyledButtonProps) => {
   const { theme } = useTheme();
+  const Icon = Icons[iconSet];
 
   const styles = StyleSheet.create({
     button: {
@@ -18,6 +23,7 @@ export const StyledButton = ({ title, variant = 'primary', style, ...props }: St
       borderRadius: theme.borderRadius.m,
       alignItems: 'center',
       justifyContent: 'center',
+      flexDirection: 'row',
     },
     primary: {
       backgroundColor: theme.colors.primary,
@@ -35,6 +41,9 @@ export const StyledButton = ({ title, variant = 'primary', style, ...props }: St
     secondaryText: {
       color: theme.colors.primary,
     },
+    icon: {
+      marginRight: theme.spacing.s,
+    }
   });
 
   return (
@@ -42,6 +51,7 @@ export const StyledButton = ({ title, variant = 'primary', style, ...props }: St
       style={[styles.button, styles[variant], style]}
       {...props}
     >
+      {icon && Icon && <Icon name={icon} size={iconSize} color={styles[`${variant}Text`].color} style={styles.icon} />}
       <Text style={[styles.text, styles[`${variant}Text`]]}>{title}</Text>
     </TouchableOpacity>
   );
