@@ -1,0 +1,37 @@
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { StyledButton, useTheme } from '@repo/ui';
+import { ICONS, ICON_SETS } from '@repo/ui/icons';
+
+export default function GenderSelector({ gender, setGender }) {
+    const { theme } = useTheme();
+    const styles = StyleSheet.create({
+        genderSelectorContainer: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+        },
+    });
+
+    return (
+        <View style={styles.genderSelectorContainer}>
+            <StyledButton
+                title="Male"
+                onPress={() => setGender("male")}
+                variant={gender === 'male' ? 'primary' : 'secondary'}
+                size="small"
+                style={{ flex: 1 }}
+                iconSet={ICON_SETS.FONTISTO}
+                icon={ICONS.GENDER_MALE}
+            />
+            <StyledButton
+                title="Female"
+                onPress={() => setGender("female")}
+                variant={gender === 'female' ? 'primary' : 'secondary'}
+                size="small"
+                style={{ flex: 1, marginLeft: theme.spacing.s }}
+                iconSet={ICON_SETS.FONTISTO}
+                icon={ICONS.GENDER_FEMALE}
+            />
+        </View>
+    );
+};
