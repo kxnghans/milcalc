@@ -7,7 +7,6 @@
  */
 import * as React from "react";
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Card, StyledTextInput, IconRow } from "@repo/ui";
 import { calculatePtScore, getMinMaxValues, getCardioMinMaxValues } from "@repo/utils";
 import { useTheme } from "@repo/ui";
@@ -160,6 +159,7 @@ export default function PTCalculator() {
     container: {
         flex: 1,
         backgroundColor: theme.colors.background,
+        padding: theme.spacing.m,
     },
     cardTitle: {
         ...theme.typography.title,
@@ -184,9 +184,9 @@ export default function PTCalculator() {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
         <PdfModal isModalVisible={isModalVisible} setModalVisible={setModalVisible} />
-        <View style={{paddingHorizontal: theme.spacing.m, flex: 1}}>
+        <View style={{flex: 1}}>
             <View>
                 <ScoreDisplay score={score} />
                 <IconRow icons={[
@@ -210,7 +210,7 @@ export default function PTCalculator() {
             >
                 <View style={{ marginTop: theme.spacing.s, flex: 1 }}>
                     <Card style={{ flex: 1, padding: 0 }}>
-                        <ScrollView style={{ padding: theme.spacing.m }} contentContainerStyle={{paddingBottom: theme.spacing.m}}>
+                        <ScrollView style={{ padding: theme.spacing.m }} contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
                             <View style={styles.inlineInputContainer}>
                                 <View style={{width: 80, marginRight: theme.spacing.m}}>
                                     <Text style={[styles.cardTitle, {marginBottom: theme.spacing.s}]}>Age</Text>
@@ -281,6 +281,6 @@ export default function PTCalculator() {
                 </View>
             </KeyboardAvoidingView>
         </View>
-    </SafeAreaView>
+    </View>
   );
 }
