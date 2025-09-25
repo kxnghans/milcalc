@@ -9,10 +9,6 @@ export default function StrengthComponent({
     setPushups,
     pushupComponent,
     setPushupComponent,
-    handleLayout,
-    handleSegmentedLayout,
-    exerciseBlockStyle,
-    segmentedStyle
 }) {
     const { theme } = useTheme();
     const styles = StyleSheet.create({
@@ -27,7 +23,6 @@ export default function StrengthComponent({
         },
         componentHeader: {
             flexDirection: 'row',
-            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: theme.spacing.m,
         },
@@ -51,26 +46,24 @@ export default function StrengthComponent({
     return (
         <View>
             <View style={styles.separator} />
-            <View style={[styles.exerciseBlock, exerciseBlockStyle]} onLayout={(e) => handleLayout('strength', e)}>
+            <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <Text style={styles.cardTitle}>Strength</Text>
+                    <Text style={[styles.cardTitle, {marginRight: theme.spacing.m}]}>Strength</Text>
                     {showProgressBars && (
-                        <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                        <View style={{ flex: 1 }}>
                             <ProgressBar
-                                mode="ascending"
                                 value={parseInt(pushups) || 0}
                                 passThreshold={minMax.pushups.min}
                                 maxPointsThreshold={minMax.pushups.max}
+                                ninetyPercentileThreshold={minMax.pushups.max * 0.9}
                             />
                         </View>
                     )}
                 </View>
                 <SegmentedSelector
-                    style={segmentedStyle}
                     options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min HR Push-ups", value: "hand_release_pushups_2min" }]} 
                     selectedValue={pushupComponent}
                     onValueChange={setPushupComponent}
-                    onLayout={(e) => handleSegmentedLayout('strength', e)}
                 />
                 <StyledTextInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" keyboardType="numeric" style={styles.numericInput} />
             </View>
