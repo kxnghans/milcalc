@@ -15,10 +15,6 @@ export default function CoreComponent({
     setPlankMinutes,
     plankSeconds,
     setPlankSeconds,
-    handleLayout,
-    handleSegmentedLayout,
-    exerciseBlockStyle,
-    segmentedStyle,
     handleMinutesChange,
     plankSecondsInput
 }) {
@@ -35,7 +31,6 @@ export default function CoreComponent({
         },
         componentHeader: {
             flexDirection: 'row',
-            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: theme.spacing.m,
         },
@@ -85,37 +80,38 @@ export default function CoreComponent({
     return (
         <View>
             <View style={styles.separator} />
-            <View style={[styles.exerciseBlock, exerciseBlockStyle]} onLayout={(e) => handleLayout('core', e)}>
+            <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <Text style={styles.cardTitle}>Core</Text>
+                    <Text style={[styles.cardTitle, {marginRight: theme.spacing.m}]}>Core</Text>
                     {showProgressBars && (() => {
+                        const ninetyPercentileThreshold = minMax.core.max * 0.9;
                         if (coreComponent === "forearm_plank_time") {
                             const plankTimeInSeconds = (parseInt(plankMinutes) || 0) * 60 + (parseInt(plankSeconds) || 0);
                             return (
-                                <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                                <View style={{ flex: 1 }}>
                                     <ProgressBar
-                                        mode="ascending"
                                         value={plankTimeInSeconds}
                                         passThreshold={minMax.core.min}
                                         maxPointsThreshold={minMax.core.max}
+                                        ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                        valueIsTime={true}
                                     />
                                 </View>
                             );
                         }
                         return (
-                            <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+                            <View style={{ flex: 1 }}>
                                 <ProgressBar
-                                    mode="ascending"
                                     value={parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0}
                                     passThreshold={minMax.core.min}
                                     maxPointsThreshold={minMax.core.max}
+                                    ninetyPercentileThreshold={ninetyPercentileThreshold}
                                 />
                             </View>
                         );
                     })()}
                 </View>
                 <SegmentedSelector
-                    style={segmentedStyle}
                     options={[
                         { label: "1-min Sit-ups", value: "sit_ups_1min" },
                         { label: "2-min Cross-Leg Crunch", value: "cross_leg_reverse_crunch_2min" },
@@ -123,7 +119,6 @@ export default function CoreComponent({
                     ]}
                     selectedValue={coreComponent}
                     onValueChange={setCoreComponent}
-                    onLayout={(e) => handleSegmentedLayout('core', e)}
                 />
                 {coreComponent === "sit_ups_1min" && (
                     <StyledTextInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" keyboardType="numeric" style={styles.numericInput} />

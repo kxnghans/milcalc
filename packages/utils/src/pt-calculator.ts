@@ -187,6 +187,16 @@ export const getMinMaxValues = (age: number, sex: string, component: string) => 
     const table = ageGroup.muscular_fitness[component];
     if (!table || table.length === 0) return { min: 0, max: 0 };
 
+    if (component === 'forearm_plank_time') {
+        const timesInSeconds = table.map(row => {
+            const timeString = String(row.time).replace(/[^0-9:]/g, '').trim();
+            return timeToSeconds(timeString);
+        });
+        const min = Math.min(...timesInSeconds.filter(t => t > 0));
+        const max = Math.max(...timesInSeconds);
+        return { min, max };
+    }
+
     const reps = table.map(row => {
         if (typeof row.reps === 'string') {
             const match = row.reps.replace(/[^0-9]/g, '');

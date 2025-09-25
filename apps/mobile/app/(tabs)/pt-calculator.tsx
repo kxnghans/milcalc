@@ -53,7 +53,6 @@ export default function PTCalculator() {
   const [minMax, setMinMax] = React.useState({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
   const [cardioMinMax, setCardioMinMax] = React.useState({ min: 0, max: 0 });
   const [isModalVisible, setModalVisible] = React.useState(false);
-  const [blockHeights, setBlockHeights] = React.useState({ strength: 0, core: 0, cardio: 0 });
   const [segmentedHeights, setSegmentedHeights] = React.useState({ strength: 0, core: 0, cardio: 0 });
 
   // Refs for auto-focusing time inputs
@@ -74,16 +73,6 @@ export default function PTCalculator() {
     }
   };
 
-  const handleLayout = (block, event) => {
-    const { height } = event.nativeEvent.layout;
-    setBlockHeights(heights => {
-        if (heights[block] !== height) {
-            return { ...heights, [block]: height };
-        }
-        return heights;
-    });
-  };
-
   const handleSegmentedLayout = (block, event) => {
     const { height } = event.nativeEvent.layout;
     setSegmentedHeights(heights => {
@@ -96,7 +85,7 @@ export default function PTCalculator() {
 
   /**
    * Gets the appropriate theme icon based on the current theme mode.
-   * @returns {string} The name of the icon to display.
+   * @returns {string} The name of the icon to display.s
    */
   const getThemeIcon = () => {
     if (themeMode === 'light') {
@@ -144,10 +133,6 @@ export default function PTCalculator() {
   }, [age, gender, cardioComponent, runMinutes, runSeconds, shuttles, walkMinutes, walkSeconds, pushupComponent, pushups, coreComponent, situps, reverseCrunches, plankMinutes, plankSeconds]);
 
   const showProgressBars = age && gender;
-  const maxHeight = Math.max(...Object.values(blockHeights));
-  const exerciseBlockStyle = {
-      height: maxHeight > 0 ? maxHeight : 'auto',
-  }
 
   const maxSegmentedHeight = Math.max(...Object.values(segmentedHeights));
   const segmentedStyle = {
@@ -219,6 +204,7 @@ export default function PTCalculator() {
                                 <View style={{flex: 1}}>
                                     <Text style={[styles.cardTitle, {textAlign: 'center', marginBottom: theme.spacing.s}]}>Gender</Text>
                                     <GenderSelector gender={gender} setGender={setGender} />
+                                
                                 </View>
                             </View>
                             <StrengthComponent 
@@ -228,9 +214,7 @@ export default function PTCalculator() {
                                 setPushups={setPushups}
                                 pushupComponent={pushupComponent}
                                 setPushupComponent={setPushupComponent}
-                                handleLayout={handleLayout}
                                 handleSegmentedLayout={handleSegmentedLayout}
-                                exerciseBlockStyle={exerciseBlockStyle}
                                 segmentedStyle={segmentedStyle}
                             />
                             <CoreComponent
@@ -246,9 +230,7 @@ export default function PTCalculator() {
                                 setPlankMinutes={setPlankMinutes}
                                 plankSeconds={plankSeconds}
                                 setPlankSeconds={setPlankSeconds}
-                                handleLayout={handleLayout}
                                 handleSegmentedLayout={handleSegmentedLayout}
-                                exerciseBlockStyle={exerciseBlockStyle}
                                 segmentedStyle={segmentedStyle}
                                 handleMinutesChange={handleMinutesChange}
                                 plankSecondsInput={plankSecondsInput}
@@ -268,9 +250,7 @@ export default function PTCalculator() {
                                 shuttles={shuttles}
                                 setShuttles={setShuttles}
                                 cardioMinMax={cardioMinMax}
-                                handleLayout={handleLayout}
                                 handleSegmentedLayout={handleSegmentedLayout}
-                                exerciseBlockStyle={exerciseBlockStyle}
                                 segmentedStyle={segmentedStyle}
                                 handleMinutesChange={handleMinutesChange}
                                 runSecondsInput={runSecondsInput}

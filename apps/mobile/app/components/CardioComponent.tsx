@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { Card, ProgressBar, SegmentedSelector, StyledTextInput, useTheme } from '@repo/ui';
 
-export default function CardioComponent({ 
+export default function CardioComponent({
     showProgressBars,
     cardioComponent,
     setCardioComponent,
@@ -17,10 +17,6 @@ export default function CardioComponent({
     shuttles,
     setShuttles,
     cardioMinMax,
-    handleLayout,
-    handleSegmentedLayout,
-    exerciseBlockStyle,
-    segmentedStyle,
     handleMinutesChange,
     runSecondsInput,
     walkSecondsInput
@@ -38,7 +34,6 @@ export default function CardioComponent({
         },
         componentHeader: {
             flexDirection: 'row',
-            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: theme.spacing.m,
         },
@@ -86,63 +81,72 @@ export default function CardioComponent({
     });
 
     return (
-        <View>
-            <View style={styles.separator} />
-            <View style={[styles.exerciseBlock, exerciseBlockStyle]} onLayout={(e) => handleLayout('cardio', e)}>
-                <View style={styles.componentHeader}>
-                    <Text style={styles.cardTitle}>Cardio</Text>
-                    {showProgressBars && (() => {
-                        if (cardioComponent === 'run' || cardioComponent === 'walk') {
-                            const timeInSeconds = (cardioComponent === 'run' ? (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0) : (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0));
-                            return (
-                                <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
-                                    <ProgressBar
-                                        mode="descending"
-                                        value={timeInSeconds}
-                                        passThreshold={cardioMinMax.min}
-                                        maxPointsThreshold={cardioMinMax.max}
-                                    />
-                                </View>
-                            );
-                        } else { // shuttles
-                            return (
-                                <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
-                                    <ProgressBar
-                                        mode="ascending"
-                                        value={parseInt(shuttles) || 0}
-                                        passThreshold={cardioMinMax.min}
-                                        maxPointsThreshold={cardioMinMax.max}
-                                    />
-                                </View>
-                            );
-                        }
-                    })()}
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
+        >
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                <View>
+                    <View style={styles.separator} />
+                    <View style={styles.exerciseBlock}>
+                        <View style={styles.componentHeader}>
+                            <Text style={[styles.cardTitle, { marginRight: theme.spacing.m }]}>Cardio</Text>
+                            {showProgressBars && (() => {
+                                if (cardioComponent === 'run' || cardioComponent === 'walk') {
+                                    const timeInSeconds = (cardioComponent === 'run' ? (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0) : (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0));
+                                    const ninetyPercentileThreshold = cardioMinMax.max + (cardioMinMax.min - cardioMinMax.max) * 0.1;
+                                    return (
+                                        <View style={{ flex: 1 }}>
+                                            <ProgressBar
+                                                invertScale={true}
+                                                value={timeInSeconds}
+                                                passThreshold={cardioMinMax.min}
+                                                maxPointsThreshold={cardioMinMax.max}
+                                                ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                                valueIsTime={true}
+                                            />
+                                        </View>
+                                    );
+                                } else { // shuttles
+                                    const ninetyPercentileThreshold = cardioMinMax.max * 0.9;
+                                    return (
+                                        <View style={{ flex: 1 }}>
+                                            <ProgressBar
+                                                value={parseInt(shuttles) || 0}
+                                                passThreshold={cardioMinMax.min}
+                                                maxPointsThreshold={cardioMinMax.max}
+                                                ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                            />
+                                        </View>
+                                    );
+                                }
+                            })()}
+                        </View>
+                        <SegmentedSelector
+                            options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
+                            selectedValue={cardioComponent}
+                            onValueChange={setCardioComponent}
+                        />
+                        {cardioComponent === "run" && (
+                            <View style={styles.timeInputContainer}>
+                                <StyledTextInput value={runMinutes} onChangeText={(value) => handleMinutesChange(value, setRunMinutes, runSecondsInput)} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
+                                <Text style={styles.timeInputSeparator}>:</Text>
+                                <StyledTextInput ref={runSecondsInput} value={runSeconds} onChangeText={setRunSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                            </View>
+                        )}
+                        {cardioComponent === "shuttles" && (
+                            <StyledTextInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" keyboardType="numeric" style={styles.numericInput} />
+                        )}
+                        {cardioComponent === "walk" && (
+                            <View style={styles.timeInputContainer}>
+                                <StyledTextInput value={walkMinutes} onChangeText={(value) => handleMinutesChange(value, setWalkMinutes, walkSecondsInput)} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
+                                <Text style={styles.timeInputSeparator}>:</Text>
+                                <StyledTextInput ref={walkSecondsInput} value={walkSeconds} onChangeText={setWalkSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
+                            </View>
+                        )}
+                    </View>
                 </View>
-                <SegmentedSelector
-                    style={segmentedStyle}
-                    options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
-                    selectedValue={cardioComponent}
-                    onValueChange={setCardioComponent}
-                    onLayout={(e) => handleSegmentedLayout('cardio', e)}
-                />
-                {cardioComponent === "run" && (
-                    <View style={styles.timeInputContainer}>
-                        <StyledTextInput value={runMinutes} onChangeText={(value) => handleMinutesChange(value, setRunMinutes, runSecondsInput)} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
-                        <Text style={styles.timeInputSeparator}>:</Text>
-                        <StyledTextInput ref={runSecondsInput} value={runSeconds} onChangeText={setRunSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
-                    </View>
-                )}
-                {cardioComponent === "shuttles" && (
-                    <StyledTextInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" keyboardType="numeric" style={styles.numericInput} />
-                )}
-                {cardioComponent === "walk" && (
-                    <View style={styles.timeInputContainer}>
-                        <StyledTextInput value={walkMinutes} onChangeText={(value) => handleMinutesChange(value, setWalkMinutes, walkSecondsInput)} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
-                        <Text style={styles.timeInputSeparator}>:</Text>
-                        <StyledTextInput ref={walkSecondsInput} value={walkSeconds} onChangeText={setWalkSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
-                    </View>
-                )}
-            </View>
-        </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 };
