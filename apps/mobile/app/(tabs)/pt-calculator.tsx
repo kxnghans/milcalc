@@ -130,8 +130,7 @@ export default function PTCalculator() {
     container: {
         flex: 1,
         backgroundColor: theme.colors.background,
-        paddingHorizontal: theme.spacing.m,
-        paddingTop: theme.spacing.m,
+        paddingHorizontal: theme.spacing.s,
     },
     cardTitle: {
         ...theme.typography.title,
@@ -149,7 +148,7 @@ export default function PTCalculator() {
         <PdfModal isModalVisible={isModalVisible} setModalVisible={setModalVisible} />
         <View style={{flex: 1}}>
             <View>
-                <ScoreDisplay score={score} containerStyle={{ marginBottom: 0 }} />
+                <ScoreDisplay score={score} containerStyle={{ marginBottom: theme.spacing.s }} />
                 <IconRow icons={[
                     {
                         name: ICONS.BEST_SCORE,
@@ -172,15 +171,25 @@ export default function PTCalculator() {
                 <View style={{ flex: 1 }}>
                     <Card style={{ flex: 1 }}>
                         <ScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
-                            <View style={styles.inlineInputContainer}>
-                                <View style={{width: 80, marginRight: theme.spacing.m}}>
-                                    <Text style={[styles.cardTitle, {marginBottom: theme.spacing.s}]}>Age</Text>
-                                    <NumberInput value={age} onChangeText={setAge} placeholder="" />
+                            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                <View style={{width: 96, marginRight: theme.spacing.m}}>
+                                    <Text style={[styles.cardTitle]}>Age</Text>
                                 </View>
                                 <View style={{flex: 1}}>
-                                    <Text style={[styles.cardTitle, {textAlign: 'center', marginBottom: theme.spacing.s}]}>Gender</Text>
+                                    <Text style={[styles.cardTitle, {textAlign: 'center'}]}>Gender</Text>
+                                </View>
+                            </View>
+                            <View style={styles.inlineInputContainer}>
+                                <View style={{width: 96, marginRight: theme.spacing.m}}>
+                                    <NumberInput 
+                                        value={age} 
+                                        onChangeText={setAge} 
+                                        placeholder="" 
+                                        inputStyle={{paddingVertical: theme.spacing.s + 4}}
+                                    />
+                                </View>
+                                <View style={{flex: 1}}>
                                     <GenderSelector gender={gender} setGender={setGender} />
-                                
                                 </View>
                             </View>
                             <Divider />
