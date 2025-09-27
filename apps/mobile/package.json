@@ -7,7 +7,9 @@
     "dev": "expo start --lan",
     "dev:clear": "expo start --lan --clear",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
   "dependencies": {
     "@expo/metro-runtime": "6.1.2",
@@ -26,5 +28,8 @@
     "react-native": "0.81.4",
     "react-native-safe-area-context": "5.6.1",
     "react-native-screens": "4.16.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
   }
 }
