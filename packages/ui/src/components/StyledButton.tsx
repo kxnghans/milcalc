@@ -1,7 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps, StyleProp, ViewStyle } from 'react-native';
-import { useTheme } from './contexts/ThemeContext';
+import { useTheme } from "../contexts/ThemeContext";
 import * as Icons from '@expo/vector-icons';
+import NeumorphicOutset from './NeumorphicOutset';
 
 interface StyledButtonProps extends TouchableOpacityProps {
   title: string;
@@ -24,12 +25,6 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row',
-    },
-    primary: {
-      backgroundColor: theme.colors.primary,
-    },
-    secondary: {
-      backgroundColor: theme.colors.secondary,
     },
     text: {
       fontWeight: '600',
@@ -61,14 +56,17 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
   const buttonSizeStyle = size === 'small' ? styles.smallButton : styles.mediumButton;
   const textSizeStyle = size === 'small' ? styles.smallText : styles.mediumText;
   const finalIconSize = iconSize ?? (size === 'small' ? theme.typography.subtitle.fontSize + 2 : theme.typography.body.fontSize + 2);
+  const backgroundColor = variant === 'primary' ? theme.colors.primary : theme.colors.secondary;
 
   return (
-    <TouchableOpacity
-      style={[styles.button, styles[variant], buttonSizeStyle, style]}
-      {...props}
-    >
-      {icon && Icon && <Icon name={icon} size={finalIconSize} color={styles[`${variant}Text`].color} style={styles.icon} />}
-      <Text style={[styles.text, styles[`${variant}Text`], textSizeStyle]}>{title}</Text>
-    </TouchableOpacity>
+    <NeumorphicOutset color={backgroundColor} style={style}>
+        <TouchableOpacity
+        style={[styles.button, buttonSizeStyle]}
+        {...props}
+        >
+            {icon && Icon && <Icon name={icon} size={finalIconSize} color={styles[`${variant}Text`].color} style={styles.icon} />}
+            <Text style={[styles.text, styles[`${variant}Text`], textSizeStyle]}>{title}</Text>
+        </TouchableOpacity>
+    </NeumorphicOutset>
   );
 };

@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useTheme } from '@repo/ui';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface NeumorphicInsetProps {
   children: ReactNode;

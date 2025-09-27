@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card, ProgressBar, SegmentedSelector, StyledTextInput, useTheme } from '@repo/ui';
+import { Card, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
+import NumberInput from './NumberInput';
+import TimeInput from './TimeInput';
 
 export default function CoreComponent({ 
     showProgressBars,
@@ -15,8 +17,6 @@ export default function CoreComponent({
     setPlankMinutes,
     plankSeconds,
     setPlankSeconds,
-    handleMinutesChange,
-    plankSecondsInput
 }) {
     const { theme } = useTheme();
     const styles = StyleSheet.create({
@@ -36,44 +36,6 @@ export default function CoreComponent({
         },
         exerciseBlock: {
             justifyContent: 'center',
-        },
-        numericInput: {
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-            borderRadius: theme.borderRadius.m,
-            paddingVertical: theme.spacing.s,
-            paddingHorizontal: theme.spacing.m,
-            backgroundColor: theme.colors.surface,
-            marginBottom: theme.spacing.s,
-            ...theme.typography.label,
-            textAlign: "center",
-            color: theme.colors.text,
-        },
-        timeInputContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-            borderRadius: theme.borderRadius.m,
-            paddingVertical: theme.spacing.s,
-            paddingHorizontal: theme.spacing.m,
-            backgroundColor: theme.colors.surface,
-            marginBottom: theme.spacing.s,
-        },
-        timeInput: {
-            flex: 1,
-            borderWidth: 0,
-            padding: 0,
-            margin: 0,
-            ...theme.typography.label,
-            color: theme.colors.text,
-            backgroundColor: 'transparent',
-            textAlign: 'center',
-        },
-        timeInputSeparator: {
-            ...theme.typography.body,
-            marginHorizontal: theme.spacing.s,
-            color: theme.colors.text,
         },
     });
 
@@ -121,17 +83,18 @@ export default function CoreComponent({
                     onValueChange={setCoreComponent}
                 />
                 {coreComponent === "sit_ups_1min" && (
-                    <StyledTextInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" keyboardType="numeric" style={styles.numericInput} />
+                    <NumberInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" />
                 )}
                 {coreComponent === "cross_leg_reverse_crunch_2min" && (
-                    <StyledTextInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" keyboardType="numeric" style={styles.numericInput} />
+                    <NumberInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" />
                 )}
                 {coreComponent === "forearm_plank_time" && (
-                    <View style={styles.timeInputContainer}>
-                        <StyledTextInput value={plankMinutes} onChangeText={(value) => handleMinutesChange(value, setPlankMinutes, plankSecondsInput)} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
-                        <Text style={styles.timeInputSeparator}>:</Text>
-                        <StyledTextInput ref={plankSecondsInput} value={plankSeconds} onChangeText={setPlankSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
-                    </View>
+                    <TimeInput
+                        minutes={plankMinutes}
+                        setMinutes={setPlankMinutes}
+                        seconds={plankSeconds}
+                        setSeconds={setPlankSeconds}
+                    />
                 )}
             </View>
         </View>

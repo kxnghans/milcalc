@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '@repo/ui';
+import { useTheme, NeumorphicOutset } from '@repo/ui';
 
 const getScoreColor = (score, maxScore, theme) => {
     if (score === 0) return theme.colors.error;
@@ -18,36 +18,27 @@ export default function ScoreDisplay({ score }) {
     scoreContainer: {
         marginBottom: theme.spacing.s,
         padding: theme.spacing.m,
-        backgroundColor: theme.colors.surface,
-        borderRadius: theme.borderRadius.m,
         alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
     },
     scoreBreakdownContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
+        gap: theme.spacing.m,
         width: '100%',
-        marginTop: theme.spacing.s,
     },
     scoreText: {
         ...theme.typography.header,
+        marginBottom: theme.spacing.s,
     },
     scoreBreakdownText: {
         ...theme.typography.subtitle,
         color: theme.colors.text,
-        marginTop: theme.spacing.s,
+        
     },
   });
 
   return (
-    <View style={styles.scoreContainer}>
+    <NeumorphicOutset style={styles.scoreContainer}>
         <Text style={[styles.scoreText, { color: scoreColor }]}>{score.totalScore.toFixed(2)}</Text>
         <View style={styles.scoreBreakdownContainer}>
             <View style={{flexDirection: 'row'}}>
@@ -65,6 +56,6 @@ export default function ScoreDisplay({ score }) {
                 <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.cardioScore, 60, theme) }]}>{score.cardioScore}</Text>
             </View>
         </View>
-    </View>
+    </NeumorphicOutset>
   );
 };

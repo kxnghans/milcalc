@@ -2,7 +2,8 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Icons from '@expo/vector-icons';
 import { Link } from 'expo-router';
-import { useTheme } from './contexts/ThemeContext';
+import { useTheme } from "../contexts/ThemeContext";
+import NeumorphicOutset from './NeumorphicOutset';
 
 interface IconRowProps {
   icons: {
@@ -24,7 +25,6 @@ export const IconRow = ({ icons }: IconRowProps) => {
       gap: theme.spacing.m,
     },
     iconBlock: {
-      backgroundColor: theme.colors.surface,
       borderRadius: theme.borderRadius.l,
       padding: theme.spacing.s + 2,
       alignItems: 'center',
@@ -40,9 +40,11 @@ export const IconRow = ({ icons }: IconRowProps) => {
       {icons.map((icon, index) => {
         const Icon = Icons[icon.iconSet || 'MaterialCommunityIcons'];
         const iconContent = (
-          <View style={styles.iconBlock}>
-            <Icon name={icon.name} size={25} color={theme.colors.text} />
-          </View>
+          <NeumorphicOutset>
+            <View style={styles.iconBlock}>
+                <Icon name={icon.name} size={25} color={theme.colors.text} />
+            </View>
+          </NeumorphicOutset>
         );
 
         if (icon.href) {

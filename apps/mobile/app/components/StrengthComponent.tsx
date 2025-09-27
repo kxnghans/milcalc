@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card, ProgressBar, SegmentedSelector, StyledTextInput, useTheme } from '@repo/ui';
+import { Card, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
+import NumberInput from './NumberInput';
 
 export default function StrengthComponent({ 
     showProgressBars,
@@ -29,18 +30,6 @@ export default function StrengthComponent({
         exerciseBlock: {
             justifyContent: 'center',
         },
-        numericInput: {
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-            borderRadius: theme.borderRadius.m,
-            paddingVertical: theme.spacing.s,
-            paddingHorizontal: theme.spacing.m,
-            backgroundColor: theme.colors.surface,
-            marginBottom: theme.spacing.s,
-            ...theme.typography.label,
-            textAlign: "center",
-            color: theme.colors.text,
-        },
     });
 
     return (
@@ -65,7 +54,7 @@ export default function StrengthComponent({
                     selectedValue={pushupComponent}
                     onValueChange={setPushupComponent}
                 />
-                <StyledTextInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" keyboardType="numeric" style={styles.numericInput} />
+                <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" />
             </View>
         </View>
     );

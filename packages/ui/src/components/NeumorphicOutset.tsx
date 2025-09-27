@@ -1,14 +1,16 @@
 import React, { ReactNode } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
-import { useTheme } from '@repo/ui';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface NeumorphicOutsetProps {
   children: ReactNode;
   style?: any;
+  color?: string;
 }
 
-const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({ children, style }) => {
+const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({ children, style, color }) => {
   const { theme } = useTheme();
+  const { padding, alignItems, ...restStyle } = StyleSheet.flatten(style) || {};
 
   const styles = StyleSheet.create({
     container: {
@@ -22,7 +24,7 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({ children, style }) 
         },
         android: {
           elevation: theme.colors.neumorphic.outset.elevation,
-          backgroundColor: theme.colors.background,
+          backgroundColor: color || theme.colors.background,
         },
       }),
     },
@@ -38,14 +40,15 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({ children, style }) 
         }),
     },
     content: {
-      padding: theme.spacing.m,
       borderRadius: theme.borderRadius.m,
-      backgroundColor: theme.colors.background,
+      backgroundColor: color || theme.colors.background,
+      padding: padding,
+      alignItems: alignItems,
     },
   });
 
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, restStyle]}>
         <View style={styles.highlight}>
             <View style={styles.content}>
                 {children}

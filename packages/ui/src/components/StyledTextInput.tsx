@@ -1,8 +1,8 @@
 import React from 'react';
 import { TextInput, StyleSheet, TextInputProps } from 'react-native';
-import { useTheme } from './contexts/ThemeContext';
+import { useTheme } from "../contexts/ThemeContext";
 
-export const StyledTextInput = (props: TextInputProps) => {
+export const StyledTextInput = React.forwardRef<TextInput, TextInputProps>((props, ref) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -18,5 +18,5 @@ export const StyledTextInput = (props: TextInputProps) => {
     },
   });
 
-  return <TextInput style={styles.input} placeholderTextColor={theme.colors.placeholder} {...props} />;
-};
+  return <TextInput ref={ref} style={styles.input} placeholderTextColor={theme.colors.placeholder} {...props} />;
+});
