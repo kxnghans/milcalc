@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-import { Card, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
 
@@ -58,36 +58,42 @@ export default function CardioComponent({
                                     const ninetyPercentileThreshold = cardioMinMax.max + (cardioMinMax.min - cardioMinMax.max) * 0.1;
                                     return (
                                         <View style={{ flex: 1 }}>
-                                            <ProgressBar
-                                                invertScale={true}
-                                                value={timeInSeconds}
-                                                passThreshold={cardioMinMax.min}
-                                                maxPointsThreshold={cardioMinMax.max}
-                                                ninetyPercentileThreshold={ninetyPercentileThreshold}
-                                                valueIsTime={true}
-                                            />
+                                            <NeumorphicOutset>
+                                                <ProgressBar
+                                                    invertScale={true}
+                                                    value={timeInSeconds}
+                                                    passThreshold={cardioMinMax.min}
+                                                    maxPointsThreshold={cardioMinMax.max}
+                                                    ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                                    valueIsTime={true}
+                                                />
+                                            </NeumorphicOutset>
                                         </View>
                                     );
                                 } else { // shuttles
                                     const ninetyPercentileThreshold = cardioMinMax.max * 0.9;
                                     return (
                                         <View style={{ flex: 1 }}>
-                                            <ProgressBar
-                                                value={parseInt(shuttles) || 0}
-                                                passThreshold={cardioMinMax.min}
-                                                maxPointsThreshold={cardioMinMax.max}
-                                                ninetyPercentileThreshold={ninetyPercentileThreshold}
-                                            />
+                                            <NeumorphicOutset>
+                                                <ProgressBar
+                                                    value={parseInt(shuttles) || 0}
+                                                    passThreshold={cardioMinMax.min}
+                                                    maxPointsThreshold={cardioMinMax.max}
+                                                    ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                                />
+                                            </NeumorphicOutset>
                                         </View>
                                     );
                                 }
                             })()}
                         </View>
-                        <SegmentedSelector
-                            options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
-                            selectedValue={cardioComponent}
-                            onValueChange={setCardioComponent}
-                        />
+                        <NeumorphicOutset>
+                            <SegmentedSelector
+                                options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
+                                selectedValue={cardioComponent}
+                                onValueChange={setCardioComponent}
+                            />
+                        </NeumorphicOutset>
                         {cardioComponent === "run" && (
                             <TimeInput
                                 minutes={runMinutes}

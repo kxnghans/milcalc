@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
 import NumberInput from './NumberInput';
 
 export default function StrengthComponent({ 
@@ -40,20 +40,24 @@ export default function StrengthComponent({
                     <Text style={[styles.cardTitle, {marginRight: theme.spacing.m}]}>Strength</Text>
                     {showProgressBars && (
                         <View style={{ flex: 1 }}>
-                            <ProgressBar
-                                value={parseInt(pushups) || 0}
-                                passThreshold={minMax.pushups.min}
-                                maxPointsThreshold={minMax.pushups.max}
-                                ninetyPercentileThreshold={minMax.pushups.max * 0.9}
-                            />
+                            <NeumorphicOutset>
+                                <ProgressBar
+                                    value={parseInt(pushups) || 0}
+                                    passThreshold={minMax.pushups.min}
+                                    maxPointsThreshold={minMax.pushups.max}
+                                    ninetyPercentileThreshold={minMax.pushups.max * 0.9}
+                                />
+                            </NeumorphicOutset>
                         </View>
                     )}
                 </View>
-                <SegmentedSelector
-                    options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min HR Push-ups", value: "hand_release_pushups_2min" }]} 
-                    selectedValue={pushupComponent}
-                    onValueChange={setPushupComponent}
-                />
+                <NeumorphicOutset>
+                    <SegmentedSelector
+                        options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min HR Push-ups", value: "hand_release_pushups_2min" }]} 
+                        selectedValue={pushupComponent}
+                        onValueChange={setPushupComponent}
+                    />
+                </NeumorphicOutset>
                 <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" />
             </View>
         </View>
