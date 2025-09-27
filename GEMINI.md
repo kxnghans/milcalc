@@ -54,6 +54,7 @@ The project uses `pnpm` as the package manager and `turbo` as the monorepo build
 -   **Focus:** Current development is focused on the mobile application first.
 -   **Documentation:** When modifying the project, always consider whether the `GEMINI.md` file needs to be updated to reflect the changes.
 -   **Version Control:** Ensure that any necessary files are added to the `.gitignore` file to avoid committing unnecessary files.
+-   **Pnpm Overrides:** When installing new dependencies, always check the `pnpm.overrides` in the root `package.json` to avoid version conflicts.
 
 ## Data Sources
 
