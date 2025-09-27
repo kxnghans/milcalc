@@ -51,9 +51,8 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
           return (
             <NeumorphicOutset
               key={option.value}
-              color={theme.colors.primary}
-              containerStyle={{ flex: 1, margin: theme.spacing.xs, borderRadius: theme.borderRadius.m }}
-              contentStyle={{}}
+              containerStyle={{ flex: 1, borderRadius: theme.borderRadius.m }}
+              contentStyle={{ backgroundColor: theme.colors.primary, borderRadius: theme.borderRadius.m, overflow: 'hidden' }}
             >
               <TouchableOpacity
                 style={[

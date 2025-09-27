@@ -21,7 +21,6 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
   const styles = StyleSheet.create({
     button: {
       paddingHorizontal: theme.spacing.l,
-      borderRadius: theme.borderRadius.m,
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row',
@@ -59,7 +58,14 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
   const backgroundColor = variant === 'primary' ? theme.colors.primary : theme.colors.secondary;
 
   return (
-    <NeumorphicOutset color={backgroundColor} containerStyle={style}>
+    <NeumorphicOutset 
+      containerStyle={[style, { borderRadius: theme.borderRadius.m, margin: theme.spacing.s }]}
+      contentStyle={{
+        backgroundColor,
+        borderRadius: theme.borderRadius.m,
+        overflow: 'hidden',
+      }}
+    >
         <TouchableOpacity
         style={[styles.button, buttonSizeStyle]}
         {...props}

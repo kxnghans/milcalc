@@ -6,7 +6,7 @@ const NumberInput = React.forwardRef<TextInput, TextInputProps>((props, ref) => 
   const { theme } = useTheme();
 
   return (
-    <NeumorphicInset>
+    <NeumorphicInset style={{ borderRadius: theme.borderRadius.m, overflow: 'hidden' }}>
       <StyledTextInput
         ref={ref}
         {...props}

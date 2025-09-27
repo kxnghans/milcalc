@@ -37,6 +37,9 @@ export default function CoreComponent({
         exerciseBlock: {
             justifyContent: 'center',
         },
+        neumorphicOutsetContainer: {
+            margin: theme.spacing.s,
+        },
     });
 
     return (
@@ -51,7 +54,7 @@ export default function CoreComponent({
                             const plankTimeInSeconds = (parseInt(plankMinutes) || 0) * 60 + (parseInt(plankSeconds) || 0);
                             return (
                                 <View style={{ flex: 1 }}>
-                                    <NeumorphicOutset>
+                                    <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                                         <ProgressBar
                                             value={plankTimeInSeconds}
                                             passThreshold={minMax.core.min}
@@ -65,7 +68,7 @@ export default function CoreComponent({
                         }
                         return (
                             <View style={{ flex: 1 }}>
-                                <NeumorphicOutset>
+                                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                                     <ProgressBar
                                         value={parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0}
                                         passThreshold={minMax.core.min}
@@ -77,7 +80,7 @@ export default function CoreComponent({
                         );
                     })()}
                 </View>
-                <NeumorphicOutset>
+                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                     <SegmentedSelector
                         options={[
                             { label: "1-min Sit-ups", value: "sit_ups_1min" },
