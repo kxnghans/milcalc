@@ -1,3 +1,11 @@
+const spacing = {
+  xs: 3,
+  s: 8,
+  m: 16,
+  l: 24,
+  xl: 40,
+};
+
 export const lightColors = {
   primary: '#007AFF',
   secondary: '#E5E5EA',
@@ -12,18 +20,18 @@ export const lightColors = {
   primaryText: '#FFFFFF',
   neumorphic: {
     outset: {
-      shadow: '#A3B1C6',
+      shadow: '#000000',
       highlight: '#FFFFFF',
-      shadowOffset: { width: 3, height: 3 },
-      highlightOffset: { width: -3, height: -3 },
-      shadowOpacity: 0.5,
-      highlightOpacity: 1,
+      shadowOffset: { width: spacing.xs, height: spacing.xs },
+      highlightOffset: { width: -spacing.xs, height: -spacing.xs },
+      shadowOpacity: 0.1,
+      highlightOpacity: 0.9,
       shadowRadius: 6,
       elevation: 10,
     },
     inset: {
-      shadow: '#A3B1C680',
-      highlight: '#FFFFFFFF',
+      shadow: '#0000001A',
+      highlight: '#FFFFFFE6',
       borderWidth: 1,
     },
   },
@@ -43,18 +51,18 @@ export const darkColors = {
   primaryText: '#FFFFFF',
   neumorphic: {
     outset: {
-      shadow: '#1C1C1E',
-      highlight: '#3A3A3C',
-      shadowOffset: { width: 3, height: 3 },
-      highlightOffset: { width: -3, height: -3 },
-      shadowOpacity: 0.5,
-      highlightOpacity: 1,
+      shadow: '#000000',
+      highlight: '#FFFFFF',
+      shadowOffset: { width: spacing.xs, height: spacing.xs },
+      highlightOffset: { width: -spacing.xs, height: -spacing.xs },
+      shadowOpacity: 0.6,
+      highlightOpacity: 0.2,
       shadowRadius: 6,
       elevation: 10,
     },
     inset: {
-      shadow: '#1C1C1E80',
-      highlight: '#3A3A3CFF',
+      shadow: '#00000080',
+      highlight: '#FFFFFF14',
       borderWidth: 1,
     },
   },
@@ -62,12 +70,7 @@ export const darkColors = {
 
 export const theme = {
   colors: lightColors,
-  spacing: {
-    s: 8,
-    m: 16,
-    l: 24,
-    xl: 40,
-  },
+  spacing: spacing,
   typography: {
     header: {
       fontSize: 20,

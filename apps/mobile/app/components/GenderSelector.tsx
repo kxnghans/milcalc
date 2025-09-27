@@ -8,7 +8,7 @@ export default function GenderSelector({ gender, setGender }) {
     const styles = StyleSheet.create({
         genderSelectorContainer: {
             flexDirection: "row",
-            justifyContent: "space-between",
+            gap: theme.spacing.m,
         },
     });
 
@@ -28,7 +28,7 @@ export default function GenderSelector({ gender, setGender }) {
                 onPress={() => setGender("female")}
                 variant={gender === 'female' ? 'primary' : 'secondary'}
                 size="small"
-                style={{ flex: 1, marginLeft: theme.spacing.s }}
+                style={{ flex: 1 }}
                 iconSet={ICON_SETS.FONTISTO}
                 icon={ICONS.GENDER_FEMALE}
             />

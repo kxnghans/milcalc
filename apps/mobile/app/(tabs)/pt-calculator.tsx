@@ -7,7 +7,7 @@
  */
 import * as React from "react";
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { Card, StyledTextInput, IconRow } from "@repo/ui";
+import { Card, IconRow } from "@repo/ui";
 import { calculatePtScore, getMinMaxValues, getCardioMinMaxValues } from "@repo/utils";
 import { useTheme } from "@repo/ui";
 import { ICONS } from "@repo/ui/icons";
@@ -17,6 +17,7 @@ import PdfModal from "../components/PdfModal";
 import StrengthComponent from "../components/StrengthComponent";
 import CoreComponent from "../components/CoreComponent";
 import CardioComponent from "../components/CardioComponent";
+import NumberInput from "../components/NumberInput";
 
 /**
  * The main component for the PT Calculator screen.
@@ -54,24 +55,6 @@ export default function PTCalculator() {
   const [cardioMinMax, setCardioMinMax] = React.useState({ min: 0, max: 0 });
   const [isModalVisible, setModalVisible] = React.useState(false);
   const [segmentedHeights, setSegmentedHeights] = React.useState({ strength: 0, core: 0, cardio: 0 });
-
-  // Refs for auto-focusing time inputs
-  const runSecondsInput = React.useRef(null);
-  const plankSecondsInput = React.useRef(null);
-  const walkSecondsInput = React.useRef(null);
-
-  /**
-   * Handles changes in the minutes input field and auto-focuses the seconds input.
-   * @param {string} value - The input value.
-   * @param {function} setter - The state setter function for the minutes value.
-   * @param {React.RefObject} nextInputRef - The ref for the seconds input field.
-   */
-  const handleMinutesChange = (value, setter, nextInputRef) => {
-    setter(value);
-    if (value.length === 2 || parseInt(value) >= 6) {
-      nextInputRef.current?.focus();
-    }
-  };
 
   const handleSegmentedLayout = (block, event) => {
     const { height } = event.nativeEvent.layout;
@@ -155,17 +138,6 @@ export default function PTCalculator() {
         alignItems: "center",
         marginBottom: theme.spacing.m,
     },
-    ageInput: {
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        borderRadius: theme.borderRadius.m,
-        paddingVertical: theme.spacing.s + 4,
-        paddingHorizontal: theme.spacing.m,
-        backgroundColor: theme.colors.surface,
-        ...theme.typography.label,
-        textAlign: "center",
-        color: theme.colors.text,
-    },
   });
 
   return (
@@ -197,9 +169,9 @@ export default function PTCalculator() {
                     <Card style={{ flex: 1, padding: 0 }}>
                         <ScrollView style={{ padding: theme.spacing.m }} contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
                             <View style={styles.inlineInputContainer}>
-                                <View style={{width: 80, marginRight: theme.spacing.m}}>
+                                <View style={{width: 80, marginRight: theme.spacing.l}}>
                                     <Text style={[styles.cardTitle, {marginBottom: theme.spacing.s}]}>Age</Text>
-                                    <StyledTextInput value={age} onChangeText={setAge} placeholder="" keyboardType="numeric" style={styles.ageInput} />
+                                    <NumberInput value={age} onChangeText={setAge} placeholder="" />
                                 </View>
                                 <View style={{flex: 1}}>
                                     <Text style={[styles.cardTitle, {textAlign: 'center', marginBottom: theme.spacing.s}]}>Gender</Text>
@@ -232,8 +204,6 @@ export default function PTCalculator() {
                                 setPlankSeconds={setPlankSeconds}
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
-                                handleMinutesChange={handleMinutesChange}
-                                plankSecondsInput={plankSecondsInput}
                             />
                             <CardioComponent
                                 showProgressBars={showProgressBars}
@@ -252,9 +222,6 @@ export default function PTCalculator() {
                                 cardioMinMax={cardioMinMax}
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
-                                handleMinutesChange={handleMinutesChange}
-                                runSecondsInput={runSecondsInput}
-                                walkSecondsInput={walkSecondsInput}
                             />
                         </ScrollView>
                     </Card>

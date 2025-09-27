@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { theme } from './theme';
+import { theme } from "../theme";
 import { Picker } from '@react-native-picker/picker';
 import { PickerProps } from '@react-native-picker/picker';
 

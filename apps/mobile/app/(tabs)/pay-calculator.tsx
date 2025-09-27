@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
-import { useTheme } from '@repo/ui';
-import NeumorphicInset from '../components/NeumorphicInset';
-import NeumorphicOutset from '../components/NeumorphicOutset';
+import { useTheme, NeumorphicInset, NeumorphicOutset } from '@repo/ui';
 
 export default function PayCalculator() {
   const { theme } = useTheme();

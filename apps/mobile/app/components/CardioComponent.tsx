@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-import { Card, ProgressBar, SegmentedSelector, StyledTextInput, useTheme } from '@repo/ui';
+import { Card, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
+import NumberInput from './NumberInput';
+import TimeInput from './TimeInput';
 
 export default function CardioComponent({
     showProgressBars,
@@ -17,9 +19,6 @@ export default function CardioComponent({
     shuttles,
     setShuttles,
     cardioMinMax,
-    handleMinutesChange,
-    runSecondsInput,
-    walkSecondsInput
 }) {
     const { theme } = useTheme();
     const styles = StyleSheet.create({
@@ -39,44 +38,6 @@ export default function CardioComponent({
         },
         exerciseBlock: {
             justifyContent: 'center',
-        },
-        numericInput: {
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-            borderRadius: theme.borderRadius.m,
-            paddingVertical: theme.spacing.s,
-            paddingHorizontal: theme.spacing.m,
-            backgroundColor: theme.colors.surface,
-            marginBottom: theme.spacing.s,
-            ...theme.typography.label,
-            textAlign: "center",
-            color: theme.colors.text,
-        },
-        timeInputContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-            borderRadius: theme.borderRadius.m,
-            paddingVertical: theme.spacing.s,
-            paddingHorizontal: theme.spacing.m,
-            backgroundColor: theme.colors.surface,
-            marginBottom: theme.spacing.s,
-        },
-        timeInput: {
-            flex: 1,
-            borderWidth: 0,
-            padding: 0,
-            margin: 0,
-            ...theme.typography.label,
-            color: theme.colors.text,
-            backgroundColor: 'transparent',
-            textAlign: 'center',
-        },
-        timeInputSeparator: {
-            ...theme.typography.body,
-            marginHorizontal: theme.spacing.s,
-            color: theme.colors.text,
         },
     });
 
@@ -128,21 +89,23 @@ export default function CardioComponent({
                             onValueChange={setCardioComponent}
                         />
                         {cardioComponent === "run" && (
-                            <View style={styles.timeInputContainer}>
-                                <StyledTextInput value={runMinutes} onChangeText={(value) => handleMinutesChange(value, setRunMinutes, runSecondsInput)} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
-                                <Text style={styles.timeInputSeparator}>:</Text>
-                                <StyledTextInput ref={runSecondsInput} value={runSeconds} onChangeText={setRunSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
-                            </View>
+                            <TimeInput
+                                minutes={runMinutes}
+                                setMinutes={setRunMinutes}
+                                seconds={runSeconds}
+                                setSeconds={setRunSeconds}
+                            />
                         )}
                         {cardioComponent === "shuttles" && (
-                            <StyledTextInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" keyboardType="numeric" style={styles.numericInput} />
+                            <NumberInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" />
                         )}
                         {cardioComponent === "walk" && (
-                            <View style={styles.timeInputContainer}>
-                                <StyledTextInput value={walkMinutes} onChangeText={(value) => handleMinutesChange(value, setWalkMinutes, walkSecondsInput)} placeholder="Minutes" keyboardType="numeric" style={styles.timeInput} />
-                                <Text style={styles.timeInputSeparator}>:</Text>
-                                <StyledTextInput ref={walkSecondsInput} value={walkSeconds} onChangeText={setWalkSeconds} placeholder="Seconds" keyboardType="numeric" style={styles.timeInput} />
-                            </View>
+                            <TimeInput
+                                minutes={walkMinutes}
+                                setMinutes={setWalkMinutes}
+                                seconds={walkSeconds}
+                                setSeconds={setWalkSeconds}
+                            />
                         )}
                     </View>
                 </View>
