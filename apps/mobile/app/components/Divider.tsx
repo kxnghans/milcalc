@@ -1,21 +1,13 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@repo/ui';
 
-interface NeumorphicInsetProps {
-  children: ReactNode;
-  style?: any;
-}
-
-const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style }) => {
+export default function Divider() {
   const { theme } = useTheme();
-
   const styles = StyleSheet.create({
-    container: {
-      backgroundColor: theme.colors.background,
-      borderRadius: theme.borderRadius.m,
-    },
-    inner: {
+    divider: {
+      height: 5,
+      marginVertical: theme.spacing.m,
       backgroundColor: theme.colors.background,
       borderRadius: theme.borderRadius.m,
       borderTopWidth: theme.colors.neumorphic.inset.borderWidth,
@@ -26,17 +18,10 @@ const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style }) =>
       borderRightWidth: theme.colors.neumorphic.inset.borderWidth,
       borderBottomColor: theme.colors.neumorphic.inset.highlight,
       borderRightColor: theme.colors.neumorphic.inset.highlight,
-      overflow: 'hidden',
     },
   });
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.inner, style]}>
-        {children}
-      </View>
-    </View>
+    <View style={styles.divider} />
   );
-};
-
-export default NeumorphicInset;
+}

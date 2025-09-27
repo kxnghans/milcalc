@@ -7,7 +7,7 @@
  */
 import * as React from "react";
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { Card, IconRow } from "@repo/ui";
+import { Card, IconRow, NeumorphicInset } from "@repo/ui";
 import { calculatePtScore, getMinMaxValues, getCardioMinMaxValues } from "@repo/utils";
 import { useTheme } from "@repo/ui";
 import { ICONS } from "@repo/ui/icons";
@@ -18,6 +18,7 @@ import StrengthComponent from "../components/StrengthComponent";
 import CoreComponent from "../components/CoreComponent";
 import CardioComponent from "../components/CardioComponent";
 import NumberInput from "../components/NumberInput";
+import Divider from "../components/Divider";
 
 /**
  * The main component for the PT Calculator screen.
@@ -120,14 +121,17 @@ export default function PTCalculator() {
   const maxSegmentedHeight = Math.max(...Object.values(segmentedHeights));
   const segmentedStyle = {
       height: maxSegmentedHeight > 0 ? maxSegmentedHeight : 'auto',
-      marginBottom: theme.spacing.m,
+      
   }
+
+  
 
   const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.background,
-        padding: theme.spacing.m,
+        paddingHorizontal: theme.spacing.m,
+        paddingTop: theme.spacing.m,
     },
     cardTitle: {
         ...theme.typography.title,
@@ -136,7 +140,7 @@ export default function PTCalculator() {
     inlineInputContainer: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: theme.spacing.m,
+
     },
   });
 
@@ -145,7 +149,7 @@ export default function PTCalculator() {
         <PdfModal isModalVisible={isModalVisible} setModalVisible={setModalVisible} />
         <View style={{flex: 1}}>
             <View>
-                <ScoreDisplay score={score} />
+                <ScoreDisplay score={score} containerStyle={{ marginBottom: 0 }} />
                 <IconRow icons={[
                     {
                         name: ICONS.BEST_SCORE,
@@ -165,11 +169,11 @@ export default function PTCalculator() {
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
-                <View style={{ marginTop: theme.spacing.s, flex: 1 }}>
-                    <Card style={{ flex: 1, padding: 0 }}>
-                        <ScrollView style={{ padding: theme.spacing.m }} contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
+                <View style={{ flex: 1 }}>
+                    <Card style={{ flex: 1 }}>
+                        <ScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
                             <View style={styles.inlineInputContainer}>
-                                <View style={{width: 80, marginRight: theme.spacing.l}}>
+                                <View style={{width: 80, marginRight: theme.spacing.m}}>
                                     <Text style={[styles.cardTitle, {marginBottom: theme.spacing.s}]}>Age</Text>
                                     <NumberInput value={age} onChangeText={setAge} placeholder="" />
                                 </View>
@@ -179,6 +183,7 @@ export default function PTCalculator() {
                                 
                                 </View>
                             </View>
+                            <Divider />
                             <StrengthComponent 
                                 showProgressBars={showProgressBars}
                                 minMax={minMax}
@@ -189,6 +194,7 @@ export default function PTCalculator() {
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
                             />
+                            <Divider />
                             <CoreComponent
                                 showProgressBars={showProgressBars}
                                 minMax={minMax}
@@ -205,6 +211,7 @@ export default function PTCalculator() {
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
                             />
+                            <Divider />
                             <CardioComponent
                                 showProgressBars={showProgressBars}
                                 cardioComponent={cardioComponent}

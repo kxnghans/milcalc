@@ -21,11 +21,9 @@ export const IconRow = ({ icons }: IconRowProps) => {
     iconContainer: {
       flexDirection: 'row',
       justifyContent: 'space-evenly',
-      marginVertical: theme.spacing.s,
       gap: theme.spacing.m,
     },
     iconBlock: {
-      borderRadius: theme.borderRadius.l,
       padding: theme.spacing.s + 2,
       alignItems: 'center',
       justifyContent: 'center',
@@ -40,7 +38,7 @@ export const IconRow = ({ icons }: IconRowProps) => {
       {icons.map((icon, index) => {
         const Icon = Icons[icon.iconSet || 'MaterialCommunityIcons'];
         const iconContent = (
-          <NeumorphicOutset>
+          <NeumorphicOutset containerStyle={{ borderRadius: theme.borderRadius.l }}>
             <View style={styles.iconBlock}>
                 <Icon name={icon.name} size={25} color={theme.colors.text} />
             </View>

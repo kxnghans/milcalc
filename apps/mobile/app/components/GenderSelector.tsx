@@ -8,7 +8,8 @@ export default function GenderSelector({ gender, setGender }) {
     const styles = StyleSheet.create({
         genderSelectorContainer: {
             flexDirection: "row",
-            gap: theme.spacing.m,
+            overflow: 'hidden',
+            borderRadius: theme.borderRadius.m,
         },
     });
 
@@ -19,7 +20,7 @@ export default function GenderSelector({ gender, setGender }) {
                 onPress={() => setGender("male")}
                 variant={gender === 'male' ? 'primary' : 'secondary'}
                 size="small"
-                style={{ flex: 1 }}
+                style={{ flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
                 iconSet={ICON_SETS.FONTISTO}
                 icon={ICONS.GENDER_MALE}
             />
@@ -28,7 +29,7 @@ export default function GenderSelector({ gender, setGender }) {
                 onPress={() => setGender("female")}
                 variant={gender === 'female' ? 'primary' : 'secondary'}
                 size="small"
-                style={{ flex: 1 }}
+                style={{ flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                 iconSet={ICON_SETS.FONTISTO}
                 icon={ICONS.GENDER_FEMALE}
             />

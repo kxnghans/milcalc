@@ -41,7 +41,7 @@ export default function CoreComponent({
 
     return (
         <View>
-            <View style={styles.separator} />
+            
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
                     <Text style={[styles.cardTitle, {marginRight: theme.spacing.m}]}>Core</Text>

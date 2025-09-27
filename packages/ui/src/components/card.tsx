@@ -7,16 +7,14 @@ export function Card({ children, style }: { children: ReactNode, style?: ViewSty
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
-    card: {
+    cardContent: {
       padding: theme.spacing.m,
     },
   });
 
   return (
-    <NeumorphicOutset style={style}>
-        <View style={styles.card}>
-            {children}
-        </View>
+    <NeumorphicOutset containerStyle={style} contentStyle={styles.cardContent}>
+        {children}
     </NeumorphicOutset>
   );
 }
