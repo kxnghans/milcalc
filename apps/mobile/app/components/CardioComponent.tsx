@@ -34,8 +34,8 @@ export default function CardioComponent({
         componentHeader: {
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: theme.spacing.m,
         },
+
         exerciseBlock: {
             justifyContent: 'center',
         },
@@ -54,7 +54,7 @@ export default function CardioComponent({
                     
                     <View style={styles.exerciseBlock}>
                         <View style={styles.componentHeader}>
-                            <Text style={[styles.cardTitle, { marginRight: theme.spacing.m }]}>Cardio</Text>
+                            <Text style={[styles.cardTitle, { marginRight: theme.spacing.m, marginVertical: theme.spacing.s }]}>Cardio</Text>
                             {showProgressBars && (() => {
                                 if (cardioComponent === 'run' || cardioComponent === 'walk') {
                                     const timeInSeconds = (cardioComponent === 'run' ? (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0) : (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0));

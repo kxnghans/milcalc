@@ -12,9 +12,10 @@ interface IconRowProps {
     href?: string;
     iconSet?: keyof typeof Icons;
   }[];
+  style?: ViewStyle;
 }
 
-export const IconRow = ({ icons }: IconRowProps) => {
+export const IconRow = ({ icons, style }: IconRowProps) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -34,7 +35,7 @@ export const IconRow = ({ icons }: IconRowProps) => {
   });
 
   return (
-    <View style={styles.iconContainer}>
+    <View style={[styles.iconContainer, style]}>
       {icons.map((icon, index) => {
         const Icon = Icons[icon.iconSet || 'MaterialCommunityIcons'];
         const iconContent = (

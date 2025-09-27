@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@repo/ui';
@@ -24,6 +25,8 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           ...theme.typography.caption,
         },
+        tabBarHideOnKeyboard: true,
+        tabBarBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.surface }} />,
       }}>
       <Tabs.Screen
         name="pt-calculator"

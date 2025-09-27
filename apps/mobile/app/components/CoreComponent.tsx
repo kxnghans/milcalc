@@ -32,8 +32,8 @@ export default function CoreComponent({
         componentHeader: {
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: theme.spacing.m,
         },
+
         exerciseBlock: {
             justifyContent: 'center',
         },
@@ -47,7 +47,7 @@ export default function CoreComponent({
             
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <Text style={[styles.cardTitle, {marginRight: theme.spacing.m}]}>Core</Text>
+                    <Text style={[styles.cardTitle, {marginRight: theme.spacing.m, marginVertical: theme.spacing.s}]}>Core</Text>
                     {showProgressBars && (() => {
                         const ninetyPercentileThreshold = minMax.core.max * 0.9;
                         if (coreComponent === "forearm_plank_time") {

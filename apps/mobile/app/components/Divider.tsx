@@ -7,7 +7,8 @@ export default function Divider() {
   const styles = StyleSheet.create({
     divider: {
       height: 5,
-      marginVertical: theme.spacing.m,
+      marginTop: theme.spacing.m,
+      marginBottom: theme.spacing.s,
       backgroundColor: theme.colors.background,
       borderRadius: theme.borderRadius.m,
       borderTopWidth: theme.colors.neumorphic.inset.borderWidth,

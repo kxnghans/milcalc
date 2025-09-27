@@ -25,8 +25,8 @@ export default function StrengthComponent({
         componentHeader: {
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: theme.spacing.m,
         },
+
         exerciseBlock: {
             justifyContent: 'center',
         },
@@ -40,7 +40,7 @@ export default function StrengthComponent({
             
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <Text style={[styles.cardTitle, {marginRight: theme.spacing.m}]}>Strength</Text>
+                    <Text style={[styles.cardTitle, {marginRight: theme.spacing.m, marginVertical: theme.spacing.s}]}>Strength</Text>
                     {showProgressBars && (
                         <View style={{ flex: 1 }}>
                             <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
