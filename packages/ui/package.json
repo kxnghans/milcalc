@@ -9,7 +9,8 @@
     "./icons": "./src/icons.ts"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings 0",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "generate:component": "turbo gen react-component"
   },
   "devDependencies": {

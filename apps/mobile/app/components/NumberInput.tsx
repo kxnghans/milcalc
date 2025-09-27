@@ -22,6 +22,7 @@ const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inpu
           textAlign: 'center',
           borderWidth: 0, // remove the border from StyledTextInput
           paddingVertical: theme.spacing.s, // remove the padding from StyledTextInput
+          backgroundColor: theme.colors.inputBackground
         }, inputStyle]}
       />
     </NeumorphicInset>

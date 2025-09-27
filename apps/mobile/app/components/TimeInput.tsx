@@ -26,7 +26,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
       alignItems: 'center',
       justifyContent: 'center', // this will center the items in the row
       paddingVertical: theme.spacing.s, // Keep padding for the inset effect
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.inputBackground,
       borderRadius: theme.borderRadius.m,
       overflow: 'hidden',
     },
@@ -44,6 +44,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
         ...theme.typography.body,
         color: theme.colors.text,
         flex: 1,
+        backgroundColor: 'transparent',
     }
   });
 
