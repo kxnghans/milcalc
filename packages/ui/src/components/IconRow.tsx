@@ -38,7 +38,17 @@ export const IconRow = ({ icons }: IconRowProps) => {
       {icons.map((icon, index) => {
         const Icon = Icons[icon.iconSet || 'MaterialCommunityIcons'];
         const iconContent = (
-          <NeumorphicOutset containerStyle={{ borderRadius: theme.borderRadius.l }}>
+          <NeumorphicOutset 
+            containerStyle={{
+              borderRadius: theme.borderRadius.l,
+              margin: theme.spacing.s,
+            }}
+            contentStyle={{
+              backgroundColor: theme.colors.background,
+              borderRadius: theme.borderRadius.l,
+              overflow: 'hidden',
+            }}
+          >
             <View style={styles.iconBlock}>
                 <Icon name={icon.name} size={25} color={theme.colors.text} />
             </View>

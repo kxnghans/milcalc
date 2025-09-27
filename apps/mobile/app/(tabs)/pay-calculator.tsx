@@ -33,6 +33,21 @@ export default function PayCalculator() {
       ...theme.typography.body,
       color: theme.colors.text,
     },
+    neumorphicOutsetContainer: {
+      margin: theme.spacing.s,
+    },
+    neumorphicOutsetContent: {
+      borderRadius: theme.borderRadius.m,
+      backgroundColor: theme.colors.background,
+      padding: theme.spacing.m,
+      overflow: 'hidden',
+    },
+    neumorphicInsetStyle: {
+      backgroundColor: theme.colors.background,
+      borderRadius: theme.borderRadius.m,
+      padding: theme.spacing.m,
+      overflow: 'hidden',
+    },
   });
 
   return (
@@ -40,7 +55,7 @@ export default function PayCalculator() {
       <Text style={styles.text}>Pay Calculator</Text>
 
       <View style={styles.inputContainer}>
-        <NeumorphicInset>
+        <NeumorphicInset style={styles.neumorphicInsetStyle}>
           <TextInput
             style={styles.textInput}
             placeholder="Enter a value"
@@ -52,7 +67,7 @@ export default function PayCalculator() {
       </View>
 
       <View style={styles.outputContainer}>
-        <NeumorphicOutset>
+        <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} contentStyle={styles.neumorphicOutsetContent}>
           <Text style={styles.outputText}>
             {inputValue || 'Output will be shown here'}
           </Text>

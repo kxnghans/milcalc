@@ -39,6 +39,9 @@ export default function CardioComponent({
         exerciseBlock: {
             justifyContent: 'center',
         },
+        neumorphicOutsetContainer: {
+            margin: theme.spacing.s,
+        },
     });
 
     return (
@@ -58,7 +61,7 @@ export default function CardioComponent({
                                     const ninetyPercentileThreshold = cardioMinMax.max + (cardioMinMax.min - cardioMinMax.max) * 0.1;
                                     return (
                                         <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset>
+                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                                                 <ProgressBar
                                                     invertScale={true}
                                                     value={timeInSeconds}
@@ -74,7 +77,7 @@ export default function CardioComponent({
                                     const ninetyPercentileThreshold = cardioMinMax.max * 0.9;
                                     return (
                                         <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset>
+                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                                                 <ProgressBar
                                                     value={parseInt(shuttles) || 0}
                                                     passThreshold={cardioMinMax.min}
@@ -87,7 +90,7 @@ export default function CardioComponent({
                                 }
                             })()}
                         </View>
-                        <NeumorphicOutset>
+                        <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                             <SegmentedSelector
                                 options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
                                 selectedValue={cardioComponent}

@@ -30,6 +30,9 @@ export default function StrengthComponent({
         exerciseBlock: {
             justifyContent: 'center',
         },
+        neumorphicOutsetContainer: {
+            margin: theme.spacing.s,
+        },
     });
 
     return (
@@ -40,7 +43,7 @@ export default function StrengthComponent({
                     <Text style={[styles.cardTitle, {marginRight: theme.spacing.m}]}>Strength</Text>
                     {showProgressBars && (
                         <View style={{ flex: 1 }}>
-                            <NeumorphicOutset>
+                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                                 <ProgressBar
                                     value={parseInt(pushups) || 0}
                                     passThreshold={minMax.pushups.min}
@@ -51,7 +54,7 @@ export default function StrengthComponent({
                         </View>
                     )}
                 </View>
-                <NeumorphicOutset>
+                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                     <SegmentedSelector
                         options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min HR Push-ups", value: "hand_release_pushups_2min" }]} 
                         selectedValue={pushupComponent}

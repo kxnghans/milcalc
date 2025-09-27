@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "expo start --lan",
+    "dev:clear": "expo start --lan --clear",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },

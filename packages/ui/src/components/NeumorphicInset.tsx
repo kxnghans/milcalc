@@ -1,10 +1,10 @@
 import React, { ReactNode } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface NeumorphicInsetProps {
   children: ReactNode;
-  style?: any;
+  style?: ViewStyle;
 }
 
 const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style }) => {
@@ -12,12 +12,6 @@ const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style }) =>
 
   const styles = StyleSheet.create({
     container: {
-      backgroundColor: theme.colors.background,
-      borderRadius: theme.borderRadius.m,
-    },
-    inner: {
-      backgroundColor: theme.colors.background,
-      borderRadius: theme.borderRadius.m,
       borderTopWidth: theme.colors.neumorphic.inset.borderWidth,
       borderLeftWidth: theme.colors.neumorphic.inset.borderWidth,
       borderTopColor: theme.colors.neumorphic.inset.shadow,
@@ -26,15 +20,12 @@ const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style }) =>
       borderRightWidth: theme.colors.neumorphic.inset.borderWidth,
       borderBottomColor: theme.colors.neumorphic.inset.highlight,
       borderRightColor: theme.colors.neumorphic.inset.highlight,
-      overflow: 'hidden',
     },
   });
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.inner, style]}>
-        {children}
-      </View>
+    <View style={[styles.container, style]}>
+      {children}
     </View>
   );
 };

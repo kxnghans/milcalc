@@ -16,11 +16,14 @@ export default function ScoreDisplay({ score }) {
 
   const styles = StyleSheet.create({
     scoreContainer: {
-        marginBottom: theme.spacing.s,
+        margin: theme.spacing.s,
     },
     scoreContent: {
         padding: theme.spacing.m,
         alignItems: "center",
+        borderRadius: theme.borderRadius.m,
+        backgroundColor: theme.colors.background,
+        overflow: 'hidden',
     },
     scoreBreakdownContainer: {
         flexDirection: 'row',

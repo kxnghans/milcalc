@@ -10,7 +10,6 @@ interface NeumorphicOutsetProps {
   style?: ViewStyle;
   containerStyle?: ViewStyle;
   contentStyle?: ViewStyle;
-  color?: string;
 }
 
 const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
@@ -18,14 +17,11 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
   style,
   containerStyle,
   contentStyle,
-  color,
 }) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
     container: {
-      borderRadius: theme.borderRadius.m,
-      margin: theme.spacing.s,
       ...Platform.select({
         ios: {
           shadowColor: theme.colors.neumorphic.outset.shadow,
@@ -39,7 +35,6 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
       }),
     },
     highlight: {
-        borderRadius: theme.borderRadius.m,
         ...Platform.select({
             ios: {
                 shadowColor: theme.colors.neumorphic.outset.highlight,
@@ -50,9 +45,6 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
         }),
     },
     content: {
-      borderRadius: theme.borderRadius.m,
-      backgroundColor: color || theme.colors.background,
-      overflow: 'hidden',
     },
   });
 
