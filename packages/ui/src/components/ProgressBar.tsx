@@ -57,14 +57,10 @@ export const ProgressBar = ({
   const { progress, color } = calculateProgressAndColor();
 
   const styles = StyleSheet.create({
-    container: {
-      marginVertical: theme.spacing.m,
-      height: 30, // Increased height to accommodate markers within
-    },
     bar: {
-      height: 10,
+      height: 15, // Increased height to accommodate markers within
       backgroundColor: theme.colors.secondary,
-      borderRadius: 5,
+      borderRadius: theme.borderRadius.m,
       overflow: 'hidden',
       position: 'relative',
     },
@@ -73,20 +69,31 @@ export const ProgressBar = ({
       position: 'absolute',
       left: 0,
       top: 0,
+      borderRadius: theme.borderRadius.m,
+      shadowColor: theme.colors.neumorphic.outset.shadow,
+      shadowOffset: theme.colors.neumorphic.outset.shadowOffset,
+      shadowOpacity: theme.colors.neumorphic.outset.shadowOpacity,
+      shadowRadius: theme.colors.neumorphic.outset.shadowRadius,
     },
     markersContainer: {
       position: 'absolute',
       width: '100%',
       height: '100%',
-      top: 15, // Position markers below the bar
+      top: 0, // Position markers at the top of the bar
+      flexDirection: 'row',
+      alignItems: 'center',
     },
     marker: {
       position: 'absolute',
       alignItems: 'center',
+      transform: [{ translateX: -8 }],
     },
     markerLabel: {
       ...theme.typography.caption,
       color: theme.colors.text,
+      textShadowColor: theme.colors.background,
+      textShadowRadius: 2,
+      textShadowOffset: { width: 0, height: 0 },
     },
   });
 
@@ -98,10 +105,8 @@ export const ProgressBar = ({
     // maxPointsThreshold is a point on that bar
     const maxPointsMarkerPosition = passThreshold > 0 ? (maxPointsThreshold / passThreshold) * 100 : 0;
     return (
-      <View style={styles.container}>
-        <View style={styles.bar}>
-          <View style={[styles.progress, { width: `${visualProgress * 100}%`, backgroundColor: color }]} />
-        </View>
+      <View style={styles.bar}>
+        <View style={[styles.progress, { width: `${visualProgress * 100}%`, backgroundColor: color }]} />
         <View style={styles.markersContainer}>
             <View style={[styles.marker, { left: `${maxPointsMarkerPosition}%` }]}>
               <Text style={styles.markerLabel}>{valueIsTime ? formatTime(maxPointsThreshold) : maxPointsThreshold}</Text>
@@ -121,10 +126,8 @@ export const ProgressBar = ({
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.bar}>
-        <View style={[styles.progress, { width: `${visualProgress * 100}%`, backgroundColor: color }]} />
-      </View>
+    <View style={styles.bar}>
+      <View style={[styles.progress, { width: `${visualProgress * 100}%`, backgroundColor: color }]} />
       <View style={styles.markersContainer}>
           <View style={[styles.marker, { left: `${passMarkerPosition}%` }]}>
             <Text style={styles.markerLabel}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>

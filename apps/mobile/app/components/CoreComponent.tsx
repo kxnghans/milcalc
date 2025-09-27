@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
 
@@ -51,37 +51,43 @@ export default function CoreComponent({
                             const plankTimeInSeconds = (parseInt(plankMinutes) || 0) * 60 + (parseInt(plankSeconds) || 0);
                             return (
                                 <View style={{ flex: 1 }}>
-                                    <ProgressBar
-                                        value={plankTimeInSeconds}
-                                        passThreshold={minMax.core.min}
-                                        maxPointsThreshold={minMax.core.max}
-                                        ninetyPercentileThreshold={ninetyPercentileThreshold}
-                                        valueIsTime={true}
-                                    />
+                                    <NeumorphicOutset>
+                                        <ProgressBar
+                                            value={plankTimeInSeconds}
+                                            passThreshold={minMax.core.min}
+                                            maxPointsThreshold={minMax.core.max}
+                                            ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                            valueIsTime={true}
+                                        />
+                                    </NeumorphicOutset>
                                 </View>
                             );
                         }
                         return (
                             <View style={{ flex: 1 }}>
-                                <ProgressBar
-                                    value={parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0}
-                                    passThreshold={minMax.core.min}
-                                    maxPointsThreshold={minMax.core.max}
-                                    ninetyPercentileThreshold={ninetyPercentileThreshold}
-                                />
+                                <NeumorphicOutset>
+                                    <ProgressBar
+                                        value={parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0}
+                                        passThreshold={minMax.core.min}
+                                        maxPointsThreshold={minMax.core.max}
+                                        ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                    />
+                                </NeumorphicOutset>
                             </View>
                         );
                     })()}
                 </View>
-                <SegmentedSelector
-                    options={[
-                        { label: "1-min Sit-ups", value: "sit_ups_1min" },
-                        { label: "2-min Cross-Leg Crunch", value: "cross_leg_reverse_crunch_2min" },
-                        { label: "Forearm Plank", value: "forearm_plank_time" },
-                    ]}
-                    selectedValue={coreComponent}
-                    onValueChange={setCoreComponent}
-                />
+                <NeumorphicOutset>
+                    <SegmentedSelector
+                        options={[
+                            { label: "1-min Sit-ups", value: "sit_ups_1min" },
+                            { label: "2-min Cross-Leg Crunch", value: "cross_leg_reverse_crunch_2min" },
+                            { label: "Forearm Plank", value: "forearm_plank_time" },
+                        ]}
+                        selectedValue={coreComponent}
+                        onValueChange={setCoreComponent}
+                    />
+                </NeumorphicOutset>
                 {coreComponent === "sit_ups_1min" && (
                     <NumberInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" />
                 )}

@@ -24,7 +24,7 @@ export const lightColors = {
       highlight: '#FFFFFF',
       shadowOffset: { width: spacing.xs, height: spacing.xs },
       highlightOffset: { width: -spacing.xs, height: -spacing.xs },
-      shadowOpacity: 0.1,
+      shadowOpacity: 0.2,
       highlightOpacity: 0.9,
       shadowRadius: 5,
       elevation: 10,
