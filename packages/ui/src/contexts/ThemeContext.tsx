@@ -5,6 +5,7 @@ import { theme as defaultTheme, lightColors, darkColors } from '../theme';
 export const ThemeContext = createContext({
   theme: defaultTheme,
   themeMode: 'light',
+  isDarkMode: false,
   toggleTheme: () => {},
 });
 
@@ -14,17 +15,17 @@ export const ThemeProvider = ({ children }) => {
   const systemTheme = useColorScheme();
   const [themeMode, setThemeMode] = useState('auto'); // auto, light, dark
 
-  const theme = useMemo(() => {
-    let colors;
-    if (themeMode === 'light') {
-      colors = lightColors;
-    } else if (themeMode === 'dark') {
-      colors = darkColors;
-    } else { // auto
-      colors = systemTheme === 'dark' ? darkColors : lightColors;
+  const isDarkMode = useMemo(() => {
+    if (themeMode === 'auto') {
+      return systemTheme === 'dark';
     }
-    return { ...defaultTheme, colors };
+    return themeMode === 'dark';
   }, [themeMode, systemTheme]);
+
+  const theme = useMemo(() => {
+    const colors = isDarkMode ? darkColors : lightColors;
+    return { ...defaultTheme, colors };
+  }, [isDarkMode]);
 
   const toggleTheme = () => {
     setThemeMode(prevMode => {
@@ -35,7 +36,7 @@ export const ThemeProvider = ({ children }) => {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, themeMode, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, themeMode, isDarkMode, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
