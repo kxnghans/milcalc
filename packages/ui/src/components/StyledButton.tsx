@@ -59,7 +59,7 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
   const backgroundColor = variant === 'primary' ? theme.colors.primary : theme.colors.secondary;
 
   return (
-    <NeumorphicOutset color={backgroundColor} style={style}>
+    <NeumorphicOutset color={backgroundColor} containerStyle={style}>
         <TouchableOpacity
         style={[styles.button, buttonSizeStyle]}
         {...props}

@@ -1,20 +1,31 @@
 import React, { ReactNode } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, ViewStyle } from 'react-native';
 import { useTheme } from "../contexts/ThemeContext";
 
 interface NeumorphicOutsetProps {
   children: ReactNode;
-  style?: any;
+  /**
+   * @deprecated Use containerStyle or contentStyle instead.
+   */
+  style?: ViewStyle;
+  containerStyle?: ViewStyle;
+  contentStyle?: ViewStyle;
   color?: string;
 }
 
-const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({ children, style, color }) => {
+const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
+  children,
+  style,
+  containerStyle,
+  contentStyle,
+  color,
+}) => {
   const { theme } = useTheme();
-  const { padding, alignItems, ...restStyle } = StyleSheet.flatten(style) || {};
 
   const styles = StyleSheet.create({
     container: {
       borderRadius: theme.borderRadius.m,
+      margin: theme.spacing.s,
       ...Platform.select({
         ios: {
           shadowColor: theme.colors.neumorphic.outset.shadow,
@@ -24,7 +35,6 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({ children, style, co
         },
         android: {
           elevation: theme.colors.neumorphic.outset.elevation,
-          backgroundColor: color || theme.colors.background,
         },
       }),
     },
@@ -42,15 +52,14 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({ children, style, co
     content: {
       borderRadius: theme.borderRadius.m,
       backgroundColor: color || theme.colors.background,
-      padding: padding,
-      alignItems: alignItems,
+      overflow: 'hidden',
     },
   });
 
   return (
-    <View style={[styles.container, restStyle]}>
+    <View style={[styles.container, containerStyle]}>
         <View style={styles.highlight}>
-            <View style={styles.content}>
+            <View style={[styles.content, style, contentStyle]}>
                 {children}
             </View>
         </View>

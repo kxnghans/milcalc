@@ -26,7 +26,7 @@ export const lightColors = {
       highlightOffset: { width: -spacing.xs, height: -spacing.xs },
       shadowOpacity: 0.1,
       highlightOpacity: 0.9,
-      shadowRadius: 6,
+      shadowRadius: 5,
       elevation: 10,
     },
     inset: {
@@ -57,7 +57,7 @@ export const darkColors = {
       highlightOffset: { width: -spacing.xs, height: -spacing.xs },
       shadowOpacity: 0.6,
       highlightOpacity: 0.2,
-      shadowRadius: 6,
+      shadowRadius: 5,
       elevation: 10,
     },
     inset: {

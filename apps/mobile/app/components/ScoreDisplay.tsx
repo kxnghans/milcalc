@@ -17,6 +17,8 @@ export default function ScoreDisplay({ score }) {
   const styles = StyleSheet.create({
     scoreContainer: {
         marginBottom: theme.spacing.s,
+    },
+    scoreContent: {
         padding: theme.spacing.m,
         alignItems: "center",
     },
@@ -38,7 +40,7 @@ export default function ScoreDisplay({ score }) {
   });
 
   return (
-    <NeumorphicOutset style={styles.scoreContainer}>
+    <NeumorphicOutset containerStyle={styles.scoreContainer} contentStyle={styles.scoreContent}>
         <Text style={[styles.scoreText, { color: scoreColor }]}>{score.totalScore.toFixed(2)}</Text>
         <View style={styles.scoreBreakdownContainer}>
             <View style={{flexDirection: 'row'}}>

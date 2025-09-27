@@ -25,7 +25,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center', // this will center the items in the row
-      paddingHorizontal: theme.spacing.m, // Keep padding for the inset effect
+      paddingVertical: theme.spacing.s, // Keep padding for the inset effect
     },
     separator: {
       ...theme.typography.body,
@@ -40,32 +40,30 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
         textAlign: 'center',
         ...theme.typography.body,
         color: theme.colors.text,
-        width: 30, // set a fixed width
+        flex: 1,
     }
   });
 
   return (
-    <NeumorphicInset>
-        <View style={styles.container}>
-            <StyledTextInput
-                value={minutes}
-                onChangeText={handleMinutesChange}
-                placeholder="MM"
-                maxLength={2}
-                keyboardType="numeric"
-                style={styles.input}
-            />
-            <Text style={styles.separator}>:</Text>
-            <StyledTextInput
-                ref={secondsInput}
-                value={seconds}
-                onChangeText={setSeconds}
-                placeholder="SS"
-                maxLength={2}
-                keyboardType="numeric"
-                style={styles.input}
-            />
-        </View>
+    <NeumorphicInset style={styles.container}>
+        <StyledTextInput
+            value={minutes}
+            onChangeText={handleMinutesChange}
+            placeholder="Minutes"
+            maxLength={2}
+            keyboardType="numeric"
+            style={styles.input}
+        />
+        <Text style={styles.separator}>:</Text>
+        <StyledTextInput
+            ref={secondsInput}
+            value={seconds}
+            onChangeText={setSeconds}
+            placeholder="Seconds"
+            maxLength={2}
+            keyboardType="numeric"
+            style={styles.input}
+        />
     </NeumorphicInset>
   );
 };

@@ -60,3 +60,23 @@ The project uses `pnpm` as the package manager and `turbo` as the monorepo build
 
 -   **`packages/ui/src/pt-data.json`**: This file contains the scoring data for the PT calculator. It should never be changed.
 -   **`packages/ui/src/data/walk-standards.json`**: This file contains the walk standards for the 2-kilometer walk, separated by gender and age group.
+
+## UI and Styling
+
+### Neumorphic Components
+
+The project uses two main neumorphic components to create its visual style: `NeumorphicInset` and `NeumorphicOutset`.
+
+#### `NeumorphicOutset` Styling
+
+The `NeumorphicOutset` component has been refactored to provide more control over its styling, particularly margins.
+
+-   **`containerStyle`**: Use this prop to apply styles to the outer container of the component. This is where you should apply layout styles like `margin` and `flex`.
+-   **`contentStyle`**: Use this prop to apply styles to the inner content area of the component. This is where you should apply styles like `padding` and `alignItems`.
+-   **`style` (deprecated)**: This prop is deprecated but is maintained for backward compatibility. It applies styles to the content area. Please use `containerStyle` or `contentStyle` for new development.
+
+The default margin for `NeumorphicOutset` is `theme.spacing.s`.
+
+### Theme
+
+The `shadowRadius` for the neumorphic outset effect has been updated to `5` for both the light and dark themes. This change is located in `packages/ui/src/theme.ts`.

@@ -34,7 +34,7 @@ export default function StrengthComponent({
 
     return (
         <View>
-            <View style={styles.separator} />
+            
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
                     <Text style={[styles.cardTitle, {marginRight: theme.spacing.m}]}>Strength</Text>
