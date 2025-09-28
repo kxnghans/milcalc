@@ -51,7 +51,7 @@ export default function PTCalculator() {
   const [plankSeconds, setPlankSeconds] = React.useState("");
 
   // State for calculated scores and UI elements
-  const [score, setScore] = React.useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false });
+  const [score, setScore] = React.useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
   const [minMax, setMinMax] = React.useState({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
   const [cardioMinMax, setCardioMinMax] = React.useState({ min: 0, max: 0 });
   const [isModalVisible, setModalVisible] = React.useState(false);
@@ -148,7 +148,7 @@ export default function PTCalculator() {
         <PdfModal isModalVisible={isModalVisible} setModalVisible={setModalVisible} />
         <View style={{flex: 1}}>
             <View>
-                <ScoreDisplay score={score} containerStyle={{ marginBottom: theme.spacing.s }} />
+                <ScoreDisplay score={score} cardioComponent={cardioComponent} containerStyle={{ marginBottom: theme.spacing.s }} />
                 <IconRow icons={[
                     {
                         name: ICONS.BEST_SCORE,

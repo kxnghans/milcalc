@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import * as Icons from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useTheme } from "../contexts/ThemeContext";
@@ -7,7 +7,8 @@ import NeumorphicOutset from './NeumorphicOutset';
 
 interface IconRowProps {
   icons: {
-    name: string;
+    name?: string;
+    text?: string;
     onPress?: () => void;
     href?: string;
     iconSet?: keyof typeof Icons;
@@ -51,7 +52,8 @@ export const IconRow = ({ icons, style }: IconRowProps) => {
             }}
           >
             <View style={styles.iconBlock}>
-                <Icon name={icon.name} size={25} color={theme.colors.text} />
+                {icon.name && <Icon name={icon.name} size={25} color={theme.colors.text} />}
+                {icon.text && <Text style={{color: theme.colors.text}}>{icon.text}</Text>}
             </View>
           </NeumorphicOutset>
         );

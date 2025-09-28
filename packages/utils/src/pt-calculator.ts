@@ -121,26 +121,28 @@ const getAgeGroupIndex = (age: number) => {
     return -1;
 }
 
-export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number) => {
+export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number): 'pass' | 'fail' | 'n/a' => {
+    const userTimeInSeconds = minutes * 60 + seconds;
+    if (userTimeInSeconds === 0) return 'n/a';
+
     const ageIndex = getAgeGroupIndex(age);
-    if (ageIndex === -1) return false;
+    if (ageIndex === -1) return 'n/a';
 
     const standards = walkStandards[gender];
-    if (!standards) return false;
+    if (!standards) return 'n/a';
     const maxTime = standards[ageIndex].max_time;
     const maxTimeInSeconds = timeToSeconds(maxTime);
-    const userTimeInSeconds = minutes * 60 + seconds;
 
-    return userTimeInSeconds <= maxTimeInSeconds;
+    return userTimeInSeconds <= maxTimeInSeconds ? 'pass' : 'fail';
 };
 
 export const calculatePtScore = (inputs: any) => {
-    if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false };
+    if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
     const ageGroup = getAgeGroup(inputs.age, inputs.gender);
-    if (!ageGroup) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false };
+    if (!ageGroup) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
 
     let cardioScore = 0;
-    let walkPassed = false;
+    let walkPassed: 'pass' | 'fail' | 'n/a' = 'n/a';
 
     if (inputs.cardioComponent === 'walk') {
         walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds);
@@ -163,13 +165,20 @@ export const calculatePtScore = (inputs: any) => {
         coreScore = getPlankScore(ageGroup, { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds });
     }
 
-    const totalScore = cardioScore + pushupScore + coreScore;
+    let totalScore = cardioScore + pushupScore + coreScore;
+    let isPass = false;
 
-    let isPass = totalScore >= 75;
     if (inputs.cardioComponent === 'walk') {
-        isPass = walkPassed;
+        if (walkPassed === 'pass' && pushupScore > 0 && coreScore > 0) {
+            totalScore = ((pushupScore + coreScore) / 40) * 100;
+            isPass = totalScore >= 75;
+        } else {
+            totalScore = pushupScore + coreScore;
+            isPass = false;
+        }
+    } else {
+        isPass = totalScore >= 75 && cardioScore > 0 && pushupScore > 0 && coreScore > 0;
     }
-
 
     return {
         totalScore,
@@ -177,6 +186,7 @@ export const calculatePtScore = (inputs: any) => {
         pushupScore,
         coreScore,
         isPass,
+        walkPassed,
     };
 };
 
@@ -214,6 +224,18 @@ export const getMinMaxValues = (age: number, sex: string, component: string) => 
 export const getCardioMinMaxValues = (age: number, sex: string, component: string) => {
     const ageGroup = getAgeGroup(age, sex);
     if (!ageGroup) return { min: 0, max: 0 };
+
+    if (component === 'walk') {
+        const ageIndex = getAgeGroupIndex(age);
+        if (ageIndex === -1) return { min: 0, max: 0 };
+
+        const standards = walkStandards[sex];
+        if (!standards) return { min: 0, max: 0 };
+
+        const maxTime = standards[ageIndex].max_time;
+        const maxTimeInSeconds = timeToSeconds(maxTime);
+        return { min: maxTimeInSeconds, max: 0 }; // Using min to hold the passThreshold
+    }
 
     const brackets = ageGroup.cardiorespiratory.run_time_brackets;
     if (!brackets || brackets.length === 0) return { min: 0, max: 0 };

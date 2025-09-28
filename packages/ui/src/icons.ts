@@ -6,6 +6,8 @@ export const ICONS = {
   THEME_AUTO: 'brightness-auto',
   GENDER_MALE: 'male',
   GENDER_FEMALE: 'female',
+  HOME: 'home-outline',
+  HELP: 'help-circle-outline',
 };
 
 export const ICON_SETS = {

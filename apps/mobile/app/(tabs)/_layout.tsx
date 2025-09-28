@@ -50,6 +50,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="clock-check-outline" size={28} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="best-score"
+        options={{
+          headerTitle: 'Best PT Score Calculator',
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

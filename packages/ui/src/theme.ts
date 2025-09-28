@@ -19,6 +19,7 @@ export const lightColors = {
   inputBackground: 'rgba(0, 0, 0, 0.04)',
   ninetyPlus: 'rgba(0, 122, 255, 1)',
   placeholder: 'rgba(143, 157, 178, 1)',
+  disabled: 'rgba(60, 60, 67, 0.25)',
   primaryText: 'rgba(255, 255, 255, 1)',
   neumorphic: {
     outset: {
@@ -52,6 +53,7 @@ export const darkColors = {
   inputBackground: 'rgba(0, 0, 0, 0.085)',
   ninetyPlus: 'rgba(0, 122, 255, 1)',
   placeholder: 'rgba(142, 142, 147, 1)',
+  disabled: 'rgba(235, 235, 245, 0.5)',
   primaryText: 'rgba(255, 255, 255, 1)',
   neumorphic: {
     outset: {

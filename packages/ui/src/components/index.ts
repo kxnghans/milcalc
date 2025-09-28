@@ -7,3 +7,4 @@ export * from './SegmentedSelector';
 export * from './StyledButton';
 export * from './StyledPicker';
 export * from './StyledTextInput';
+export * from './Icon';
