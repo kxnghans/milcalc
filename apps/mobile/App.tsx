@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, SafeAreaView, ScrollView } from "react-native";
+import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "@repo/ui/src/card";
 import { SegmentedSelector } from "@repo/ui/src/SegmentedSelector";
 import { StyledTextInput } from "@repo/ui/src/StyledTextInput";

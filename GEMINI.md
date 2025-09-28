@@ -14,6 +14,8 @@ MilCalc is a monorepo application built with pnpm workspaces. It includes:
 
 The project combines features for military personnel, such as an Air Force PT Calculator, and a travel planning tool. The mobile app features a dynamic theme system with light, dark, and automatic modes. It also includes progress bars for all physical training components to provide users with immediate feedback on their performance. A new "Best Score" page has been added to help users track their personal bests. The main screen now includes icons for navigating to the "Best Score" page, linking to official PT documents, and switching the theme.
 
+The Best Score page displays the user's best score for each exercise. It features a main score display, a navigation row with a home button, and a card containing sections for Strength, Core, and Cardio. Each section has a segmented selector for different exercises, input fields for the best scores, and a display for the score of each exercise.
+
 ## Building and Running
 
 The project uses `pnpm` as the package manager and `turbo` as the monorepo build tool.
@@ -84,3 +86,16 @@ The default margin for `NeumorphicOutset` is `theme.spacing.s`.
 ### Theme
 
 The `shadowRadius` for the neumorphic outset effect has been updated to `5` for both the light and dark themes. This change is located in `packages/ui/src/theme.ts`.
+
+## Component Library (`packages/ui`)
+
+### New Components
+
+- **`Icon`**: A new `Icon` component has been created in `packages/ui/src/components/Icon.tsx`. It acts as a wrapper around `@expo/vector-icons` to provide a consistent way to use icons throughout the application.
+
+### Component Updates
+
+- **`IconRow`**: This component has been updated to be more flexible. It can now display text in addition to icons, making it reusable for displaying scores.
+- **`ProgressBar`**: The `ProgressBar` component now supports a `isPassFail` mode, which is used for the walk component of the PT test. It also has a `withNeumorphic` prop to conditionally apply the neumorphic effect.
+- **`ScoreDisplay`**: The `ScoreDisplay` component now has a `showBreakdown` prop to conditionally render the score breakdown section. It also handles the display of "Pass", "Fail", or "N/A" for the walk component.
+- **`NumberInput` and `TimeInput`**: These components now have a `withNeumorphic` prop to conditionally apply the `NeumorphicInset` effect. This allows them to be used in different contexts, such as on the Best Score page.

@@ -4,12 +4,13 @@ import { useTheme } from "../contexts/ThemeContext";
 import NeumorphicOutset from './NeumorphicOutset';
 
 interface ProgressBarProps {
-  value: number; // The user's current value
-  passThreshold: number; // The boundary between fail and pass
-  maxPointsThreshold: number; // The value for a perfect score
-  ninetyPercentileThreshold: number; // The value for the 90th percentile score
-  invertScale?: boolean; // True for scales where lower is better (e.g., run time)
+  value: number;
+  passThreshold: number;
+  maxPointsThreshold?: number;
+  ninetyPercentileThreshold?: number;
+  invertScale?: boolean;
   valueIsTime?: boolean;
+  isPassFail?: boolean;
 }
 
 export const ProgressBar = ({
@@ -18,7 +19,8 @@ export const ProgressBar = ({
   maxPointsThreshold,
   ninetyPercentileThreshold,
   invertScale = false,
-  valueIsTime = false
+  valueIsTime = false,
+  isPassFail = false,
 }: ProgressBarProps) => {
   const { theme, isDarkMode } = useTheme();
 
@@ -31,35 +33,42 @@ export const ProgressBar = ({
 
   const calculateProgressAndColor = () => {
     let progress = 0;
-    let color = theme.colors.error; // Default to red/error
+    let color = theme.colors.error;
 
-    if (invertScale) {
-      // Lower is better (e.g., Run), but progress bar fills left-to-right with time
-      if (value <= passThreshold) { // Pass
-        color = value <= ninetyPercentileThreshold ? theme.colors.ninetyPlus : theme.colors.success;
+    if (isPassFail) {
+      let passed = invertScale ? value > 0 && value <= passThreshold : value >= passThreshold;
+      if (passed) {
+        color = theme.colors.success;
       }
-      // Progress is direct: value against passThreshold (which is the max time)
       if (passThreshold > 0) {
         progress = value / passThreshold;
       }
     } else {
-      // Higher is better (e.g., Reps, Plank)
-      if (value >= passThreshold) { // Pass
-        color = value >= ninetyPercentileThreshold ? theme.colors.ninetyPlus : theme.colors.success;
-      }
-      if (maxPointsThreshold > 0) {
-        progress = value / maxPointsThreshold;
+      if (invertScale) {
+        if (value <= passThreshold) {
+          color = value <= ninetyPercentileThreshold! ? theme.colors.ninetyPlus : theme.colors.success;
+        }
+        if (passThreshold > 0) {
+          progress = value / passThreshold;
+        }
+      } else {
+        if (value >= passThreshold) {
+          color = value >= ninetyPercentileThreshold! ? theme.colors.ninetyPlus : theme.colors.success;
+        }
+        if (maxPointsThreshold && maxPointsThreshold > 0) {
+          progress = value / maxPointsThreshold;
+        }
       }
     }
 
-    return { progress: Math.max(0, Math.min(1, progress)), color }; // Cap progress at 1
+    return { progress: Math.max(0, progress), color };
   };
 
   const { progress, color } = calculateProgressAndColor();
 
   const styles = StyleSheet.create({
     bar: {
-      height: 15, // Increased height to accommodate markers within
+      height: 15,
       backgroundColor: theme.colors.secondary,
       borderRadius: theme.borderRadius.m,
       position: 'relative',
@@ -72,7 +81,7 @@ export const ProgressBar = ({
       position: 'absolute',
       width: '100%',
       height: '100%',
-      top: 0, // Position markers at the top of the bar
+      top: 0,
       flexDirection: 'row',
       alignItems: 'center',
     },
@@ -96,8 +105,7 @@ export const ProgressBar = ({
     },
   });
 
-  // Allow the bar to extend beyond 100% but cap it visually for sanity
-  const visualProgress = Math.min(progress, 1.5);
+  const visualProgress = Math.min(progress, 1);
 
   const renderProgressBar = () => (
     <NeumorphicOutset
@@ -120,10 +128,25 @@ export const ProgressBar = ({
     </NeumorphicOutset>
   );
 
+  if (isPassFail) {
+    const passMarkerStyle = [
+        styles.markerLabel,
+        !isDarkMode && visualProgress * 100 >= 100 && styles.whiteMarkerLabel
+    ];
+    return (
+        <View style={styles.bar}>
+            {renderProgressBar()}
+            <View style={styles.markersContainer}>
+                <View style={[styles.marker, { right: '0%' }]}>
+                    <Text style={passMarkerStyle}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>
+                </View>
+            </View>
+        </View>
+    );
+  }
+
   if (invertScale) {
-    // Inverted scale: bar from 0 to passThreshold (slowest time)
-    // maxPointsThreshold is a point on that bar
-    const maxPointsMarkerPosition = passThreshold > 0 ? (maxPointsThreshold / passThreshold) * 100 : 0;
+    const maxPointsMarkerPosition = passThreshold > 0 ? (maxPointsThreshold! / passThreshold) * 100 : 0;
     const maxMarkerStyle = [
         styles.markerLabel,
         !isDarkMode && visualProgress * 100 >= maxPointsMarkerPosition && styles.whiteMarkerLabel
@@ -138,7 +161,7 @@ export const ProgressBar = ({
         {renderProgressBar()}
         <View style={styles.markersContainer}>
             <View style={[styles.marker, { left: `${maxPointsMarkerPosition}%` }]}>
-              <Text style={maxMarkerStyle}>{valueIsTime ? formatTime(maxPointsThreshold) : maxPointsThreshold}</Text>
+              <Text style={maxMarkerStyle}>{valueIsTime ? formatTime(maxPointsThreshold!) : maxPointsThreshold}</Text>
             </View>
             <View style={[styles.marker, { right: '0%' }]}>
               <Text style={passMarkerStyle}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>
@@ -148,9 +171,8 @@ export const ProgressBar = ({
     );
   }
 
-  // Original logic for non-inverted scale
   let passMarkerPosition = 0;
-  if (maxPointsThreshold > 0) {
+  if (maxPointsThreshold && maxPointsThreshold > 0) {
     passMarkerPosition = (passThreshold / maxPointsThreshold) * 100;
   }
 
@@ -172,7 +194,7 @@ export const ProgressBar = ({
             <Text style={passMarkerStyle}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>
           </View>
           <View style={[styles.marker, { right: '0%' }]}>
-            <Text style={maxMarkerStyle}>{valueIsTime ? formatTime(maxPointsThreshold) : maxPointsThreshold}</Text>
+            <Text style={maxMarkerStyle}>{valueIsTime ? formatTime(maxPointsThreshold!) : maxPointsThreshold}</Text>
           </View>
       </View>
     </View>

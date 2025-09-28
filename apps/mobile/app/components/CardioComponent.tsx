@@ -56,8 +56,8 @@ export default function CardioComponent({
                         <View style={styles.componentHeader}>
                             <Text style={[styles.cardTitle, { marginRight: theme.spacing.m, marginVertical: theme.spacing.s }]}>Cardio</Text>
                             {showProgressBars && (() => {
-                                if (cardioComponent === 'run' || cardioComponent === 'walk') {
-                                    const timeInSeconds = (cardioComponent === 'run' ? (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0) : (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0));
+                                if (cardioComponent === 'run') {
+                                    const timeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
                                     const ninetyPercentileThreshold = cardioMinMax.max + (cardioMinMax.min - cardioMinMax.max) * 0.1;
                                     return (
                                         <View style={{ flex: 1 }}>
@@ -69,6 +69,21 @@ export default function CardioComponent({
                                                     maxPointsThreshold={cardioMinMax.max}
                                                     ninetyPercentileThreshold={ninetyPercentileThreshold}
                                                     valueIsTime={true}
+                                                />
+                                            </NeumorphicOutset>
+                                        </View>
+                                    );
+                                } else if (cardioComponent === 'walk') {
+                                    const timeInSeconds = (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0);
+                                    return (
+                                        <View style={{ flex: 1 }}>
+                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} highlightOpacity={isDarkMode ? 0.4 : undefined}>
+                                                <ProgressBar
+                                                    invertScale={true}
+                                                    value={timeInSeconds}
+                                                    passThreshold={cardioMinMax.min} // This will be the max time for passing
+                                                    valueIsTime={true}
+                                                    isPassFail={true}
                                                 />
                                             </NeumorphicOutset>
                                         </View>
