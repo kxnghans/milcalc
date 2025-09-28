@@ -12,9 +12,10 @@ interface StyledButtonProps extends TouchableOpacityProps {
   icon?: string;
   iconSet?: keyof typeof Icons;
   iconSize?: number;
+  highlightOpacity?: number;
 }
 
-export const StyledButton = ({ title, variant = 'primary', size = 'medium', style, icon, iconSet = 'MaterialCommunityIcons', iconSize, ...props }: StyledButtonProps) => {
+export const StyledButton = ({ title, variant = 'primary', size = 'medium', style, icon, iconSet = 'MaterialCommunityIcons', iconSize, highlightOpacity, ...props }: StyledButtonProps) => {
   const { theme } = useTheme();
   const Icon = Icons[iconSet];
 
@@ -65,6 +66,7 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
         borderRadius: theme.borderRadius.m,
         overflow: 'hidden',
       }}
+      highlightOpacity={highlightOpacity}
     >
         <TouchableOpacity
         style={[styles.button, buttonSizeStyle]}

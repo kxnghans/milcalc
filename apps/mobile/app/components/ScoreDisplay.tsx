@@ -34,11 +34,16 @@ export default function ScoreDisplay({ score }) {
     scoreText: {
         ...theme.typography.header,
         marginBottom: theme.spacing.s,
+        textShadowColor: theme.colors.neumorphic.outset.shadow,
+        textShadowRadius: 0.5,
+        textShadowOffset: { width: 0, height: 0 },
     },
     scoreBreakdownText: {
         ...theme.typography.subtitle,
         color: theme.colors.text,
-        
+        textShadowColor: theme.colors.neumorphic.outset.shadow,
+        textShadowRadius: 0.2,
+        textShadowOffset: { width: 0, height: 0 },
     },
   });
 

@@ -15,9 +15,10 @@ export const lightColors = {
   border: 'rgba(199, 199, 204, 1)',
   error: 'rgba(255, 59, 48, 1)',
   success: 'rgba(52, 199, 89, 1)',
-  inputBackground: 'rgba(209, 217, 227, 0.6)',
+  darkenColor: 'rgba(0, 0, 0, 0.1)',
+  inputBackground: 'rgba(0, 0, 0, 0.04)',
   ninetyPlus: 'rgba(0, 122, 255, 1)',
-  placeholder: 'rgba(163, 177, 198, 1)',
+  placeholder: 'rgba(143, 157, 178, 1)',
   primaryText: 'rgba(255, 255, 255, 1)',
   neumorphic: {
     outset: {
@@ -27,7 +28,7 @@ export const lightColors = {
       highlightOffset: { width: -spacing.xs, height: -spacing.xs },
       shadowOpacity: 0.2,
       highlightOpacity: 0.9,
-      shadowRadius: 5,
+      shadowRadius: 3.5,
       elevation: 10,
     },
     inset: {
@@ -47,19 +48,20 @@ export const darkColors = {
   border: 'rgba(44, 44, 46, 1)',
   error: 'rgba(255, 59, 48, 1)',
   success: 'rgba(52, 199, 89, 1)',
-  inputBackground: 'rgba(36, 36, 38, 0.45)',
+  darkenColor: 'rgba(0, 0, 0, 0.15)',
+  inputBackground: 'rgba(0, 0, 0, 0.085)',
   ninetyPlus: 'rgba(0, 122, 255, 1)',
   placeholder: 'rgba(142, 142, 147, 1)',
   primaryText: 'rgba(255, 255, 255, 1)',
   neumorphic: {
     outset: {
-      shadow: 'rgba(0, 0, 0, 1)',
-      highlight: 'rgba(255, 255, 255, 1)',
+      shadow: 'rgba(0, 0, 0, 0.77)',
+      highlight: 'rgba(255, 255, 255, 0.43)',
       shadowOffset: { width: spacing.xs, height: spacing.xs },
       highlightOffset: { width: -spacing.xs, height: -spacing.xs },
       shadowOpacity: 0.6,
       highlightOpacity: 0.2,
-      shadowRadius: 5,
+      shadowRadius: 3,
       elevation: 10,
     },
     inset: {

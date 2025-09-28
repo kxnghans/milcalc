@@ -18,7 +18,7 @@ export default function CoreComponent({
     plankSeconds,
     setPlankSeconds,
 }) {
-    const { theme } = useTheme();
+    const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
         cardTitle: {
             ...theme.typography.title,
@@ -54,7 +54,7 @@ export default function CoreComponent({
                             const plankTimeInSeconds = (parseInt(plankMinutes) || 0) * 60 + (parseInt(plankSeconds) || 0);
                             return (
                                 <View style={{ flex: 1 }}>
-                                    <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                                    <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} highlightOpacity={isDarkMode ? 0.4 : undefined}>
                                         <ProgressBar
                                             value={plankTimeInSeconds}
                                             passThreshold={minMax.core.min}
@@ -68,7 +68,7 @@ export default function CoreComponent({
                         }
                         return (
                             <View style={{ flex: 1 }}>
-                                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} highlightOpacity={isDarkMode ? 0.4 : undefined}>
                                     <ProgressBar
                                         value={parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0}
                                         passThreshold={minMax.core.min}

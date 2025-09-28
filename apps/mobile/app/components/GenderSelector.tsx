@@ -4,7 +4,7 @@ import { StyledButton, useTheme } from '@repo/ui';
 import { ICONS, ICON_SETS } from '@repo/ui/icons';
 
 export default function GenderSelector({ gender, setGender }) {
-    const { theme } = useTheme();
+    const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
         genderSelectorContainer: {
             flexDirection: "row",
@@ -23,6 +23,7 @@ export default function GenderSelector({ gender, setGender }) {
                 style={{ flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
                 iconSet={ICON_SETS.FONTISTO}
                 icon={ICONS.GENDER_MALE}
+                highlightOpacity={isDarkMode ? 0.33 : undefined}
             />
             <StyledButton
                 title="Female"
@@ -32,6 +33,7 @@ export default function GenderSelector({ gender, setGender }) {
                 style={{ flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                 iconSet={ICON_SETS.FONTISTO}
                 icon={ICONS.GENDER_FEMALE}
+                highlightOpacity={isDarkMode ? 0.33 : undefined}
             />
         </View>
     );

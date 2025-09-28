@@ -9,7 +9,7 @@ export default function Divider() {
       height: 5,
       marginTop: theme.spacing.m,
       marginBottom: theme.spacing.s,
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.darkenColor,
       borderRadius: theme.borderRadius.m,
       borderTopWidth: theme.colors.neumorphic.inset.borderWidth,
       borderLeftWidth: theme.colors.neumorphic.inset.borderWidth,

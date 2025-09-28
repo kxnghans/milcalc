@@ -11,7 +11,7 @@ export default function StrengthComponent({
     pushupComponent,
     setPushupComponent,
 }) {
-    const { theme } = useTheme();
+    const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
         cardTitle: {
             ...theme.typography.title,
@@ -43,7 +43,7 @@ export default function StrengthComponent({
                     <Text style={[styles.cardTitle, {marginRight: theme.spacing.m, marginVertical: theme.spacing.s}]}>Strength</Text>
                     {showProgressBars && (
                         <View style={{ flex: 1 }}>
-                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} highlightOpacity={isDarkMode ? 0.4 : undefined}>
                                 <ProgressBar
                                     value={parseInt(pushups) || 0}
                                     passThreshold={minMax.pushups.min}

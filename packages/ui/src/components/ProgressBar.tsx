@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from "../contexts/ThemeContext";
+import NeumorphicOutset from './NeumorphicOutset';
 
 interface ProgressBarProps {
   value: number; // The user's current value
@@ -11,15 +12,15 @@ interface ProgressBarProps {
   valueIsTime?: boolean;
 }
 
-export const ProgressBar = ({ 
+export const ProgressBar = ({
   value,
   passThreshold,
   maxPointsThreshold,
   ninetyPercentileThreshold,
-  invertScale = false, 
+  invertScale = false,
   valueIsTime = false
 }: ProgressBarProps) => {
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
 
   const formatTime = (totalSeconds: number) => {
     if (totalSeconds === null || isNaN(totalSeconds) || totalSeconds < 0) return '--:--';
@@ -61,19 +62,11 @@ export const ProgressBar = ({
       height: 15, // Increased height to accommodate markers within
       backgroundColor: theme.colors.secondary,
       borderRadius: theme.borderRadius.m,
-      overflow: 'hidden',
       position: 'relative',
     },
     progress: {
       height: '100%',
-      position: 'absolute',
-      left: 0,
-      top: 0,
       borderRadius: theme.borderRadius.m,
-      shadowColor: theme.colors.neumorphic.outset.shadow,
-      shadowOffset: theme.colors.neumorphic.outset.shadowOffset,
-      shadowOpacity: theme.colors.neumorphic.outset.shadowOpacity,
-      shadowRadius: theme.colors.neumorphic.outset.shadowRadius,
     },
     markersContainer: {
       position: 'absolute',
@@ -92,27 +85,63 @@ export const ProgressBar = ({
       ...theme.typography.caption,
       color: theme.colors.text,
       textShadowColor: theme.colors.background,
-      textShadowRadius: 2,
+      textShadowRadius: 3,
       textShadowOffset: { width: 0, height: 0 },
+    },
+    whiteMarkerLabel: {
+        color: 'white',
+        textShadowColor: 'rgba(0,0,0,0.3)',
+        textShadowRadius: 2,
+        textShadowOffset: { width: 0, height: 1 },
     },
   });
 
   // Allow the bar to extend beyond 100% but cap it visually for sanity
   const visualProgress = Math.min(progress, 1.5);
 
+  const renderProgressBar = () => (
+    <NeumorphicOutset
+      containerStyle={{
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        height: '100%',
+        width: `${visualProgress * 100}%`,
+      }}
+      contentStyle={{
+        borderRadius: theme.borderRadius.m,
+        overflow: 'hidden',
+      }}
+      highlightOpacity={isDarkMode ? 0.5 : 1}
+      shadowOpacity={isDarkMode ? 0.1 : 0.35}
+      shadowRadius={theme.spacing.xs / 1.5}
+    >
+      <View style={[styles.progress, { backgroundColor: color }]} />
+    </NeumorphicOutset>
+  );
+
   if (invertScale) {
     // Inverted scale: bar from 0 to passThreshold (slowest time)
     // maxPointsThreshold is a point on that bar
     const maxPointsMarkerPosition = passThreshold > 0 ? (maxPointsThreshold / passThreshold) * 100 : 0;
+    const maxMarkerStyle = [
+        styles.markerLabel,
+        !isDarkMode && visualProgress * 100 >= maxPointsMarkerPosition && styles.whiteMarkerLabel
+    ];
+    const passMarkerStyle = [
+        styles.markerLabel,
+        !isDarkMode && visualProgress * 100 >= 100 && styles.whiteMarkerLabel
+    ];
+
     return (
       <View style={styles.bar}>
-        <View style={[styles.progress, { width: `${visualProgress * 100}%`, backgroundColor: color }]} />
+        {renderProgressBar()}
         <View style={styles.markersContainer}>
             <View style={[styles.marker, { left: `${maxPointsMarkerPosition}%` }]}>
-              <Text style={styles.markerLabel}>{valueIsTime ? formatTime(maxPointsThreshold) : maxPointsThreshold}</Text>
+              <Text style={maxMarkerStyle}>{valueIsTime ? formatTime(maxPointsThreshold) : maxPointsThreshold}</Text>
             </View>
             <View style={[styles.marker, { right: '0%' }]}>
-              <Text style={styles.markerLabel}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>
+              <Text style={passMarkerStyle}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>
             </View>
         </View>
       </View>
@@ -125,15 +154,25 @@ export const ProgressBar = ({
     passMarkerPosition = (passThreshold / maxPointsThreshold) * 100;
   }
 
+  const passMarkerStyle = [
+    styles.markerLabel,
+    !isDarkMode && visualProgress * 100 >= passMarkerPosition && styles.whiteMarkerLabel
+  ];
+
+  const maxMarkerStyle = [
+    styles.markerLabel,
+    !isDarkMode && visualProgress * 100 >= 100 && styles.whiteMarkerLabel
+  ];
+
   return (
     <View style={styles.bar}>
-      <View style={[styles.progress, { width: `${visualProgress * 100}%`, backgroundColor: color }]} />
+      {renderProgressBar()}
       <View style={styles.markersContainer}>
           <View style={[styles.marker, { left: `${passMarkerPosition}%` }]}>
-            <Text style={styles.markerLabel}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>
+            <Text style={passMarkerStyle}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>
           </View>
           <View style={[styles.marker, { right: '0%' }]}>
-            <Text style={styles.markerLabel}>{valueIsTime ? formatTime(maxPointsThreshold) : maxPointsThreshold}</Text>
+            <Text style={maxMarkerStyle}>{valueIsTime ? formatTime(maxPointsThreshold) : maxPointsThreshold}</Text>
           </View>
       </View>
     </View>

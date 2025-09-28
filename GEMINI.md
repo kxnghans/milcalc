@@ -56,6 +56,10 @@ The project uses `pnpm` as the package manager and `turbo` as the monorepo build
 -   **Version Control:** Ensure that any necessary files are added to the `.gitignore` file to avoid committing unnecessary files.
 -   **Pnpm Overrides:** When installing new dependencies, always check the `pnpm.overrides` in the root `package.json` to avoid version conflicts.
 
+### Component Design Principles
+
+-   **Separation of Concerns:** Components should be self-contained and not impose layout styles on their children. Physical properties like `flex`, `margin`, and `height` should be specified by the parent component through style props (e.g., `containerStyle`, `contentStyle`). This makes components more reusable and predictable.
+
 ## Data Sources
 
 -   **`packages/ui/src/pt-data.json`**: This file contains the scoring data for the PT calculator. It should never be changed.

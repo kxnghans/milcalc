@@ -22,7 +22,7 @@ export const IconRow = ({ icons, style }: IconRowProps) => {
     iconContainer: {
       flexDirection: 'row',
       justifyContent: 'space-evenly',
-      gap: theme.spacing.m,
+      gap: theme.spacing.xs,
     },
     iconBlock: {
       padding: theme.spacing.s + 2,
