@@ -18,6 +18,7 @@ import StrengthComponent from "../components/StrengthComponent";
 import CoreComponent from "../components/CoreComponent";
 import CardioComponent from "../components/CardioComponent";
 import NumberInput from "../components/NumberInput";
+import Demographics from "../components/Demographics";
 import Divider from "../components/Divider";
 
 /**
@@ -171,28 +172,8 @@ export default function PTCalculator() {
                 <View style={{ flex: 1 }}>
                     <Card style={{ flex: 1 }}>
                         <ScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
-                            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                <View style={{width: 96, marginRight: theme.spacing.m}}>
-                                    <Text style={[styles.cardTitle]}>Age</Text>
-                                </View>
-                                <View style={{flex: 1}}>
-                                    <Text style={[styles.cardTitle, {textAlign: 'center'}]}>Gender</Text>
-                                </View>
-                            </View>
-                            <View style={styles.inlineInputContainer}>
-                                <View style={{width: 96, marginRight: theme.spacing.m}}>
-                                    <NumberInput 
-                                        value={age} 
-                                        onChangeText={setAge} 
-                                        placeholder="" 
-                                        inputStyle={{paddingVertical: theme.spacing.s + 4}}
-                                    />
-                                </View>
-                                <View style={{flex: 1}}>
-                                    <GenderSelector gender={gender} setGender={setGender} />
-                                </View>
-                            </View>
-                            <Divider />
+                            <Demographics age={age} setAge={setAge} gender={gender} setGender={setGender} />
+                            <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <StrengthComponent 
                                 showProgressBars={showProgressBars}
                                 minMax={minMax}
@@ -203,7 +184,7 @@ export default function PTCalculator() {
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
                             />
-                            <Divider />
+                            <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <CoreComponent
                                 showProgressBars={showProgressBars}
                                 minMax={minMax}
@@ -220,7 +201,7 @@ export default function PTCalculator() {
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
                             />
-                            <Divider />
+                            <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <CardioComponent
                                 showProgressBars={showProgressBars}
                                 cardioComponent={cardioComponent}

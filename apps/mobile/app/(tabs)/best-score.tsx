@@ -5,6 +5,7 @@ import { ICONS } from '@repo/ui/icons';
 import ScoreDisplay from '../components/ScoreDisplay';
 import NumberInput from '../components/NumberInput';
 import TimeInput from '../components/TimeInput';
+import Demographics from '../components/Demographics';
 import Divider from '../components/Divider';
 
 
@@ -13,7 +14,6 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
 
   const styles = StyleSheet.create({
     sectionContainer: {
-      marginBottom: theme.spacing.m,
     },
     sectionHeader: {
       flexDirection: 'row',
@@ -75,6 +75,9 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
 export default function BestScoreScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
   const score = { totalScore: 100, isPass: true }; // Dummy score
+
+  const [age, setAge] = React.useState("");
+  const [gender, setGender] = React.useState("male");
 
   const getThemeIcon = () => {
     if (themeMode === 'light') return ICONS.THEME_LIGHT;
@@ -140,20 +143,22 @@ export default function BestScoreScreen() {
         />
         <Card style={styles.card}>
             <ScrollView>
+                <Demographics age={age} setAge={setAge} gender={gender} setGender={setGender} />
+                <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <BestScoreSection 
                     title="Strength" 
                     exercises={strengthExercises} 
                     scores={strengthScores} 
                     bestValues={strengthBestValues} 
                 />
-                <Divider />
+                <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <BestScoreSection 
                     title="Core" 
                     exercises={coreExercises} 
                     scores={coreScores} 
                     bestValues={coreBestValues} 
                 />
-                <Divider />
+                <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <BestScoreSection 
                     title="Cardio" 
                     exercises={cardioExercises} 
