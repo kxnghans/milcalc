@@ -10,6 +10,16 @@ interface NeumorphicOutsetProps {
   style?: ViewStyle;
   containerStyle?: ViewStyle;
   contentStyle?: ViewStyle;
+  highlightStyle?: ViewStyle;
+  shadowColor?: string;
+  shadowOffset?: { width: number; height: number };
+  shadowOpacity?: number;
+  shadowRadius?: number;
+  elevation?: number;
+  highlightColor?: string;
+  highlightOffset?: { width: number; height: number };
+  highlightOpacity?: number;
+  highlightRadius?: number;
 }
 
 const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
@@ -17,6 +27,16 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
   style,
   containerStyle,
   contentStyle,
+  highlightStyle,
+  shadowColor,
+  shadowOffset,
+  shadowOpacity,
+  shadowRadius,
+  elevation,
+  highlightColor,
+  highlightOffset,
+  highlightOpacity,
+  highlightRadius,
 }) => {
   const { theme } = useTheme();
 
@@ -24,23 +44,23 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
     container: {
       ...Platform.select({
         ios: {
-          shadowColor: theme.colors.neumorphic.outset.shadow,
-          shadowOffset: theme.colors.neumorphic.outset.shadowOffset,
-          shadowOpacity: theme.colors.neumorphic.outset.shadowOpacity,
-          shadowRadius: theme.colors.neumorphic.outset.shadowRadius,
+          shadowColor: shadowColor || theme.colors.neumorphic.outset.shadow,
+          shadowOffset: shadowOffset || theme.colors.neumorphic.outset.shadowOffset,
+          shadowOpacity: shadowOpacity || theme.colors.neumorphic.outset.shadowOpacity,
+          shadowRadius: shadowRadius || theme.colors.neumorphic.outset.shadowRadius,
         },
         android: {
-          elevation: theme.colors.neumorphic.outset.elevation,
+          elevation: elevation || theme.colors.neumorphic.outset.elevation,
         },
       }),
     },
     highlight: {
         ...Platform.select({
             ios: {
-                shadowColor: theme.colors.neumorphic.outset.highlight,
-                shadowOffset: theme.colors.neumorphic.outset.highlightOffset,
-                shadowOpacity: theme.colors.neumorphic.outset.highlightOpacity,
-                shadowRadius: theme.colors.neumorphic.outset.shadowRadius,
+                shadowColor: highlightColor || theme.colors.neumorphic.outset.highlight,
+                shadowOffset: highlightOffset || theme.colors.neumorphic.outset.highlightOffset,
+                shadowOpacity: highlightOpacity || theme.colors.neumorphic.outset.highlightOpacity,
+                shadowRadius: highlightRadius || shadowRadius || theme.colors.neumorphic.outset.shadowRadius,
             },
         }),
     },
@@ -50,7 +70,7 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-        <View style={styles.highlight}>
+        <View style={[styles.highlight, highlightStyle]}>
             <View style={[styles.content, style, contentStyle]}>
                 {children}
             </View>

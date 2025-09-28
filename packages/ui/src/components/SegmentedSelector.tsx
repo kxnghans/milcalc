@@ -12,26 +12,22 @@ interface SegmentedSelectorProps {
 }
 
 export const SegmentedSelector = ({ options, selectedValue, onValueChange, style, onLayout }: SegmentedSelectorProps) => {
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
 
   const styles = StyleSheet.create({
     container: {
       flexDirection: 'row',
-      backgroundColor: theme.colors.secondary,
       borderRadius: theme.borderRadius.m,
-      overflow: 'hidden',
     },
     segment: {
       flex: 1,
-      paddingVertical: theme.spacing.s,
-      paddingHorizontal: theme.spacing.s,
+      padding: theme.spacing.s,
       justifyContent: 'center',
       alignItems: 'center',
     },
     selectedSegment: {
-      // backgroundColor: theme.colors.primary,
-      // borderRadius: theme.borderRadius.m,
-      // margin: theme.spacing.xs,
+      paddingVertical: theme.spacing.s,
+      paddingHorizontal: theme.spacing.xs,
     },
     text: {
       ...theme.typography.body,
@@ -45,46 +41,50 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
   });
 
   return (
-    <View style={[styles.container, style]} onLayout={onLayout}>
-      {options.map((option) => {
-        if (option.value === selectedValue) {
-          return (
-            <NeumorphicOutset
-              key={option.value}
-              containerStyle={{ flex: 1, borderRadius: theme.borderRadius.m }}
-              contentStyle={{ backgroundColor: theme.colors.primary, borderRadius: theme.borderRadius.m, overflow: 'hidden' }}
-            >
-              <TouchableOpacity
-                style={[
-                  styles.segment,
-                  styles.selectedSegment,
-                ]}
-                onPress={() => onValueChange(option.value)}
+    <NeumorphicOutset
+      containerStyle={style}
+      contentStyle={{ backgroundColor: theme.colors.secondary, borderRadius: theme.borderRadius.m, overflow: 'hidden' }}
+      highlightOpacity={isDarkMode ? 0.15 : 1}
+      shadowOpacity={isDarkMode ? 0.15 : 0.2}
+    >
+      <View style={styles.container} onLayout={onLayout}>
+        {options.map((option) => {
+          if (option.value === selectedValue) {
+            return (
+              <NeumorphicOutset
+                key={option.value}
+                containerStyle={{ flex: 1, borderRadius: theme.borderRadius.m, margin: theme.spacing.xs, alignSelf: 'stretch' }}
+                contentStyle={{ backgroundColor: theme.colors.primary, borderRadius: theme.borderRadius.m, overflow: 'hidden', flex: 1 }}
+                highlightStyle={{ flex: 1 }}
+                highlightOpacity={isDarkMode ? 0.47 : 1} // Using same opacity for now
+                shadowOpacity={isDarkMode ? 0.6 : 0.45} // Using same opacity for now
+                shadowOffset={{ width: theme.spacing.xs, height: theme.spacing.xs / 3 }} // Smaller offset
+                highlightOffset={{ width: -theme.spacing.xs, height: -theme.spacing.xs / 3 }} // Smaller offset
               >
-                <Text
-                  style={[
-                    styles.text,
-                    styles.selectedText,
-                  ]}
+                <TouchableOpacity
+                  style={[styles.segment, styles.selectedSegment]}
+                  onPress={() => onValueChange(option.value)}
                 >
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            </NeumorphicOutset>
+                  <Text style={[styles.text, styles.selectedText]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              </NeumorphicOutset>
+            )
+          }
+          return (
+            <TouchableOpacity
+              key={option.value}
+              style={styles.segment}
+              onPress={() => onValueChange(option.value)}
+            >
+              <Text style={styles.text}>
+                {option.label}
+              </Text>
+            </TouchableOpacity>
           )
-        }
-        return (
-          <TouchableOpacity
-            key={option.value}
-            style={styles.segment}
-            onPress={() => onValueChange(option.value)}
-          >
-            <Text style={styles.text}>
-              {option.label}
-            </Text>
-          </TouchableOpacity>
-        )
-      })}
-    </View>
+        })}
+      </View>
+    </NeumorphicOutset>
   );
 };

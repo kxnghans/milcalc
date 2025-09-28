@@ -20,7 +20,7 @@ export default function CardioComponent({
     setShuttles,
     cardioMinMax,
 }) {
-    const { theme } = useTheme();
+    const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
         cardTitle: {
             ...theme.typography.title,
@@ -61,7 +61,7 @@ export default function CardioComponent({
                                     const ninetyPercentileThreshold = cardioMinMax.max + (cardioMinMax.min - cardioMinMax.max) * 0.1;
                                     return (
                                         <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} highlightOpacity={isDarkMode ? 0.4 : undefined}>
                                                 <ProgressBar
                                                     invertScale={true}
                                                     value={timeInSeconds}
@@ -77,7 +77,7 @@ export default function CardioComponent({
                                     const ninetyPercentileThreshold = cardioMinMax.max * 0.9;
                                     return (
                                         <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} highlightOpacity={isDarkMode ? 0.4 : undefined}>
                                                 <ProgressBar
                                                     value={parseInt(shuttles) || 0}
                                                     passThreshold={cardioMinMax.min}
