@@ -1,16 +1,18 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '@repo/ui';
 
-export default function Divider() {
+interface DividerProps {
+  style?: ViewStyle;
+}
+
+export default function Divider({ style }: DividerProps) {
   const { theme } = useTheme();
   const styles = StyleSheet.create({
     divider: {
       height: 5,
-      marginTop: theme.spacing.m,
-      marginBottom: theme.spacing.s,
       backgroundColor: theme.colors.darkenColor,
-      borderRadius: theme.borderRadius.m,
+      borderRadius: theme.borderRadius.s,
       borderTopWidth: theme.colors.neumorphic.inset.borderWidth,
       borderLeftWidth: theme.colors.neumorphic.inset.borderWidth,
       borderTopColor: theme.colors.neumorphic.inset.shadow,
@@ -23,6 +25,6 @@ export default function Divider() {
   });
 
   return (
-    <View style={styles.divider} />
+    <View style={[styles.divider, style]} />
   );
 }
