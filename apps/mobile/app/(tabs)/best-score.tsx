@@ -29,17 +29,16 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
     gridContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        gap: theme.spacing.s,
-        marginTop: theme.spacing.s,
     },
     gridColumn: {
         flex: 1,
         alignItems: 'center',
         gap: theme.spacing.s,
+        marginHorizontal: theme.spacing.s,
+        marginVertical: theme.spacing.xs,
     },
     scoreRow: {
         width: '100%',
-        marginTop: theme.spacing.s,
     }
   });
 
@@ -49,13 +48,11 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
         <Text style={styles.cardTitle}>{title}</Text>
         <Icon name={ICONS.HELP} size={24} color={theme.colors.text} />
       </View>
-      <NeumorphicOutset>
         <SegmentedSelector
             options={exercises.map(e => ({ label: e.label, value: e.value }))}
             selectedValue={exercises[0].value} // Placeholder
             onValueChange={onExerciseChange}
         />
-      </NeumorphicOutset>
       <View style={styles.gridContainer}>
         {exercises.map((exercise, index) => (
             <View key={index} style={styles.gridColumn}>
@@ -67,7 +64,7 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
         ))}
       </View>
       <View style={styles.scoreRow}>
-        <IconRow icons={scores.map(s => ({ text: String(s) }))} />
+        <IconRow icons={scores.map(s => ({ text: String(s) }))} borderRadius={theme.borderRadius.m} />
       </View>
     </View>
   );

@@ -79,17 +79,15 @@ export default function CoreComponent({
                         );
                     })()}
                 </View>
-                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
-                    <SegmentedSelector
-                        options={[
-                            { label: "1-min Sit-ups", value: "sit_ups_1min" },
-                            { label: "2-min Cross-Leg Crunch", value: "cross_leg_reverse_crunch_2min" },
-                            { label: "Forearm Plank", value: "forearm_plank_time" },
-                        ]}
-                        selectedValue={coreComponent}
-                        onValueChange={setCoreComponent}
-                    />
-                </NeumorphicOutset>
+                <SegmentedSelector
+                    options={[
+                        { label: "1-min Sit-ups", value: "sit_ups_1min" },
+                        { label: "2-min Cross-Leg Crunch", value: "cross_leg_reverse_crunch_2min" },
+                        { label: "Forearm Plank", value: "forearm_plank_time" },
+                    ]}
+                    selectedValue={coreComponent}
+                    onValueChange={setCoreComponent}
+                />
                 {coreComponent === "sit_ups_1min" && (
                     <NumberInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" />
                 )}

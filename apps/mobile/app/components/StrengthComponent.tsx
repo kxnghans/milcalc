@@ -53,13 +53,11 @@ export default function StrengthComponent({
                         </View>
                     )}
                 </View>
-                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
-                    <SegmentedSelector
-                        options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min HR Push-ups", value: "hand_release_pushups_2min" }]} 
-                        selectedValue={pushupComponent}
-                        onValueChange={setPushupComponent}
-                    />
-                </NeumorphicOutset>
+                <SegmentedSelector
+                    options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min HR Push-ups", value: "hand_release_pushups_2min" }]} 
+                    selectedValue={pushupComponent}
+                    onValueChange={setPushupComponent}
+                />
                 <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" />
             </View>
         </View>
