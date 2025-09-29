@@ -113,6 +113,7 @@ export default function PTCalculator() {
             reverseCrunches: parseInt(reverseCrunches) || 0,
             plankMinutes: parseInt(plankMinutes) || 0,
             plankSeconds: parseInt(plankSeconds) || 0,
+            altitudeGroup,
         });
         setScore(result);
     };
@@ -206,6 +207,7 @@ export default function PTCalculator() {
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <CardioComponent
                                 showProgressBars={showProgressBars}
+                                cardioMinMax={cardioMinMax}
                                 cardioComponent={cardioComponent}
                                 setCardioComponent={setCardioComponent}
                                 runMinutes={runMinutes}
@@ -217,6 +219,9 @@ export default function PTCalculator() {
                                 walkSeconds={walkSeconds}
                                 setWalkSeconds={setWalkSeconds}
                                 segmentedStyle={segmentedStyle}
+                                altitudeGroup={altitudeGroup}
+                                age={age}
+                                gender={gender}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                             <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} />

@@ -53,7 +53,7 @@ export default function CoreComponent({
                             const plankTimeInSeconds = (parseInt(plankMinutes) || 0) * 60 + (parseInt(plankSeconds) || 0);
                             return (
                                 <View style={{ flex: 1 }}>
-                                    <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} highlightOpacity={isDarkMode ? 0.4 : undefined}>
+                                    <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                                         <ProgressBar
                                             value={plankTimeInSeconds}
                                             passThreshold={minMax.core.min}
@@ -67,7 +67,7 @@ export default function CoreComponent({
                         }
                         return (
                             <View style={{ flex: 1 }}>
-                                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} highlightOpacity={isDarkMode ? 0.4 : undefined}>
+                                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                                     <ProgressBar
                                         value={parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0}
                                         passThreshold={minMax.core.min}

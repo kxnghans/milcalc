@@ -1,5 +1,6 @@
 import data from '../../ui/src/pt_data/pt-data.json';
 import walkStandards from '../../ui/src/pt_data/walk-standards.json';
+import altitudeAdjustments from '../../ui/src/pt_data/altitude-adjustments.json';
 
 const timeToSeconds = (time: string) => {
     if (!time) return 0;
@@ -121,17 +122,24 @@ const getAgeGroupIndex = (age: number) => {
     return -1;
 }
 
-export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number): 'pass' | 'fail' | 'n/a' => {
+export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number, altitudeGroup?: string): 'pass' | 'fail' | 'n/a' => {
     const userTimeInSeconds = minutes * 60 + seconds;
     if (userTimeInSeconds === 0) return 'n/a';
 
     const ageIndex = getAgeGroupIndex(age);
     if (ageIndex === -1) return 'n/a';
 
-    const standards = walkStandards[gender];
-    if (!standards) return 'n/a';
-    const maxTime = standards[ageIndex].max_time;
-    const maxTimeInSeconds = timeToSeconds(maxTime);
+    let maxTimeInSeconds = 0;
+
+    if (altitudeGroup && altitudeGroup !== 'normal') {
+        const maxTime = altitudeAdjustments.walk[gender].groups[altitudeGroup].max_times[ageIndex].max_time;
+        maxTimeInSeconds = maxTime;
+    } else {
+        const standards = walkStandards[gender];
+        if (!standards) return 'n/a';
+        const maxTime = standards[ageIndex].max_time;
+        maxTimeInSeconds = timeToSeconds(maxTime);
+    }
 
     return userTimeInSeconds <= maxTimeInSeconds ? 'pass' : 'fail';
 };
@@ -145,12 +153,29 @@ export const calculatePtScore = (inputs: any) => {
     let walkPassed: 'pass' | 'fail' | 'n/a' = 'n/a';
 
     if (inputs.cardioComponent === 'walk') {
-        walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds);
+        walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds, inputs.altitudeGroup);
     } else {
+        let adjustedRunTime = { minutes: inputs.runMinutes, seconds: inputs.runSeconds };
+        let adjustedShuttles = inputs.shuttles;
+
+        if (inputs.altitudeGroup && inputs.altitudeGroup !== 'normal') {
+            if (inputs.cardioComponent === 'run') {
+                const runTimeInSeconds = inputs.runMinutes * 60 + inputs.runSeconds;
+                const correction = altitudeAdjustments.run.groups[inputs.altitudeGroup].corrections.find(c => runTimeInSeconds >= c.time_range[0] && runTimeInSeconds <= c.time_range[1]);
+                if (correction) {
+                    const adjustedTimeInSeconds = runTimeInSeconds - correction.correction;
+                    adjustedRunTime.minutes = Math.floor(adjustedTimeInSeconds / 60);
+                    adjustedRunTime.seconds = adjustedTimeInSeconds % 60;
+                }
+            } else if (inputs.cardioComponent === 'shuttles') {
+                adjustedShuttles += altitudeAdjustments.hamr.groups[inputs.altitudeGroup].shuttles_to_add;
+            }
+        }
+
         cardioScore = getCardioScore(ageGroup, inputs.cardioComponent, {
-            minutes: inputs.runMinutes,
-            seconds: inputs.runSeconds,
-            shuttles: inputs.shuttles,
+            minutes: adjustedRunTime.minutes,
+            seconds: adjustedRunTime.seconds,
+            shuttles: adjustedShuttles,
         });
     }
 

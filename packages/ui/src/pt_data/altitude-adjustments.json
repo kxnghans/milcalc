@@ -1,0 +1,281 @@
+
+{
+  "description": "This file contains altitude correction data for the Air Force PT Test. For the 1.5-mile run, the correction values should be subtracted from the raw time. For the 2.0-kilometer walk, the values represent the new maximum time. For the HAMR shuttle run, the values should be added to the shuttle count.",
+  "run": {
+    "description": "Altitude correction for 1.5-mile run. Values are in seconds and should be subtracted from the run time.",
+    "groups": {
+      "group1": {
+        "altitude": "5250 ft - 5499 ft",
+        "corrections": [
+          { "time_range": [0, 552], "correction": 2 },
+          { "time_range": [553, 562], "correction": 2 },
+          { "time_range": [563, 574], "correction": 2 },
+          { "time_range": [575, 585], "correction": 2 },
+          { "time_range": [586, 598], "correction": 2 },
+          { "time_range": [599, 610], "correction": 2 },
+          { "time_range": [611, 623], "correction": 2 },
+          { "time_range": [624, 637], "correction": 2 },
+          { "time_range": [638, 651], "correction": 2 },
+          { "time_range": [652, 666], "correction": 2 },
+          { "time_range": [667, 682], "correction": 2 },
+          { "time_range": [683, 698], "correction": 3 },
+          { "time_range": [699, 716], "correction": 3 },
+          { "time_range": [717, 734], "correction": 3 },
+          { "time_range": [735, 753], "correction": 3 },
+          { "time_range": [754, 773], "correction": 3 },
+          { "time_range": [774, 794], "correction": 3 },
+          { "time_range": [795, 816], "correction": 3 },
+          { "time_range": [817, 840], "correction": 3 },
+          { "time_range": [841, 865], "correction": 3 },
+          { "time_range": [866, 892], "correction": 3 },
+          { "time_range": [893, 920], "correction": 3 },
+          { "time_range": [921, 950], "correction": 4 },
+          { "time_range": [951, 982], "correction": 4 },
+          { "time_range": [983, 1017], "correction": 5 },
+          { "time_range": [1018, 1054], "correction": 5 },
+          { "time_range": [1055, 1094], "correction": 5 },
+          { "time_range": [1095, 1136], "correction": 5 },
+          { "time_range": [1137, 1183], "correction": 5 },
+          { "time_range": [1184, 1233], "correction": 5 },
+          { "time_range": [1234, 1288], "correction": 6 },
+          { "time_range": [1289, 1348], "correction": 6 },
+          { "time_range": [1349, 1414], "correction": 6 },
+          { "time_range": [1415, 1486], "correction": 6 },
+          { "time_range": [1487, 1566], "correction": 7 },
+          { "time_range": [1567, 9999], "correction": 8 }
+        ]
+      },
+      "group2": {
+        "altitude": "5500 ft - 5999 ft",
+        "corrections": [
+            { "time_range": [0, 552], "correction": 6 },
+            { "time_range": [553, 562], "correction": 6 },
+            { "time_range": [563, 574], "correction": 6 },
+            { "time_range": [575, 585], "correction": 7 },
+            { "time_range": [586, 598], "correction": 7 },
+            { "time_range": [599, 610], "correction": 7 },
+            { "time_range": [611, 623], "correction": 7 },
+            { "time_range": [624, 637], "correction": 7 },
+            { "time_range": [638, 651], "correction": 8 },
+            { "time_range": [652, 666], "correction": 8 },
+            { "time_range": [667, 682], "correction": 8 },
+            { "time_range": [683, 698], "correction": 8 },
+            { "time_range": [699, 716], "correction": 9 },
+            { "time_range": [717, 734], "correction": 9 },
+            { "time_range": [735, 753], "correction": 9 },
+            { "time_range": [754, 773], "correction": 9 },
+            { "time_range": [774, 794], "correction": 9 },
+            { "time_range": [795, 816], "correction": 10 },
+            { "time_range": [817, 840], "correction": 10 },
+            { "time_range": [841, 865], "correction": 10 },
+            { "time_range": [866, 892], "correction": 11 },
+            { "time_range": [893, 920], "correction": 11 },
+            { "time_range": [921, 950], "correction": 11 },
+            { "time_range": [951, 982], "correction": 12 },
+            { "time_range": [983, 1017], "correction": 13 },
+            { "time_range": [1018, 1054], "correction": 13 },
+            { "time_range": [1055, 1094], "correction": 14 },
+            { "time_range": [1095, 1136], "correction": 14 },
+            { "time_range": [1137, 1183], "correction": 15 },
+            { "time_range": [1184, 1233], "correction": 15 },
+            { "time_range": [1234, 1288], "correction": 17 },
+            { "time_range": [1289, 1348], "correction": 18 },
+            { "time_range": [1349, 1414], "correction": 18 },
+            { "time_range": [1415, 1486], "correction": 19 },
+            { "time_range": [1487, 1566], "correction": 20 },
+            { "time_range": [1567, 9999], "correction": 22 }
+        ]
+      },
+      "group3": {
+        "altitude": "6000 ft - 6599 ft",
+        "corrections": [
+            { "time_range": [0, 552], "correction": 11 },
+            { "time_range": [553, 562], "correction": 11 },
+            { "time_range": [563, 574], "correction": 11 },
+            { "time_range": [575, 585], "correction": 12 },
+            { "time_range": [586, 598], "correction": 12 },
+            { "time_range": [599, 610], "correction": 12 },
+            { "time_range": [611, 623], "correction": 12 },
+            { "time_range": [624, 637], "correction": 12 },
+            { "time_range": [638, 651], "correction": 13 },
+            { "time_range": [652, 666], "correction": 13 },
+            { "time_range": [667, 682], "correction": 13 },
+            { "time_range": [683, 698], "correction": 14 },
+            { "time_range": [699, 716], "correction": 15 },
+            { "time_range": [717, 734], "correction": 15 },
+            { "time_range": [735, 753], "correction": 15 },
+            { "time_range": [754, 773], "correction": 16 },
+            { "time_range": [774, 794], "correction": 16 },
+            { "time_range": [795, 816], "correction": 16 },
+            { "time_range": [817, 840], "correction": 17 },
+            { "time_range": [841, 865], "correction": 17 },
+            { "time_range": [866, 892], "correction": 18 },
+            { "time_range": [893, 920], "correction": 18 },
+            { "time_range": [921, 950], "correction": 19 },
+            { "time_range": [951, 982], "correction": 20 },
+            { "time_range": [983, 1017], "correction": 21 },
+            { "time_range": [1018, 1054], "correction": 22 },
+            { "time_range": [1055, 1094], "correction": 23 },
+            { "time_range": [1095, 1136], "correction": 24 },
+            { "time_range": [1137, 1183], "correction": 25 },
+            { "time_range": [1184, 1233], "correction": 26 },
+            { "time_range": [1234, 1288], "correction": 28 },
+            { "time_range": [1289, 1348], "correction": 29 },
+            { "time_range": [1349, 1414], "correction": 31 },
+            { "time_range": [1415, 1486], "correction": 32 },
+            { "time_range": [1487, 1566], "correction": 34 },
+            { "time_range": [1567, 9999], "correction": 37 }
+        ]
+      },
+      "group4": {
+        "altitude": "at or greater than 6600 ft",
+        "corrections": [
+            { "time_range": [0, 552], "correction": 18 },
+            { "time_range": [553, 562], "correction": 18 },
+            { "time_range": [563, 574], "correction": 19 },
+            { "time_range": [575, 585], "correction": 20 },
+            { "time_range": [586, 598], "correction": 20 },
+            { "time_range": [599, 610], "correction": 20 },
+            { "time_range": [611, 623], "correction": 21 },
+            { "time_range": [624, 637], "correction": 21 },
+            { "time_range": [638, 651], "correction": 22 },
+            { "time_range": [652, 666], "correction": 22 },
+            { "time_range": [667, 682], "correction": 22 },
+            { "time_range": [683, 698], "correction": 23 },
+            { "time_range": [699, 716], "correction": 24 },
+            { "time_range": [717, 734], "correction": 25 },
+            { "time_range": [735, 753], "correction": 26 },
+            { "time_range": [754, 773], "correction": 26 },
+            { "time_range": [774, 794], "correction": 27 },
+            { "time_range": [795, 816], "correction": 28 },
+            { "time_range": [817, 840], "correction": 28 },
+            { "time_range": [841, 865], "correction": 29 },
+            { "time_range": [866, 892], "correction": 31 },
+            { "time_range": [893, 920], "correction": 31 },
+            { "time_range": [921, 950], "correction": 32 },
+            { "time_range": [951, 982], "correction": 34 },
+            { "time_range": [983, 1017], "correction": 36 },
+            { "time_range": [1018, 1054], "correction": 37 },
+            { "time_range": [1055, 1094], "correction": 38 },
+            { "time_range": [1095, 1136], "correction": 40 },
+            { "time_range": [1137, 1183], "correction": 42 },
+            { "time_range": [1184, 1233], "correction": 43 },
+            { "time_range": [1234, 1288], "correction": 46 },
+            { "time_range": [1289, 1348], "correction": 49 },
+            { "time_range": [1349, 1414], "correction": 51 },
+            { "time_range": [1415, 1486], "correction": 54 },
+            { "time_range": [1487, 1566], "correction": 57 },
+            { "time_range": [1567, 9999], "correction": 62 }
+        ]
+      }
+    }
+  },
+  "walk": {
+    "description": "Altitude correction for 2.0-kilometer walk. Values are the new maximum time in seconds.",
+    "male": {
+      "group1": {
+        "altitude": "5250 ft - 5500 ft",
+        "max_times": [
+          { "age_range": [0, 29], "max_time": 978 },
+          { "age_range": [30, 39], "max_time": 980 },
+          { "age_range": [40, 49], "max_time": 985 },
+          { "age_range": [50, 59], "max_time": 1002 },
+          { "age_range": [60, 99], "max_time": 1019 }
+        ]
+      },
+      "group2": {
+        "altitude": "5500 ft - 6000 ft",
+        "max_times": [
+          { "age_range": [0, 29], "max_time": 982 },
+          { "age_range": [30, 39], "max_time": 984 },
+          { "age_range": [40, 49], "max_time": 988 },
+          { "age_range": [50, 59], "max_time": 1005 },
+          { "age_range": [60, 99], "max_time": 1022 }
+        ]
+      },
+      "group3": {
+        "altitude": "6000 ft - 6600 ft",
+        "max_times": [
+          { "age_range": [0, 29], "max_time": 985 },
+          { "age_range": [30, 39], "max_time": 987 },
+          { "age_range": [40, 49], "max_time": 991 },
+          { "age_range": [50, 59], "max_time": 1008 },
+          { "age_range": [60, 99], "max_time": 1025 }
+        ]
+      },
+      "group4": {
+        "altitude": "at or greater than 6600 ft",
+        "max_times": [
+          { "age_range": [0, 29], "max_time": 991 },
+          { "age_range": [30, 39], "max_time": 993 },
+          { "age_range": [40, 49], "max_time": 997 },
+          { "age_range": [50, 59], "max_time": 1013 },
+          { "age_range": [60, 99], "max_time": 1030 }
+        ]
+      }
+    },
+    "female": {
+      "group1": {
+        "altitude": "5250 ft - 5500 ft",
+        "max_times": [
+          { "age_range": [0, 29], "max_time": 1045 },
+          { "age_range": [30, 39], "max_time": 1050 },
+          { "age_range": [40, 49], "max_time": 1072 },
+          { "age_range": [50, 59], "max_time": 1093 },
+          { "age_range": [60, 99], "max_time": 1134 }
+        ]
+      },
+      "group2": {
+        "altitude": "5500 ft - 6000 ft",
+        "max_times": [
+          { "age_range": [0, 29], "max_time": 1050 },
+          { "age_range": [30, 39], "max_time": 1055 },
+          { "age_range": [40, 49], "max_time": 1076 },
+          { "age_range": [50, 59], "max_time": 1097 },
+          { "age_range": [60, 99], "max_time": 1138 }
+        ]
+      },
+      "group3": {
+        "altitude": "6000 ft - 6600 ft",
+        "max_times": [
+          { "age_range": [0, 29], "max_time": 1054 },
+          { "age_range": [30, 39], "max_time": 1060 },
+          { "age_range": [40, 49], "max_time": 1080 },
+          { "age_range": [50, 59], "max_time": 1101 },
+          { "age_range": [60, 99], "max_time": 1142 }
+        ]
+      },
+      "group4": {
+        "altitude": "at or greater than 6600 ft",
+        "max_times": [
+          { "age_range": [0, 29], "max_time": 1062 },
+          { "age_range": [30, 39], "max_time": 1067 },
+          { "age_range": [40, 49], "max_time": 1087 },
+          { "age_range": [50, 59], "max_time": 1108 },
+          { "age_range": [60, 99], "max_time": 1148 }
+        ]
+      }
+    }
+  },
+  "hamr": {
+    "description": "Altitude correction for HAMR. Values should be added to the shuttle count.",
+    "groups": {
+      "group1": {
+        "altitude": "5250 ft - 5500 ft",
+        "shuttles_to_add": 1
+      },
+      "group2": {
+        "altitude": "5500 ft - 6000 ft",
+        "shuttles_to_add": 2
+      },
+      "group3": {
+        "altitude": "6000 ft - 6600 ft",
+        "shuttles_to_add": 3
+      },
+      "group4": {
+        "altitude": "> 6600 ft",
+        "shuttles_to_add": 4
+      }
+    }
+  }
+}
