@@ -38,7 +38,6 @@ export default function CoreComponent({
             justifyContent: 'center',
         },
         neumorphicOutsetContainer: {
-            margin: theme.spacing.s,
         },
     });
 

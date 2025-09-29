@@ -98,6 +98,11 @@ export const theme = {
       fontWeight: '400',
       fontFamily: 'System',
     },
+    bodybold: {
+      fontSize: 13,
+      fontWeight: '500',
+      fontFamily: 'System',
+    },
       label: {
       fontSize: 15,
       fontWeight: '400',

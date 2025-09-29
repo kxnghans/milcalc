@@ -6,6 +6,7 @@ import ScoreDisplay from '../components/ScoreDisplay';
 import NumberInput from '../components/NumberInput';
 import TimeInput from '../components/TimeInput';
 import Demographics from '../components/Demographics';
+import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
 import Divider from '../components/Divider';
 
 
@@ -78,6 +79,7 @@ export default function BestScoreScreen() {
 
   const [age, setAge] = React.useState("");
   const [gender, setGender] = React.useState("male");
+  const [altitudeGroup, setAltitudeGroup] = React.useState("normal");
 
   const getThemeIcon = () => {
     if (themeMode === 'light') return ICONS.THEME_LIGHT;
@@ -165,6 +167,8 @@ export default function BestScoreScreen() {
                     scores={cardioScores} 
                     bestValues={cardioBestValues} 
                 />
+                <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
+                <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} />
             </ScrollView>
         </Card>
     </View>

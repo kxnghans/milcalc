@@ -34,7 +34,6 @@ export default function PayCalculator() {
       color: theme.colors.text,
     },
     neumorphicOutsetContainer: {
-      margin: theme.spacing.s,
     },
     neumorphicOutsetContent: {
       borderRadius: theme.borderRadius.m,

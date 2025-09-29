@@ -60,7 +60,7 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
 
   return (
     <NeumorphicOutset 
-      containerStyle={[style, { borderRadius: theme.borderRadius.m, margin: theme.spacing.s }]}
+      containerStyle={[style, { borderRadius: theme.borderRadius.m }]}
       contentStyle={{
         backgroundColor,
         borderRadius: theme.borderRadius.m,

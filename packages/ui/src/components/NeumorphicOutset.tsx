@@ -42,6 +42,10 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
 
   const styles = StyleSheet.create({
     container: {
+      marginTop: theme.spacing.s,
+      marginBottom: theme.spacing.s,
+      marginLeft: theme.spacing.s,
+      marginRight: theme.spacing.s,
       ...Platform.select({
         ios: {
           shadowColor: shadowColor || theme.colors.neumorphic.outset.shadow,
