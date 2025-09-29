@@ -10,6 +10,7 @@ export default function StrengthComponent({
     setPushups,
     pushupComponent,
     setPushupComponent,
+    ninetyPercentileThreshold,
 }) {
     const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
@@ -47,7 +48,7 @@ export default function StrengthComponent({
                                     value={parseInt(pushups) || 0}
                                     passThreshold={minMax.pushups.min}
                                     maxPointsThreshold={minMax.pushups.max}
-                                    ninetyPercentileThreshold={minMax.pushups.max * 0.9}
+                                    ninetyPercentileThreshold={ninetyPercentileThreshold}
                                 />
                             </NeumorphicOutset>
                         </View>
@@ -58,7 +59,7 @@ export default function StrengthComponent({
                     selectedValue={pushupComponent}
                     onValueChange={setPushupComponent}
                 />
-                <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" />
+                <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
             </View>
         </View>
     );

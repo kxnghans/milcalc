@@ -33,7 +33,6 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
     },
     scoreText: {
         ...theme.typography.header,
-        marginBottom: theme.spacing.s,
         textShadowColor: theme.colors.neumorphic.outset.shadow,
         textShadowRadius: 0.25,
         textShadowOffset: { width: 0, height: 0 },
@@ -61,7 +60,7 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
 
   return (
     <NeumorphicOutset containerStyle={styles.scoreContainer} contentStyle={styles.scoreContent}>
-        <Text style={[styles.scoreText, { color: scoreColor }]}>{score.totalScore.toFixed(2)}</Text>
+        <Text style={[styles.scoreText, { color: scoreColor }, showBreakdown && { marginBottom: theme.spacing.s }]}>{score.totalScore.toFixed(2)}</Text>
         {showBreakdown && (
             <View style={styles.scoreBreakdownContainer}>
                 <View style={{flexDirection: 'row'}}>

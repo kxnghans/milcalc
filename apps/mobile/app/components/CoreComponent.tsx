@@ -17,6 +17,7 @@ export default function CoreComponent({
     setPlankMinutes,
     plankSeconds,
     setPlankSeconds,
+    ninetyPercentileThreshold,
 }) {
     const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
@@ -48,7 +49,7 @@ export default function CoreComponent({
                 <View style={styles.componentHeader}>
                     <Text style={[styles.cardTitle, {marginRight: theme.spacing.m, marginVertical: theme.spacing.s}]}>Core</Text>
                     {showProgressBars && (() => {
-                        const ninetyPercentileThreshold = minMax.core.max * 0.9;
+
                         if (coreComponent === "forearm_plank_time") {
                             const plankTimeInSeconds = (parseInt(plankMinutes) || 0) * 60 + (parseInt(plankSeconds) || 0);
                             return (
@@ -89,10 +90,10 @@ export default function CoreComponent({
                     onValueChange={setCoreComponent}
                 />
                 {coreComponent === "sit_ups_1min" && (
-                    <NumberInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" />
+                    <NumberInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
                 )}
                 {coreComponent === "cross_leg_reverse_crunch_2min" && (
-                    <NumberInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" />
+                    <NumberInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
                 )}
                 {coreComponent === "forearm_plank_time" && (
                     <TimeInput
@@ -100,6 +101,7 @@ export default function CoreComponent({
                         setMinutes={setPlankMinutes}
                         seconds={plankSeconds}
                         setSeconds={setPlankSeconds}
+                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }}
                     />
                 )}
             </View>

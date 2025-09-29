@@ -26,7 +26,7 @@ const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inpu
         padding: 0,
         margin: 0,
         textAlign: 'center',
-        ...theme.typography.body,
+        ...theme.typography.label,
         color: theme.colors.text,
         flex: 1,
         backgroundColor: 'transparent',
@@ -41,7 +41,7 @@ const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inpu
         keyboardType="numeric"
         style={[styles.input, inputStyle]}
       />
-      {adjustment && <Text style={{ color: theme.colors.success, ...theme.typography.caption, paddingRight: theme.spacing.s }}>{adjustment}</Text>}
+      {adjustment && <Text style={{ color: theme.colors.success, ...theme.typography.label, paddingRight: theme.spacing.s }}>{adjustment}</Text>}
     </NeumorphicInset>
   );
 });

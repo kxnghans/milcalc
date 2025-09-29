@@ -8,7 +8,7 @@
 import * as React from "react";
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { Card, IconRow, NeumorphicInset } from "@repo/ui";
-import { calculatePtScore, getMinMaxValues, getCardioMinMaxValues } from "@repo/utils";
+import { calculatePtScore, getMinMaxValues, getCardioMinMaxValues, getPerformanceForScore } from "@repo/utils";
 import { useTheme } from "@repo/ui";
 import { ICONS } from "@repo/ui/icons";
 import ScoreDisplay from "../components/ScoreDisplay";
@@ -57,6 +57,7 @@ export default function PTCalculator() {
   const [score, setScore] = React.useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
   const [minMax, setMinMax] = React.useState({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
   const [cardioMinMax, setCardioMinMax] = React.useState({ min: 0, max: 0 });
+  const [ninetyPercentileThresholds, setNinetyPercentileThresholds] = React.useState({ pushups: 0, core: 0, cardio: 0 });
   const [isModalVisible, setModalVisible] = React.useState(false);
   const [segmentedHeights, setSegmentedHeights] = React.useState({ strength: 0, core: 0, cardio: 0 });
 
@@ -94,6 +95,16 @@ export default function PTCalculator() {
         const cardioValues = getCardioMinMaxValues(ageNum, gender, cardioComponent);
         setMinMax({pushups: pushupValues, core: coreValues});
         setCardioMinMax(cardioValues);
+
+        const pushupThreshold = getPerformanceForScore(ageNum, gender, pushupComponent, 18); // 90% of 20
+        const coreThreshold = getPerformanceForScore(ageNum, gender, coreComponent, 18); // 90% of 20
+        const cardioThreshold = getPerformanceForScore(ageNum, gender, cardioComponent, 54); // 90% of 60
+
+        setNinetyPercentileThresholds({
+            pushups: pushupThreshold,
+            core: coreThreshold,
+            cardio: cardioThreshold,
+        });
     }
 
     const calculateScore = () => {
@@ -118,7 +129,7 @@ export default function PTCalculator() {
         setScore(result);
     };
     calculateScore();
-  }, [age, gender, cardioComponent, runMinutes, runSeconds, shuttles, walkMinutes, walkSeconds, pushupComponent, pushups, coreComponent, situps, reverseCrunches, plankMinutes, plankSeconds]);
+  }, [age, gender, cardioComponent, runMinutes, runSeconds, shuttles, walkMinutes, walkSeconds, pushupComponent, pushups, coreComponent, situps, reverseCrunches, plankMinutes, plankSeconds, coreComponent, pushupComponent]);
 
   const showProgressBars = age && gender;
 
@@ -184,6 +195,7 @@ export default function PTCalculator() {
                                 setPushups={setPushups}
                                 pushupComponent={pushupComponent}
                                 setPushupComponent={setPushupComponent}
+                                ninetyPercentileThreshold={ninetyPercentileThresholds.pushups}
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
                             />
@@ -201,6 +213,7 @@ export default function PTCalculator() {
                                 setPlankMinutes={setPlankMinutes}
                                 plankSeconds={plankSeconds}
                                 setPlankSeconds={setPlankSeconds}
+                                ninetyPercentileThreshold={ninetyPercentileThresholds.core}
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
                             />
@@ -218,6 +231,7 @@ export default function PTCalculator() {
                                 setWalkMinutes={setWalkMinutes}
                                 walkSeconds={walkSeconds}
                                 setWalkSeconds={setWalkSeconds}
+                                ninetyPercentileThreshold={ninetyPercentileThresholds.cardio}
                                 segmentedStyle={segmentedStyle}
                                 altitudeGroup={altitudeGroup}
                                 age={age}
