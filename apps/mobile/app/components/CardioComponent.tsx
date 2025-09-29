@@ -40,7 +40,6 @@ export default function CardioComponent({
             justifyContent: 'center',
         },
         neumorphicOutsetContainer: {
-            margin: theme.spacing.s,
         },
     });
 

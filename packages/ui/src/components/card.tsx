@@ -16,7 +16,7 @@ export function Card({ children, style }: { children: ReactNode, style?: ViewSty
   });
 
   return (
-    <NeumorphicOutset containerStyle={[style, { borderRadius: theme.borderRadius.m, margin: theme.spacing.s }]} contentStyle={styles.cardContent}>
+    <NeumorphicOutset containerStyle={[style, { borderRadius: theme.borderRadius.m }]} contentStyle={styles.cardContent}>
         {children}
     </NeumorphicOutset>
   );

@@ -19,6 +19,7 @@ import CoreComponent from "../components/CoreComponent";
 import CardioComponent from "../components/CardioComponent";
 import NumberInput from "../components/NumberInput";
 import Demographics from "../components/Demographics";
+import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
 import Divider from "../components/Divider";
 
 /**
@@ -50,6 +51,7 @@ export default function PTCalculator() {
   const [reverseCrunches, setReverseCrunches] = React.useState("");
   const [plankMinutes, setPlankMinutes] = React.useState("");
   const [plankSeconds, setPlankSeconds] = React.useState("");
+  const [altitudeGroup, setAltitudeGroup] = React.useState("normal");
 
   // State for calculated scores and UI elements
   const [score, setScore] = React.useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
@@ -214,12 +216,10 @@ export default function PTCalculator() {
                                 setWalkMinutes={setWalkMinutes}
                                 walkSeconds={walkSeconds}
                                 setWalkSeconds={setWalkSeconds}
-                                shuttles={shuttles}
-                                setShuttles={setShuttles}
-                                cardioMinMax={cardioMinMax}
-                                handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
                             />
+                            <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
+                            <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} />
                         </ScrollView>
                     </Card>
                 </View>

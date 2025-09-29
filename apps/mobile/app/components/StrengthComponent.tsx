@@ -31,7 +31,6 @@ export default function StrengthComponent({
             justifyContent: 'center',
         },
         neumorphicOutsetContainer: {
-            margin: theme.spacing.s,
         },
     });
 
