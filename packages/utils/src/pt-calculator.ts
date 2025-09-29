@@ -280,11 +280,14 @@ export const getCardioMinMaxValues = (age: number, sex: string, component: strin
         };
     } else if (component === 'shuttles') {
         const shuttleCounts = brackets.map(bracket => {
-            const shuttleString = bracket.shuttles_range.replace(/[≥*<>]/g, '').trim();
-            if (shuttleString.includes(' - ')) {
-                return parseInt(shuttleString.split(' - ')[1], 10);
+            const shuttleRange = bracket.shuttles_range;
+            if (shuttleRange.includes(' - ')) {
+                const parts = shuttleRange.split(' - ');
+                const highEnd = parts[1].replace(/[^0-9]/g, '');
+                return parseInt(highEnd, 10);
             }
-            return parseInt(shuttleString, 10);
+            const singleValue = shuttleRange.replace(/[^0-9]/g, '');
+            return parseInt(singleValue, 10);
         }).filter(s => !isNaN(s));
 
         return {
@@ -294,4 +297,49 @@ export const getCardioMinMaxValues = (age: number, sex: string, component: strin
     }
 
     return { min: 0, max: 0 };
+};
+
+export const getPerformanceForScore = (age: number, sex: string, component: string, targetScore: number): number => {
+    const ageGroup = getAgeGroup(age, sex);
+    if (!ageGroup) return 0;
+
+    if (component === 'run') {
+        const brackets = ageGroup.cardiorespiratory.run_time_brackets;
+        const candidates = brackets.filter(b => b.points >= targetScore);
+        if (candidates.length === 0) return 9999; // Return a very high time if no score is high enough
+        const times = candidates.map(b => {
+            const timeString = b.run_time.replace(/[≤*<>]/g, '').trim();
+            const timeParts = timeString.split(' - ');
+            return timeToSeconds(timeParts[timeParts.length - 1]);
+        });
+        return Math.max(...times);
+    }
+
+    if (component === 'shuttles') {
+        const brackets = ageGroup.cardiorespiratory.run_time_brackets;
+        const candidates = brackets.filter(b => b.points >= targetScore);
+        if (candidates.length === 0) return 999; // Return a high number
+        const shuttles = candidates.map(b => {
+            const shuttleString = b.shuttles_range.replace(/[≥*<>]/g, '').trim();
+            const shuttleParts = shuttleString.split(' - ');
+            return parseInt(shuttleParts[0], 10);
+        });
+        return Math.min(...shuttles);
+    }
+
+    if (component === 'forearm_plank_time') {
+        const table = ageGroup.muscular_fitness[component];
+        const candidates = table.filter(row => row.points >= targetScore);
+        if (candidates.length === 0) return 999;
+        const times = candidates.map(row => timeToSeconds(String(row.time).replace(/[^0-9:]/g, '')));
+        return Math.min(...times);
+    }
+
+    // For push_ups_1min, hand_release_pushups_2min, sit_ups_1min, cross_leg_reverse_crunch_2min
+    const table = ageGroup.muscular_fitness[component];
+    if (!table) return 0;
+    const candidates = table.filter(row => row.points >= targetScore);
+    if (candidates.length === 0) return 999;
+    const reps = candidates.map(row => parseInt(String(row.reps).replace(/[^0-9]/g, '')));
+    return Math.min(...reps);
 };

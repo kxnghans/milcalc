@@ -24,6 +24,7 @@ export default function CardioComponent({
     altitudeGroup,
     age,
     gender,
+    ninetyPercentileThreshold,
 }) {
     const { theme, isDarkMode } = useTheme();
     const [adjustment, setAdjustment] = React.useState(null);
@@ -103,7 +104,7 @@ export default function CardioComponent({
                             {showProgressBars && (() => {
                                 if (cardioComponent === 'run') {
                                     const timeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
-                                    const ninetyPercentileThreshold = cardioMinMax.max + (cardioMinMax.min - cardioMinMax.max) * 0.1;
+
                                     return (
                                         <View style={{ flex: 1 }}>
                                             <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
@@ -134,7 +135,7 @@ export default function CardioComponent({
                                         </View>
                                     );
                                 } else { // shuttles
-                                    const ninetyPercentileThreshold = cardioMinMax.max * 0.9;
+
                                     return (
                                         <View style={{ flex: 1 }}>
                                             <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
@@ -162,10 +163,11 @@ export default function CardioComponent({
                                 seconds={runSeconds}
                                 setSeconds={setRunSeconds}
                                 adjustment={adjustment}
+                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }}
                             />
                         )}
                         {cardioComponent === "shuttles" && (
-                            <NumberInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" adjustment={adjustment} />
+                            <NumberInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" adjustment={adjustment} style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
                         )}
                         {cardioComponent === "walk" && (
                             <TimeInput
@@ -174,6 +176,7 @@ export default function CardioComponent({
                                 seconds={walkSeconds}
                                 setSeconds={setWalkSeconds}
                                 adjustment={adjustment}
+                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }}
                             />
                         )}
                     </View>

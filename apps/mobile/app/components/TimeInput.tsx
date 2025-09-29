@@ -8,9 +8,10 @@ interface TimeInputProps {
   seconds: string;
   setSeconds: (seconds: string) => void;
   adjustment?: string;
+  style?: any;
 }
 
-const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, setSeconds, adjustment }) => {
+const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, setSeconds, adjustment, style }) => {
   const { theme } = useTheme();
   const secondsInput = useRef<TextInput>(null);
 
@@ -32,7 +33,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
       overflow: 'hidden',
     },
     separator: {
-      ...theme.typography.body,
+      ...theme.typography.label,
       color: theme.colors.text,
       marginHorizontal: theme.spacing.s,
     },
@@ -42,7 +43,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
         padding: 0,
         margin: 0,
         textAlign: 'center',
-        ...theme.typography.body,
+        ...theme.typography.label,
         color: theme.colors.text,
         flex: 1,
         backgroundColor: 'transparent',
@@ -50,7 +51,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
   });
 
   return (
-    <NeumorphicInset style={styles.container}>
+    <NeumorphicInset style={[styles.container, style]}>
         <StyledTextInput
             value={minutes}
             onChangeText={handleMinutesChange}
@@ -69,7 +70,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
             keyboardType="numeric"
             style={styles.input}
         />
-        {adjustment && <Text style={{ color: theme.colors.success, ...theme.typography.caption, marginHorizontal: theme.spacing.s, backgroundColor: 'transparent', textShadowRadius: 0.05, textShadowColor: theme.colors.neumorphic.outset.shadow }}>{adjustment}</Text>}
+        {adjustment && <Text style={{ color: theme.colors.success, ...theme.typography.label, marginHorizontal: theme.spacing.s, backgroundColor: 'transparent', textShadowRadius: 0.05, textShadowColor: theme.colors.neumorphic.outset.shadow }}>{adjustment}</Text>}
     </NeumorphicInset>
   );
 };

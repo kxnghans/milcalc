@@ -24,7 +24,10 @@
       "react-native-reanimated": "4.1.0",
       "@expo/vector-icons": "15.0.2",
       "@types/react": "19.1.0"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "core-js-pure"
+    ]
   },
   "dependencies": {
     "react-native-gesture-handler": "^2.28.0"
