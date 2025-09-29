@@ -104,13 +104,11 @@ export default function CardioComponent({
                                 }
                             })()}
                         </View>
-                        <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
-                            <SegmentedSelector
-                                options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
-                                selectedValue={cardioComponent}
-                                onValueChange={setCardioComponent}
-                            />
-                        </NeumorphicOutset>
+                        <SegmentedSelector
+                            options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
+                            selectedValue={cardioComponent}
+                            onValueChange={setCardioComponent}
+                        />
                         {cardioComponent === "run" && (
                             <TimeInput
                                 minutes={runMinutes}

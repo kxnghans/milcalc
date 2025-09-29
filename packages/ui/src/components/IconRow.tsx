@@ -14,9 +14,10 @@ interface IconRowProps {
     iconSet?: keyof typeof Icons;
   }[];
   style?: ViewStyle;
+  borderRadius?: number;
 }
 
-export const IconRow = ({ icons, style }: IconRowProps) => {
+export const IconRow = ({ icons, style, borderRadius }: IconRowProps) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -42,12 +43,12 @@ export const IconRow = ({ icons, style }: IconRowProps) => {
         const iconContent = (
           <NeumorphicOutset 
             containerStyle={{
-              borderRadius: theme.borderRadius.l,
+              borderRadius: borderRadius ?? theme.borderRadius.l,
               margin: theme.spacing.s,
             }}
             contentStyle={{
               backgroundColor: theme.colors.background,
-              borderRadius: theme.borderRadius.l,
+              borderRadius: borderRadius ?? theme.borderRadius.l,
               overflow: 'hidden',
             }}
           >
