@@ -120,9 +120,6 @@ export const ProgressBar = ({
         borderRadius: theme.borderRadius.m,
         overflow: 'hidden',
       }}
-      highlightOpacity={isDarkMode ? 0.5 : 1}
-      shadowOpacity={isDarkMode ? 0.1 : 0.35}
-      shadowRadius={theme.spacing.xs / 1.5}
     >
       <View style={[styles.progress, { backgroundColor: color }]} />
     </NeumorphicOutset>

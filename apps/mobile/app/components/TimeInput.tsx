@@ -7,9 +7,10 @@ interface TimeInputProps {
   setMinutes: (minutes: string) => void;
   seconds: string;
   setSeconds: (seconds: string) => void;
+  adjustment?: string;
 }
 
-const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, setSeconds }) => {
+const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, setSeconds, adjustment }) => {
   const { theme } = useTheme();
   const secondsInput = useRef<TextInput>(null);
 
@@ -68,6 +69,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
             keyboardType="numeric"
             style={styles.input}
         />
+        {adjustment && <Text style={{ color: theme.colors.success, ...theme.typography.caption, marginHorizontal: theme.spacing.s, backgroundColor: 'transparent', textShadowRadius: 0.05, textShadowColor: theme.colors.neumorphic.outset.shadow }}>{adjustment}</Text>}
     </NeumorphicInset>
   );
 };

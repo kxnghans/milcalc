@@ -42,7 +42,7 @@ export default function Demographics({ age, setAge, gender, setGender }: Demogra
                   value={age}
                   onChangeText={setAge}
                   placeholder=""
-                  inputStyle={{paddingVertical: theme.spacing.s + 4}}
+                  inputStyle={{paddingVertical: 6}}
               />
           </View>
           <View style={{flex: 1}}>

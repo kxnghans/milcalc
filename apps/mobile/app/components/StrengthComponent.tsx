@@ -42,7 +42,7 @@ export default function StrengthComponent({
                     <Text style={[styles.cardTitle, {marginRight: theme.spacing.m, marginVertical: theme.spacing.s}]}>Strength</Text>
                     {showProgressBars && (
                         <View style={{ flex: 1 }}>
-                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} highlightOpacity={isDarkMode ? 0.4 : undefined}>
+                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
                                 <ProgressBar
                                     value={parseInt(pushups) || 0}
                                     passThreshold={minMax.pushups.min}
