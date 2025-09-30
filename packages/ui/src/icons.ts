@@ -7,7 +7,9 @@ export const ICONS = {
   GENDER_MALE: 'male',
   GENDER_FEMALE: 'female',
   HOME: 'home-outline',
+  HOME_FILLED: 'home',
   HELP: 'help-circle-outline',
+  WEIGHT_LIFTER: 'weight-lifter',
 };
 
 export const ICON_SETS = {

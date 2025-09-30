@@ -20,7 +20,6 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: theme.spacing.s,
     },
     cardTitle: {
         ...theme.typography.title,
@@ -46,7 +45,7 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.cardTitle}>{title}</Text>
-        <Icon name={ICONS.HELP} size={24} color={theme.colors.text} />
+        <Icon name={ICONS.HELP} size={18} color={theme.colors.disabled} style={{ marginHorizontal: theme.spacing.s }} />
       </View>
         <SegmentedSelector
             options={exercises.map(e => ({ label: e.label, value: e.value }))}
@@ -92,7 +91,6 @@ export default function BestScoreScreen() {
     },
     card: {
         flex: 1,
-        marginTop: theme.spacing.m,
     }
   });
 
@@ -127,7 +125,7 @@ export default function BestScoreScreen() {
         <IconRow
             icons={[
             {
-                name: ICONS.HOME,
+                name: themeMode === 'auto' ? ICONS.HOME_FILLED : ICONS.HOME,
                 href: '(tabs)/pt-calculator',
             },
             {

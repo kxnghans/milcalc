@@ -166,7 +166,7 @@ export default function PTCalculator() {
                 <ScoreDisplay score={score} cardioComponent={cardioComponent} containerStyle={{ marginBottom: theme.spacing.s }} />
                 <IconRow icons={[
                     {
-                        name: ICONS.BEST_SCORE,
+                        name: ICONS.WEIGHT_LIFTER,
                         href: "/best-score",
                     },
                     {

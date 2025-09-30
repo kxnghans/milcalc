@@ -163,11 +163,11 @@ export default function CardioComponent({
                                 seconds={runSeconds}
                                 setSeconds={setRunSeconds}
                                 adjustment={adjustment}
-                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }}
+                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
                             />
                         )}
                         {cardioComponent === "shuttles" && (
-                            <NumberInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" adjustment={adjustment} style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
+                            <NumberInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" adjustment={adjustment} style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
                         )}
                         {cardioComponent === "walk" && (
                             <TimeInput
@@ -176,7 +176,7 @@ export default function CardioComponent({
                                 seconds={walkSeconds}
                                 setSeconds={setWalkSeconds}
                                 adjustment={adjustment}
-                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }}
+                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
                             />
                         )}
                     </View>

@@ -9,14 +9,15 @@ interface StyledButtonProps extends TouchableOpacityProps {
   variant?: 'primary' | 'secondary';
   size?: 'small' | 'medium';
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   icon?: string;
   iconSet?: keyof typeof Icons;
   iconSize?: number;
   highlightOpacity?: number;
 }
 
-export const StyledButton = ({ title, variant = 'primary', size = 'medium', style, icon, iconSet = 'MaterialCommunityIcons', iconSize, highlightOpacity, ...props }: StyledButtonProps) => {
-  const { theme } = useTheme();
+export const StyledButton = ({ title, variant = 'primary', size = 'medium', style, textStyle, icon, iconSet = 'MaterialCommunityIcons', iconSize, highlightOpacity, ...props }: StyledButtonProps) => {
+  const { theme, isDarkMode } = useTheme();
   const Icon = Icons[iconSet];
 
   const styles = StyleSheet.create({
@@ -58,6 +59,8 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
   const finalIconSize = iconSize ?? (size === 'small' ? theme.typography.subtitle.fontSize + 2 : theme.typography.body.fontSize + 2);
   const backgroundColor = variant === 'primary' ? theme.colors.primary : theme.colors.secondary;
 
+  const isPrimary = variant === 'primary';
+
   return (
     <NeumorphicOutset 
       containerStyle={[style, { borderRadius: theme.borderRadius.m }]}
@@ -66,14 +69,16 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
         borderRadius: theme.borderRadius.m,
         overflow: 'hidden',
       }}
-      highlightOpacity={highlightOpacity}
+      shadowOpacity={isPrimary ? (isDarkMode ? undefined : 0.3) : undefined}
+      highlightColor={isPrimary ? undefined : (isDarkMode ? 'rgba(0,0,0,1)' : undefined)}
+      highlightOpacity={isPrimary ? (isDarkMode ? 0.3 : 1) : (isDarkMode ? 0.01 : 1)}
     >
         <TouchableOpacity
         style={[styles.button, buttonSizeStyle]}
         {...props}
         >
             {icon && Icon && <Icon name={icon} size={finalIconSize} color={styles[`${variant}Text`].color} style={styles.icon} />}
-            <Text style={[styles.text, styles[`${variant}Text`], textSizeStyle]}>{title}</Text>
+            <Text style={[styles.text, styles[`${variant}Text`], textSizeStyle, textStyle]}>{title}</Text>
         </TouchableOpacity>
     </NeumorphicOutset>
   );

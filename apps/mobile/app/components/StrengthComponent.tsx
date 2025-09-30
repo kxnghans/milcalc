@@ -59,7 +59,7 @@ export default function StrengthComponent({
                     selectedValue={pushupComponent}
                     onValueChange={setPushupComponent}
                 />
-                <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
+                <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
             </View>
         </View>
     );
