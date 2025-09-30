@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Card, IconRow, useTheme, SegmentedSelector, NeumorphicOutset, Icon } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
+import { getScoreForExercise, calculateBestScore, checkWalkPass } from '@repo/utils';
 import ScoreDisplay from '../components/ScoreDisplay';
 import NumberInput from '../components/NumberInput';
 import TimeInput from '../components/TimeInput';
@@ -12,6 +13,7 @@ import Divider from '../components/Divider';
 
 const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChange }) => {
   const { theme } = useTheme();
+  const [selectedValue, setSelectedValue] = React.useState(exercises[0].value);
 
   const styles = StyleSheet.create({
     sectionContainer: {
@@ -48,15 +50,15 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
       </View>
         <SegmentedSelector
             options={exercises.map(e => ({ label: e.label, value: e.value }))}
-            selectedValue={exercises[0].value} // Placeholder
-            onValueChange={onExerciseChange}
+            selectedValue={selectedValue}
+            onValueChange={setSelectedValue}
         />
       <View style={styles.gridContainer}>
         {exercises.map((exercise, index) => (
             <View key={index} style={styles.gridColumn}>
                 {exercise.type === 'number' ? 
-                    <NumberInput value={bestValues[exercise.value]} placeholder='--' style={{width: '100%'}} /> : 
-                    <TimeInput minutes={bestValues[exercise.value]?.minutes} seconds={bestValues[exercise.value]?.seconds} style={{width: '100%'}} />
+                    <NumberInput value={bestValues[exercise.value]} onChangeText={exercise.onValueChange} placeholder='--' style={{width: '100%'}} /> : 
+                    <TimeInput minutes={bestValues[exercise.value]?.minutes} seconds={bestValues[exercise.value]?.seconds} setMinutes={(minutes) => exercise.onValueChange({ minutes, seconds: bestValues[exercise.value]?.seconds })} setSeconds={(seconds) => exercise.onValueChange({ minutes: bestValues[exercise.value]?.minutes, seconds })} style={{width: '100%'}} />
                 }
             </View>
         ))}
@@ -95,34 +97,62 @@ export default function BestScoreScreen() {
     }
   });
 
-  // Dummy data
+  const [pushUps, setPushUps] = React.useState("");
+  const [hrPushUps, setHrPushUps] = React.useState("");
+  const [sitUps, setSitUps] = React.useState("");
+  const [crunches, setCrunches] = React.useState("");
+  const [plankMinutes, setPlankMinutes] = React.useState("");
+  const [plankSeconds, setPlankSeconds] = React.useState("");
+  const [runMinutes, setRunMinutes] = React.useState("");
+  const [runSeconds, setRunSeconds] = React.useState("");
+  const [shuttles, setShuttles] = React.useState("");
+  const [walkMinutes, setWalkMinutes] = React.useState("");
+  const [walkSeconds, setWalkSeconds] = React.useState("");
+
+  const [scores, setScores] = React.useState({});
+  const [bestScore, setBestScore] = React.useState(0);
+
+  React.useEffect(() => {
+    const newScores = {
+        push_ups_1min: getScoreForExercise(Number(age), gender, 'push_ups_1min', { reps: Number(pushUps) }),
+        hand_release_pushups_2min: getScoreForExercise(Number(age), gender, 'hand_release_pushups_2min', { reps: Number(hrPushUps) }),
+        sit_ups_1min: getScoreForExercise(Number(age), gender, 'sit_ups_1min', { reps: Number(sitUps) }),
+        cross_leg_reverse_crunch_2min: getScoreForExercise(Number(age), gender, 'cross_leg_reverse_crunch_2min', { reps: Number(crunches) }),
+        forearm_plank_time: getScoreForExercise(Number(age), gender, 'forearm_plank_time', { minutes: Number(plankMinutes), seconds: Number(plankSeconds) }),
+        run: getScoreForExercise(Number(age), gender, 'run', { minutes: Number(runMinutes), seconds: Number(runSeconds) }, altitudeGroup),
+        shuttles: getScoreForExercise(Number(age), gender, 'shuttles', { shuttles: Number(shuttles) }, altitudeGroup),
+    };
+    setScores(newScores);
+    setBestScore(calculateBestScore(newScores));
+  }, [age, gender, pushUps, hrPushUps, sitUps, crunches, plankMinutes, plankSeconds, runMinutes, runSeconds, shuttles, walkMinutes, walkSeconds, altitudeGroup]);
+
   const strengthExercises = [
-    { label: '1-Min Push-ups', value: 'push_ups_1min', type: 'number' },
-    { label: '2-Min HR Push-ups', value: 'hr_push_ups_2min', type: 'number' },
+    { label: '1-Min Push-ups', value: 'push_ups_1min', type: 'number', onValueChange: setPushUps },
+    { label: '2-Min HR Push-ups', value: 'hand_release_pushups_2min', type: 'number', onValueChange: setHrPushUps },
   ];
-  const strengthScores = [20, 20];
-  const strengthBestValues = { push_ups_1min: '60', hr_push_ups_2min: '30' };
+  const strengthScores = [scores.push_ups_1min || 0, scores.hand_release_pushups_2min || 0];
+  const strengthBestValues = { push_ups_1min: pushUps, hand_release_pushups_2min: hrPushUps };
 
   const coreExercises = [
-    { label: '1-Min Sit-ups', value: 'sit_ups_1min', type: 'number' },
-    { label: '2-Min Crunches', value: 'cross_leg_reverse_crunch_2min', type: 'number' },
-    { label: 'Plank', value: 'forearm_plank_time', type: 'time' },
+    { label: '1-Min Sit-ups', value: 'sit_ups_1min', type: 'number', onValueChange: setSitUps },
+    { label: '2-Min Crunches', value: 'cross_leg_reverse_crunch_2min', type: 'number', onValueChange: setCrunches },
+    { label: 'Plank', value: 'forearm_plank_time', type: 'time', onValueChange: (value) => { setPlankMinutes(value.minutes); setPlankSeconds(value.seconds); } },
   ];
-  const coreScores = [20, 20, 20];
-  const coreBestValues = { sit_ups_1min: '60', cross_leg_reverse_crunch_2min: '30', forearm_plank_time: { minutes: '3', seconds: '45' } };
+  const coreScores = [scores.sit_ups_1min || 0, scores.cross_leg_reverse_crunch_2min || 0, scores.forearm_plank_time || 0];
+  const coreBestValues = { sit_ups_1min: sitUps, cross_leg_reverse_crunch_2min: crunches, forearm_plank_time: { minutes: plankMinutes, seconds: plankSeconds } };
 
   const cardioExercises = [
-    { label: '1.5-Mile Run', value: 'run', type: 'time' },
-    { label: '20m HAMR', value: 'shuttles', type: 'number' },
-    { label: '2-km Walk', value: 'walk', type: 'time' },
+    { label: '1.5-Mile Run', value: 'run', type: 'time', onValueChange: (value) => { setRunMinutes(value.minutes); setRunSeconds(value.seconds); } },
+    { label: '20m HAMR', value: 'shuttles', type: 'number', onValueChange: setShuttles },
+    { label: '2-km Walk', value: 'walk', type: 'time', onValueChange: (value) => { setWalkMinutes(value.minutes); setWalkSeconds(value.seconds); } },
   ];
-  const cardioScores = [60, 60, 'Pass'];
-  const cardioBestValues = { run: { minutes: '9', seconds: '12' }, shuttles: '60', walk: { minutes: '15', seconds: '30' } };
+  const cardioScores = [scores.run || 0, scores.shuttles || 0, checkWalkPass(Number(age), gender, Number(walkMinutes), Number(walkSeconds), altitudeGroup)];
+  const cardioBestValues = { run: { minutes: runMinutes, seconds: runSeconds }, shuttles: shuttles, walk: { minutes: walkMinutes, seconds: walkSeconds } };
 
 
   return (
     <View style={styles.container}>
-        <ScoreDisplay score={score} showBreakdown={false} />
+        <ScoreDisplay score={{ totalScore: bestScore, isPass: bestScore >= 75 }} showBreakdown={false} />
         <IconRow
             icons={[
             {

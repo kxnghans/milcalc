@@ -113,6 +113,42 @@ const getPlankScore = (ageGroup: any, performance: any) => {
     return 0;
 };
 
+export const getScoreForExercise = (age: number, gender: string, component: string, performance: any, altitudeGroup?: string) => {
+    const ageGroup = getAgeGroup(age, gender);
+    if (!ageGroup) return 0;
+
+    let adjustedPerformance = { ...performance };
+
+    if (altitudeGroup && altitudeGroup !== 'normal') {
+        if (component === 'run') {
+            const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
+            const correction = altitudeAdjustments.run.groups[altitudeGroup].corrections.find(c => runTimeInSeconds >= c.time_range[0] && runTimeInSeconds <= c.time_range[1]);
+            if (correction) {
+                const adjustedTimeInSeconds = runTimeInSeconds - correction.correction;
+                adjustedPerformance.minutes = Math.floor(adjustedTimeInSeconds / 60);
+                adjustedPerformance.seconds = adjustedTimeInSeconds % 60;
+            }
+        } else if (component === 'shuttles') {
+            adjustedPerformance.shuttles += altitudeAdjustments.hamr.groups[altitudeGroup].shuttles_to_add;
+        }
+    }
+
+    switch (component) {
+        case 'run':
+        case 'shuttles':
+            return getCardioScore(ageGroup, component, adjustedPerformance);
+        case 'push_ups_1min':
+        case 'hand_release_pushups_2min':
+        case 'sit_ups_1min':
+        case 'cross_leg_reverse_crunch_2min':
+            return getMuscularFitnessScore(ageGroup, component, adjustedPerformance.reps);
+        case 'forearm_plank_time':
+            return getPlankScore(ageGroup, adjustedPerformance);
+        default:
+            return 0;
+    }
+};
+
 const getAgeGroupIndex = (age: number) => {
     if (age < 30) return 0;
     if (age >= 30 && age <= 39) return 1;
@@ -223,6 +259,14 @@ export const calculatePtScore = (inputs: any) => {
         isPass,
         walkPassed,
     };
+};
+
+export const calculateBestScore = (scores: { [key: string]: number }) => {
+    const strength = Math.max(scores.push_ups_1min || 0, scores.hand_release_pushups_2min || 0);
+    const core = Math.max(scores.sit_ups_1min || 0, scores.cross_leg_reverse_crunch_2min || 0, scores.forearm_plank_time || 0);
+    const cardio = Math.max(scores.run || 0, scores.shuttles || 0);
+
+    return strength + core + cardio;
 };
 
 export const getMinMaxValues = (age: number, sex: string, component: string) => {
