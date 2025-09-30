@@ -18,7 +18,7 @@ export const lightColors = {
   inputBackground: 'rgba(0, 0, 0, 0.04)',
   ninetyPlus: 'rgba(0, 122, 255, 1)',
   placeholder: 'rgba(143, 157, 178, 1)',
-  disabled: 'rgba(60, 60, 67, 0.25)',
+  disabled: 'rgba(60, 60, 67, 0.45)',
   primaryText: 'rgba(255, 255, 255, 1)',
   neumorphic: {
     outset: {
@@ -83,7 +83,7 @@ export const theme = {
       fontFamily: 'System',
     },
     title: {
-      fontSize: 17,
+      fontSize: 16.5,
       fontWeight: '700',
       fontFamily: 'System',
     },

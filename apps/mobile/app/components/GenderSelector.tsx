@@ -12,8 +12,8 @@ export default function GenderSelector({ gender, setGender }) {
             borderRadius: theme.borderRadius.m,
         },
         inactiveText: {
-            textShadowColor: isDarkMode ? 'white' : undefined,
-            textShadowRadius: 0.3,
+            textShadowColor: isDarkMode ? 'black' : undefined,
+            textShadowRadius: 1,
             textShadowOffset: { width: 0, height: 0 },
             color: theme.colors.primary,
         }

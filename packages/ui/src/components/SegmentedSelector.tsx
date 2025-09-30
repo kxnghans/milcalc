@@ -36,9 +36,20 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
       textAlign: 'center',
     },
     selectedText: {
+      ...theme.typography.bodybold,
       color: theme.colors.primaryText,
-      fontWeight: '600',
+      textAlign: 'center',
     },
+    captionText: {
+        ...theme.typography.caption,
+        color: theme.colors.text,
+        textAlign: 'center',
+    },
+    selectedCaptionText: {
+        ...theme.typography.caption,
+        color: theme.colors.primaryText,
+        textAlign: 'center',
+    }
   });
 
   return (
@@ -50,7 +61,10 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
     >
       <View style={styles.container} onLayout={onLayout}>
         {options.map((option) => {
-          if (option.value === selectedValue) {
+          const lines = option.label.split('\n');
+          const isSelected = option.value === selectedValue;
+
+          if (isSelected) {
             return (
               <NeumorphicOutset
                 key={option.value}
@@ -72,9 +86,11 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
                   style={[styles.segment, styles.selectedSegment]}
                   onPress={() => onValueChange(option.value)}
                 >
-                  <Text style={[styles.text, styles.selectedText]}>
-                    {option.label}
-                  </Text>
+                  {lines.map((line, index) => (
+                    <Text key={index} style={index === 0 ? styles.selectedText : styles.selectedCaptionText}>
+                      {line}
+                    </Text>
+                  ))}
                 </TouchableOpacity>
               </NeumorphicOutset>
             )
@@ -85,9 +101,11 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
               style={styles.segment}
               onPress={() => onValueChange(option.value)}
             >
-              <Text style={styles.text}>
-                {option.label}
-              </Text>
+              {lines.map((line, index) => (
+                <Text key={index} style={index === 0 ? styles.text : styles.captionText}>
+                  {line}
+                </Text>
+              ))}
             </TouchableOpacity>
           )
         })}

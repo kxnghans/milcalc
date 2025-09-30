@@ -115,6 +115,10 @@ export const ProgressBar = ({
         top: 0,
         height: '100%',
         width: `${visualProgress * 100}%`,
+        marginTop: 0,
+        marginBottom: 0,
+        marginLeft: 0,
+        marginRight: 0,
       }}
       contentStyle={{
         borderRadius: theme.borderRadius.m,

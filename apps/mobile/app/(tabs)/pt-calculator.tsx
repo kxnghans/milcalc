@@ -146,6 +146,7 @@ export default function PTCalculator() {
         flex: 1,
         backgroundColor: theme.colors.background,
         paddingHorizontal: theme.spacing.s,
+        paddingVertical: theme.spacing.xs,
     },
     cardTitle: {
         ...theme.typography.title,
