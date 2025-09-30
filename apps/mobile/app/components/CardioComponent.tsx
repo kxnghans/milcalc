@@ -28,37 +28,55 @@ export default function CardioComponent({
 }) {
     const { theme, isDarkMode } = useTheme();
     const [adjustment, setAdjustment] = React.useState(null);
+    const [adjustedWalkMaxTime, setAdjustedWalkMaxTime] = React.useState(null);
 
     React.useEffect(() => {
+        // Always reset adjustments when dependencies change
+        setAdjustment(null);
+        setAdjustedWalkMaxTime(null);
+
         if (altitudeGroup && altitudeGroup !== 'normal') {
             if (cardioComponent === 'run') {
-                const runTimeInSeconds = parseInt(runMinutes) * 60 + parseInt(runSeconds);
-                const correction = altitudeAdjustments.run.groups[altitudeGroup].corrections.find(c => runTimeInSeconds >= c.time_range[0] && runTimeInSeconds <= c.time_range[1]);
-                if (correction) {
-                    setAdjustment(`- ${correction.correction}s`);
-                } else {
-                    setAdjustment(null);
+                const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
+                const correctionGroup = altitudeAdjustments.run.groups[altitudeGroup];
+                if (correctionGroup) {
+                    const correction = correctionGroup.corrections.find(c => runTimeInSeconds >= c.time_range[0] && runTimeInSeconds <= c.time_range[1]);
+                    if (correction) {
+                        setAdjustment(`- ${correction.correction}s`);
+                    }
                 }
             } else if (cardioComponent === 'walk') {
                 const ageIndex = getAgeGroupIndex(age);
-                if (ageIndex !== -1 && gender) {
-                    const maxTime = altitudeAdjustments.walk[gender].groups[altitudeGroup].max_times[ageIndex].max_time;
-                    const minutes = Math.floor(maxTime / 60);
-                    const seconds = maxTime % 60;
-                    setAdjustment(`Max time: ${minutes}:${seconds.toString().padStart(2, '0')}`);
-                } else {
-                    setAdjustment(null);
+
+                // Defensive checks to prevent the TypeError
+                if (ageIndex !== -1 && gender &&
+                    altitudeAdjustments.walk &&
+                    altitudeAdjustments.walk[gender] &&
+                    altitudeAdjustments.walk[gender][altitudeGroup] &&
+                    altitudeAdjustments.walk[gender][altitudeGroup].max_times &&
+                    altitudeAdjustments.walk[gender][altitudeGroup].max_times[ageIndex]
+                ) {
+                    const maxTime = altitudeAdjustments.walk[gender][altitudeGroup].max_times[ageIndex].max_time;
+                    if (maxTime) {
+                        const minutes = Math.floor(maxTime / 60);
+                        const seconds = maxTime % 60;
+                        setAdjustment(`Max time: ${minutes}:${seconds.toString().padStart(2, '0')}`);
+                        setAdjustedWalkMaxTime(maxTime);
+                    }
                 }
             } else if (cardioComponent === 'shuttles') {
-                const shuttlesToAdd = altitudeAdjustments.hamr.groups[altitudeGroup].shuttles_to_add;
-                setAdjustment(`+ ${shuttlesToAdd}`);
-            } else {
-                setAdjustment(null);
+                if (altitudeAdjustments.hamr &&
+                    altitudeAdjustments.hamr.groups &&
+                    altitudeAdjustments.hamr.groups[altitudeGroup]
+                ) {
+                    const shuttlesToAdd = altitudeAdjustments.hamr.groups[altitudeGroup].shuttles_to_add;
+                    if (shuttlesToAdd) {
+                        setAdjustment(`+ ${shuttlesToAdd}`);
+                    }
+                }
             }
-        } else {
-            setAdjustment(null);
         }
-    }, [runMinutes, runSeconds, walkMinutes, walkSeconds, shuttles, cardioComponent, altitudeGroup, age, gender]);
+    }, [runMinutes, runSeconds, cardioComponent, altitudeGroup, age, gender]);
 
     const getAgeGroupIndex = (age: number) => {
         if (age < 30) return 0;
@@ -68,6 +86,7 @@ export default function CardioComponent({
         if (age >= 60) return 4;
         return -1;
     }
+
     const styles = StyleSheet.create({
         cardTitle: {
             ...theme.typography.title,
@@ -82,7 +101,6 @@ export default function CardioComponent({
             flexDirection: 'row',
             alignItems: 'center',
         },
-
         exerciseBlock: {
             justifyContent: 'center',
         },
@@ -95,7 +113,6 @@ export default function CardioComponent({
         >
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <View>
-                    
                     <View style={styles.exerciseBlock}>
                         <View style={styles.componentHeader}>
                             <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
@@ -103,7 +120,6 @@ export default function CardioComponent({
                             {showProgressBars && (() => {
                                 if (cardioComponent === 'run') {
                                     const timeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
-
                                     return (
                                         <View style={{ flex: 1 }}>
                                             <NeumorphicOutset>
@@ -120,13 +136,14 @@ export default function CardioComponent({
                                     );
                                 } else if (cardioComponent === 'walk') {
                                     const timeInSeconds = (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0);
+                                    const passThreshold = adjustedWalkMaxTime !== null ? adjustedWalkMaxTime : cardioMinMax.min;
                                     return (
                                         <View style={{ flex: 1 }}>
                                             <NeumorphicOutset>
                                                 <ProgressBar
                                                     invertScale={true}
                                                     value={timeInSeconds}
-                                                    passThreshold={cardioMinMax.min} // This will be the max time for passing
+                                                    passThreshold={passThreshold}
                                                     valueIsTime={true}
                                                     isPassFail={true}
                                                 />
@@ -134,7 +151,6 @@ export default function CardioComponent({
                                         </View>
                                     );
                                 } else { // shuttles
-
                                     return (
                                         <View style={{ flex: 1 }}>
                                             <NeumorphicOutset>

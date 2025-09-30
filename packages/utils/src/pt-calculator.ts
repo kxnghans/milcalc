@@ -132,11 +132,21 @@ export const checkWalkPass = (age: number, gender: string, minutes: number, seco
     let maxTimeInSeconds = 0;
 
     if (altitudeGroup && altitudeGroup !== 'normal') {
-        const maxTime = altitudeAdjustments.walk[gender].groups[altitudeGroup].max_times[ageIndex].max_time;
-        maxTimeInSeconds = maxTime;
+        // Defensive checks to prevent the TypeError
+        if (
+            altitudeAdjustments.walk &&
+            altitudeAdjustments.walk[gender] &&
+            altitudeAdjustments.walk[gender][altitudeGroup] &&
+            altitudeAdjustments.walk[gender][altitudeGroup].max_times &&
+            altitudeAdjustments.walk[gender][altitudeGroup].max_times[ageIndex]
+        ) {
+            maxTimeInSeconds = altitudeAdjustments.walk[gender][altitudeGroup].max_times[ageIndex].max_time;
+        } else {
+            return 'n/a'; // Data not available for this combination
+        }
     } else {
         const standards = walkStandards[gender];
-        if (!standards) return 'n/a';
+        if (!standards || !standards[ageIndex]) return 'n/a';
         const maxTime = standards[ageIndex].max_time;
         maxTimeInSeconds = timeToSeconds(maxTime);
     }

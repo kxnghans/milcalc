@@ -92,7 +92,7 @@ export default function CoreComponent({
                     <NumberInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
                 )}
                 {coreComponent === "cross_leg_reverse_crunch_2min" && (
-                    <NumberInput value={reverseCrunches} onChangeText={setReverseCrunches} style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
+                    <NumberInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
                 )}
                 {coreComponent === "forearm_plank_time" && (
                     <TimeInput
