@@ -129,7 +129,7 @@ export default function PTCalculator() {
         setScore(result);
     };
     calculateScore();
-  }, [age, gender, cardioComponent, runMinutes, runSeconds, shuttles, walkMinutes, walkSeconds, pushupComponent, pushups, coreComponent, situps, reverseCrunches, plankMinutes, plankSeconds, coreComponent, pushupComponent]);
+  }, [age, gender, cardioComponent, runMinutes, runSeconds, shuttles, walkMinutes, walkSeconds, pushupComponent, pushups, coreComponent, situps, reverseCrunches, plankMinutes, plankSeconds, altitudeGroup]);
 
   const showProgressBars = age && gender;
 
