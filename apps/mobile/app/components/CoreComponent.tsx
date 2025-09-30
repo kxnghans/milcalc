@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
 
@@ -38,8 +38,6 @@ export default function CoreComponent({
         exerciseBlock: {
             justifyContent: 'center',
         },
-        neumorphicOutsetContainer: {
-        },
     });
 
     return (
@@ -47,14 +45,15 @@ export default function CoreComponent({
             
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <Text style={[styles.cardTitle, {marginRight: theme.spacing.m, marginVertical: theme.spacing.s}]}>Core</Text>
+                    <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                    <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m}]}>Core</Text>
                     {showProgressBars && (() => {
 
                         if (coreComponent === "forearm_plank_time") {
                             const plankTimeInSeconds = (parseInt(plankMinutes) || 0) * 60 + (parseInt(plankSeconds) || 0);
                             return (
                                 <View style={{ flex: 1 }}>
-                                    <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                                    <NeumorphicOutset>
                                         <ProgressBar
                                             value={plankTimeInSeconds}
                                             passThreshold={minMax.core.min}
@@ -68,7 +67,7 @@ export default function CoreComponent({
                         }
                         return (
                             <View style={{ flex: 1 }}>
-                                <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                                <NeumorphicOutset>
                                     <ProgressBar
                                         value={parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0}
                                         passThreshold={minMax.core.min}
@@ -90,10 +89,10 @@ export default function CoreComponent({
                     onValueChange={setCoreComponent}
                 />
                 {coreComponent === "sit_ups_1min" && (
-                    <NumberInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
+                    <NumberInput value={situps} onChangeText={setSitups} placeholder="Enter sit-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
                 )}
                 {coreComponent === "cross_leg_reverse_crunch_2min" && (
-                    <NumberInput value={reverseCrunches} onChangeText={setReverseCrunches} placeholder="Enter crunch count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
+                    <NumberInput value={reverseCrunches} onChangeText={setReverseCrunches} style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
                 )}
                 {coreComponent === "forearm_plank_time" && (
                     <TimeInput
@@ -101,7 +100,7 @@ export default function CoreComponent({
                         setMinutes={setPlankMinutes}
                         seconds={plankSeconds}
                         setSeconds={setPlankSeconds}
-                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }}
+                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
                     />
                 )}
             </View>

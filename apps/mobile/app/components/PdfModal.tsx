@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking } from 'react-native';
-import { useTheme } from '@repo/ui';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback } from 'react-native';
+import { useTheme, NeumorphicOutset } from '@repo/ui';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import { Asset } from 'expo-asset';
 
-export default function PdfModal({ isModalVisible, setModalVisible }) {
-    const { theme } = useTheme();
+export default function PdfModal({ isModalVisible, setModalVisible, shadowOpacity, highlightOpacity, shadowRadius, highlightRadius, highlightColor: highlightColorProp }) {
+    const { theme, isDarkMode } = useTheme();
 
     const pdfs = [
         {
@@ -52,13 +52,15 @@ export default function PdfModal({ isModalVisible, setModalVisible }) {
         }
     };
 
+    const highlightColor = highlightColorProp || 'rgba(0,0,0,1)';
+    const finalHighlightOpacity = isDarkMode ? 0.05 : 0.02;
+
     const styles = StyleSheet.create({
         centeredView: {
             flex: 1,
             justifyContent: "center",
             alignItems: "center",
             marginTop: 22,
-            backgroundColor: 'rgba(0,0,0,0.5)',
         },
         modalView: {
             margin: 20,
@@ -101,32 +103,43 @@ export default function PdfModal({ isModalVisible, setModalVisible }) {
             animationType="slide"
             transparent={true}
             visible={isModalVisible}
-            onRequestClose={() => {
-                setModalVisible(!isModalVisible);
-            }}
+            onRequestClose={() => setModalVisible(false)}
         >
-            <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        
-                        {pdfs.map((pdf, index) => (
+            <View style={{ flex: 1 }}>
+                {/* Background blur that closes modal */}
+                <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                    <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+                </TouchableWithoutFeedback>
+
+                {/* Centered white card that does NOT close */}
+                <View style={styles.centeredView} pointerEvents="box-none">
+                    <NeumorphicOutset
+                        shadowOpacity={shadowOpacity}
+                        highlightOpacity={highlightOpacity || finalHighlightOpacity}
+                        shadowRadius={shadowRadius}
+                        highlightRadius={highlightRadius}
+                        highlightColor={highlightColor}
+                    >
+                        <View style={styles.modalView}>
+                            {pdfs.map((pdf, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    style={styles.button}
+                                    onPress={() => handlePress(pdf)}
+                                >
+                                    <Text style={styles.textStyle}>{pdf.name}</Text>
+                                </TouchableOpacity>
+                            ))}
                             <TouchableOpacity
-                                key={index}
-                                style={styles.button}
-                                onPress={() => handlePress(pdf)}
+                                style={[styles.button, styles.buttonClose]}
+                                onPress={() => setModalVisible(false)}
                             >
-                                <Text style={styles.textStyle}>{pdf.name}</Text>
+                                <Text style={styles.textStyle}>Close</Text>
                             </TouchableOpacity>
-                        ))}
-                        <TouchableOpacity
-                            style={[styles.button, styles.buttonClose]}
-                            onPress={() => setModalVisible(!isModalVisible)}
-                        >
-                            <Text style={styles.textStyle}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
+                        </View>
+                    </NeumorphicOutset>
                 </View>
-            </BlurView>
+            </View>
         </Modal>
     );
 };

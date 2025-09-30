@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme, SegmentedSelector } from '@repo/ui';
+import { useTheme, SegmentedSelector, Icon, ICONS } from '@repo/ui';
 
 interface AltitudeAdjustmentComponentProps {
   selectedValue: string;
@@ -13,7 +13,6 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
     cardTitle: {
       ...theme.typography.title,
       color: theme.colors.text,
-      marginBottom: theme.spacing.s,
     },
   });
 
@@ -27,7 +26,10 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
 
   return (
     <View>
-      <Text style={styles.cardTitle}>Altitude Adjustment (ft)</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} />
+        <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s }]}>Altitude Adjustment (ft)</Text>
+      </View>
       <SegmentedSelector
         options={altitudeOptions}
         selectedValue={selectedValue}

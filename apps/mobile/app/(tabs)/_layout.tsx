@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@repo/ui';
 
 export default function TabLayout() {
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
 
   return (
     <Tabs
@@ -14,9 +14,20 @@ export default function TabLayout() {
         tabBarInactiveTintColor: theme.colors.text,
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
+          borderTopColor: 'transparent',
+          shadowColor: theme.colors.neumorphic.outset.highlight,
+          shadowOffset: theme.colors.neumorphic.outset.highlightOffset,
+          shadowOpacity: theme.colors.neumorphic.outset.highlightOpacity,
+          shadowRadius: theme.colors.neumorphic.outset.shadowRadius,
+          elevation: theme.colors.neumorphic.outset.elevation,
         },
         headerStyle: {
           backgroundColor: theme.colors.surface,
+          shadowColor: theme.colors.neumorphic.outset.shadow,
+          shadowOffset: theme.colors.neumorphic.outset.shadowOffset,
+          shadowOpacity: theme.colors.neumorphic.outset.shadowOpacity,
+          shadowRadius: theme.colors.neumorphic.outset.shadowRadius,
+          elevation: theme.colors.neumorphic.outset.elevation,
         },
         headerTitleStyle: {
           ...theme.typography.header,
@@ -26,7 +37,6 @@ export default function TabLayout() {
           ...theme.typography.caption,
         },
         tabBarHideOnKeyboard: true,
-        tabBarBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.surface }} />,
       }}>
       <Tabs.Screen
         name="pt-calculator"

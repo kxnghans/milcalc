@@ -146,6 +146,7 @@ export default function PTCalculator() {
         flex: 1,
         backgroundColor: theme.colors.background,
         paddingHorizontal: theme.spacing.s,
+        paddingVertical: theme.spacing.xs,
     },
     cardTitle: {
         ...theme.typography.title,
@@ -166,7 +167,7 @@ export default function PTCalculator() {
                 <ScoreDisplay score={score} cardioComponent={cardioComponent} containerStyle={{ marginBottom: theme.spacing.s }} />
                 <IconRow icons={[
                     {
-                        name: ICONS.BEST_SCORE,
+                        name: ICONS.WEIGHT_LIFTER,
                         href: "/best-score",
                     },
                     {

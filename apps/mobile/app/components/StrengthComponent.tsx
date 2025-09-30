@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
 import NumberInput from './NumberInput';
 
 export default function StrengthComponent({ 
@@ -31,8 +31,6 @@ export default function StrengthComponent({
         exerciseBlock: {
             justifyContent: 'center',
         },
-        neumorphicOutsetContainer: {
-        },
     });
 
     return (
@@ -40,10 +38,11 @@ export default function StrengthComponent({
             
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <Text style={[styles.cardTitle, {marginRight: theme.spacing.m, marginVertical: theme.spacing.s}]}>Strength</Text>
+                    <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                    <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m}]}>Strength</Text>
                     {showProgressBars && (
                         <View style={{ flex: 1 }}>
-                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                            <NeumorphicOutset>
                                 <ProgressBar
                                     value={parseInt(pushups) || 0}
                                     passThreshold={minMax.pushups.min}
@@ -59,7 +58,7 @@ export default function StrengthComponent({
                     selectedValue={pushupComponent}
                     onValueChange={setPushupComponent}
                 />
-                <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
+                <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
             </View>
         </View>
     );

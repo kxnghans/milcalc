@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme } from '@repo/ui';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
 
@@ -86,8 +86,6 @@ export default function CardioComponent({
         exerciseBlock: {
             justifyContent: 'center',
         },
-        neumorphicOutsetContainer: {
-        },
     });
 
     return (
@@ -100,14 +98,15 @@ export default function CardioComponent({
                     
                     <View style={styles.exerciseBlock}>
                         <View style={styles.componentHeader}>
-                            <Text style={[styles.cardTitle, { marginRight: theme.spacing.m, marginVertical: theme.spacing.s }]}>Cardio</Text>
+                            <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                            <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m }]}>Cardio</Text>
                             {showProgressBars && (() => {
                                 if (cardioComponent === 'run') {
                                     const timeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
 
                                     return (
                                         <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                                            <NeumorphicOutset>
                                                 <ProgressBar
                                                     invertScale={true}
                                                     value={timeInSeconds}
@@ -123,7 +122,7 @@ export default function CardioComponent({
                                     const timeInSeconds = (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0);
                                     return (
                                         <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                                            <NeumorphicOutset>
                                                 <ProgressBar
                                                     invertScale={true}
                                                     value={timeInSeconds}
@@ -138,7 +137,7 @@ export default function CardioComponent({
 
                                     return (
                                         <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer}>
+                                            <NeumorphicOutset>
                                                 <ProgressBar
                                                     value={parseInt(shuttles) || 0}
                                                     passThreshold={cardioMinMax.min}
@@ -163,11 +162,11 @@ export default function CardioComponent({
                                 seconds={runSeconds}
                                 setSeconds={setRunSeconds}
                                 adjustment={adjustment}
-                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }}
+                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
                             />
                         )}
                         {cardioComponent === "shuttles" && (
-                            <NumberInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" adjustment={adjustment} style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }} />
+                            <NumberInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" adjustment={adjustment} style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
                         )}
                         {cardioComponent === "walk" && (
                             <TimeInput
@@ -176,7 +175,7 @@ export default function CardioComponent({
                                 seconds={walkSeconds}
                                 setSeconds={setWalkSeconds}
                                 adjustment={adjustment}
-                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.s }}
+                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
                             />
                         )}
                     </View>

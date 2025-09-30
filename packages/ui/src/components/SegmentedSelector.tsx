@@ -21,7 +21,8 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
     },
     segment: {
       flex: 1,
-      padding: theme.spacing.s,
+      paddingVertical: theme.spacing.s,
+      paddingHorizontal: theme.spacing.xs,
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -35,20 +36,35 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
       textAlign: 'center',
     },
     selectedText: {
+      ...theme.typography.bodybold,
       color: theme.colors.primaryText,
-      fontWeight: '600',
+      textAlign: 'center',
     },
+    captionText: {
+        ...theme.typography.caption,
+        color: theme.colors.text,
+        textAlign: 'center',
+    },
+    selectedCaptionText: {
+        ...theme.typography.caption,
+        color: theme.colors.primaryText,
+        textAlign: 'center',
+    }
   });
 
   return (
     <NeumorphicOutset
       containerStyle={style}
       contentStyle={{ backgroundColor: theme.colors.secondary, borderRadius: theme.borderRadius.m, overflow: 'hidden' }}
-      highlightOpacity={isDarkMode ? 0.4 : 1}
+      highlightColor={isDarkMode ? 'rgba(0,0,0,1)' : undefined}
+      highlightOpacity={isDarkMode ? 0.05 : 1}
     >
       <View style={styles.container} onLayout={onLayout}>
         {options.map((option) => {
-          if (option.value === selectedValue) {
+          const lines = option.label.split('\n');
+          const isSelected = option.value === selectedValue;
+
+          if (isSelected) {
             return (
               <NeumorphicOutset
                 key={option.value}
@@ -59,23 +75,22 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
                   marginBottom: theme.spacing.xs,
                   marginLeft: theme.spacing.xs,
                   marginRight: theme.spacing.xs,
-                  shadowRadius: theme.spacing.xs,
-                  highlightRadius: theme.spacing.xs,
                   alignSelf: 'stretch'
                 }}
-                shadowRadius={3} // theme.spacing.xs
-                highlightRadius={3} // theme.spacing.xs
                 contentStyle={{ backgroundColor: theme.colors.primary, borderRadius: theme.borderRadius.m, overflow: 'hidden', flex: 1 }}
                 highlightStyle={{ flex: 1 }}
+                shadowOpacity={isDarkMode ? undefined : 0.3}
                 highlightOpacity={isDarkMode ? 0.55 : 1}
               >
                 <TouchableOpacity
                   style={[styles.segment, styles.selectedSegment]}
                   onPress={() => onValueChange(option.value)}
                 >
-                  <Text style={[styles.text, styles.selectedText]}>
-                    {option.label}
-                  </Text>
+                  {lines.map((line, index) => (
+                    <Text key={index} style={index === 0 ? styles.selectedText : styles.selectedCaptionText}>
+                      {line}
+                    </Text>
+                  ))}
                 </TouchableOpacity>
               </NeumorphicOutset>
             )
@@ -86,9 +101,11 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
               style={styles.segment}
               onPress={() => onValueChange(option.value)}
             >
-              <Text style={styles.text}>
-                {option.label}
-              </Text>
+              {lines.map((line, index) => (
+                <Text key={index} style={index === 0 ? styles.text : styles.captionText}>
+                  {line}
+                </Text>
+              ))}
             </TouchableOpacity>
           )
         })}
