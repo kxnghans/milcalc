@@ -55,7 +55,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
         <StyledTextInput
             value={minutes}
             onChangeText={handleMinutesChange}
-            placeholder="Minutes"
+            placeholder="mm"
             maxLength={2}
             keyboardType="numeric"
             style={styles.input}
@@ -65,7 +65,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
             ref={secondsInput}
             value={seconds}
             onChangeText={setSeconds}
-            placeholder="Seconds"
+            placeholder="ss"
             maxLength={2}
             keyboardType="numeric"
             style={styles.input}
