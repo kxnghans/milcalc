@@ -1,12 +1,12 @@
 # MilCalc
 
-A collection of tools for military personnel and travel enthusiasts.
+A collection of tools for military personnel.
 
 ## Features
 
 - **Air Force PT Calculator**: Calculate your score for the US Air Force Physical Fitness Test.
 - **Best Score Calculator**: Track your personal bests for each component of the PT test.
-- **Travel Buddy**: Plan your trips and get out of the group chat (formerly "unpack").
+
 
 ## Prerequisites
 
