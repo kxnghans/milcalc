@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'dev.unpack.mobile'
+    namespace 'dev.milcalc.mobile'
     defaultConfig {
-        applicationId 'dev.unpack.mobile'
+        applicationId 'dev.milcalc.mobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -1,4 +1,4 @@
-package dev.unpack.mobile
+package dev.milcalc.mobile
 
 import android.os.Build
 import android.os.Bundle

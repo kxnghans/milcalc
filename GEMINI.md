@@ -38,14 +38,36 @@ The project uses `pnpm` as the package manager and `turbo` as the monorepo build
 
 ### Web App
 
--   **Run:** `pnpm --filter unpack-web dev`
+-   **Run:** `pnpm --filter milcalc-web dev`
 -   **Access:** http://localhost:3000
 -   **PT Calculator:** http://localhost:3000/pt-calculator
 
 ### Mobile App
 
--   **Run:** `pnpm --filter unpack-mobile dev`
+-   **Run:** `pnpm --filter milcalc-mobile dev`
 -   **Access:** Use the Expo Go app and scan the QR code from the terminal.
+
+## Calculation Logic
+
+The PT score calculation logic is centralized in `packages/utils/src/pt-calculator.ts` to ensure consistency and reusability across the application. The calculations are based on the standards outlined in `dafman36-2905.pdf`.
+
+### PT Calculator (Home Screen)
+
+The home screen (`apps/mobile/app/(tabs)/pt-calculator.tsx`) uses the `calculatePtScore` function to calculate the user's total PT score. This function takes a single object containing all the user's demographic data (age, gender), selected components for each category (strength, core, cardio), and performance results.
+
+The `calculatePtScore` function also handles altitude adjustments. If an altitude group other than "normal" is selected, the function adjusts the scores for the 1.5-mile run and the 20-meter HAMR shuttle run based on the tables in `packages/ui/src/pt_data/altitude-adjustments.json`. For the 2-kilometer walk, it uses the adjusted maximum times from the same file to determine a pass or fail.
+
+### Best Score Screen
+
+The "Best Score" screen (`apps/mobile/app/(tabs)/best-score.tsx`) is designed to help users determine their best possible score. It uses two main utility functions:
+
+-   `getScoreForExercise`: This function calculates the score for a single exercise. It takes the user's age, gender, the specific exercise component, the user's performance, and the selected altitude group as arguments. This allows the screen to display the score for each individual exercise as the user enters their performance data. Like `calculatePtScore`, this function also applies altitude adjustments to the cardio components.
+
+-   `calculateBestScore`: This function takes an object containing the scores for all exercises and calculates the best possible total score. It does this by finding the maximum score within each category (Strength, Core, and Cardio) and then summing these maximum scores.
+
+### Code Reuse
+
+The calculation logic is highly reusable. Both the home screen and the "Best Score" screen import and use functions from the `packages/utils/src/pt-calculator.ts` file. This centralized approach to logic ensures that any updates to the scoring rules only need to be made in one place, and the changes will be reflected in both screens. This makes the code more modular, maintainable, and scalable.
 
 ## Development Conventions
 
@@ -65,7 +87,7 @@ The project uses `pnpm` as the package manager and `turbo` as the monorepo build
 
 ## Data Sources
 
--   **`packages/ui/src/pt-data.json`**: This file contains the scoring data for the PT calculator. It should never be changed.
+-   **`packages/ui/src/pt_data/pt-data.json`**: This file contains the scoring data for the PT calculator. It should never be changed.
 -   **`packages/ui/src/data/walk-standards.json`**: This file contains the walk standards for the 2-kilometer walk, separated by gender and age group.
 
 ## UI and Styling
@@ -74,15 +96,30 @@ The project uses `pnpm` as the package manager and `turbo` as the monorepo build
 
 The project uses two main neumorphic components to create its visual style: `NeumorphicInset` and `NeumorphicOutset`.
 
-#### `NeumorphicOutset` Styling
+#### `NeumorphicInset`
 
-The `NeumorphicOutset` component has been refactored to provide more control over its styling, particularly margins.
+The `NeumorphicInset` component creates an inset or "pressed-in" effect. It achieves this by using inner shadows. The top and left borders are given a shadow color, while the bottom and right borders are given a highlight color. This creates the illusion that the component is pressed into the screen.
+
+#### `NeumorphicOutset`
+
+The `NeumorphicOutset` component creates an outset or "raised" effect. It uses two overlapping `View` components with different shadow properties to create the effect. The outer `View` has a dark shadow offset to the bottom and right, while the inner `View` has a light shadow (highlight) offset to the top and left. This combination of shadows and highlights makes the component appear as if it is extruding from the screen.
+
+#### Style Overrides
+
+Both `NeumorphicInset` and `NeumorphicOutset` are designed to be flexible and customizable. You can override their default styles using the following props:
 
 -   **`containerStyle`**: Use this prop to apply styles to the outer container of the component. This is where you should apply layout styles like `margin` and `flex`.
 -   **`contentStyle`**: Use this prop to apply styles to the inner content area of the component. This is where you should apply styles like `padding` and `alignItems`.
--   **`style` (deprecated)**: This prop is deprecated but is maintained for backward compatibility. It applies styles to the content area. Please use `containerStyle` or `contentStyle` for new development.
 
-The default margin for `NeumorphicOutset` is `theme.spacing.s`.
+##### Overriding by Edge
+
+You can also override styles for specific edges (top, bottom, left, right) by passing them in the `containerStyle` or `contentStyle` objects. For example, to change the top border color of a `NeumorphicInset` component, you would do the following:
+
+```tsx
+<NeumorphicInset containerStyle={{ borderTopColor: 'red' }} />
+```
+
+Similarly, you can override other border properties like `borderLeftWidth`, `borderBottomColor`, etc.
 
 ### Theme
 
