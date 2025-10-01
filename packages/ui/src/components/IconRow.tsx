@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, ViewStyle, TextStyle } from 'react-native';
 import * as Icons from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useTheme } from "../contexts/ThemeContext";
@@ -12,6 +12,9 @@ interface IconRowProps {
     onPress?: () => void;
     href?: string;
     iconSet?: keyof typeof Icons;
+    color?: string;
+    backgroundColor?: string;
+    textStyle?: TextStyle;
   }[];
   style?: ViewStyle;
   borderRadius?: number;
@@ -47,14 +50,14 @@ export const IconRow = ({ icons, style, borderRadius }: IconRowProps) => {
               margin: theme.spacing.s,
             }}
             contentStyle={{
-              backgroundColor: theme.colors.background,
+              backgroundColor: icon.backgroundColor || theme.colors.background,
               borderRadius: borderRadius ?? theme.borderRadius.l,
               overflow: 'hidden',
             }}
           >
             <View style={styles.iconBlock}>
-                {icon.name && <Icon name={icon.name} size={25} color={theme.colors.text} />}
-                {icon.text && <Text style={{color: theme.colors.text}}>{icon.text}</Text>}
+                {icon.name && <Icon name={icon.name} size={25} color={icon.color || theme.colors.text} />}
+                {icon.text && <Text style={[{color: icon.color || theme.colors.text}, icon.textStyle]}>{icon.text}</Text>}
             </View>
           </NeumorphicOutset>
         );

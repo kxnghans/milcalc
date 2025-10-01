@@ -32,7 +32,7 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
       </View>
       <SegmentedSelector
         options={altitudeOptions}
-        selectedValue={selectedValue}
+        selectedValues={[selectedValue]}
         onValueChange={onValueChange}
       />
     </View>

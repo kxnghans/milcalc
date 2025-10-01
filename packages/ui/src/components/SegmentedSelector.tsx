@@ -5,13 +5,13 @@ import { useTheme } from "../contexts/ThemeContext";
 
 interface SegmentedSelectorProps {
   options: { label: string; value: string }[];
-  selectedValue: string;
+  selectedValues: string[];
   onValueChange: (value: string) => void;
   style?: StyleProp<ViewStyle>;
   onLayout?: (event: any) => void;
 }
 
-export const SegmentedSelector = ({ options, selectedValue, onValueChange, style, onLayout }: SegmentedSelectorProps) => {
+export const SegmentedSelector = ({ options, selectedValues, onValueChange, style, onLayout }: SegmentedSelectorProps) => {
   const { theme, isDarkMode } = useTheme();
 
   const styles = StyleSheet.create({
@@ -62,7 +62,7 @@ export const SegmentedSelector = ({ options, selectedValue, onValueChange, style
       <View style={styles.container} onLayout={onLayout}>
         {options.map((option) => {
           const lines = option.label.split('\n');
-          const isSelected = option.value === selectedValue;
+          const isSelected = selectedValues.includes(option.value);
 
           if (isSelected) {
             return (

@@ -9,9 +9,20 @@ interface TimeInputProps {
   setSeconds: (seconds: string) => void;
   adjustment?: string;
   style?: any;
+  minutesPlaceholder?: string;
+  secondsPlaceholder?: string;
 }
 
-const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, setSeconds, adjustment, style }) => {
+const TimeInput: React.FC<TimeInputProps> = ({
+  minutes,
+  setMinutes,
+  seconds,
+  setSeconds,
+  adjustment,
+  style,
+  minutesPlaceholder = "mm",
+  secondsPlaceholder = "ss",
+}) => {
   const { theme } = useTheme();
   const secondsInput = useRef<TextInput>(null);
 
@@ -55,7 +66,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
         <StyledTextInput
             value={minutes}
             onChangeText={handleMinutesChange}
-            placeholder="mm"
+            placeholder={minutesPlaceholder}
             maxLength={2}
             keyboardType="numeric"
             style={styles.input}
@@ -65,7 +76,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ minutes, setMinutes, seconds, set
             ref={secondsInput}
             value={seconds}
             onChangeText={setSeconds}
-            placeholder="ss"
+            placeholder={secondsPlaceholder}
             maxLength={2}
             keyboardType="numeric"
             style={styles.input}

@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Card, IconRow, useTheme, SegmentedSelector, NeumorphicOutset, Icon } from '@repo/ui';
+import { Card, IconRow, useTheme, SegmentedSelector, NeumorphicOutset, Icon, useScoreColors } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
-import { getScoreForExercise, calculateBestScore, checkWalkPass } from '@repo/utils';
+import { getScoreForExercise, calculateBestScore, checkWalkPass, getScoreCategory } from '@repo/utils';
 import ScoreDisplay from '../components/ScoreDisplay';
 import NumberInput from '../components/NumberInput';
 import TimeInput from '../components/TimeInput';
@@ -10,10 +10,22 @@ import Demographics from '../components/Demographics';
 import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
 import Divider from '../components/Divider';
 
-
-const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChange }) => {
+const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) => {
   const { theme } = useTheme();
-  const [selectedValue, setSelectedValue] = React.useState(exercises[0].value);
+
+  const excellentColors = useScoreColors('excellent');
+  const passColors = useScoreColors('pass');
+  const failColors = useScoreColors('fail');
+
+  const getColorForScore = (score) => {
+    const category = getScoreCategory(score, maxScore);
+    switch(category) {
+        case 'excellent': return excellentColors;
+        case 'pass': return passColors;
+        case 'fail': return failColors;
+        default: return {};
+    }
+  }
 
   const styles = StyleSheet.create({
     sectionContainer: {
@@ -39,8 +51,26 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
     },
     scoreRow: {
         width: '100%',
-    }
+    },
+    scoreBreakdownText: {
+        ...theme.typography.subtitle,
+        textShadowColor: theme.colors.neumorphic.outset.shadow,
+        textShadowRadius: 0.1,
+        textShadowOffset: { width: 0, height: 0 },
+    },
   });
+
+  const maxNumericScore = Math.max(0, ...scores.filter(s => typeof s === 'number'));
+  let selectedExerciseValues = [];
+
+  if (maxNumericScore > 0) {
+      selectedExerciseValues = scores.reduce((acc, score, index) => {
+          if (score === maxNumericScore) {
+              acc.push(exercises[index].value);
+          }
+          return acc;
+      }, []);
+  }
 
   return (
     <View style={styles.sectionContainer}>
@@ -50,8 +80,8 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
       </View>
         <SegmentedSelector
             options={exercises.map(e => ({ label: e.label, value: e.value }))}
-            selectedValue={selectedValue}
-            onValueChange={setSelectedValue}
+            selectedValues={selectedExerciseValues}
+            onValueChange={() => {}}
         />
       <View style={styles.gridContainer}>
         {exercises.map((exercise, index) => (
@@ -64,7 +94,31 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, onExerciseChan
         ))}
       </View>
       <View style={styles.scoreRow}>
-        <IconRow icons={scores.map(s => ({ text: String(s) }))} borderRadius={theme.borderRadius.m} />
+        <IconRow 
+            icons={scores.map((s, index) => {
+                const isWalk = exercises[index]?.value === 'walk';
+                const isBestNumeric = s === maxNumericScore && typeof s === 'number' && maxNumericScore > 0;
+
+                let colors = {};
+                let text = String(s);
+
+                if (isWalk) {
+                    colors = getColorForScore(s);
+                    if (s === 'pass') text = 'Pass';
+                    else if (s === 'fail') text = 'Fail';
+                    else text = 'N/A';
+                } else if (isBestNumeric) {
+                    colors = getColorForScore(s);
+                }
+
+                return { 
+                    text,
+                    textStyle: styles.scoreBreakdownText,
+                    ...colors 
+                };
+            })} 
+            borderRadius={theme.borderRadius.m} 
+        />
       </View>
     </View>
   );
@@ -135,8 +189,8 @@ export default function BestScoreScreen() {
 
   const coreExercises = [
     { label: '1-Min Sit-ups', value: 'sit_ups_1min', type: 'number', onValueChange: setSitUps },
-    { label: '2-Min Crunches', value: 'cross_leg_reverse_crunch_2min', type: 'number', onValueChange: setCrunches },
-    { label: 'Plank', value: 'forearm_plank_time', type: 'time', onValueChange: (value) => { setPlankMinutes(value.minutes); setPlankSeconds(value.seconds); } },
+    { label: '2-Min CL Crunch', value: 'cross_leg_reverse_crunch_2min', type: 'number', onValueChange: setCrunches },
+    { label: 'Forearm Planks', value: 'forearm_plank_time', type: 'time', onValueChange: (value) => { setPlankMinutes(value.minutes); setPlankSeconds(value.seconds); } },
   ];
   const coreScores = [scores.sit_ups_1min || 0, scores.cross_leg_reverse_crunch_2min || 0, scores.forearm_plank_time || 0];
   const coreBestValues = { sit_ups_1min: sitUps, cross_leg_reverse_crunch_2min: crunches, forearm_plank_time: { minutes: plankMinutes, seconds: plankSeconds } };
@@ -178,6 +232,7 @@ export default function BestScoreScreen() {
                     exercises={strengthExercises} 
                     scores={strengthScores} 
                     bestValues={strengthBestValues} 
+                    maxScore={20}
                 />
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <BestScoreSection 
@@ -185,6 +240,7 @@ export default function BestScoreScreen() {
                     exercises={coreExercises} 
                     scores={coreScores} 
                     bestValues={coreBestValues} 
+                    maxScore={20}
                 />
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <BestScoreSection 
@@ -192,6 +248,7 @@ export default function BestScoreScreen() {
                     exercises={cardioExercises} 
                     scores={cardioScores} 
                     bestValues={cardioBestValues} 
+                    maxScore={60}
                 />
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} />
