@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from "../contexts/ThemeContext";
 import NeumorphicOutset from './NeumorphicOutset';
+import { getPerformanceCategory } from '@repo/utils';
+import { useScoreColors } from '../hooks/useScoreColors';
 
 interface ProgressBarProps {
   value: number;
@@ -24,6 +26,20 @@ export const ProgressBar = ({
 }: ProgressBarProps) => {
   const { theme, isDarkMode } = useTheme();
 
+  const excellentColors = useScoreColors('excellent');
+  const passColors = useScoreColors('pass');
+  const failColors = useScoreColors('fail');
+  const noneColors = useScoreColors('none');
+
+  const getColorForCategory = (category) => {
+      switch(category) {
+          case 'excellent': return excellentColors;
+          case 'pass': return passColors;
+          case 'fail': return failColors;
+          default: return noneColors;
+      }
+  }
+
   const formatTime = (totalSeconds: number) => {
     if (totalSeconds === null || isNaN(totalSeconds) || totalSeconds < 0) return '--:--';
     const minutes = Math.floor(totalSeconds / 60);
@@ -33,35 +49,29 @@ export const ProgressBar = ({
 
   const calculateProgressAndColor = () => {
     let progress = 0;
-    let color = theme.colors.error;
+    let category;
 
     if (isPassFail) {
-      let passed = invertScale ? value > 0 && value <= passThreshold : value >= passThreshold;
-      if (passed) {
-        color = theme.colors.success;
-      }
+      const passed = invertScale ? value > 0 && value <= passThreshold : value >= passThreshold;
+      category = passed ? 'pass' : 'fail';
       if (passThreshold > 0) {
         progress = value / passThreshold;
       }
     } else {
+      category = getPerformanceCategory(value, passThreshold, ninetyPercentileThreshold!, invertScale);
       if (invertScale) {
-        if (value <= passThreshold) {
-          color = value <= ninetyPercentileThreshold! ? theme.colors.ninetyPlus : theme.colors.success;
-        }
         if (passThreshold > 0) {
           progress = value / passThreshold;
         }
       } else {
-        if (value >= passThreshold) {
-          color = value >= ninetyPercentileThreshold! ? theme.colors.ninetyPlus : theme.colors.success;
-        }
         if (maxPointsThreshold && maxPointsThreshold > 0) {
           progress = value / maxPointsThreshold;
         }
       }
     }
+    const colors = getColorForCategory(category);
 
-    return { progress: Math.max(0, progress), color };
+    return { progress: Math.max(0, progress), color: colors.backgroundColor || theme.colors.secondary };
   };
 
   const { progress, color } = calculateProgressAndColor();

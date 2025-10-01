@@ -36,7 +36,7 @@ export default function CardioComponent({
         setAdjustedWalkMaxTime(null);
 
         if (altitudeGroup && altitudeGroup !== 'normal') {
-            if (cardioComponent === 'run') {
+            if (cardioComponent === 'run' && (runMinutes && runSeconds)) {
                 const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
                 const correctionGroup = altitudeAdjustments.run.groups[altitudeGroup];
                 if (correctionGroup) {
@@ -45,7 +45,7 @@ export default function CardioComponent({
                         setAdjustment(`- ${correction.correction}s`);
                     }
                 }
-            } else if (cardioComponent === 'walk') {
+            } else if (cardioComponent === 'walk' && (walkMinutes && walkSeconds)) {
                 const ageIndex = getAgeGroupIndex(age);
 
                 // Defensive checks to prevent the TypeError
@@ -76,7 +76,7 @@ export default function CardioComponent({
                 }
             }
         }
-    }, [runMinutes, runSeconds, cardioComponent, altitudeGroup, age, gender]);
+    }, [runMinutes, runSeconds, walkMinutes, walkSeconds, shuttles, cardioComponent, altitudeGroup, age, gender]);
 
     const getAgeGroupIndex = (age: number) => {
         if (age < 30) return 0;
@@ -167,8 +167,8 @@ export default function CardioComponent({
                             })()}
                         </View>
                         <SegmentedSelector
-                            options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR Shuttles", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
-                            selectedValue={cardioComponent}
+                            options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
+                            selectedValues={[cardioComponent]}
                             onValueChange={setCardioComponent}
                         />
                         {cardioComponent === "run" && (
@@ -178,6 +178,8 @@ export default function CardioComponent({
                                 seconds={runSeconds}
                                 setSeconds={setRunSeconds}
                                 adjustment={adjustment}
+                                minutesPlaceholder="Minutes"
+                                secondsPlaceholder="Seconds"
                                 style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
                             />
                         )}
@@ -191,6 +193,8 @@ export default function CardioComponent({
                                 seconds={walkSeconds}
                                 setSeconds={setWalkSeconds}
                                 adjustment={adjustment}
+                                minutesPlaceholder="Minutes"
+                                secondsPlaceholder="Seconds"
                                 style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
                             />
                         )}

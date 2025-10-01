@@ -54,8 +54,8 @@ export default function StrengthComponent({
                     )}
                 </View>
                 <SegmentedSelector
-                    options={[{ label: "1-min Push-ups", value: "push_ups_1min" }, { label: "2-min HR Push-ups", value: "hand_release_pushups_2min" }]} 
-                    selectedValue={pushupComponent}
+                    options={[{ label: "1-Min Push-ups", value: "push_ups_1min" }, { label: "2-Min HR Push-ups", value: "hand_release_pushups_2min" }]} 
+                    selectedValues={[pushupComponent]}
                     onValueChange={setPushupComponent}
                 />
                 <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />

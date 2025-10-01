@@ -41,7 +41,7 @@ export default function Demographics({ age, setAge, gender, setGender }: Demogra
               <NumberInput
                   value={age}
                   onChangeText={setAge}
-                  placeholder=""
+                  placeholder="--"
                   inputStyle={{paddingVertical: 6}}
               />
           </View>

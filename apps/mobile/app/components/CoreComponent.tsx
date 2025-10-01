@@ -81,11 +81,11 @@ export default function CoreComponent({
                 </View>
                 <SegmentedSelector
                     options={[
-                        { label: "1-min Sit-ups", value: "sit_ups_1min" },
-                        { label: "2-min Cross-Leg Crunch", value: "cross_leg_reverse_crunch_2min" },
-                        { label: "Forearm Plank", value: "forearm_plank_time" },
+                        { label: "1-Min Sit-ups", value: "sit_ups_1min" },
+                        { label: "2-Min CL Crunch", value: "cross_leg_reverse_crunch_2min" },
+                        { label: "Forearm Planks", value: "forearm_plank_time" },
                     ]}
-                    selectedValue={coreComponent}
+                    selectedValues={[coreComponent]}
                     onValueChange={setCoreComponent}
                 />
                 {coreComponent === "sit_ups_1min" && (
@@ -100,6 +100,8 @@ export default function CoreComponent({
                         setMinutes={setPlankMinutes}
                         seconds={plankSeconds}
                         setSeconds={setPlankSeconds}
+                        minutesPlaceholder="Minutes"
+                        secondsPlaceholder="Seconds"
                         style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
                     />
                 )}

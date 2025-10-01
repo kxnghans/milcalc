@@ -105,30 +105,35 @@ export default function PTCalculator() {
             core: coreThreshold,
             cardio: cardioThreshold,
         });
-    }
 
-    const calculateScore = () => {
-        const result = calculatePtScore({
-            age: ageNum || 0,
-            gender,
-            cardioComponent,
-            runMinutes: parseInt(runMinutes) || 0,
-            runSeconds: parseInt(runSeconds) || 0,
-            shuttles: parseInt(shuttles) || 0,
-            walkMinutes: parseInt(walkMinutes) || 0,
-            walkSeconds: parseInt(walkSeconds) || 0,
-            pushupComponent,
-            pushups: parseInt(pushups) || 0,
-            coreComponent,
-            situps: parseInt(situps) || 0,
-            reverseCrunches: parseInt(reverseCrunches) || 0,
-            plankMinutes: parseInt(plankMinutes) || 0,
-            plankSeconds: parseInt(plankSeconds) || 0,
-            altitudeGroup,
-        });
-        setScore(result);
-    };
-    calculateScore();
+        const calculateScore = () => {
+            const result = calculatePtScore({
+                age: ageNum || 0,
+                gender,
+                cardioComponent,
+                runMinutes: parseInt(runMinutes) || 0,
+                runSeconds: parseInt(runSeconds) || 0,
+                shuttles: parseInt(shuttles) || 0,
+                walkMinutes: parseInt(walkMinutes) || 0,
+                walkSeconds: parseInt(walkSeconds) || 0,
+                pushupComponent,
+                pushups: parseInt(pushups) || 0,
+                coreComponent,
+                situps: parseInt(situps) || 0,
+                reverseCrunches: parseInt(reverseCrunches) || 0,
+                plankMinutes: parseInt(plankMinutes) || 0,
+                plankSeconds: parseInt(plankSeconds) || 0,
+                altitudeGroup,
+            });
+            setScore(result);
+        };
+        calculateScore();
+    } else {
+        setScore({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
+        setMinMax({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
+        setCardioMinMax({ min: 0, max: 0 });
+        setNinetyPercentileThresholds({ pushups: 0, core: 0, cardio: 0 });
+    }
   }, [age, gender, cardioComponent, runMinutes, runSeconds, shuttles, walkMinutes, walkSeconds, pushupComponent, pushups, coreComponent, situps, reverseCrunches, plankMinutes, plankSeconds, altitudeGroup]);
 
   const showProgressBars = age && gender;
