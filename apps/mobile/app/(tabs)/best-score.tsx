@@ -1,8 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Card, IconRow, useTheme, SegmentedSelector, NeumorphicOutset, Icon, useScoreColors } from '@repo/ui';
+import {
+  Card,
+  IconRow,
+  useTheme,
+  SegmentedSelector,
+  Icon,
+  useScoreColors,
+  useDemographicsState,
+  useBestScoreState
+} from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
-import { getScoreForExercise, calculateBestScore, checkWalkPass, getScoreCategory } from '@repo/utils';
+import { getScoreCategory } from '@repo/utils';
 import ScoreDisplay from '../components/ScoreDisplay';
 import NumberInput from '../components/NumberInput';
 import TimeInput from '../components/TimeInput';
@@ -126,11 +135,9 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
 
 export default function BestScoreScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
-  const score = { totalScore: 100, isPass: true }; // Dummy score
-
-  const [age, setAge] = React.useState("");
-  const [gender, setGender] = React.useState("male");
-  const [altitudeGroup, setAltitudeGroup] = React.useState("normal");
+  
+  const { age, setAge, gender, setGender, altitudeGroup, setAltitudeGroup } = useDemographicsState();
+  const { inputs, outputs } = useBestScoreState(age, gender, altitudeGroup);
 
   const getThemeIcon = () => {
     if (themeMode === 'light') return ICONS.THEME_LIGHT;
@@ -144,69 +151,39 @@ export default function BestScoreScreen() {
       backgroundColor: theme.colors.background,
       paddingHorizontal: theme.spacing.s,
       paddingVertical: theme.spacing.xs,
-
     },
     card: {
         flex: 1,
     }
   });
 
-  const [pushUps, setPushUps] = React.useState("");
-  const [hrPushUps, setHrPushUps] = React.useState("");
-  const [sitUps, setSitUps] = React.useState("");
-  const [crunches, setCrunches] = React.useState("");
-  const [plankMinutes, setPlankMinutes] = React.useState("");
-  const [plankSeconds, setPlankSeconds] = React.useState("");
-  const [runMinutes, setRunMinutes] = React.useState("");
-  const [runSeconds, setRunSeconds] = React.useState("");
-  const [shuttles, setShuttles] = React.useState("");
-  const [walkMinutes, setWalkMinutes] = React.useState("");
-  const [walkSeconds, setWalkSeconds] = React.useState("");
-
-  const [scores, setScores] = React.useState({});
-  const [bestScore, setBestScore] = React.useState(0);
-
-  React.useEffect(() => {
-    const newScores = {
-        push_ups_1min: getScoreForExercise(Number(age), gender, 'push_ups_1min', { reps: Number(pushUps) }),
-        hand_release_pushups_2min: getScoreForExercise(Number(age), gender, 'hand_release_pushups_2min', { reps: Number(hrPushUps) }),
-        sit_ups_1min: getScoreForExercise(Number(age), gender, 'sit_ups_1min', { reps: Number(sitUps) }),
-        cross_leg_reverse_crunch_2min: getScoreForExercise(Number(age), gender, 'cross_leg_reverse_crunch_2min', { reps: Number(crunches) }),
-        forearm_plank_time: getScoreForExercise(Number(age), gender, 'forearm_plank_time', { minutes: Number(plankMinutes), seconds: Number(plankSeconds) }),
-        run: getScoreForExercise(Number(age), gender, 'run', { minutes: Number(runMinutes), seconds: Number(runSeconds) }, altitudeGroup),
-        shuttles: getScoreForExercise(Number(age), gender, 'shuttles', { shuttles: Number(shuttles) }, altitudeGroup),
-    };
-    setScores(newScores);
-    setBestScore(calculateBestScore(newScores));
-  }, [age, gender, pushUps, hrPushUps, sitUps, crunches, plankMinutes, plankSeconds, runMinutes, runSeconds, shuttles, walkMinutes, walkSeconds, altitudeGroup]);
-
   const strengthExercises = [
-    { label: '1-Min Push-ups', value: 'push_ups_1min', type: 'number', onValueChange: setPushUps },
-    { label: '2-Min HR Push-ups', value: 'hand_release_pushups_2min', type: 'number', onValueChange: setHrPushUps },
+    { label: '1-Min Push-ups', value: 'push_ups_1min', type: 'number', onValueChange: inputs.setPushUps },
+    { label: '2-Min HR Push-ups', value: 'hand_release_pushups_2min', type: 'number', onValueChange: inputs.setHrPushUps },
   ];
-  const strengthScores = [scores.push_ups_1min || 0, scores.hand_release_pushups_2min || 0];
-  const strengthBestValues = { push_ups_1min: pushUps, hand_release_pushups_2min: hrPushUps };
+  const strengthScores = [outputs.scores.push_ups_1min || 0, outputs.scores.hand_release_pushups_2min || 0];
+  const strengthBestValues = { push_ups_1min: inputs.pushUps, hand_release_pushups_2min: inputs.hrPushUps };
 
   const coreExercises = [
-    { label: '1-Min Sit-ups', value: 'sit_ups_1min', type: 'number', onValueChange: setSitUps },
-    { label: '2-Min CL Crunch', value: 'cross_leg_reverse_crunch_2min', type: 'number', onValueChange: setCrunches },
-    { label: 'Forearm Planks', value: 'forearm_plank_time', type: 'time', onValueChange: (value) => { setPlankMinutes(value.minutes); setPlankSeconds(value.seconds); } },
+    { label: '1-Min Sit-ups', value: 'sit_ups_1min', type: 'number', onValueChange: inputs.setSitUps },
+    { label: '2-Min CL Crunch', value: 'cross_leg_reverse_crunch_2min', type: 'number', onValueChange: inputs.setCrunches },
+    { label: 'Forearm Planks', value: 'forearm_plank_time', type: 'time', onValueChange: (value) => { inputs.setPlankMinutes(value.minutes); inputs.setPlankSeconds(value.seconds); } },
   ];
-  const coreScores = [scores.sit_ups_1min || 0, scores.cross_leg_reverse_crunch_2min || 0, scores.forearm_plank_time || 0];
-  const coreBestValues = { sit_ups_1min: sitUps, cross_leg_reverse_crunch_2min: crunches, forearm_plank_time: { minutes: plankMinutes, seconds: plankSeconds } };
+  const coreScores = [outputs.scores.sit_ups_1min || 0, outputs.scores.cross_leg_reverse_crunch_2min || 0, outputs.scores.forearm_plank_time || 0];
+  const coreBestValues = { sit_ups_1min: inputs.sitUps, cross_leg_reverse_crunch_2min: inputs.crunches, forearm_plank_time: { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds } };
 
   const cardioExercises = [
-    { label: '1.5-Mile Run', value: 'run', type: 'time', onValueChange: (value) => { setRunMinutes(value.minutes); setRunSeconds(value.seconds); } },
-    { label: '20m HAMR', value: 'shuttles', type: 'number', onValueChange: setShuttles },
-    { label: '2-km Walk', value: 'walk', type: 'time', onValueChange: (value) => { setWalkMinutes(value.minutes); setWalkSeconds(value.seconds); } },
+    { label: '1.5-Mile Run', value: 'run', type: 'time', onValueChange: (value) => { inputs.setRunMinutes(value.minutes); inputs.setRunSeconds(value.seconds); } },
+    { label: '20m HAMR', value: 'shuttles', type: 'number', onValueChange: inputs.setShuttles },
+    { label: '2-km Walk', value: 'walk', type: 'time', onValueChange: (value) => { inputs.setWalkMinutes(value.minutes); inputs.setWalkSeconds(value.seconds); } },
   ];
-  const cardioScores = [scores.run || 0, scores.shuttles || 0, checkWalkPass(Number(age), gender, Number(walkMinutes), Number(walkSeconds), altitudeGroup)];
-  const cardioBestValues = { run: { minutes: runMinutes, seconds: runSeconds }, shuttles: shuttles, walk: { minutes: walkMinutes, seconds: walkSeconds } };
+  const cardioScores = [outputs.scores.run || 0, outputs.scores.shuttles || 0, outputs.scores.walk || 'N/A'];
+  const cardioBestValues = { run: { minutes: inputs.runMinutes, seconds: inputs.runSeconds }, shuttles: inputs.shuttles, walk: { minutes: inputs.walkMinutes, seconds: inputs.walkSeconds } };
 
 
   return (
     <View style={styles.container}>
-        <ScoreDisplay score={{ totalScore: bestScore, isPass: bestScore >= 75 }} showBreakdown={false} />
+        <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
         <IconRow
             icons={[
             {
