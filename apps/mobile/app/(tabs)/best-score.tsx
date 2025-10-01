@@ -1,3 +1,10 @@
+/**
+ * @file best-score.tsx
+ * @description This file defines the "Best Score" screen of the mobile application.
+ * It allows users to input their personal bests for each PT exercise component
+ * and calculates their best possible overall score based on these individual achievements.
+ */
+
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import {
@@ -20,6 +27,18 @@ import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentCompone
 import Divider from '../components/Divider';
 import PdfModal from '../components/PdfModal';
 
+/**
+ * A component that renders a section for a specific PT category (Strength, Core, Cardio).
+ * It displays the exercises within that category, inputs for the user's best performance,
+ * and the corresponding scores.
+ * @param {object} props - The component props.
+ * @param {string} props.title - The title of the section (e.g., "Strength").
+ * @param {Array<object>} props.exercises - An array of exercise objects in this category.
+ * @param {Array<number|string>} props.scores - An array of scores for each exercise.
+ * @param {object} props.bestValues - An object containing the user's best performance values.
+ * @param {number} props.maxScore - The maximum possible score for this category.
+ * @returns {JSX.Element} The rendered section.
+ */
 const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) => {
   const { theme } = useTheme();
 
@@ -27,6 +46,12 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
   const passColors = useScoreColors('pass');
   const failColors = useScoreColors('fail');
 
+  /**
+   * Determines the color for a score based on its category (excellent, pass, fail).
+   * @param {number} score - The score to evaluate.
+   * @param {number} maxScore - The maximum possible score for the component.
+   * @returns {string} The color code for the score.
+   */
   const getScoreColor = (score, maxScore) => {
     const category = getScoreCategory(score, maxScore);
     if (category === 'excellent') return excellentColors.progressColor;
@@ -68,9 +93,11 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
     },
   });
 
+  // Find the highest score among the numeric scores in the category
   const maxNumericScore = Math.max(0, ...scores.filter(s => typeof s === 'number'));
   let selectedExerciseValues = [];
 
+  // Identify which exercise(s) achieved the highest score to highlight them in the UI
   if (maxNumericScore > 0) {
       selectedExerciseValues = scores.reduce((acc, score, index) => {
           if (score === maxNumericScore) {
@@ -90,11 +117,12 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
             options={exercises.map(e => ({ label: e.label, value: e.value }))}
             selectedValues={selectedExerciseValues}
             onValueChange={() => {}}
-            isTouchable={false}
+            isTouchable={false} // Non-interactive, for display only
         />
       <View style={styles.gridContainer}>
         {exercises.map((exercise, index) => (
             <View key={index} style={styles.gridColumn}>
+                {/* Render either a number or time input based on exercise type */}
                 {exercise.type === 'number' ? 
                     <NumberInput value={bestValues[exercise.value]} onChangeText={exercise.onValueChange} placeholder='--' style={{width: '100%'}} /> : 
                     <TimeInput minutes={bestValues[exercise.value]?.minutes} seconds={bestValues[exercise.value]?.seconds} setMinutes={(minutes) => exercise.onValueChange({ minutes, seconds: bestValues[exercise.value]?.seconds })} setSeconds={(seconds) => exercise.onValueChange({ minutes: bestValues[exercise.value]?.minutes, seconds })} style={{width: '100%'}} />
@@ -110,6 +138,7 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
                 let color = theme.colors.text; // Default color
 
                 if (isWalk) {
+                    // Special handling for walk component pass/fail status
                     if (s === 'pass') {
                         color = passColors.progressColor;
                         text = 'Pass';
@@ -121,6 +150,7 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
                         color = theme.colors.disabled;
                     }
                 } else {
+                    // Highlight the best score in the category
                     const isBestNumeric = typeof s === 'number' && s === maxNumericScore && maxNumericScore > 0;
                     if (isBestNumeric) {
                         color = getScoreColor(s, maxScore);
@@ -140,13 +170,23 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
   );
 };
 
+/**
+ * The main screen component for the "Best Score" calculator.
+ * It integrates demographics, exercise inputs, and score displays.
+ */
 export default function BestScoreScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
   const [isModalVisible, setModalVisible] = React.useState(false);
   
+  // State for user demographics (age, gender, altitude)
   const { age, setAge, gender, setGender, altitudeGroup, setAltitudeGroup } = useDemographicsState();
+  // Custom hook to manage the state and logic for the best score calculation
   const { inputs, outputs } = useBestScoreState(age, gender, altitudeGroup);
 
+  /**
+   * Gets the appropriate icon for the current theme setting (light, dark, or auto).
+   * @returns {string} The name of the icon to display.
+   */
   const getThemeIcon = () => {
     if (themeMode === 'light') return ICONS.THEME_LIGHT;
     if (themeMode === 'dark') return ICONS.THEME_DARK;
@@ -165,6 +205,7 @@ export default function BestScoreScreen() {
     }
   });
 
+  // Data definitions for each exercise category
   const strengthExercises = [
     { label: '1-Min Push-ups', value: 'push_ups_1min', type: 'number', onValueChange: inputs.setPushUps },
     { label: '2-Min HR Push-ups', value: 'hand_release_pushups_2min', type: 'number', onValueChange: inputs.setHrPushUps },

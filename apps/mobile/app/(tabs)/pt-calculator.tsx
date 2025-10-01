@@ -24,8 +24,10 @@ import Divider from "../components/Divider";
 export default function PTCalculator() {
   const { theme, themeMode, toggleTheme } = useTheme();
   const [isModalVisible, setModalVisible] = React.useState(false);
+  // State to store the heights of the segmented controls in each component.
   const [segmentedHeights, setSegmentedHeights] = React.useState({ strength: 0, core: 0, cardio: 0 });
 
+  // The main state hook that provides all the necessary values and setters.
   const {
     demographics,
     strength,
@@ -37,6 +39,12 @@ export default function PTCalculator() {
     ninetyPercentileThresholds,
   } = usePtCalculatorState();
 
+  /**
+   * A layout handler to measure the height of the segmented controls.
+   * This is used to synchronize the heights of all segmented controls across the different components.
+   * @param {string} block - The component block ('strength', 'core', 'cardio').
+   * @param {object} event - The layout event.
+   */
   const handleSegmentedLayout = (block, event) => {
     const { height } = event.nativeEvent.layout;
     setSegmentedHeights(heights => {
@@ -47,13 +55,19 @@ export default function PTCalculator() {
     });
   };
 
+  /**
+   * Gets the appropriate icon for the current theme setting (light, dark, or auto).
+   * @returns {string} The name of the icon to display.
+   */
   const getThemeIcon = () => {
     if (themeMode === 'light') return ICONS.THEME_LIGHT;
     if (themeMode === 'dark') return ICONS.THEME_DARK;
     return ICONS.THEME_AUTO;
   };
 
+  // Progress bars are only shown once age and gender have been entered.
   const showProgressBars = demographics.age && demographics.gender;
+  // Calculate the maximum height among all segmented controls to ensure they are all the same size.
   const maxSegmentedHeight = Math.max(...Object.values(segmentedHeights));
   const segmentedStyle = {
       height: maxSegmentedHeight > 0 ? maxSegmentedHeight : 'auto',
@@ -72,6 +86,7 @@ export default function PTCalculator() {
     <View style={styles.container}>
         <PdfModal isModalVisible={isModalVisible} setModalVisible={setModalVisible} />
         <View style={{flex: 1}}>
+            {/* Top section with score display and main action icons. */}
             <View>
                 <ScoreDisplay score={score} cardioComponent={cardio.cardioComponent} containerStyle={{ marginBottom: theme.spacing.s }} />
                 <IconRow icons={[
@@ -89,6 +104,7 @@ export default function PTCalculator() {
                     },
                 ]} />
             </View>
+            {/* The main input area, wrapped in a KeyboardAvoidingView and ScrollView. */}
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -96,6 +112,7 @@ export default function PTCalculator() {
                 <View style={{ flex: 1 }}>
                     <Card style={{ flex: 1 }}>
                         <ScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
+                            {/* Each section of the calculator is rendered as a separate component. */}
                             <Demographics
                                 age={demographics.age}
                                 setAge={demographics.setAge}

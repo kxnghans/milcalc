@@ -1,17 +1,37 @@
+/**
+ * @file SegmentedSelector.tsx
+ * @description This file defines a custom segmented control component with a neumorphic design.
+ * It supports multiple selections and can be rendered as a non-interactive display.
+ */
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import NeumorphicOutset from './NeumorphicOutset';
 import { useTheme } from "../contexts/ThemeContext";
 
+/**
+ * Props for the SegmentedSelector component.
+ */
 interface SegmentedSelectorProps {
+  /** An array of options to display, where each option has a label and a value. */
   options: { label: string; value: string }[];
+  /** An array of values corresponding to the currently selected options. */
   selectedValues: string[];
+  /** A function to be called when an option is selected. */
   onValueChange: (value: string) => void;
+  /** Optional custom style for the container. */
   style?: StyleProp<ViewStyle>;
+  /** Optional layout event handler. */
   onLayout?: (event: any) => void;
+  /** If false, the selector will be non-interactive. Defaults to true. */
   isTouchable?: boolean;
 }
 
+/**
+ * A custom segmented control component that displays a set of options.
+ * It can handle multiple selections and has a distinct neumorphic style for selected items.
+ * It can also be used as a non-interactive display.
+ */
 export const SegmentedSelector = ({ options, selectedValues, onValueChange, style, onLayout, isTouchable = true }: SegmentedSelectorProps) => {
   const { theme, isDarkMode } = useTheme();
 
@@ -65,8 +85,10 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
           const lines = option.label.split('\n');
           const isSelected = selectedValues.includes(option.value);
 
+          // Use TouchableOpacity for interactive segments, and View for non-interactive ones.
           const Wrapper = isTouchable ? TouchableOpacity : View;
 
+          // Render the selected segment with a distinct neumorphic style.
           if (isSelected) {
             return (
               <NeumorphicOutset
@@ -89,6 +111,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
                   style={[styles.segment, styles.selectedSegment]}
                   onPress={() => onValueChange(option.value)}
                 >
+                  {/* Support for multi-line labels */}
                   {lines.map((line, index) => (
                     <Text key={index} style={index === 0 ? styles.selectedText : styles.selectedCaptionText}>
                       {line}
@@ -98,6 +121,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
               </NeumorphicOutset>
             )
           }
+          // Render a standard, unselected segment.
           return (
             <Wrapper
               key={option.value}

@@ -1,14 +1,34 @@
+/**
+ * @file ScoreDisplay.tsx
+ * @description This component is responsible for rendering the total PT score and a breakdown of individual component scores.
+ * It uses neumorphic styling and color-codes the scores based on performance categories.
+ */
+
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme, NeumorphicOutset, useScoreColors } from '@repo/ui';
 import { getScoreCategory } from '@repo/utils';
 
+/**
+ * Displays the total PT score and a breakdown of component scores.
+ * @param {object} props - The component props.
+ * @param {object} props.score - An object containing the score details (totalScore, pushupScore, coreScore, cardioScore, isPass, walkPassed).
+ * @param {string} [props.cardioComponent] - The selected cardio component ('run', 'shuttles', or 'walk').
+ * @param {boolean} [props.showBreakdown=true] - Whether to show the breakdown of individual component scores.
+ * @returns {JSX.Element} The rendered score display component.
+ */
 export default function ScoreDisplay({ score, cardioComponent, showBreakdown = true }) {
   const { theme } = useTheme();
   const excellentColors = useScoreColors('excellent');
   const passColors = useScoreColors('pass');
   const failColors = useScoreColors('fail');
 
+  /**
+   * Determines the color for a score based on its category (excellent, pass, fail).
+   * @param {number} score - The score to evaluate.
+   * @param {number} maxScore - The maximum possible score for the component.
+   * @returns {string} The color code for the score.
+   */
   const getScoreColor = (score, maxScore) => {
     const category = getScoreCategory(score, maxScore);
     if (category === 'excellent') return excellentColors.progressColor;
@@ -17,6 +37,7 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
     return theme.colors.text;
   }
 
+  // The total score is colored red if the test is a fail, otherwise it's colored based on the score category.
   const scoreColor = score.isPass ? getScoreColor(score.totalScore, 100) : failColors.progressColor;
 
   const styles = StyleSheet.create({
@@ -51,6 +72,11 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
     },
   });
 
+  /**
+   * Renders the cardio score, with special handling for the walk component.
+   * For the walk, it displays "Pass", "Fail", or "N/A". For other cardio, it displays the numeric score.
+   * @returns {JSX.Element} The rendered cardio score text.
+   */
   const renderCardioScore = () => {
     if (cardioComponent === 'walk') {
         if (score.walkPassed === 'n/a') {
@@ -60,12 +86,15 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
         const text = score.walkPassed === 'pass' ? 'Pass' : 'Fail';
         return <Text style={[styles.scoreBreakdownText, { color }]}>{text}</Text>;
     }
+    // Default case for run and shuttles
     return <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.cardioScore, 60) }]}>{score.cardioScore}</Text>;
   };
 
   return (
     <NeumorphicOutset containerStyle={styles.scoreContainer} contentStyle={styles.scoreContent}>
+        {/* Display the total score */}
         <Text style={[styles.scoreText, { color: scoreColor }, showBreakdown && { marginBottom: theme.spacing.s }]}>{score.totalScore.toFixed(2)}</Text>
+        {/* Optionally, display the breakdown of component scores */}
         {showBreakdown && (
             <View style={styles.scoreBreakdownContainer}>
                 <View style={{flexDirection: 'row'}}>

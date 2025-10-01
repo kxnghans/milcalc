@@ -1,12 +1,24 @@
+/**
+ * @file page.tsx
+ * @description This file defines the PT Calculator page for the web application.
+ * It includes a form for users to enter their PT data and a button to calculate their score.
+ * NOTE: This component appears to be a work in progress and has inconsistencies in its use of UI components.
+ */
 
 "use client";
 
 import * as React from "react";
+// These components are imported from the shared UI library but do not seem to be used correctly below.
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { TextInput } from "@repo/ui/text-input";
 
+/**
+ * The main page component for the PT Calculator.
+ * It manages the state for all user inputs and displays the calculated score.
+ */
 export default function PtCalculatorPage() {
+  // State for the user's demographic and performance data.
   const [age, setAge] = React.useState("");
   const [gender, setGender] = React.useState("male");
   const [pushups, setPushups] = React.useState("");
@@ -15,6 +27,10 @@ export default function PtCalculatorPage() {
   const [runSeconds, setRunSeconds] = React.useState("");
   const [score, setScore] = React.useState(null);
 
+  /**
+   * A placeholder function to calculate the PT score.
+   * The actual calculation logic is not yet implemented.
+   */
   const calculateScore = () => {
     // Logic to calculate the score will go here
     // For now, we'll just set a dummy score
@@ -24,8 +40,10 @@ export default function PtCalculatorPage() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Air Force PT Calculator</h1>
+      {/* The Card component is used here, but the implementation seems to be custom HTML/CSS, not the shared component. */}
       <Card title="Enter Your Information">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* The TextInput component is used here, but the implementation seems to be custom HTML/CSS. */}
           <TextInput
             label="Age"
             value={age}
@@ -76,8 +94,10 @@ export default function PtCalculatorPage() {
           />
         </div>
         <div className="mt-4">
+          {/* The Button component is used here, but the implementation seems to be custom HTML/CSS. */}
           <Button onClick={calculateScore}>Calculate Score</Button>
         </div>
+        {/* Display the score if it has been calculated. */}
         {score !== null && (
           <div className="mt-4 p-4 bg-gray-100 rounded-md">
             <h2 className="text-xl font-bold">Your Score: {score}</h2>

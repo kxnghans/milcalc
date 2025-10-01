@@ -1,8 +1,23 @@
+/**
+ * @file useBestScoreState.ts
+ * @description This file defines a custom React hook for managing the state and logic
+ * of the "Best Score" calculator screen. It handles user inputs for all PT components,
+ * debounces them, and calculates the scores for each, as well as the best possible combined score.
+ */
+
 import { useState, useEffect } from 'react';
 import { getScoreForExercise, calculateBestScore, checkWalkPass } from '@repo/utils';
 import { useDebounce } from './useDebounce';
 
+/**
+ * A custom hook to manage the state for the Best Score calculator.
+ * @param {string} age - The user's age.
+ * @param {string} gender - The user's gender.
+ * @param {string} altitudeGroup - The selected altitude group.
+ * @returns An object containing the state values and setters (`inputs`) and the calculated results (`outputs`).
+ */
 export function useBestScoreState(age: string, gender: string, altitudeGroup: string) {
+  // State for raw user inputs for each exercise component.
   const [pushUps, setPushUps] = useState("");
   const [hrPushUps, setHrPushUps] = useState("");
   const [sitUps, setSitUps] = useState("");
@@ -15,9 +30,12 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   const [walkMinutes, setWalkMinutes] = useState("");
   const [walkSeconds, setWalkSeconds] = useState("");
 
+  // State to store the calculated scores for each component and the final best score.
   const [scores, setScores] = useState({});
   const [bestScore, setBestScore] = useState(0);
 
+  // Debounce all user inputs to prevent recalculating scores on every keystroke.
+  // This improves performance by waiting for a pause in user input.
   const debouncedAge = useDebounce(age, 500);
   const debouncedGender = useDebounce(gender, 500);
   const debouncedAltitudeGroup = useDebounce(altitudeGroup, 500);
@@ -33,13 +51,17 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   const debouncedWalkMinutes = useDebounce(walkMinutes, 500);
   const debouncedWalkSeconds = useDebounce(walkSeconds, 500);
 
+  // This effect runs whenever a debounced input value changes.
+  // It recalculates the scores for all components and the best possible total score.
   useEffect(() => {
+    // If essential demographic info is missing, reset scores and exit.
     if (!debouncedAge || !debouncedGender) {
         setScores({});
         setBestScore(0);
         return;
     }
 
+    // Calculate the score for each individual exercise based on the debounced inputs.
     const newScores = {
         push_ups_1min: getScoreForExercise(Number(debouncedAge), debouncedGender, 'push_ups_1min', { reps: Number(debouncedPushUps) }),
         hand_release_pushups_2min: getScoreForExercise(Number(debouncedAge), debouncedGender, 'hand_release_pushups_2min', { reps: Number(debouncedHrPushUps) }),
@@ -51,10 +73,12 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
         walk: checkWalkPass(Number(debouncedAge), debouncedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), debouncedAltitudeGroup),
     };
     setScores(newScores);
+    // Calculate the best possible total score from the individual component scores.
     setBestScore(calculateBestScore(newScores));
   }, [debouncedAge, debouncedGender, debouncedPushUps, debouncedHrPushUps, debouncedSitUps, debouncedCrunches, debouncedPlankMinutes, debouncedPlankSeconds, debouncedRunMinutes, debouncedRunSeconds, debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds, debouncedAltitudeGroup]);
 
   return {
+    // The raw input values and their state setters.
     inputs: {
         pushUps, setPushUps,
         hrPushUps, setHrPushUps,
@@ -68,6 +92,7 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
         walkMinutes, setWalkMinutes,
         walkSeconds, setWalkSeconds,
     },
+    // The calculated results.
     outputs: {
         scores,
         bestScore,

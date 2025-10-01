@@ -1,8 +1,21 @@
+/**
+ * @file GenderSelector.tsx
+ * @description This file defines a component for selecting gender, consisting of two
+ * styled buttons for "Male" and "Female".
+ */
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StyledButton, useTheme } from '@repo/ui';
 import { ICONS, ICON_SETS } from '@repo/ui/icons';
 
+/**
+ * A component that renders a gender selection control using two styled buttons.
+ * @param {object} props - The component props.
+ * @param {string} props.gender - The currently selected gender ('male' or 'female').
+ * @param {(gender: string) => void} props.setGender - The function to update the selected gender.
+ * @returns {JSX.Element} The rendered gender selector component.
+ */
 export default function GenderSelector({ gender, setGender }) {
     const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
@@ -11,6 +24,7 @@ export default function GenderSelector({ gender, setGender }) {
             overflow: 'hidden',
             borderRadius: theme.borderRadius.m,
         },
+        // Custom style for the text of the inactive button.
         inactiveText: {
             textShadowColor: isDarkMode ? 'black' : undefined,
             textShadowRadius: 1,
@@ -24,6 +38,7 @@ export default function GenderSelector({ gender, setGender }) {
             <StyledButton
                 title="Male"
                 onPress={() => setGender("male")}
+                // The button variant is 'primary' if selected, otherwise 'secondary'.
                 variant={gender === 'male' ? 'primary' : 'secondary'}
                 textStyle={gender !== 'male' ? styles.inactiveText : {}}
                 size="small"

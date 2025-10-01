@@ -1,3 +1,10 @@
+/**
+ * @file CardioComponent.tsx
+ * @description This file defines the UI component for the cardio section of the PT calculator.
+ * It's a complex component that handles multiple cardio options (run, shuttle, walk),
+ * conditionally renders different inputs, and calculates altitude adjustments in real-time.
+ */
+
 import React from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
@@ -6,6 +13,13 @@ import TimeInput from './TimeInput';
 
 import altitudeAdjustments from '../../../../packages/ui/src/pt_data/altitude-adjustments.json';
 
+/**
+ * A component that renders the cardio section of the PT calculator.
+ * It manages state for the run, shuttle run, and walk, and displays the correct
+ * input fields and progress bars based on the user's selection.
+ * @param {object} props - The component props.
+ * @returns {JSX.Element} The rendered cardio component section.
+ */
 export default function CardioComponent({
     showProgressBars,
     cardioComponent,
@@ -27,9 +41,12 @@ export default function CardioComponent({
     ninetyPercentileThreshold,
 }) {
     const { theme, isDarkMode } = useTheme();
+    // State to hold the calculated altitude adjustment text to be displayed to the user.
     const [adjustment, setAdjustment] = React.useState(null);
+    // State to hold the adjusted max time for the walk when at altitude.
     const [adjustedWalkMaxTime, setAdjustedWalkMaxTime] = React.useState(null);
 
+    // This effect recalculates the altitude adjustment whenever a relevant input changes.
     React.useEffect(() => {
         // Always reset adjustments when dependencies change
         setAdjustment(null);
@@ -37,6 +54,7 @@ export default function CardioComponent({
 
         if (altitudeGroup && altitudeGroup !== 'normal') {
             if (cardioComponent === 'run' && (runMinutes && runSeconds)) {
+                // Calculate adjustment for the 1.5-mile run.
                 const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
                 const correctionGroup = altitudeAdjustments.run.groups[altitudeGroup];
                 if (correctionGroup) {
@@ -46,6 +64,7 @@ export default function CardioComponent({
                     }
                 }
             } else if (cardioComponent === 'walk' && (walkMinutes && walkSeconds)) {
+                // Calculate and display the adjusted max time for the 2km walk.
                 const ageIndex = getAgeGroupIndex(age);
 
                 // Defensive checks to prevent the TypeError
@@ -65,6 +84,7 @@ export default function CardioComponent({
                     }
                 }
             } else if (cardioComponent === 'shuttles') {
+                // Calculate adjustment for the HAMR shuttle run.
                 if (altitudeAdjustments.hamr &&
                     altitudeAdjustments.hamr.groups &&
                     altitudeAdjustments.hamr.groups[altitudeGroup]
@@ -78,6 +98,11 @@ export default function CardioComponent({
         }
     }, [runMinutes, runSeconds, walkMinutes, walkSeconds, shuttles, cardioComponent, altitudeGroup, age, gender]);
 
+    /**
+     * Helper function to get the age group index for walk standards.
+     * @param {number} age - The user's age.
+     * @returns {number} The index for the age group.
+     */
     const getAgeGroupIndex = (age: number) => {
         if (age < 30) return 0;
         if (age >= 30 && age <= 39) return 1;
@@ -117,6 +142,7 @@ export default function CardioComponent({
                         <View style={styles.componentHeader}>
                             <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
                             <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m }]}>Cardio</Text>
+                            {/* Conditionally render the correct progress bar for the selected cardio type. */}
                             {showProgressBars && (() => {
                                 if (cardioComponent === 'run') {
                                     const timeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
@@ -124,7 +150,7 @@ export default function CardioComponent({
                                         <View style={{ flex: 1 }}>
                                             <NeumorphicOutset>
                                                 <ProgressBar
-                                                    invertScale={true}
+                                                    invertScale={true} // Lower time is better.
                                                     value={timeInSeconds}
                                                     passThreshold={cardioMinMax.min}
                                                     maxPointsThreshold={cardioMinMax.max}
@@ -141,11 +167,11 @@ export default function CardioComponent({
                                         <View style={{ flex: 1 }}>
                                             <NeumorphicOutset>
                                                 <ProgressBar
-                                                    invertScale={true}
+                                                    invertScale={true} // Lower time is better.
                                                     value={timeInSeconds}
                                                     passThreshold={passThreshold}
                                                     valueIsTime={true}
-                                                    isPassFail={true}
+                                                    isPassFail={true} // Walk is a simple pass/fail event.
                                                 />
                                             </NeumorphicOutset>
                                         </View>
@@ -171,6 +197,7 @@ export default function CardioComponent({
                             selectedValues={[cardioComponent]}
                             onValueChange={setCardioComponent}
                         />
+                        {/* Conditionally render the correct input field for the selected cardio type. */}
                         {cardioComponent === "run" && (
                             <TimeInput
                                 minutes={runMinutes}

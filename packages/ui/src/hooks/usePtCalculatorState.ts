@@ -1,3 +1,11 @@
+/**
+ * @file usePtCalculatorState.ts
+ * @description This file defines the primary custom hook for the main PT Calculator screen.
+ * It acts as a central state aggregator, composing several smaller state management hooks
+ * (for demographics, strength, core, and cardio). It debounces all inputs and triggers
+ * score calculations and updates when the inputs have stabilized.
+ */
+
 import { useState, useEffect } from 'react';
 import {
   calculatePtScore,
@@ -11,18 +19,28 @@ import { useStrengthState } from './useStrengthState';
 import { useCoreState } from './useCoreState';
 import { useCardioState } from './useCardioState';
 
+/**
+ * A comprehensive custom hook that manages the entire state for the PT Calculator screen.
+ * It integrates state from demographics, strength, core, and cardio components,
+ * debounces the inputs, and calculates the final score and associated data.
+ * @returns An object containing all the state and derived data needed by the calculator screen.
+ */
 export function usePtCalculatorState() {
+  // Compose smaller hooks to manage specific sections of the calculator.
   const demographics = useDemographicsState();
   const strength = useStrengthState();
   const core = useCoreState();
   const cardio = useCardioState();
 
+  // State for the calculated results from the core utility functions.
   const [score, setScore] = useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
   const [minMax, setMinMax] = useState({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
   const [cardioMinMax, setCardioMinMax] = useState({ min: 0, max: 0 });
   const [ninetyPercentileThresholds, setNinetyPercentileThresholds] = useState({ pushups: 0, core: 0, cardio: 0 });
 
-  // Debounce all the state values that will be used in the calculation
+  // Debounce all state values that are used in calculations.
+  // This is critical for performance, as it prevents recalculating on every single input change (e.g., each keystroke).
+  // The calculation will only run after the user has stopped typing for 500ms.
   const debouncedAge = useDebounce(demographics.age, 500);
   const debouncedGender = useDebounce(demographics.gender, 500);
   const debouncedAltitudeGroup = useDebounce(demographics.altitudeGroup, 500);
@@ -43,15 +61,20 @@ export function usePtCalculatorState() {
   const debouncedWalkMinutes = useDebounce(cardio.walkMinutes, 500);
   const debouncedWalkSeconds = useDebounce(cardio.walkSeconds, 500);
 
+  // The main effect hook that runs all calculations whenever a debounced input changes.
   useEffect(() => {
     const ageNum = parseInt(debouncedAge);
+    // Only perform calculations if the essential demographic information is present.
     if (ageNum && debouncedGender) {
+        // Fetch the minimum and maximum possible performance values for the selected components.
         const pushupValues = getMinMaxValues(ageNum, debouncedGender, debouncedPushupComponent);
         const coreValues = getMinMaxValues(ageNum, debouncedGender, debouncedCoreComponent);
         const cardioValues = getCardioMinMaxValues(ageNum, debouncedGender, debouncedCardioComponent);
         setMinMax({pushups: pushupValues, core: coreValues});
         setCardioMinMax(cardioValues);
 
+        // Fetch the performance required to get a 90% score for each component.
+        // This is used for the "excellent" category threshold in the UI.
         const pushupThreshold = getPerformanceForScore(ageNum, debouncedGender, debouncedPushupComponent, 18); // 90% of 20
         const coreThreshold = getPerformanceForScore(ageNum, debouncedGender, debouncedCoreComponent, 18); // 90% of 20
         const cardioThreshold = getPerformanceForScore(ageNum, debouncedGender, debouncedCardioComponent, 54); // 90% of 60
@@ -62,6 +85,7 @@ export function usePtCalculatorState() {
             cardio: cardioThreshold,
         });
 
+        // Call the main calculation function with all the debounced and parsed inputs.
         const result = calculatePtScore({
             age: ageNum || 0,
             gender: debouncedGender,
@@ -82,18 +106,21 @@ export function usePtCalculatorState() {
         });
         setScore(result);
     } else {
+        // If age or gender is missing, reset all calculated data to their initial states.
         setScore({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
         setMinMax({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
         setCardioMinMax({ min: 0, max: 0 });
         setNinetyPercentileThresholds({ pushups: 0, core: 0, cardio: 0 });
     }
   }, [
+    // This dependency array ensures the effect only re-runs when a debounced value changes.
     debouncedAge, debouncedGender, debouncedAltitudeGroup,
     debouncedPushupComponent, debouncedPushups,
     debouncedCoreComponent, debouncedSitups, debouncedReverseCrunches, debouncedPlankMinutes, debouncedPlankSeconds,
     debouncedCardioComponent, debouncedRunMinutes, debouncedRunSeconds, debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds
   ]);
 
+  // Expose all the state and derived data to the consuming component.
   return {
     demographics,
     strength,
