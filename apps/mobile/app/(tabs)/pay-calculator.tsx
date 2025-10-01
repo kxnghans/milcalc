@@ -1,7 +1,18 @@
+/**
+ * @file pay-calculator.tsx
+ * @description This file defines the placeholder screen for the Pay Calculator feature.
+ * It currently includes a basic UI for input and output but lacks any calculation logic.
+ */
+
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { useTheme, NeumorphicInset, NeumorphicOutset } from '@repo/ui';
 
+/**
+ * A placeholder component for the Pay Calculator screen.
+ * It currently renders an input field and displays the entered text in an output area.
+ * @returns {JSX.Element} The rendered placeholder screen.
+ */
 export default function PayCalculator() {
   const { theme } = useTheme();
   const [inputValue, setInputValue] = useState('');
@@ -53,6 +64,7 @@ export default function PayCalculator() {
     <View style={styles.container}>
       <Text style={styles.text}>Pay Calculator</Text>
 
+      {/* Input section with a neumorphic inset effect. */}
       <View style={styles.inputContainer}>
         <NeumorphicInset style={styles.neumorphicInsetStyle}>
           <TextInput
@@ -65,9 +77,11 @@ export default function PayCalculator() {
         </NeumorphicInset>
       </View>
 
+      {/* Output section with a neumorphic outset effect. */}
       <View style={styles.outputContainer}>
         <NeumorphicOutset containerStyle={styles.neumorphicOutsetContainer} contentStyle={styles.neumorphicOutsetContent}>
           <Text style={styles.outputText}>
+            {/* Currently just echoes the input value. */}
             {inputValue || 'Output will be shown here'}
           </Text>
         </NeumorphicOutset>

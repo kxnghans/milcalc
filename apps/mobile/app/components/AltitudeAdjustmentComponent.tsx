@@ -1,11 +1,27 @@
+/**
+ * @file AltitudeAdjustmentComponent.tsx
+ * @description This file defines a component that allows users to select an altitude group
+ * to apply the appropriate adjustments to their cardio scores.
+ */
+
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme, SegmentedSelector, Icon, ICONS } from '@repo/ui';
 
+/**
+ * Props for the AltitudeAdjustmentComponent.
+ */
 interface AltitudeAdjustmentComponentProps {
+  /** The currently selected altitude group value. */
   selectedValue: string;
+  /** A function to be called when the selected value changes. */
   onValueChange: (value: string) => void;
 }
 
+/**
+ * A component that renders a segmented control for selecting the altitude group.
+ * @param {AltitudeAdjustmentComponentProps} props - The component props.
+ * @returns {JSX.Element} The rendered altitude adjustment component.
+ */
 export default function AltitudeAdjustmentComponent({ selectedValue, onValueChange }: AltitudeAdjustmentComponentProps) {
   const { theme } = useTheme();
 
@@ -16,6 +32,7 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
     },
   });
 
+  // The options for the segmented selector, including labels with line breaks for better readability.
   const altitudeOptions = [
     { label: 'Normal\n< 5,250', value: 'normal' },
     { label: 'Group 1\n5,250\n5,499', value: 'group1' },

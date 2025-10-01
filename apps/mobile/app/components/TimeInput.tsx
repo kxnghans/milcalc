@@ -1,18 +1,40 @@
+/**
+ * @file TimeInput.tsx
+ * @description This file defines a custom component for inputting time in a "minutes:seconds" format.
+ * It uses neumorphic styling and provides a seamless user experience by auto-focusing the next field.
+ */
+
 import React, { useRef } from 'react';
 import { View, StyleSheet, TextInput, Text } from 'react-native';
 import { NeumorphicInset, StyledTextInput, useTheme } from '@repo/ui';
 
+/**
+ * Props for the TimeInput component.
+ */
 interface TimeInputProps {
+  /** The current value of the minutes input. */
   minutes: string;
+  /** A function to set the minutes value. */
   setMinutes: (minutes: string) => void;
+  /** The current value of the seconds input. */
   seconds: string;
+  /** A function to set the seconds value. */
   setSeconds: (seconds: string) => void;
+  /** An optional string to display an adjustment (e.g., for altitude), shown next to the input. */
   adjustment?: string;
+  /** Optional custom styles for the container. */
   style?: any;
+  /** Placeholder text for the minutes input. Defaults to "mm". */
   minutesPlaceholder?: string;
+  /** Placeholder text for the seconds input. Defaults to "ss". */
   secondsPlaceholder?: string;
 }
 
+/**
+ * A custom input component for time values (minutes and seconds).
+ * It features two separate text inputs styled to look like a single field,
+ * and automatically moves focus from minutes to seconds for a better user experience.
+ */
 const TimeInput: React.FC<TimeInputProps> = ({
   minutes,
   setMinutes,
@@ -24,10 +46,17 @@ const TimeInput: React.FC<TimeInputProps> = ({
   secondsPlaceholder = "ss",
 }) => {
   const { theme } = useTheme();
+  // A ref to the seconds input field to allow for programmatic focusing.
   const secondsInput = useRef<TextInput>(null);
 
+  /**
+   * Handles changes to the minutes input. When the user has entered two digits,
+   * it automatically focuses the seconds input.
+   * @param {string} value - The new value of the minutes input.
+   */
   const handleMinutesChange = (value: string) => {
     setMinutes(value);
+    // Auto-focus the seconds input when the minutes field is filled.
     if (value.length === 2 || parseInt(value) >= 6) {
       secondsInput.current?.focus();
     }
@@ -62,6 +91,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
   });
 
   return (
+    // The component is wrapped in a NeumorphicInset to give it the "pressed-in" look.
     <NeumorphicInset style={[styles.container, style]}>
         <StyledTextInput
             value={minutes}
@@ -81,6 +111,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
             keyboardType="numeric"
             style={styles.input}
         />
+        {/* Optionally display an adjustment value, like for altitude correction. */}
         {adjustment && <Text style={{ color: theme.colors.success, ...theme.typography.label, marginHorizontal: theme.spacing.s, backgroundColor: 'transparent', textShadowRadius: 0.05, textShadowColor: theme.colors.neumorphic.outset.shadow }}>{adjustment}</Text>}
     </NeumorphicInset>
   );

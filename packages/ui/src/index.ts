@@ -1,3 +1,10 @@
+/**
+ * @file index.ts
+ * @description This file serves as the main entry point for the `@repo/ui` package.
+ * It exports all the shared components, theme configuration, icons, contexts, and hooks,
+ * making them easily accessible to other applications in the monorepo like `mobile` and `web`.
+ */
+
 export * from './components';
 export * from './theme';
 export * from './icons';

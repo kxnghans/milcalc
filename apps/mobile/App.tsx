@@ -1,6 +1,18 @@
+/**
+ * @file App.tsx
+ * @description This file appears to be the original root component for the mobile application,
+ * likely from before the project was migrated to use Expo Router's file-based routing.
+ * It contains a significant amount of state and logic that has since been refactored into
+ * custom hooks and separate components.
+ *
+ * NOTE: This file is likely DEPRECATED and UNUSED. The current entry point for the app
+ * is `apps/mobile/app/_layout.tsx`.
+ */
+
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+// The imports here are not using the aliased paths from the monorepo config.
 import { Card } from "@repo/ui/src/card";
 import { SegmentedSelector } from "@repo/ui/src/SegmentedSelector";
 import { StyledTextInput } from "@repo/ui/src/StyledTextInput";
@@ -8,7 +20,13 @@ import { StyledButton } from "@repo/ui/src/StyledButton";
 import { useState } from "react";
 import { calculatePtScore } from "@repo/utils/pt-calculator";
 
+/**
+ * The original root component for the PT Calculator app.
+ * This component manages all state locally and contains all UI elements in a single file.
+ * It has been superseded by the new structure in the `app/(tabs)` directory.
+ */
 export default function App() {
+  // All application state was originally managed here with numerous useState hooks.
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("Male");
   const [strengthComponent, setStrengthComponent] = useState("1-min Push-ups");
@@ -27,6 +45,10 @@ export default function App() {
 
   const [score, setScore] = useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false });
 
+  /**
+   * Handles the calculation of the PT score by gathering all state variables,
+   * formatting them, and calling the central `calculatePtScore` function.
+   */
   const handleCalculate = () => {
     const inputs = {
       age: parseInt(age),
@@ -53,6 +75,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Air Force PT Calculator</Text>
+        {/* Score Display Card */}
         <Card style={{ width: '100%', alignItems: 'center' }}>
           <Text style={styles.score}>{score.totalScore.toFixed(2)}</Text>
           <Text style={styles.scoreBreakdown}>
@@ -60,6 +83,7 @@ export default function App() {
           </Text>
         </Card>
 
+        {/* Demographics Card */}
         <Card style={{ width: '100%' }}>
           <View style={styles.row}>
             <View style={{ flex: 1, marginRight: 8 }}>
@@ -76,6 +100,7 @@ export default function App() {
           </View>
         </Card>
 
+        {/* Strength Component Card */}
         <Card style={{ width: '100%' }}>
           <SegmentedSelector
             label="Strength"
@@ -90,6 +115,7 @@ export default function App() {
           )}
         </Card>
 
+        {/* Core Component Card */}
         <Card style={{ width: '100%' }}>
           <SegmentedSelector
             label="Core"
@@ -107,6 +133,7 @@ export default function App() {
           )}
         </Card>
 
+        {/* Cardio Component Card */}
         <Card style={{ width: '100%' }}>
           <SegmentedSelector
             label="Cardio"
@@ -132,6 +159,7 @@ export default function App() {
   );
 }
 
+// Styles are defined locally and are not using the dynamic theme from the context.
 const styles = StyleSheet.create({
   container: {
     flex: 1,

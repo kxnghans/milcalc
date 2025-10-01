@@ -1,37 +1,69 @@
+/**
+ * @file pt-calculator.ts
+ * @description This file contains the core logic for calculating Air Force Physical Fitness (PT) scores.
+ * It includes functions to determine age groups, calculate scores for various exercises,
+ * handle altitude adjustments, and determine pass/fail status.
+ */
+
 import data from '../../ui/src/pt_data/pt-data.json';
 import walkStandards from '../../ui/src/pt_data/walk-standards.json';
 import altitudeAdjustments from '../../ui/src/pt_data/altitude-adjustments.json';
 
-const timeToSeconds = (time: string) => {
+/**
+ * Converts a time string (e.g., "mm:ss") to seconds.
+ * @param time - The time string to convert.
+ * @returns The total number of seconds, or 0 if the format is invalid.
+ */
+const timeToSeconds = (time: string): number => {
     if (!time) return 0;
     const parts = time.split(':').map(Number);
     if (parts.length === 2) {
+        // Valid "mm:ss" format
         return parts[0] * 60 + parts[1];
     }
     return 0;
 };
 
+/**
+ * Finds the appropriate age and gender group from the PT data.
+ * @param age - The person's age.
+ * @param sex - The person's gender ("male" or "female").
+ * @returns The age group object from the data, or undefined if not found.
+ */
 const getAgeGroup = (age: number, sex: string) => {
     const gender = sex.charAt(0).toUpperCase() + sex.slice(1);
     return data.age_sex_groups.find(group => {
         if (group.sex !== gender) return false;
+
+        // Handle age ranges like "<25"
         if (group.age_range.includes('<')) {
             const maxAge = parseInt(group.age_range.replace('<', ''));
             return age < maxAge;
         }
+        // Handle age ranges like "60+"
         if (group.age_range.includes('+')) {
             const minAge = parseInt(group.age_range.replace('+', ''));
             return age >= minAge;
         }
+        // Handle standard age ranges like "25-29"
         const [min, max] = group.age_range.split('-').map(Number);
         return age >= min && age <= max;
     });
 };
 
-const getCardioScore = (ageGroup: any, component: string, performance: any) => {
+/**
+ * Calculates the score for a cardio exercise (run or shuttle).
+ * @param ageGroup - The person's age group data.
+ * @param component - The specific cardio component ('run' or 'shuttles').
+ * @param performance - An object containing the performance metrics (minutes/seconds for run, shuttles count).
+ * @returns The calculated score for the cardio component.
+ */
+const getCardioScore = (ageGroup: any, component: string, performance: any): number => {
     if (component === 'run') {
         const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
         if (runTimeInSeconds === 0) return 0;
+
+        // Find the matching score bracket for the run time
         for (const bracket of ageGroup.cardiorespiratory.run_time_brackets) {
             const bracketTime = bracket.run_time.replace('*', '');
             if (bracketTime.includes('≤')) {
@@ -52,6 +84,8 @@ const getCardioScore = (ageGroup: any, component: string, performance: any) => {
     } else if (component === 'shuttles') {
         const shuttles = performance.shuttles;
         if (shuttles === 0) return 0;
+
+        // Find the matching score bracket for the shuttle count
         for (const bracket of ageGroup.cardiorespiratory.run_time_brackets) {
             const shuttleRange = bracket.shuttles_range.replace('*', '');
             if (shuttleRange.includes('>')) {
@@ -72,36 +106,53 @@ const getCardioScore = (ageGroup: any, component: string, performance: any) => {
             }
         }
     }
-    return 0;
+    return 0; // Return 0 if no bracket is matched
 };
 
-const getMuscularFitnessScore = (ageGroup: any, component: string, reps: number) => {
+/**
+ * Calculates the score for a muscular fitness exercise (e.g., push-ups, sit-ups).
+ * @param ageGroup - The person's age group data.
+ * @param component - The specific muscular fitness component.
+ * @param reps - The number of repetitions performed.
+ * @returns The calculated score for the component.
+ */
+const getMuscularFitnessScore = (ageGroup: any, component: string, reps: number): number => {
     const table = ageGroup.muscular_fitness[component];
     if (!table || !reps) return 0;
 
+    // Find the matching score for the number of reps
     for (const row of table) {
         const rowRepsString = String(row.reps).replace(/[^0-9]/g, '');
         const rowReps = parseInt(rowRepsString);
 
+        // Handle ranges like ">62" or "≥62"
         if (String(row.reps).includes('>') || String(row.reps).includes('≥')) {
             if (reps >= rowReps) {
                 return row.points;
             }
         } else {
+            // Handle exact rep counts
             if (reps >= rowReps) {
                 return row.points;
             }
         }
     }
-    return 0;
+    return 0; // Return 0 if no rep count is matched
 };
 
-const getPlankScore = (ageGroup: any, performance: any) => {
+/**
+ * Calculates the score for the forearm plank exercise.
+ * @param ageGroup - The person's age group data.
+ * @param performance - An object containing the performance metrics (minutes/seconds).
+ * @returns The calculated score for the plank.
+ */
+const getPlankScore = (ageGroup: any, performance: any): number => {
     const plankTimeInSeconds = performance.minutes * 60 + performance.seconds;
     if (plankTimeInSeconds === 0) return 0;
     const table = ageGroup.muscular_fitness['forearm_plank_time'];
     if (!table) return 0;
 
+    // Find the matching score for the plank time
     for (const row of table) {
         const bracketTime = row.time.replace(/[*≥>]/g, '').trim();
         const rowSeconds = timeToSeconds(bracketTime);
@@ -110,15 +161,25 @@ const getPlankScore = (ageGroup: any, performance: any) => {
             return row.points;
         }
     }
-    return 0;
+    return 0; // Return 0 if no time is matched
 };
 
-export const getScoreForExercise = (age: number, gender: string, component: string, performance: any, altitudeGroup?: string) => {
+/**
+ * Calculates the score for a single exercise, applying altitude adjustments if necessary.
+ * @param age - The person's age.
+ * @param gender - The person's gender.
+ * @param component - The exercise component being scored.
+ * @param performance - An object with performance data (reps, time, etc.).
+ * @param altitudeGroup - The selected altitude group (e.g., 'group1', 'group2').
+ * @returns The final score for the exercise.
+ */
+export const getScoreForExercise = (age: number, gender: string, component: string, performance: any, altitudeGroup?: string): number => {
     const ageGroup = getAgeGroup(age, gender);
     if (!ageGroup) return 0;
 
     let adjustedPerformance = { ...performance };
 
+    // Apply altitude adjustments for cardio components
     if (altitudeGroup && altitudeGroup !== 'normal') {
         if (component === 'run') {
             const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
@@ -133,6 +194,7 @@ export const getScoreForExercise = (age: number, gender: string, component: stri
         }
     }
 
+    // Route to the correct scoring function based on the component
     switch (component) {
         case 'run':
         case 'shuttles':
@@ -149,7 +211,12 @@ export const getScoreForExercise = (age: number, gender: string, component: stri
     }
 };
 
-const getAgeGroupIndex = (age: number) => {
+/**
+ * Determines the age group index for the walk test.
+ * @param age - The person's age.
+ * @returns The index of the age group (0-4), or -1 if not found.
+ */
+const getAgeGroupIndex = (age: number): number => {
     if (age < 30) return 0;
     if (age >= 30 && age <= 39) return 1;
     if (age >= 40 && age <= 49) return 2;
@@ -158,6 +225,15 @@ const getAgeGroupIndex = (age: number) => {
     return -1;
 }
 
+/**
+ * Checks if the 2-kilometer walk meets the passing criteria.
+ * @param age - The person's age.
+ * @param gender - The person's gender.
+ * @param minutes - The minutes part of the walk time.
+ * @param seconds - The seconds part of the walk time.
+ * @param altitudeGroup - The selected altitude group.
+ * @returns 'pass', 'fail', or 'n/a' if data is insufficient.
+ */
 export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number, altitudeGroup?: string): 'pass' | 'fail' | 'n/a' => {
     const userTimeInSeconds = minutes * 60 + seconds;
     if (userTimeInSeconds === 0) return 'n/a';
@@ -167,8 +243,9 @@ export const checkWalkPass = (age: number, gender: string, minutes: number, seco
 
     let maxTimeInSeconds = 0;
 
+    // Determine the maximum allowed time based on altitude
     if (altitudeGroup && altitudeGroup !== 'normal') {
-        // Defensive checks to prevent the TypeError
+        // Defensive checks to prevent errors if data structure is missing expected values
         if (
             altitudeAdjustments.walk &&
             altitudeAdjustments.walk[gender] &&
@@ -190,7 +267,13 @@ export const checkWalkPass = (age: number, gender: string, minutes: number, seco
     return userTimeInSeconds <= maxTimeInSeconds ? 'pass' : 'fail';
 };
 
+/**
+ * Calculates the total PT score based on all component inputs.
+ * @param inputs - An object containing all user inputs (age, gender, performance for each component).
+ * @returns An object with the total score, component scores, pass/fail status, and walk status.
+ */
 export const calculatePtScore = (inputs: any) => {
+    // Validate required inputs
     if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
     const ageGroup = getAgeGroup(inputs.age, inputs.gender);
     if (!ageGroup) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
@@ -198,12 +281,14 @@ export const calculatePtScore = (inputs: any) => {
     let cardioScore = 0;
     let walkPassed: 'pass' | 'fail' | 'n/a' = 'n/a';
 
+    // Calculate cardio score or check walk pass status
     if (inputs.cardioComponent === 'walk') {
         walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds, inputs.altitudeGroup);
     } else {
         let adjustedRunTime = { minutes: inputs.runMinutes, seconds: inputs.runSeconds };
         let adjustedShuttles = inputs.shuttles;
 
+        // Apply altitude adjustments before scoring
         if (inputs.altitudeGroup && inputs.altitudeGroup !== 'normal') {
             if (inputs.cardioComponent === 'run') {
                 const runTimeInSeconds = inputs.runMinutes * 60 + inputs.runSeconds;
@@ -225,6 +310,7 @@ export const calculatePtScore = (inputs: any) => {
         });
     }
 
+    // Calculate scores for other components
     const pushupScore = getMuscularFitnessScore(ageGroup, inputs.pushupComponent, inputs.pushups);
 
     let coreScore = 0;
@@ -239,15 +325,18 @@ export const calculatePtScore = (inputs: any) => {
     let totalScore = cardioScore + pushupScore + coreScore;
     let isPass = false;
 
+    // Determine overall pass/fail status based on walk or run/shuttle
     if (inputs.cardioComponent === 'walk') {
         if (walkPassed === 'pass' && pushupScore > 0 && coreScore > 0) {
+            // For the walk, the score is based on the strength and core components, scaled to 100
             totalScore = ((pushupScore + coreScore) / 40) * 100;
             isPass = totalScore >= 75;
         } else {
-            totalScore = pushupScore + coreScore;
+            totalScore = pushupScore + coreScore; // Score is not scaled if walk is not passed
             isPass = false;
         }
     } else {
+        // For other cardio, passing requires a total score of 75+ and non-zero scores in all components
         isPass = totalScore >= 75 && cardioScore > 0 && pushupScore > 0 && coreScore > 0;
     }
 
@@ -261,7 +350,13 @@ export const calculatePtScore = (inputs: any) => {
     };
 };
 
-export const calculateBestScore = (scores: { [key: string]: number }) => {
+/**
+ * Calculates the best possible total score from a set of individual exercise scores.
+ * This is used for the "Best Score" feature.
+ * @param scores - An object mapping exercise components to their highest achieved scores.
+ * @returns The sum of the best scores from each category (strength, core, cardio).
+ */
+export const calculateBestScore = (scores: { [key: string]: number }): number => {
     const strength = Math.max(scores.push_ups_1min || 0, scores.hand_release_pushups_2min || 0);
     const core = Math.max(scores.sit_ups_1min || 0, scores.cross_leg_reverse_crunch_2min || 0, scores.forearm_plank_time || 0);
     const cardio = Math.max(scores.run || 0, scores.shuttles || 0);
@@ -269,6 +364,13 @@ export const calculateBestScore = (scores: { [key: string]: number }) => {
     return strength + core + cardio;
 };
 
+/**
+ * Gets the minimum and maximum possible performance values (reps or time) for a given muscular fitness component.
+ * @param age - The person's age.
+ * @param sex - The person's gender.
+ * @param component - The muscular fitness component.
+ * @returns An object with the min and max performance values.
+ */
 export const getMinMaxValues = (age: number, sex: string, component: string) => {
     const ageGroup = getAgeGroup(age, sex);
     if (!ageGroup) return { min: 0, max: 0 };
@@ -276,6 +378,7 @@ export const getMinMaxValues = (age: number, sex: string, component: string) => 
     const table = ageGroup.muscular_fitness[component];
     if (!table || table.length === 0) return { min: 0, max: 0 };
 
+    // Handle time-based components like the plank
     if (component === 'forearm_plank_time') {
         const timesInSeconds = table.map(row => {
             const timeString = String(row.time).replace(/[^0-9:]/g, '').trim();
@@ -286,6 +389,7 @@ export const getMinMaxValues = (age: number, sex: string, component: string) => 
         return { min, max };
     }
 
+    // Handle rep-based components
     const reps = table.map(row => {
         if (typeof row.reps === 'string') {
             const match = row.reps.replace(/[^0-9]/g, '');
@@ -300,10 +404,18 @@ export const getMinMaxValues = (age: number, sex: string, component: string) => 
     return { min, max };
 };
 
+/**
+ * Gets the minimum and maximum possible performance values for a given cardio component.
+ * @param age - The person's age.
+ * @param sex - The person's gender.
+ * @param component - The cardio component ('run', 'shuttles', or 'walk').
+ * @returns An object with the min and max performance values. For run, min is slowest and max is fastest.
+ */
 export const getCardioMinMaxValues = (age: number, sex: string, component: string) => {
     const ageGroup = getAgeGroup(age, sex);
     if (!ageGroup) return { min: 0, max: 0 };
 
+    // For the walk, "min" holds the passing time threshold
     if (component === 'walk') {
         const ageIndex = getAgeGroupIndex(age);
         if (ageIndex === -1) return { min: 0, max: 0 };
@@ -353,6 +465,14 @@ export const getCardioMinMaxValues = (age: number, sex: string, component: strin
     return { min: 0, max: 0 };
 };
 
+/**
+ * Gets the required performance for a given component to achieve a target score.
+ * @param age - The person's age.
+ * @param sex - The person's gender.
+ * @param component - The exercise component.
+ * @param targetScore - The desired score.
+ * @returns The performance value (time in seconds, reps, or shuttle count) required to meet the target score.
+ */
 export const getPerformanceForScore = (age: number, sex: string, component: string, targetScore: number): number => {
     const ageGroup = getAgeGroup(age, sex);
     if (!ageGroup) return 0;
@@ -372,7 +492,7 @@ export const getPerformanceForScore = (age: number, sex: string, component: stri
     if (component === 'shuttles') {
         const brackets = ageGroup.cardiorespiratory.run_time_brackets;
         const candidates = brackets.filter(b => b.points >= targetScore);
-        if (candidates.length === 0) return 999; // Return a high number
+        if (candidates.length === 0) return 999; // Return a high number if not achievable
         const shuttles = candidates.map(b => {
             const shuttleString = b.shuttles_range.replace(/[≥*<>]/g, '').trim();
             const shuttleParts = shuttleString.split(' - ');
@@ -384,16 +504,16 @@ export const getPerformanceForScore = (age: number, sex: string, component: stri
     if (component === 'forearm_plank_time') {
         const table = ageGroup.muscular_fitness[component];
         const candidates = table.filter(row => row.points >= targetScore);
-        if (candidates.length === 0) return 999;
+        if (candidates.length === 0) return 999; // Return a high number if not achievable
         const times = candidates.map(row => timeToSeconds(String(row.time).replace(/[^0-9:]/g, '')));
         return Math.min(...times);
     }
 
-    // For push_ups_1min, hand_release_pushups_2min, sit_ups_1min, cross_leg_reverse_crunch_2min
+    // Handles push-ups, sit-ups, and reverse crunches
     const table = ageGroup.muscular_fitness[component];
     if (!table) return 0;
     const candidates = table.filter(row => row.points >= targetScore);
-    if (candidates.length === 0) return 999;
+    if (candidates.length === 0) return 999; // Return a high number if not achievable
     const reps = candidates.map(row => parseInt(String(row.reps).replace(/[^0-9]/g, '')));
     return Math.min(...reps);
 };

@@ -1,3 +1,10 @@
+/**
+ * @file layout.tsx
+ * @description This file defines the root layout for the web application.
+ * It sets up the main HTML document structure and wraps the content with the
+ * central `Providers` component.
+ */
+
 import { Providers } from './providers';
 
 /**
