@@ -18,6 +18,7 @@ import TimeInput from '../components/TimeInput';
 import Demographics from '../components/Demographics';
 import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
 import Divider from '../components/Divider';
+import PdfModal from '../components/PdfModal';
 
 const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) => {
   const { theme } = useTheme();
@@ -26,14 +27,12 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
   const passColors = useScoreColors('pass');
   const failColors = useScoreColors('fail');
 
-  const getColorForScore = (score) => {
+  const getScoreColor = (score, maxScore) => {
     const category = getScoreCategory(score, maxScore);
-    switch(category) {
-        case 'excellent': return excellentColors;
-        case 'pass': return passColors;
-        case 'fail': return failColors;
-        default: return {};
-    }
+    if (category === 'excellent') return excellentColors.progressColor;
+    if (category === 'pass') return passColors.progressColor;
+    if (category === 'fail') return failColors.progressColor;
+    return theme.colors.text;
   }
 
   const styles = StyleSheet.create({
@@ -91,6 +90,7 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
             options={exercises.map(e => ({ label: e.label, value: e.value }))}
             selectedValues={selectedExerciseValues}
             onValueChange={() => {}}
+            isTouchable={false}
         />
       <View style={styles.gridContainer}>
         {exercises.map((exercise, index) => (
@@ -106,24 +106,31 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
         <IconRow 
             icons={scores.map((s, index) => {
                 const isWalk = exercises[index]?.value === 'walk';
-                const isBestNumeric = s === maxNumericScore && typeof s === 'number' && maxNumericScore > 0;
-
-                let colors = {};
-                let text = String(s);
+                let text = s ? String(s) : '0';
+                let color = theme.colors.text; // Default color
 
                 if (isWalk) {
-                    colors = getColorForScore(s);
-                    if (s === 'pass') text = 'Pass';
-                    else if (s === 'fail') text = 'Fail';
-                    else text = 'N/A';
-                } else if (isBestNumeric) {
-                    colors = getColorForScore(s);
+                    if (s === 'pass') {
+                        color = passColors.progressColor;
+                        text = 'Pass';
+                    } else if (s === 'fail') {
+                        color = failColors.progressColor;
+                        text = 'Fail';
+                    } else {
+                        text = 'N/A';
+                        color = theme.colors.disabled;
+                    }
+                } else {
+                    const isBestNumeric = typeof s === 'number' && s === maxNumericScore && maxNumericScore > 0;
+                    if (isBestNumeric) {
+                        color = getScoreColor(s, maxScore);
+                    }
                 }
 
-                return { 
+                return {
                     text,
                     textStyle: styles.scoreBreakdownText,
-                    ...colors 
+                    color,
                 };
             })} 
             borderRadius={theme.borderRadius.m} 
@@ -135,6 +142,7 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
 
 export default function BestScoreScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
+  const [isModalVisible, setModalVisible] = React.useState(false);
   
   const { age, setAge, gender, setGender, altitudeGroup, setAltitudeGroup } = useDemographicsState();
   const { inputs, outputs } = useBestScoreState(age, gender, altitudeGroup);
@@ -183,6 +191,7 @@ export default function BestScoreScreen() {
 
   return (
     <View style={styles.container}>
+        <PdfModal isModalVisible={isModalVisible} setModalVisible={setModalVisible} />
         <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
         <IconRow
             icons={[
@@ -192,7 +201,7 @@ export default function BestScoreScreen() {
             },
             {
                 name: ICONS.PDF,
-                onPress: () => {},
+                onPress: () => setModalVisible(true),
             },
             {
                 name: getThemeIcon(),
