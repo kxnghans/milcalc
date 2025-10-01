@@ -1,18 +1,23 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme, NeumorphicOutset } from '@repo/ui';
-
-const getScoreColor = (score, maxScore, theme) => {
-    if (score === 0) return theme.colors.error;
-    if (score >= maxScore * 0.9) {
-        return theme.colors.ninetyPlus;
-    }
-    return theme.colors.success;
-};
+import { useTheme, NeumorphicOutset, useScoreColors } from '@repo/ui';
+import { getScoreCategory } from '@repo/utils';
 
 export default function ScoreDisplay({ score, cardioComponent, showBreakdown = true }) {
   const { theme } = useTheme();
-  const scoreColor = score.isPass ? (score.totalScore >= 90 ? theme.colors.ninetyPlus : theme.colors.success) : theme.colors.error;
+  const excellentColors = useScoreColors('excellent');
+  const passColors = useScoreColors('pass');
+  const failColors = useScoreColors('fail');
+
+  const getScoreColor = (score, maxScore) => {
+    const category = getScoreCategory(score, maxScore);
+    if (category === 'excellent') return excellentColors.progressColor;
+    if (category === 'pass') return passColors.progressColor;
+    if (category === 'fail') return failColors.progressColor;
+    return theme.colors.text;
+  }
+
+  const scoreColor = score.isPass ? getScoreColor(score.totalScore, 100) : failColors.progressColor;
 
   const styles = StyleSheet.create({
     scoreContainer: {
@@ -51,11 +56,11 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
         if (score.walkPassed === 'n/a') {
             return <Text style={[styles.scoreBreakdownText, { color: theme.colors.disabled }]}>N/A</Text>;
         }
-        const color = score.walkPassed === 'pass' ? theme.colors.success : theme.colors.error;
+        const color = score.walkPassed === 'pass' ? passColors.progressColor : failColors.progressColor;
         const text = score.walkPassed === 'pass' ? 'Pass' : 'Fail';
         return <Text style={[styles.scoreBreakdownText, { color }]}>{text}</Text>;
     }
-    return <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.cardioScore, 60, theme) }]}>{score.cardioScore}</Text>;
+    return <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.cardioScore, 60) }]}>{score.cardioScore}</Text>;
   };
 
   return (
@@ -65,12 +70,12 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
             <View style={styles.scoreBreakdownContainer}>
                 <View style={{flexDirection: 'row'}}>
                     <Text style={styles.scoreBreakdownText}>Strength: </Text>
-                    <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.pushupScore, 20, theme) }]}>{score.pushupScore}</Text>
+                    <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.pushupScore, 20) }]}>{score.pushupScore}</Text>
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={{flexDirection: 'row'}}>
                     <Text style={styles.scoreBreakdownText}>Core: </Text>
-                    <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.coreScore, 20, theme) }]}>{score.coreScore}</Text>
+                    <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.coreScore, 20) }]}>{score.coreScore}</Text>
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={{flexDirection: 'row'}}>

@@ -34,6 +34,12 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   const debouncedWalkSeconds = useDebounce(walkSeconds, 500);
 
   useEffect(() => {
+    if (!debouncedAge || !debouncedGender) {
+        setScores({});
+        setBestScore(0);
+        return;
+    }
+
     const newScores = {
         push_ups_1min: getScoreForExercise(Number(debouncedAge), debouncedGender, 'push_ups_1min', { reps: Number(debouncedPushUps) }),
         hand_release_pushups_2min: getScoreForExercise(Number(debouncedAge), debouncedGender, 'hand_release_pushups_2min', { reps: Number(debouncedHrPushUps) }),

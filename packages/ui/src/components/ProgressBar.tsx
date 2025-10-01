@@ -71,10 +71,10 @@ export const ProgressBar = ({
     }
     const colors = getColorForCategory(category);
 
-    return { progress: Math.max(0, progress), color: colors.backgroundColor || theme.colors.secondary };
+    return { progress: Math.max(0, progress), ...colors };
   };
 
-  const { progress, color } = calculateProgressAndColor();
+  const { progress, progressColor, backgroundColor } = calculateProgressAndColor();
 
   const styles = StyleSheet.create({
     bar: {
@@ -135,7 +135,7 @@ export const ProgressBar = ({
         overflow: 'hidden',
       }}
     >
-      <View style={[styles.progress, { backgroundColor: color }]} />
+      <View style={[styles.progress, { backgroundColor: progressColor }]} />
     </NeumorphicOutset>
   );
 

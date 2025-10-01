@@ -70,10 +70,18 @@ export const IconRow = ({ icons, style, borderRadius }: IconRowProps) => {
           );
         }
 
+        if (icon.onPress) {
+            return (
+                <TouchableOpacity onPress={icon.onPress} key={index} style={styles.touchable}>
+                    {iconContent}
+                </TouchableOpacity>
+            );
+        }
+
         return (
-          <TouchableOpacity onPress={icon.onPress} key={index} style={styles.touchable}>
-            {iconContent}
-          </TouchableOpacity>
+            <View key={index} style={styles.touchable}>
+                {iconContent}
+            </View>
         );
       })}
     </View>

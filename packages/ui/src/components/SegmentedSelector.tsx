@@ -9,9 +9,10 @@ interface SegmentedSelectorProps {
   onValueChange: (value: string) => void;
   style?: StyleProp<ViewStyle>;
   onLayout?: (event: any) => void;
+  isTouchable?: boolean;
 }
 
-export const SegmentedSelector = ({ options, selectedValues, onValueChange, style, onLayout }: SegmentedSelectorProps) => {
+export const SegmentedSelector = ({ options, selectedValues, onValueChange, style, onLayout, isTouchable = true }: SegmentedSelectorProps) => {
   const { theme, isDarkMode } = useTheme();
 
   const styles = StyleSheet.create({
@@ -64,6 +65,8 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
           const lines = option.label.split('\n');
           const isSelected = selectedValues.includes(option.value);
 
+          const Wrapper = isTouchable ? TouchableOpacity : View;
+
           if (isSelected) {
             return (
               <NeumorphicOutset
@@ -82,7 +85,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
                 shadowOpacity={isDarkMode ? undefined : 0.3}
                 highlightOpacity={isDarkMode ? 0.55 : 1}
               >
-                <TouchableOpacity
+                <Wrapper
                   style={[styles.segment, styles.selectedSegment]}
                   onPress={() => onValueChange(option.value)}
                 >
@@ -91,12 +94,12 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
                       {line}
                     </Text>
                   ))}
-                </TouchableOpacity>
+                </Wrapper>
               </NeumorphicOutset>
             )
           }
           return (
-            <TouchableOpacity
+            <Wrapper
               key={option.value}
               style={styles.segment}
               onPress={() => onValueChange(option.value)}
@@ -106,7 +109,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
                   {line}
                 </Text>
               ))}
-            </TouchableOpacity>
+            </Wrapper>
           )
         })}
       </View>

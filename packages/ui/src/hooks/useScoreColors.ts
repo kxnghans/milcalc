@@ -4,15 +4,17 @@ import { ScoreCategory } from '@repo/utils';
 export const useScoreColors = (category: ScoreCategory) => {
   const { theme } = useTheme();
 
+  const backgroundColor = theme.colors.secondary;
+
   switch (category) {
     case 'excellent':
-      return { color: theme.colors.ninetyPlus };
+      return { backgroundColor, progressColor: theme.colors.ninetyPlus };
     case 'pass':
-      return { color: theme.colors.success };
+      return { backgroundColor, progressColor: theme.colors.success };
     case 'fail':
-      return { color: theme.colors.error };
+      return { backgroundColor, progressColor: theme.colors.error };
     case 'none':
     default:
-      return { color: theme.colors.text };
+      return { backgroundColor, progressColor: theme.colors.secondary };
   }
 };
