@@ -1,8 +1,8 @@
 /**
  * @file useCoreState.ts
  * @description This file defines a custom React hook for managing the state related to the
- * core component of the PT calculator. This includes the selected exercise type and the
- * performance values for sit-ups, reverse crunches, and the forearm plank.
+ * core component of the PT calculator. This includes the selected exercise type, performance
+ * values, and the exemption status.
  */
 
 import { useState } from 'react';
@@ -33,6 +33,25 @@ export function useCoreState(
   const [plankMinutes, setPlankMinutes] = useState(initialPlankMinutes);
   // State for the seconds part of the plank time.
   const [plankSeconds, setPlankSeconds] = useState(initialPlankSeconds);
+  // State for the exemption status of the component.
+  const [isExempt, setIsExempt] = useState(false);
+
+  /**
+   * Toggles the exemption status for the core component.
+   * When exempted, it clears all core input values.
+   */
+  const toggleExempt = () => {
+    setIsExempt(current => {
+      const nextIsExempt = !current;
+      if (nextIsExempt) {
+        setSitups('');
+        setReverseCrunches('');
+        setPlankMinutes('');
+        setPlankSeconds('');
+      }
+      return nextIsExempt;
+    });
+  };
 
   return {
     coreComponent,
@@ -45,5 +64,7 @@ export function useCoreState(
     setPlankMinutes,
     plankSeconds,
     setPlankSeconds,
+    isExempt,
+    toggleExempt,
   };
 }

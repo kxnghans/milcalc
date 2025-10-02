@@ -39,6 +39,8 @@ export default function CardioComponent({
     age,
     gender,
     ninetyPercentileThreshold,
+    isExempt,
+    toggleExempt,
 }) {
     const { theme, isDarkMode } = useTheme();
     // State to hold the calculated altitude adjustment text to be displayed to the user.
@@ -194,7 +196,7 @@ export default function CardioComponent({
                         </View>
                         <SegmentedSelector
                             options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
-                            selectedValues={[cardioComponent]}
+                            selectedValues={isExempt ? [] : [cardioComponent]}
                             onValueChange={setCardioComponent}
                         />
                         {/* Conditionally render the correct input field for the selected cardio type. */}
@@ -208,10 +210,22 @@ export default function CardioComponent({
                                 minutesPlaceholder="Minutes"
                                 secondsPlaceholder="Seconds"
                                 style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                                disabled={isExempt}
+                                onToggleExempt={toggleExempt}
+                                isExempt={isExempt}
                             />
                         )}
                         {cardioComponent === "shuttles" && (
-                            <NumberInput value={shuttles} onChangeText={setShuttles} placeholder="Enter shuttle count" adjustment={adjustment} style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
+                            <NumberInput
+                                value={shuttles}
+                                onChangeText={setShuttles}
+                                placeholder="Enter shuttle count"
+                                adjustment={adjustment}
+                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                                disabled={isExempt}
+                                onToggleExempt={toggleExempt}
+                                isExempt={isExempt}
+                            />
                         )}
                         {cardioComponent === "walk" && (
                             <TimeInput
@@ -223,6 +237,9 @@ export default function CardioComponent({
                                 minutesPlaceholder="Minutes"
                                 secondsPlaceholder="Seconds"
                                 style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                                disabled={isExempt}
+                                onToggleExempt={toggleExempt}
+                                isExempt={isExempt}
                             />
                         )}
                     </View>

@@ -6,7 +6,7 @@
 
 import React, { useRef } from 'react';
 import { View, StyleSheet, TextInput, Text } from 'react-native';
-import { NeumorphicInset, StyledTextInput, useTheme } from '@repo/ui';
+import { NeumorphicInset, StyledTextInput, useTheme, ExemptButton } from '@repo/ui';
 
 /**
  * Props for the TimeInput component.
@@ -28,6 +28,10 @@ interface TimeInputProps {
   minutesPlaceholder?: string;
   /** Placeholder text for the seconds input. Defaults to "ss". */
   secondsPlaceholder?: string;
+  /** An optional function to call when the exempt button is toggled. If provided, the button will be rendered. */
+  onToggleExempt?: () => void;
+  /** Whether the component is currently exempt. When true, the input is non-editable and shows 'xx'. */
+  isExempt?: boolean;
 }
 
 /**
@@ -44,6 +48,8 @@ const TimeInput: React.FC<TimeInputProps> = ({
   style,
   minutesPlaceholder = "mm",
   secondsPlaceholder = "ss",
+  onToggleExempt,
+  isExempt,
 }) => {
   const { theme } = useTheme();
   // A ref to the seconds input field to allow for programmatic focusing.
@@ -87,29 +93,42 @@ const TimeInput: React.FC<TimeInputProps> = ({
         color: theme.colors.text,
         flex: 1,
         backgroundColor: 'transparent',
-    }
+    },
   });
+
+  // When exempt, show 'xx' as the placeholder. Otherwise, use the placeholder from props.
+  const currentMinutesPlaceholder = isExempt ? 'xx' : minutesPlaceholder;
+  const currentSecondsPlaceholder = isExempt ? 'xx' : secondsPlaceholder;
 
   return (
     // The component is wrapped in a NeumorphicInset to give it the "pressed-in" look.
     <NeumorphicInset style={[styles.container, style]}>
+        {onToggleExempt && (
+            <ExemptButton
+                onPress={onToggleExempt}
+                isActive={isExempt}
+                style={{ marginHorizontal: theme.spacing.s }}
+            />
+        )}
         <StyledTextInput
             value={minutes}
             onChangeText={handleMinutesChange}
-            placeholder={minutesPlaceholder}
+            placeholder={currentMinutesPlaceholder}
             maxLength={2}
             keyboardType="numeric"
             style={styles.input}
+            editable={!isExempt}
         />
         <Text style={styles.separator}>:</Text>
         <StyledTextInput
             ref={secondsInput}
             value={seconds}
             onChangeText={setSeconds}
-            placeholder={secondsPlaceholder}
+            placeholder={currentSecondsPlaceholder}
             maxLength={2}
             keyboardType="numeric"
             style={styles.input}
+            editable={!isExempt}
         />
         {/* Optionally display an adjustment value, like for altitude correction. */}
         {adjustment && <Text style={{ color: theme.colors.success, ...theme.typography.label, marginHorizontal: theme.spacing.s, backgroundColor: 'transparent', textShadowRadius: 0.05, textShadowColor: theme.colors.neumorphic.outset.shadow }}>{adjustment}</Text>}

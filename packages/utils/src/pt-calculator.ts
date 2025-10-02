@@ -2,7 +2,7 @@
  * @file pt-calculator.ts
  * @description This file contains the core logic for calculating Air Force Physical Fitness (PT) scores.
  * It includes functions to determine age groups, calculate scores for various exercises,
- * handle altitude adjustments, and determine pass/fail status.
+ * handle altitude adjustments, and determine pass/fail status, including exemption logic.
  */
 
 import data from '../../ui/src/pt_data/pt-data.json';
@@ -268,80 +268,103 @@ export const checkWalkPass = (age: number, gender: string, minutes: number, seco
 };
 
 /**
- * Calculates the total PT score based on all component inputs.
- * @param inputs - An object containing all user inputs (age, gender, performance for each component).
- * @returns An object with the total score, component scores, pass/fail status, and walk status.
+ * Calculates the total PT score based on all component inputs, including exemptions.
+ * @param inputs - An object containing all user inputs (age, gender, performance, and exemption status for each component).
+ * @returns An object with the composite score, component scores, pass/fail status, and walk status.
  */
 export const calculatePtScore = (inputs: any) => {
     // Validate required inputs
-    if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
+    if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) {
+        return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
+    }
     const ageGroup = getAgeGroup(inputs.age, inputs.gender);
-    if (!ageGroup) return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
+    if (!ageGroup) {
+        return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
+    }
 
-    let cardioScore = 0;
+    let totalPossiblePoints = 100;
+    let earnedPoints = 0;
+
+    // Strength Component
+    let pushupScore: number | string = 0;
+    if (inputs.isStrengthExempt) {
+        pushupScore = 'Exempt';
+        totalPossiblePoints -= 20;
+    } else {
+        pushupScore = getMuscularFitnessScore(ageGroup, inputs.pushupComponent, inputs.pushups);
+        earnedPoints += pushupScore;
+    }
+
+    // Core Component
+    let coreScore: number | string = 0;
+    if (inputs.isCoreExempt) {
+        coreScore = 'Exempt';
+        totalPossiblePoints -= 20;
+    } else {
+        if (inputs.coreComponent === 'sit_ups_1min') {
+            coreScore = getMuscularFitnessScore(ageGroup, 'sit_ups_1min', inputs.situps);
+        } else if (inputs.coreComponent === 'cross_leg_reverse_crunch_2min') {
+            coreScore = getMuscularFitnessScore(ageGroup, 'cross_leg_reverse_crunch_2min', inputs.reverseCrunches);
+        } else if (inputs.coreComponent === 'forearm_plank_time') {
+            coreScore = getPlankScore(ageGroup, { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds });
+        }
+        earnedPoints += coreScore;
+    }
+
+    // Cardio Component
+    let cardioScore: number | string = 0;
     let walkPassed: 'pass' | 'fail' | 'n/a' = 'n/a';
-
-    // Calculate cardio score or check walk pass status
-    if (inputs.cardioComponent === 'walk') {
+    if (inputs.isCardioExempt) {
+        cardioScore = 'Exempt';
+        totalPossiblePoints -= 60;
+    } else if (inputs.cardioComponent === 'walk') {
         walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds, inputs.altitudeGroup);
+        totalPossiblePoints -= 60; // Walk test does not contribute points, max score is based on other components.
     } else {
         let adjustedRunTime = { minutes: inputs.runMinutes, seconds: inputs.runSeconds };
         let adjustedShuttles = inputs.shuttles;
 
-        // Apply altitude adjustments before scoring
         if (inputs.altitudeGroup && inputs.altitudeGroup !== 'normal') {
             if (inputs.cardioComponent === 'run') {
                 const runTimeInSeconds = inputs.runMinutes * 60 + inputs.runSeconds;
-                const correction = altitudeAdjustments.run.groups[inputs.altitudeGroup].corrections.find(c => runTimeInSeconds >= c.time_range[0] && runTimeInSeconds <= c.time_range[1]);
+                const correction = altitudeAdjustments.run.groups[inputs.altitudeGroup]?.corrections.find(c => runTimeInSeconds >= c.time_range[0] && runTimeInSeconds <= c.time_range[1]);
                 if (correction) {
                     const adjustedTimeInSeconds = runTimeInSeconds - correction.correction;
                     adjustedRunTime.minutes = Math.floor(adjustedTimeInSeconds / 60);
                     adjustedRunTime.seconds = adjustedTimeInSeconds % 60;
                 }
             } else if (inputs.cardioComponent === 'shuttles') {
-                adjustedShuttles += altitudeAdjustments.hamr.groups[inputs.altitudeGroup].shuttles_to_add;
+                adjustedShuttles += altitudeAdjustments.hamr.groups[inputs.altitudeGroup]?.shuttles_to_add || 0;
             }
         }
-
         cardioScore = getCardioScore(ageGroup, inputs.cardioComponent, {
             minutes: adjustedRunTime.minutes,
             seconds: adjustedRunTime.seconds,
             shuttles: adjustedShuttles,
         });
+        earnedPoints += cardioScore;
     }
 
-    // Calculate scores for other components
-    const pushupScore = getMuscularFitnessScore(ageGroup, inputs.pushupComponent, inputs.pushups);
-
-    let coreScore = 0;
-    if (inputs.coreComponent === 'sit_ups_1min') {
-        coreScore = getMuscularFitnessScore(ageGroup, 'sit_ups_1min', inputs.situps);
-    } else if (inputs.coreComponent === 'cross_leg_reverse_crunch_2min') {
-        coreScore = getMuscularFitnessScore(ageGroup, 'cross_leg_reverse_crunch_2min', inputs.reverseCrunches);
-    } else if (inputs.coreComponent === 'forearm_plank_time') {
-        coreScore = getPlankScore(ageGroup, { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds });
+    // Calculate Composite Score
+    let compositeScore = 0;
+    if (totalPossiblePoints > 0) {
+        compositeScore = (earnedPoints / totalPossiblePoints) * 100;
+    } else if (inputs.isStrengthExempt && inputs.isCoreExempt && inputs.isCardioExempt) {
+        // If all components are exempt, member is exempt from the test.
+        // No score is given, but they "pass".
+        compositeScore = 100;
     }
 
-    let totalScore = cardioScore + pushupScore + coreScore;
-    let isPass = false;
+    // Determine Overall Pass/Fail Status
+    const strengthMet = inputs.isStrengthExempt || (typeof pushupScore === 'number' && pushupScore > 0);
+    const coreMet = inputs.isCoreExempt || (typeof coreScore === 'number' && coreScore > 0);
+    const cardioMet = inputs.isCardioExempt || (inputs.cardioComponent === 'walk' ? walkPassed === 'pass' : (typeof cardioScore === 'number' && cardioScore > 0));
 
-    // Determine overall pass/fail status based on walk or run/shuttle
-    if (inputs.cardioComponent === 'walk') {
-        if (walkPassed === 'pass' && pushupScore > 0 && coreScore > 0) {
-            // For the walk, the score is based on the strength and core components, scaled to 100
-            totalScore = ((pushupScore + coreScore) / 40) * 100;
-            isPass = totalScore >= 75;
-        } else {
-            totalScore = pushupScore + coreScore; // Score is not scaled if walk is not passed
-            isPass = false;
-        }
-    } else {
-        // For other cardio, passing requires a total score of 75+ and non-zero scores in all components
-        isPass = totalScore >= 75 && cardioScore > 0 && pushupScore > 0 && coreScore > 0;
-    }
+    const allMinsMet = strengthMet && coreMet && cardioMet;
+    const isPass = allMinsMet && compositeScore >= 75;
 
     return {
-        totalScore,
+        totalScore: compositeScore,
         cardioScore,
         pushupScore,
         coreScore,
@@ -356,10 +379,20 @@ export const calculatePtScore = (inputs: any) => {
  * @param scores - An object mapping exercise components to their highest achieved scores.
  * @returns The sum of the best scores from each category (strength, core, cardio).
  */
-export const calculateBestScore = (scores: { [key: string]: number }): number => {
-    const strength = Math.max(scores.push_ups_1min || 0, scores.hand_release_pushups_2min || 0);
-    const core = Math.max(scores.sit_ups_1min || 0, scores.cross_leg_reverse_crunch_2min || 0, scores.forearm_plank_time || 0);
-    const cardio = Math.max(scores.run || 0, scores.shuttles || 0);
+export const calculateBestScore = (scores: { [key: string]: number | string }): number => {
+    const strength = Math.max(
+        typeof scores.push_ups_1min === 'number' ? scores.push_ups_1min : 0,
+        typeof scores.hand_release_pushups_2min === 'number' ? scores.hand_release_pushups_2min : 0
+    );
+    const core = Math.max(
+        typeof scores.sit_ups_1min === 'number' ? scores.sit_ups_1min : 0,
+        typeof scores.cross_leg_reverse_crunch_2min === 'number' ? scores.cross_leg_reverse_crunch_2min : 0,
+        typeof scores.forearm_plank_time === 'number' ? scores.forearm_plank_time : 0
+    );
+    const cardio = Math.max(
+        typeof scores.run === 'number' ? scores.run : 0,
+        typeof scores.shuttles === 'number' ? scores.shuttles : 0
+    );
 
     return strength + core + cardio;
 };

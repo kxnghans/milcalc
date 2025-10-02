@@ -14,13 +14,6 @@ import NumberInput from './NumberInput';
  * This includes a selector for the type of push-up and an input for the number of reps.
  * It can also display a progress bar showing performance against standards.
  * @param {object} props - The component props.
- * @param {boolean} props.showProgressBars - Whether to display the performance progress bar.
- * @param {object} props.minMax - An object containing the min and max possible reps for the selected exercise.
- * @param {string} props.pushups - The current value of the push-up repetitions input.
- * @param {(value: string) => void} props.setPushups - The function to update the push-ups value.
- * @param {string} props.pushupComponent - The currently selected strength exercise component.
- * @param {(value: string) => void} props.setPushupComponent - The function to update the selected strength component.
- * @param {number} props.ninetyPercentileThreshold - The performance threshold for an "excellent" score.
  * @returns {JSX.Element} The rendered strength component section.
  */
 export default function StrengthComponent({ 
@@ -31,6 +24,8 @@ export default function StrengthComponent({
     pushupComponent,
     setPushupComponent,
     ninetyPercentileThreshold,
+    isExempt,
+    toggleExempt,
 }) {
     const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
@@ -55,7 +50,6 @@ export default function StrengthComponent({
 
     return (
         <View>
-            
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
                     <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
@@ -76,10 +70,18 @@ export default function StrengthComponent({
                 </View>
                 <SegmentedSelector
                     options={[{ label: "1-Min Push-ups", value: "push_ups_1min" }, { label: "2-Min HR Push-ups", value: "hand_release_pushups_2min" }]} 
-                    selectedValues={[pushupComponent]}
+                    selectedValues={isExempt ? [] : [pushupComponent]}
                     onValueChange={setPushupComponent}
                 />
-                <NumberInput value={pushups} onChangeText={setPushups} placeholder="Enter push-up count" style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }} />
+                <NumberInput
+                    value={pushups}
+                    onChangeText={setPushups}
+                    placeholder="Enter push-up count"
+                    style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                    disabled={isExempt}
+                    onToggleExempt={toggleExempt}
+                    isExempt={isExempt}
+                />
             </View>
         </View>
     );

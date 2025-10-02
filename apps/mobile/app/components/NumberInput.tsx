@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { TextInput, TextInputProps, Text, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { NeumorphicInset, StyledTextInput, useTheme } from '@repo/ui';
+import { NeumorphicInset, StyledTextInput, useTheme, ExemptButton } from '@repo/ui';
 
 /**
  * Props for the NumberInput component.
@@ -18,6 +18,10 @@ interface NumberInputProps extends TextInputProps {
   inputStyle?: StyleProp<ViewStyle>;
   /** An optional string to display an adjustment (e.g., for altitude), shown next to the input. */
   adjustment?: string;
+  /** An optional function to call when the exempt button is toggled. If provided, the button will be rendered. */
+  onToggleExempt?: () => void;
+  /** Whether the component is currently exempt. When true, the input is non-editable and shows 'xx'. */
+  isExempt?: boolean;
 }
 
 /**
@@ -27,7 +31,7 @@ interface NumberInputProps extends TextInputProps {
  * @param {React.Ref<TextInput>} ref - The ref to be forwarded to the TextInput component.
  * @returns {JSX.Element} The rendered number input component.
  */
-const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inputStyle, adjustment, ...props }, ref) => {
+const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inputStyle, adjustment, onToggleExempt, isExempt, ...props }, ref) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -49,15 +53,27 @@ const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inpu
         color: theme.colors.text,
         flex: 1,
         backgroundColor: 'transparent',
-    }
+    },
   });
+
+  // When exempt, show 'xx' as the placeholder. Otherwise, use the placeholder from props.
+  const placeholder = isExempt ? 'xx' : props.placeholder;
 
   return (
     // The component is wrapped in a NeumorphicInset to give it the "pressed-in" look.
     <NeumorphicInset style={[styles.container, style]}>
+      {onToggleExempt && (
+        <ExemptButton
+          onPress={onToggleExempt}
+          isActive={isExempt}
+          style={{ marginHorizontal: theme.spacing.s }}
+        />
+      )}
       <StyledTextInput
         ref={ref}
         {...props}
+        placeholder={placeholder}
+        editable={!isExempt} // Input is not editable when exempt.
         keyboardType="numeric" // Set the keyboard type to numeric for a better user experience.
         style={[styles.input, inputStyle]}
       />
