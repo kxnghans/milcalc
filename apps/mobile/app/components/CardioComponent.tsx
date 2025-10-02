@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity } from 'react-native';
 import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
@@ -41,6 +41,7 @@ export default function CardioComponent({
     ninetyPercentileThreshold,
     isExempt,
     toggleExempt,
+    openDetailModal,
 }) {
     const { theme, isDarkMode } = useTheme();
     // State to hold the calculated altitude adjustment text to be displayed to the user.
@@ -133,6 +134,19 @@ export default function CardioComponent({
         },
     });
 
+    const getPerformance = () => {
+        switch (cardioComponent) {
+            case 'run':
+                return { minutes: runMinutes, seconds: runSeconds };
+            case 'shuttles':
+                return { reps: shuttles };
+            case 'walk':
+                return { minutes: walkMinutes, seconds: walkSeconds };
+            default:
+                return {};
+        }
+    };
+
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -142,7 +156,11 @@ export default function CardioComponent({
                 <View>
                     <View style={styles.exerciseBlock}>
                         <View style={styles.componentHeader}>
-                            <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                            <TouchableOpacity onPress={() => openDetailModal(cardioComponent, getPerformance())}>
+                                                            <TouchableOpacity onPress={() => openDetailModal(cardioComponent)}>
+                                <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                            </TouchableOpacity>
+                            </TouchableOpacity>
                             <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m }]}>Cardio</Text>
                             {/* Conditionally render the correct progress bar for the selected cardio type. */}
                             {showProgressBars && (() => {

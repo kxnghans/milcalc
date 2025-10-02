@@ -53,9 +53,9 @@ export const ExemptButton: React.FC<ExemptButtonProps> = ({ onPress, isActive, s
         borderRadius: theme.borderRadius.m,
         overflow: 'hidden',
       }}
-      shadowOpacity={isActive ? (isDarkMode ? undefined : 0.3) : undefined}
-      highlightColor={isActive ? undefined : (isDarkMode ? 'rgba(0,0,0,1)' : undefined)}
-      highlightOpacity={isActive ? (isDarkMode ? 0.3 : 1) : (isDarkMode ? 0.01 : 1)}
+      shadowOpacity={isActive ? (isDarkMode ? 0.5 : 0.3) : (isDarkMode ? 0.5 : 0.2)}
+      highlightColor={isActive ? (isDarkMode ? theme.colors.neumorphic.outset.highlight : 'white') : (isDarkMode ? theme.colors.neumorphic.outset.highlight : 'white')}
+      highlightOpacity={isActive ? (isDarkMode ? 0.3 : 1) : (isDarkMode ? 0.15 : 0.9)}
     >
       <TouchableOpacity onPress={onPress} style={styles.container}>
         <Text style={[styles.text, isActive && styles.activeText]}>EXEMPT</Text>

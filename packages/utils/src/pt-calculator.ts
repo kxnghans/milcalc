@@ -550,3 +550,34 @@ export const getPerformanceForScore = (age: number, sex: string, component: stri
     const reps = candidates.map(row => parseInt(String(row.reps).replace(/[^0-9]/g, '')));
     return Math.min(...reps);
 };
+
+/**
+ * Generates a dynamic, human-readable string explaining the score for a given performance.
+ * @param componentKey - The specific exercise component.
+ * @param age - The user's age.
+ * @param gender - The user's gender.
+ * @param performance - An object containing the performance data (reps, minutes, seconds).
+ * @returns A string detailing the calculated score, or an empty string if inputs are invalid.
+ */
+export const getDynamicHelpText = (componentKey: string, age: number, gender: string, performance: any): string => {
+    if (!age || !gender) {
+        return "Please enter age and gender to see dynamic scoring details.";
+    }
+
+    const score = getScoreForExercise(age, gender, componentKey, performance);
+
+    let performanceText = "";
+    if (performance.reps) {
+        performanceText = `${performance.reps} reps`;
+    } else if (performance.minutes || performance.seconds) {
+        const minutes = performance.minutes || 0;
+        const seconds = performance.seconds || 0;
+        performanceText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    if (performanceText) {
+        return `For a ${age}-year-old ${gender}, a performance of ${performanceText} results in a score of ${score.toFixed(2)} points.`;
+    } else {
+        return "Enter a performance value to see your calculated score.";
+    }
+};

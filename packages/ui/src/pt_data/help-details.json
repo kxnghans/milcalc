@@ -1,0 +1,182 @@
+{
+  "push_ups_1min": {
+    "title": "1-Minute Push-ups",
+    "sections": [
+      {
+        "header": "Performance",
+        "content": "Start in the front-leaning rest position. Lower your body until your upper arms are at least parallel to the floor, then return to the starting position with your elbows fully extended.\n\nYour body must remain in a straight line and not bow or arch."
+      },
+      {
+        "header": "Resting",
+        "content": "You may rest in the up position, either on your hands and toes or by flexing your knees and resting on your lower legs. You may not lift your hands or feet from the floor."
+      },
+      {
+        "header": "Exemption",
+        "content": "If exempt, this component is excluded. The composite score is then calculated based only on the points earned in the remaining components, scaled to a 100-point maximum."
+      }
+    ]
+  },
+  "hand_release_pushups_2min": {
+    "title": "2-Minute Hand-Release Push-ups",
+    "sections": [
+      {
+        "header": "Performance",
+        "content": "Start in the prone position with hands flat on the ground. Push up until elbows are fully extended, then lower your body completely to the ground.\n\nLift both hands from the floor, then place them back down before starting the next repetition."
+      },
+      {
+        "header": "Resting",
+        "content": "You may rest in the up or down position. In the down position, you may rest with your face on the ground, but you cannot lift your hands or feet."
+      },
+      {
+        "header": "Scoring",
+        "content": "The score is the total number of correct hand-release push-ups completed in two minutes."
+      },
+      {
+        "header": "Exemption",
+        "content": "If exempt, this component is excluded. The composite score is then calculated based only on the points earned in the remaining components, scaled to a 100-point maximum."
+      }
+    ]
+  },
+  "sit_ups_1min": {
+    "title": "1-Minute Sit-ups",
+    "sections": [
+      {
+        "header": "Performance",
+        "content": "Start by lying on your back with your knees bent at a 90-degree angle. Your arms should be crossed over your chest with your hands on your shoulders. A spotter will hold your feet.\n\nRaise your upper body until your elbows touch your knees or thighs, then lower your body until your shoulder blades touch the floor."
+      },
+      {
+        "header": "Resting",
+        "content": "You may only rest in the up position."
+      },
+      {
+        "header": "Exemption",
+        "content": "If exempt, this component is excluded. The composite score is then calculated based only on the points earned in the remaining components, scaled to a 100-point maximum."
+      }
+    ]
+  },
+  "cross_leg_reverse_crunch_2min": {
+    "title": "2-Minute Cross-Leg Reverse Crunches",
+    "sections": [
+      {
+        "header": "Performance",
+        "content": "Lie on your back with knees bent and feet on the floor. Cross one leg over the other and place your hands under your head.\n\nLift your hips and bring your knees toward your chest without lifting your upper back from the floor, then lower your hips back to the starting position."
+      },
+      {
+        "header": "Resting",
+        "content": "You may rest at any point during the exercise."
+      },
+      {
+        "header": "Scoring",
+        "content": "The score is the total number of correct crunches completed in two minutes."
+      },
+      {
+        "header": "Exemption",
+        "content": "If exempt, this component is excluded. The composite score is then calculated based only on the points earned in the remaining components, scaled to a 100-point maximum."
+      }
+    ]
+  },
+  "forearm_plank_time": {
+    "title": "Forearm Plank",
+    "sections": [
+      {
+        "header": "Performance",
+        "content": "Start with your elbows and forearms on the floor, parallel to your body. Your body should form a straight line from your head to your heels. Hold this position for as long as possible."
+      },
+      {
+        "header": "Resting",
+        "content": "No resting is permitted during this component."
+      },
+      {
+        "header": "Scoring",
+        "content": "The score is based on the total time you can maintain the correct plank position."
+      },
+      {
+        "header": "Exemption",
+        "content": "If exempt, this component is excluded. The composite score is then calculated based only on the points earned in the remaining components, scaled to a 100-point maximum."
+      }
+    ]
+  },
+  "run": {
+    "title": "1.5-Mile Run",
+    "sections": [
+      {
+        "header": "Performance",
+        "content": "Complete a 1.5-mile run on a flat, measured course as quickly as possible."
+      },
+      {
+        "header": "Scoring",
+        "content": "The score is based on the time taken to complete the run. A faster time results in a higher score."
+      },
+      {
+        "header": "Exemption",
+        "content": "If exempt, this component is excluded. The composite score is then calculated based only on the points earned in the remaining components, scaled to a 100-point maximum."
+      }
+    ]
+  },
+  "shuttles": {
+    "title": "20m HAMR (Shuttle Run)",
+    "sections": [
+      {
+        "header": "Performance",
+        "content": "Run back and forth between two lines set 20 meters apart, in time with a series of beeps. You must touch the line with your foot on or before each beep.\n\nThe time between beeps gets shorter as the test progresses."
+      },
+      {
+        "header": "Exemption",
+        "content": "If exempt, this component is excluded. The composite score is then calculated based only on the points earned in the remaining components, scaled to a 100-point maximum."
+      }
+    ]
+  },
+  "walk": {
+    "title": "2-km Walk",
+    "sections": [
+      {
+        "header": "Performance",
+        "content": "Complete a 2-kilometer walk on a flat, measured course as quickly as possible. This is a pass/fail component."
+      },
+      {
+        "header": "Scoring",
+        "content": "This component is not scored for points. You must complete the walk within the maximum time allowed for your age and gender to pass the cardio portion of the test."
+      },
+      {
+        "header": "Exemption",
+        "content": "If exempt, this component is excluded. The composite score is then calculated based only on the points earned in the remaining components, scaled to a 100-point maximum."
+      }
+    ]
+  },
+  "best_score_strength": {
+    "title": "Best Strength Score",
+    "sections": [
+      {
+        "header": "Purpose",
+        "content": "This section helps you find your highest possible score in the Strength category by comparing your personal bests across all available exercises. Enter your best performance for each exercise to see which one yields the most points."
+      }
+    ]
+  },
+  "best_score_core": {
+    "title": "Best Core Score",
+    "sections": [
+      {
+        "header": "Purpose",
+        "content": "This section helps you find your highest possible score in the Core category by comparing your personal bests across all available exercises. Enter your best performance for each exercise to see which one yields the most points."
+      }
+    ]
+  },
+  "best_score_cardio": {
+    "title": "Best Cardio Score",
+    "sections": [
+      {
+        "header": "Purpose",
+        "content": "This section helps you find your highest possible score in the Cardio category by comparing your personal bests across all available exercises. Enter your best performance for each exercise to see which one yields the most points."
+      }
+    ]
+  },
+  "altitude_adjustment": {
+    "title": "Altitude Adjustment",
+    "sections": [
+      {
+        "header": "Purpose",
+        "content": "If you are testing at a location with an elevation of 5,000 feet or more above sea level, official adjustments are applied to cardio events to account for the reduced oxygen.\n\nSelect your altitude group to see these adjustments applied automatically."
+      }
+    ]
+  }
+}

@@ -4,7 +4,7 @@
  * to apply the appropriate adjustments to their cardio scores.
  */
 
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme, SegmentedSelector, Icon, ICONS } from '@repo/ui';
 
 /**
@@ -15,6 +15,8 @@ interface AltitudeAdjustmentComponentProps {
   selectedValue: string;
   /** A function to be called when the selected value changes. */
   onValueChange: (value: string) => void;
+  /** A function to open the detail modal. */
+  openDetailModal: (key: string) => void;
 }
 
 /**
@@ -22,7 +24,7 @@ interface AltitudeAdjustmentComponentProps {
  * @param {AltitudeAdjustmentComponentProps} props - The component props.
  * @returns {JSX.Element} The rendered altitude adjustment component.
  */
-export default function AltitudeAdjustmentComponent({ selectedValue, onValueChange }: AltitudeAdjustmentComponentProps) {
+export default function AltitudeAdjustmentComponent({ selectedValue, onValueChange, openDetailModal }: AltitudeAdjustmentComponentProps) {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -44,7 +46,9 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} />
+        <TouchableOpacity onPress={() => openDetailModal('altitude_adjustment')}>
+            <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} />
+        </TouchableOpacity>
         <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s }]}>Altitude Adjustment (ft)</Text>
       </View>
       <SegmentedSelector

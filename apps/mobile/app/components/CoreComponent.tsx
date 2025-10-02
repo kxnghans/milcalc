@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
@@ -34,6 +34,7 @@ export default function CoreComponent({
     ninetyPercentileThreshold,
     isExempt,
     toggleExempt,
+    openDetailModal,
 }) {
     const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
@@ -56,12 +57,29 @@ export default function CoreComponent({
         },
     });
 
+    const getPerformance = () => {
+        switch (coreComponent) {
+            case 'sit_ups_1min':
+                return { reps: situps };
+            case 'cross_leg_reverse_crunch_2min':
+                return { reps: reverseCrunches };
+            case 'forearm_plank_time':
+                return { minutes: plankMinutes, seconds: plankSeconds };
+            default:
+                return {};
+        }
+    };
+
     return (
         <View>
             
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                    <TouchableOpacity onPress={() => openDetailModal(coreComponent, getPerformance())}>
+                                            <TouchableOpacity onPress={() => openDetailModal(coreComponent)}>
+                        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                    </TouchableOpacity>
+                    </TouchableOpacity>
                     <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m}]}>Core</Text>
                     {/* Conditionally render the progress bar based on the showProgressBars prop. */}
                     {showProgressBars && (() => {

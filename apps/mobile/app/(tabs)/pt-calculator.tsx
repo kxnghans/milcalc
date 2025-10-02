@@ -17,13 +17,30 @@ import Demographics from "../components/Demographics";
 import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
 import Divider from "../components/Divider";
 
+import DetailModal from "../components/DetailModal";
+
 /**
  * The main component for the PT Calculator screen.
  * It renders the UI and delegates all logic and state management to the `usePtCalculatorState` hook.
  */
 export default function PTCalculator() {
   const { theme, themeMode, toggleTheme } = useTheme();
-  const [isModalVisible, setModalVisible] = React.useState(false);
+  const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
+  const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
+  const [modalPerformance, setModalPerformance] = React.useState<any>(null);
+
+  const openDetailModal = (key: string, performance?: any) => {
+    setDetailModalContentKey(key);
+    if (performance) {
+      setModalPerformance(performance);
+    }
+  };
+
+  const closeDetailModal = () => {
+    setDetailModalContentKey(null);
+    setModalPerformance(null);
+  };
+
   // State to store the heights of the segmented controls in each component.
   const [segmentedHeights, setSegmentedHeights] = React.useState({ strength: 0, core: 0, cardio: 0 });
 
@@ -84,7 +101,15 @@ export default function PTCalculator() {
 
   return (
     <View style={styles.container}>
-        <PdfModal isModalVisible={isModalVisible} setModalVisible={setModalVisible} />
+        <PdfModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
+        <DetailModal 
+            isVisible={!!detailModalContentKey} 
+            onClose={closeDetailModal} 
+            contentKey={detailModalContentKey} 
+            age={demographics.age}
+            gender={demographics.gender}
+            performance={modalPerformance}
+        />
         <View style={{flex: 1}}>
             {/* Top section with score display and main action icons. */}
             <View>
@@ -96,7 +121,7 @@ export default function PTCalculator() {
                     },
                     {
                         name: ICONS.PDF,
-                        onPress: () => setModalVisible(true),
+                        onPress: () => setPdfModalVisible(true),
                     },
                     {
                         name: getThemeIcon(),
@@ -132,6 +157,7 @@ export default function PTCalculator() {
                                 segmentedStyle={segmentedStyle}
                                 isExempt={strength.isExempt}
                                 toggleExempt={strength.toggleExempt}
+                                openDetailModal={openDetailModal}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <CoreComponent
@@ -152,6 +178,7 @@ export default function PTCalculator() {
                                 segmentedStyle={segmentedStyle}
                                 isExempt={core.isExempt}
                                 toggleExempt={core.toggleExempt}
+                                openDetailModal={openDetailModal}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <CardioComponent
@@ -174,9 +201,10 @@ export default function PTCalculator() {
                                 gender={demographics.gender}
                                 isExempt={cardio.isExempt}
                                 toggleExempt={cardio.toggleExempt}
+                                openDetailModal={openDetailModal}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
-                            <AltitudeAdjustmentComponent selectedValue={demographics.altitudeGroup} onValueChange={demographics.setAltitudeGroup} />
+                            <AltitudeAdjustmentComponent selectedValue={demographics.altitudeGroup} onValueChange={demographics.setAltitudeGroup} openDetailModal={openDetailModal} />
                         </ScrollView>
                     </Card>
                 </View>
