@@ -155,12 +155,14 @@ export default function PdfModal({ isModalVisible, setModalVisible, shadowOpacit
                                     <Text style={styles.textStyle}>{pdf.name}</Text>
                                 </TouchableOpacity>
                             ))}
-                            <TouchableOpacity
-                                style={[styles.button, styles.buttonClose]}
-                                onPress={() => setModalVisible(false)}
-                            >
-                                <Text style={styles.textStyle}>Close</Text>
-                            </TouchableOpacity>
+                            <NeumorphicOutset>
+                                <TouchableOpacity
+                                    style={[styles.button, styles.buttonClose]}
+                                    onPress={() => setModalVisible(false)}
+                                >
+                                    <Text style={styles.textStyle}>Close</Text>
+                                </TouchableOpacity>
+                            </NeumorphicOutset>
                         </View>
                     </NeumorphicOutset>
                 </View>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import {
   Card,
   IconRow,
@@ -27,6 +27,7 @@ import Demographics from '../components/Demographics';
 import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
 import Divider from '../components/Divider';
 import PdfModal from '../components/PdfModal';
+import DetailModal from '../components/DetailModal';
 
 /**
  * A component that renders a section for a specific PT category (Strength, Core, Cardio).
@@ -35,7 +36,7 @@ import PdfModal from '../components/PdfModal';
  * @param {object} props - The component props.
  * @returns {JSX.Element} The rendered section.
  */
-const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore, isExempt, onToggleExempt }) => {
+const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore, isExempt, onToggleExempt, openDetailModal }) => {
   const { theme } = useTheme();
 
   const excellentColors = useScoreColors('excellent');
@@ -106,7 +107,9 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore, isEx
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
-        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+        <TouchableOpacity onPress={() => openDetailModal(`best_score_${title.toLowerCase()}`)}>
+            <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+        </TouchableOpacity>
         <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginRight: 'auto'}]}>{title}</Text>
         <ExemptButton onPress={onToggleExempt} isActive={isExempt} />
       </View>
@@ -180,7 +183,11 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore, isEx
  */
 export default function BestScoreScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
-  const [isModalVisible, setModalVisible] = React.useState(false);
+  const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
+  const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
+
+  const openDetailModal = (key: string) => setDetailModalContentKey(key);
+  const closeDetailModal = () => setDetailModalContentKey(null);
   
   // State for user demographics (age, gender, altitude)
   const { age, setAge, gender, setGender, altitudeGroup, setAltitudeGroup } = useDemographicsState();
@@ -236,7 +243,8 @@ export default function BestScoreScreen() {
 
   return (
     <View style={styles.container}>
-        <PdfModal isModalVisible={isModalVisible} setModalVisible={setModalVisible} />
+        <PdfModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
+        <DetailModal isVisible={!!detailModalContentKey} onClose={closeDetailModal} contentKey={detailModalContentKey} />
         <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
         <IconRow
             icons={[
@@ -246,7 +254,7 @@ export default function BestScoreScreen() {
             },
             {
                 name: ICONS.PDF,
-                onPress: () => setModalVisible(true),
+                onPress: () => setPdfModalVisible(true),
             },
             {
                 name: getThemeIcon(),
@@ -266,6 +274,7 @@ export default function BestScoreScreen() {
                     maxScore={20}
                     isExempt={exemptions.isStrengthExempt}
                     onToggleExempt={exemptions.toggleStrengthExempt}
+                    openDetailModal={openDetailModal}
                 />
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <BestScoreSection 
@@ -276,6 +285,7 @@ export default function BestScoreScreen() {
                     maxScore={20}
                     isExempt={exemptions.isCoreExempt}
                     onToggleExempt={exemptions.toggleCoreExempt}
+                    openDetailModal={openDetailModal}
                 />
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <BestScoreSection 
@@ -286,9 +296,10 @@ export default function BestScoreScreen() {
                     maxScore={60}
                     isExempt={exemptions.isCardioExempt}
                     onToggleExempt={exemptions.toggleCardioExempt}
+                    openDetailModal={openDetailModal}
                 />
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
-                <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} />
+                <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} openDetailModal={openDetailModal} />
             </ScrollView>
         </Card>
     </View>

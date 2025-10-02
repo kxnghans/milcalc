@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, ExemptButton } from '@repo/ui';
 import NumberInput from './NumberInput';
 
 /**
@@ -26,6 +26,7 @@ export default function StrengthComponent({
     ninetyPercentileThreshold,
     isExempt,
     toggleExempt,
+    openDetailModal,
 }) {
     const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
@@ -52,7 +53,11 @@ export default function StrengthComponent({
         <View>
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                    <TouchableOpacity onPress={() => openDetailModal(pushupComponent)}>
+                                            <TouchableOpacity onPress={() => openDetailModal(pushupComponent, { reps: pushups })}>
+                        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                    </TouchableOpacity>
+                    </TouchableOpacity>
                     <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m}]}>Strength</Text>
                     {/* Conditionally render the progress bar based on the showProgressBars prop. */}
                     {showProgressBars && (
