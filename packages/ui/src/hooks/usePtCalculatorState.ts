@@ -47,12 +47,14 @@ export function usePtCalculatorState() {
   
   const debouncedPushupComponent = useDebounce(strength.pushupComponent, 500);
   const debouncedPushups = useDebounce(strength.pushups, 500);
+  const debouncedStrengthExempt = useDebounce(strength.isExempt, 500);
 
   const debouncedCoreComponent = useDebounce(core.coreComponent, 500);
   const debouncedSitups = useDebounce(core.situps, 500);
   const debouncedReverseCrunches = useDebounce(core.reverseCrunches, 500);
   const debouncedPlankMinutes = useDebounce(core.plankMinutes, 500);
   const debouncedPlankSeconds = useDebounce(core.plankSeconds, 500);
+  const debouncedCoreExempt = useDebounce(core.isExempt, 500);
 
   const debouncedCardioComponent = useDebounce(cardio.cardioComponent, 500);
   const debouncedRunMinutes = useDebounce(cardio.runMinutes, 500);
@@ -60,6 +62,7 @@ export function usePtCalculatorState() {
   const debouncedShuttles = useDebounce(cardio.shuttles, 500);
   const debouncedWalkMinutes = useDebounce(cardio.walkMinutes, 500);
   const debouncedWalkSeconds = useDebounce(cardio.walkSeconds, 500);
+  const debouncedCardioExempt = useDebounce(cardio.isExempt, 500);
 
   // The main effect hook that runs all calculations whenever a debounced input changes.
   useEffect(() => {
@@ -89,20 +92,26 @@ export function usePtCalculatorState() {
         const result = calculatePtScore({
             age: ageNum || 0,
             gender: debouncedGender,
+            altitudeGroup: debouncedAltitudeGroup,
+            // Strength
+            pushupComponent: debouncedPushupComponent,
+            pushups: parseInt(debouncedPushups) || 0,
+            isStrengthExempt: debouncedStrengthExempt,
+            // Core
+            coreComponent: debouncedCoreComponent,
+            situps: parseInt(debouncedSitups) || 0,
+            reverseCrunches: parseInt(debouncedReverseCrunches) || 0,
+            plankMinutes: parseInt(debouncedPlankMinutes) || 0,
+            plankSeconds: parseInt(debouncedPlankSeconds) || 0,
+            isCoreExempt: debouncedCoreExempt,
+            // Cardio
             cardioComponent: debouncedCardioComponent,
             runMinutes: parseInt(debouncedRunMinutes) || 0,
             runSeconds: parseInt(debouncedRunSeconds) || 0,
             shuttles: parseInt(debouncedShuttles) || 0,
             walkMinutes: parseInt(debouncedWalkMinutes) || 0,
             walkSeconds: parseInt(debouncedWalkSeconds) || 0,
-            pushupComponent: debouncedPushupComponent,
-            pushups: parseInt(debouncedPushups) || 0,
-            coreComponent: debouncedCoreComponent,
-            situps: parseInt(debouncedSitups) || 0,
-            reverseCrunches: parseInt(debouncedReverseCrunches) || 0,
-            plankMinutes: parseInt(debouncedPlankMinutes) || 0,
-            plankSeconds: parseInt(debouncedPlankSeconds) || 0,
-            altitudeGroup: debouncedAltitudeGroup,
+            isCardioExempt: debouncedCardioExempt,
         });
         setScore(result);
     } else {
@@ -115,9 +124,9 @@ export function usePtCalculatorState() {
   }, [
     // This dependency array ensures the effect only re-runs when a debounced value changes.
     debouncedAge, debouncedGender, debouncedAltitudeGroup,
-    debouncedPushupComponent, debouncedPushups,
-    debouncedCoreComponent, debouncedSitups, debouncedReverseCrunches, debouncedPlankMinutes, debouncedPlankSeconds,
-    debouncedCardioComponent, debouncedRunMinutes, debouncedRunSeconds, debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds
+    debouncedPushupComponent, debouncedPushups, debouncedStrengthExempt,
+    debouncedCoreComponent, debouncedSitups, debouncedReverseCrunches, debouncedPlankMinutes, debouncedPlankSeconds, debouncedCoreExempt,
+    debouncedCardioComponent, debouncedRunMinutes, debouncedRunSeconds, debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds, debouncedCardioExempt
   ]);
 
   // Expose all the state and derived data to the consuming component.

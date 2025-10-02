@@ -130,6 +130,8 @@ export default function PTCalculator() {
                                 ninetyPercentileThreshold={ninetyPercentileThresholds.pushups}
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
+                                isExempt={strength.isExempt}
+                                toggleExempt={strength.toggleExempt}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <CoreComponent
@@ -148,6 +150,8 @@ export default function PTCalculator() {
                                 ninetyPercentileThreshold={ninetyPercentileThresholds.core}
                                 handleSegmentedLayout={handleSegmentedLayout}
                                 segmentedStyle={segmentedStyle}
+                                isExempt={core.isExempt}
+                                toggleExempt={core.toggleExempt}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <CardioComponent
@@ -168,6 +172,8 @@ export default function PTCalculator() {
                                 altitudeGroup={demographics.altitudeGroup}
                                 age={demographics.age}
                                 gender={demographics.gender}
+                                isExempt={cardio.isExempt}
+                                toggleExempt={cardio.toggleExempt}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                             <AltitudeAdjustmentComponent selectedValue={demographics.altitudeGroup} onValueChange={demographics.setAltitudeGroup} />

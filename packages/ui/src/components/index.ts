@@ -15,3 +15,4 @@ export * from './StyledButton';
 export * from './StyledPicker';
 export * from './StyledTextInput';
 export * from './Icon';
+export * from './ExemptButton';

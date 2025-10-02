@@ -15,7 +15,8 @@ import {
   Icon,
   useScoreColors,
   useDemographicsState,
-  useBestScoreState
+  useBestScoreState,
+  ExemptButton
 } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { getScoreCategory } from '@repo/utils';
@@ -32,14 +33,9 @@ import PdfModal from '../components/PdfModal';
  * It displays the exercises within that category, inputs for the user's best performance,
  * and the corresponding scores.
  * @param {object} props - The component props.
- * @param {string} props.title - The title of the section (e.g., "Strength").
- * @param {Array<object>} props.exercises - An array of exercise objects in this category.
- * @param {Array<number|string>} props.scores - An array of scores for each exercise.
- * @param {object} props.bestValues - An object containing the user's best performance values.
- * @param {number} props.maxScore - The maximum possible score for this category.
  * @returns {JSX.Element} The rendered section.
  */
-const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) => {
+const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore, isExempt, onToggleExempt }) => {
   const { theme } = useTheme();
 
   const excellentColors = useScoreColors('excellent');
@@ -98,7 +94,7 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
   let selectedExerciseValues = [];
 
   // Identify which exercise(s) achieved the highest score to highlight them in the UI
-  if (maxNumericScore > 0) {
+  if (maxNumericScore > 0 && !isExempt) {
       selectedExerciseValues = scores.reduce((acc, score, index) => {
           if (score === maxNumericScore) {
               acc.push(exercises[index].value);
@@ -111,7 +107,8 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
-        <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginRight: theme.spacing.m}]}>{title}</Text>
+        <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginRight: 'auto'}]}>{title}</Text>
+        <ExemptButton onPress={onToggleExempt} isActive={isExempt} />
       </View>
         <SegmentedSelector
             options={exercises.map(e => ({ label: e.label, value: e.value }))}
@@ -124,8 +121,8 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
             <View key={index} style={styles.gridColumn}>
                 {/* Render either a number or time input based on exercise type */}
                 {exercise.type === 'number' ? 
-                    <NumberInput value={bestValues[exercise.value]} onChangeText={exercise.onValueChange} placeholder='--' style={{width: '100%'}} /> : 
-                    <TimeInput minutes={bestValues[exercise.value]?.minutes} seconds={bestValues[exercise.value]?.seconds} setMinutes={(minutes) => exercise.onValueChange({ minutes, seconds: bestValues[exercise.value]?.seconds })} setSeconds={(seconds) => exercise.onValueChange({ minutes: bestValues[exercise.value]?.minutes, seconds })} style={{width: '100%'}} />
+                    <NumberInput value={bestValues[exercise.value]} onChangeText={exercise.onValueChange} placeholder='--' style={{width: '100%'}} isExempt={isExempt} /> : 
+                    <TimeInput minutes={bestValues[exercise.value]?.minutes} seconds={bestValues[exercise.value]?.seconds} setMinutes={(minutes) => exercise.onValueChange({ minutes, seconds: bestValues[exercise.value]?.seconds })} setSeconds={(seconds) => exercise.onValueChange({ minutes: bestValues[exercise.value]?.minutes, seconds })} style={{width: '100%'}} isExempt={isExempt} />
                 }
             </View>
         ))}
@@ -137,7 +134,10 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
                 let text = s ? String(s) : '0';
                 let color = theme.colors.text; // Default color
 
-                if (isWalk) {
+                if (isExempt) {
+                    text = 'Exempt';
+                    color = theme.colors.disabled;
+                } else if (isWalk) {
                     // Special handling for walk component pass/fail status
                     if (s === 'pass') {
                         color = passColors.progressColor;
@@ -151,9 +151,13 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore }) =>
                     }
                 } else {
                     // Highlight the best score in the category
-                    const isBestNumeric = typeof s === 'number' && s === maxNumericScore && maxNumericScore > 0;
+                    const isBestNumeric = typeof s === 'number' && s === maxNumericScore;
                     if (isBestNumeric) {
-                        color = getScoreColor(s, maxScore);
+                        if (s === 0) {
+                            color = failColors.progressColor;
+                        } else {
+                            color = getScoreColor(s, maxScore);
+                        }
                     }
                 }
 
@@ -181,7 +185,7 @@ export default function BestScoreScreen() {
   // State for user demographics (age, gender, altitude)
   const { age, setAge, gender, setGender, altitudeGroup, setAltitudeGroup } = useDemographicsState();
   // Custom hook to manage the state and logic for the best score calculation
-  const { inputs, outputs } = useBestScoreState(age, gender, altitudeGroup);
+  const { inputs, outputs, exemptions } = useBestScoreState(age, gender, altitudeGroup);
 
   /**
    * Gets the appropriate icon for the current theme setting (light, dark, or auto).
@@ -260,6 +264,8 @@ export default function BestScoreScreen() {
                     scores={strengthScores} 
                     bestValues={strengthBestValues} 
                     maxScore={20}
+                    isExempt={exemptions.isStrengthExempt}
+                    onToggleExempt={exemptions.toggleStrengthExempt}
                 />
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <BestScoreSection 
@@ -268,6 +274,8 @@ export default function BestScoreScreen() {
                     scores={coreScores} 
                     bestValues={coreBestValues} 
                     maxScore={20}
+                    isExempt={exemptions.isCoreExempt}
+                    onToggleExempt={exemptions.toggleCoreExempt}
                 />
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <BestScoreSection 
@@ -276,6 +284,8 @@ export default function BestScoreScreen() {
                     scores={cardioScores} 
                     bestValues={cardioBestValues} 
                     maxScore={60}
+                    isExempt={exemptions.isCardioExempt}
+                    onToggleExempt={exemptions.toggleCardioExempt}
                 />
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                 <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} />

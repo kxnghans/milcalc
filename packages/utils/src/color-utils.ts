@@ -24,11 +24,15 @@ export type PerformanceCategory = 'excellent' | 'pass' | 'fail' | 'none';
  * @param maxScore - The maximum possible score for the component.
  * @returns The `ScoreCategory` for the given score.
  */
-export const getScoreCategory = (score: number | string, maxScore: number): ScoreCategory => {
+export const getScoreCategory = (score: number | string, maxScore: number, treatZeroAsFail: boolean = false): ScoreCategory => {
   // Handle special string-based scores first (e.g., from the walk component).
   if (score === 'pass') return 'pass';
   if (score === 'fail') return 'fail';
-  if (score === 'n/a' || typeof score !== 'number' || score === 0) {
+  if (typeof score !== 'number' || score === 'n/a') {
+    return 'none';
+  }
+
+  if (score === 0 && !treatZeroAsFail) {
     return 'none';
   }
 

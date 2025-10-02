@@ -14,7 +14,8 @@ import { useDebounce } from './useDebounce';
  * @param {string} age - The user's age.
  * @param {string} gender - The user's gender.
  * @param {string} altitudeGroup - The selected altitude group.
- * @returns An object containing the state values and setters (`inputs`) and the calculated results (`outputs`).
+ * @returns An object containing the state values and setters (`inputs`), the calculated results (`outputs`),
+ * and the exemption state and toggles (`exemptions`).
  */
 export function useBestScoreState(age: string, gender: string, altitudeGroup: string) {
   // State for raw user inputs for each exercise component.
@@ -30,12 +31,16 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   const [walkMinutes, setWalkMinutes] = useState("");
   const [walkSeconds, setWalkSeconds] = useState("");
 
+  // State for exemption status of each component category.
+  const [isStrengthExempt, setIsStrengthExempt] = useState(false);
+  const [isCoreExempt, setIsCoreExempt] = useState(false);
+  const [isCardioExempt, setIsCardioExempt] = useState(false);
+
   // State to store the calculated scores for each component and the final best score.
   const [scores, setScores] = useState({});
   const [bestScore, setBestScore] = useState(0);
 
   // Debounce all user inputs to prevent recalculating scores on every keystroke.
-  // This improves performance by waiting for a pause in user input.
   const debouncedAge = useDebounce(age, 500);
   const debouncedGender = useDebounce(gender, 500);
   const debouncedAltitudeGroup = useDebounce(altitudeGroup, 500);
@@ -51,34 +56,73 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   const debouncedWalkMinutes = useDebounce(walkMinutes, 500);
   const debouncedWalkSeconds = useDebounce(walkSeconds, 500);
 
+  const toggleStrengthExempt = () => {
+    setIsStrengthExempt(current => {
+      const next = !current;
+      if (next) {
+        setPushUps('');
+        setHrPushUps('');
+      }
+      return next;
+    });
+  };
+
+  const toggleCoreExempt = () => {
+    setIsCoreExempt(current => {
+      const next = !current;
+      if (next) {
+        setSitUps('');
+        setCrunches('');
+        setPlankMinutes('');
+        setPlankSeconds('');
+      }
+      return next;
+    });
+  };
+
+  const toggleCardioExempt = () => {
+    setIsCardioExempt(current => {
+      const next = !current;
+      if (next) {
+        setRunMinutes('');
+        setRunSeconds('');
+        setShuttles('');
+        setWalkMinutes('');
+        setWalkSeconds('');
+      }
+      return next;
+    });
+  };
+
   // This effect runs whenever a debounced input value changes.
-  // It recalculates the scores for all components and the best possible total score.
   useEffect(() => {
-    // If essential demographic info is missing, reset scores and exit.
     if (!debouncedAge || !debouncedGender) {
         setScores({});
         setBestScore(0);
         return;
     }
 
-    // Calculate the score for each individual exercise based on the debounced inputs.
     const newScores = {
-        push_ups_1min: getScoreForExercise(Number(debouncedAge), debouncedGender, 'push_ups_1min', { reps: Number(debouncedPushUps) }),
-        hand_release_pushups_2min: getScoreForExercise(Number(debouncedAge), debouncedGender, 'hand_release_pushups_2min', { reps: Number(debouncedHrPushUps) }),
-        sit_ups_1min: getScoreForExercise(Number(debouncedAge), debouncedGender, 'sit_ups_1min', { reps: Number(debouncedSitUps) }),
-        cross_leg_reverse_crunch_2min: getScoreForExercise(Number(debouncedAge), debouncedGender, 'cross_leg_reverse_crunch_2min', { reps: Number(debouncedCrunches) }),
-        forearm_plank_time: getScoreForExercise(Number(debouncedAge), debouncedGender, 'forearm_plank_time', { minutes: Number(debouncedPlankMinutes), seconds: Number(debouncedPlankSeconds) }),
-        run: getScoreForExercise(Number(debouncedAge), debouncedGender, 'run', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup),
-        shuttles: getScoreForExercise(Number(debouncedAge), debouncedGender, 'shuttles', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup),
-        walk: checkWalkPass(Number(debouncedAge), debouncedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), debouncedAltitudeGroup),
+        push_ups_1min: isStrengthExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'push_ups_1min', { reps: Number(debouncedPushUps) }),
+        hand_release_pushups_2min: isStrengthExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'hand_release_pushups_2min', { reps: Number(debouncedHrPushUps) }),
+        sit_ups_1min: isCoreExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'sit_ups_1min', { reps: Number(debouncedSitUps) }),
+        cross_leg_reverse_crunch_2min: isCoreExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'cross_leg_reverse_crunch_2min', { reps: Number(debouncedCrunches) }),
+        forearm_plank_time: isCoreExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'forearm_plank_time', { minutes: Number(debouncedPlankMinutes), seconds: Number(debouncedPlankSeconds) }),
+        run: isCardioExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'run', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup),
+        shuttles: isCardioExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'shuttles', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup),
+        walk: isCardioExempt ? 'Exempt' : checkWalkPass(Number(debouncedAge), debouncedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), debouncedAltitudeGroup),
     };
     setScores(newScores);
-    // Calculate the best possible total score from the individual component scores.
     setBestScore(calculateBestScore(newScores));
-  }, [debouncedAge, debouncedGender, debouncedPushUps, debouncedHrPushUps, debouncedSitUps, debouncedCrunches, debouncedPlankMinutes, debouncedPlankSeconds, debouncedRunMinutes, debouncedRunSeconds, debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds, debouncedAltitudeGroup]);
+  }, [
+    debouncedAge, debouncedGender, debouncedAltitudeGroup,
+    debouncedPushUps, debouncedHrPushUps, debouncedSitUps, debouncedCrunches,
+    debouncedPlankMinutes, debouncedPlankSeconds, debouncedRunMinutes, debouncedRunSeconds,
+    debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds,
+    isStrengthExempt, isCoreExempt, isCardioExempt
+  ]);
 
   return {
-    // The raw input values and their state setters.
     inputs: {
         pushUps, setPushUps,
         hrPushUps, setHrPushUps,
@@ -92,10 +136,17 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
         walkMinutes, setWalkMinutes,
         walkSeconds, setWalkSeconds,
     },
-    // The calculated results.
     outputs: {
         scores,
         bestScore,
+    },
+    exemptions: {
+        isStrengthExempt,
+        toggleStrengthExempt,
+        isCoreExempt,
+        toggleCoreExempt,
+        isCardioExempt,
+        toggleCardioExempt,
     }
   };
 }

@@ -1,8 +1,8 @@
 /**
  * @file useCardioState.ts
  * @description This file defines a custom React hook for managing the state related to the
- * cardio component of the PT calculator. This includes the selected exercise type and the
- * performance values for the run, shuttle run (HAMR), and walk events.
+ * cardio component of the PT calculator. This includes the selected exercise type, performance
+ * values, and the exemption status.
  */
 
 import { useState } from 'react';
@@ -37,6 +37,26 @@ export function useCardioState(
   const [walkMinutes, setWalkMinutes] = useState(initialWalkMinutes);
   // State for the seconds part of the walk time.
   const [walkSeconds, setWalkSeconds] = useState(initialWalkSeconds);
+  // State for the exemption status of the component.
+  const [isExempt, setIsExempt] = useState(false);
+
+  /**
+   * Toggles the exemption status for the cardio component.
+   * When exempted, it clears all cardio input values.
+   */
+  const toggleExempt = () => {
+    setIsExempt(current => {
+      const nextIsExempt = !current;
+      if (nextIsExempt) {
+        setRunMinutes('');
+        setRunSeconds('');
+        setShuttles('');
+        setWalkMinutes('');
+        setWalkSeconds('');
+      }
+      return nextIsExempt;
+    });
+  };
 
   return {
     cardioComponent,
@@ -51,5 +71,7 @@ export function useCardioState(
     setWalkMinutes,
     walkSeconds,
     setWalkSeconds,
+    isExempt,
+    toggleExempt,
   };
 }

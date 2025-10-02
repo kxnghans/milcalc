@@ -30,7 +30,7 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
    * @returns {string} The color code for the score.
    */
   const getScoreColor = (score, maxScore) => {
-    const category = getScoreCategory(score, maxScore);
+    const category = getScoreCategory(score, maxScore, true);
     if (category === 'excellent') return excellentColors.progressColor;
     if (category === 'pass') return passColors.progressColor;
     if (category === 'fail') return failColors.progressColor;
@@ -73,11 +73,26 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
   });
 
   /**
-   * Renders the cardio score, with special handling for the walk component.
-   * For the walk, it displays "Pass", "Fail", or "N/A". For other cardio, it displays the numeric score.
+   * Renders a component score, handling numeric values and the "Exempt" status.
+   * @param {number | string} componentScore - The score to render.
+   * @param {number} maxScore - The maximum possible score for the component.
+   * @returns {JSX.Element} The rendered score text.
+   */
+  const renderComponentScore = (componentScore, maxScore) => {
+    if (componentScore === 'Exempt') {
+        return <Text style={[styles.scoreBreakdownText, { color: theme.colors.disabled }]}>Exempt</Text>;
+    }
+    return <Text style={[styles.scoreBreakdownText, { color: getScoreColor(componentScore, maxScore) }]}>{componentScore}</Text>;
+  };
+
+  /**
+   * Renders the cardio score, with special handling for the walk component and exemptions.
    * @returns {JSX.Element} The rendered cardio score text.
    */
   const renderCardioScore = () => {
+    if (score.cardioScore === 'Exempt') {
+        return <Text style={[styles.scoreBreakdownText, { color: theme.colors.disabled }]}>Exempt</Text>;
+    }
     if (cardioComponent === 'walk') {
         if (score.walkPassed === 'n/a') {
             return <Text style={[styles.scoreBreakdownText, { color: theme.colors.disabled }]}>N/A</Text>;
@@ -86,8 +101,7 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
         const text = score.walkPassed === 'pass' ? 'Pass' : 'Fail';
         return <Text style={[styles.scoreBreakdownText, { color }]}>{text}</Text>;
     }
-    // Default case for run and shuttles
-    return <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.cardioScore, 60) }]}>{score.cardioScore}</Text>;
+    return renderComponentScore(score.cardioScore, 60);
   };
 
   return (
@@ -99,12 +113,12 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
             <View style={styles.scoreBreakdownContainer}>
                 <View style={{flexDirection: 'row'}}>
                     <Text style={styles.scoreBreakdownText}>Strength: </Text>
-                    <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.pushupScore, 20) }]}>{score.pushupScore}</Text>
+                    {renderComponentScore(score.pushupScore, 20)}
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={{flexDirection: 'row'}}>
                     <Text style={styles.scoreBreakdownText}>Core: </Text>
-                    <Text style={[styles.scoreBreakdownText, { color: getScoreColor(score.coreScore, 20) }]}>{score.coreScore}</Text>
+                    {renderComponentScore(score.coreScore, 20)}
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={{flexDirection: 'row'}}>
