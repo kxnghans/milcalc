@@ -19,3 +19,4 @@ export * from './hooks/useCoreState';
 export * from './hooks/useCardioState';
 export * from './hooks/useBestScoreState';
 export * from './hooks/usePtCalculatorState';
+export * from './hooks/usePayCalculatorState';

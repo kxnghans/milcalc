@@ -11,16 +11,15 @@ interface PayDetail {
 interface PayDisplayProps {
   totalPay: string;
   payDetails: PayDetail[];
+  deductions: PayDetail[];
   containerStyle?: StyleProp<ViewStyle>;
 }
 
-export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, containerStyle }) => {
+export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, deductions, containerStyle }) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
     container: {
-      padding: theme.spacing.m,
-      borderRadius: theme.borderRadius.m,
       alignItems: 'center',
     },
     totalPayContainer: {
@@ -56,19 +55,37 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, co
   });
 
   return (
-    <NeumorphicOutset containerStyle={[styles.container, containerStyle]}>
+    <View style={[styles.container, containerStyle]}>
       <View style={styles.totalPayContainer}>
         <Text style={styles.totalPayLabel}>Total Pay</Text>
         <Text style={styles.totalPayValue}>{totalPay}</Text>
       </View>
-      <View style={styles.detailsContainer}>
-        {payDetails.map((detail, index) => (
-          <View key={index} style={styles.detailRow}>
-            <Text style={styles.detailLabel}>{detail.label}</Text>
-            <Text style={styles.detailValue}>{detail.value}</Text>
-          </View>
-        ))}
+      <View style={{ flexDirection: 'row', width: '100%' }}>
+        {/* Left Column: Income */}
+        <View style={{ flex: 1, marginRight: theme.spacing.m }}>
+            <Text style={styles.detailLabel}>Income</Text>
+            <View style={{marginTop: theme.spacing.s}}>
+                {payDetails.map((detail, index) => (
+                <View key={index} style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>{detail.label}</Text>
+                    <Text style={styles.detailValue}>{detail.value}</Text>
+                </View>
+                ))}
+            </View>
+        </View>
+        {/* Right Column: Deductions */}
+        <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+            <Text style={styles.detailLabel}>Deductions</Text>
+            <View style={{marginTop: theme.spacing.s}}>
+                {deductions.map((deduction, index) => (
+                <View key={index} style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>{deduction.label}</Text>
+                    <Text style={styles.detailValue}>{deduction.value}</Text>
+                </View>
+                ))}
+            </View>
+        </View>
       </View>
-    </NeumorphicOutset>
+    </View>
   );
 };
