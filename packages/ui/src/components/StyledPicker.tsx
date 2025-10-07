@@ -32,9 +32,6 @@ export const StyledPicker = ({ selectedValue, onValueChange, items, placeholder,
   const styles = StyleSheet.create({
     picker: {
         // These styles are now dynamically applied based on the current theme.
-        backgroundColor: theme.colors.surface,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
         borderRadius: theme.borderRadius.m,
         color: theme.colors.text, // Ensure text color matches the theme.
     },

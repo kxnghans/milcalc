@@ -83,7 +83,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
       <View style={styles.container} onLayout={onLayout}>
         {options.map((option) => {
           const lines = option.label.split('\n');
-          const isSelected = selectedValues.includes(option.value);
+          const isSelected = (selectedValues || []).includes(option.value);
 
           // Use TouchableOpacity for interactive segments, and View for non-interactive ones.
           const Wrapper = isTouchable ? TouchableOpacity : View;

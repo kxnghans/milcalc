@@ -14,7 +14,7 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
   const { theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const selectedLabel = items.find(item => item.value === selectedValue)?.label || placeholder || 'Select...';
+  const selectedLabel = (items || []).find(item => item.value === selectedValue)?.label || placeholder || 'Select...';
   const textColor = selectedValue ? theme.colors.text : theme.colors.placeholder;
 
   const styles = StyleSheet.create({
@@ -68,7 +68,7 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
                             <Text style={{ color: theme.colors.primary, fontWeight: 'bold' }}>Done</Text>
                         </Pressable>
                         <StyledPicker
-                            items={items}
+                            items={items || []}
                             selectedValue={selectedValue}
                             onValueChange={(value) => {
                                 if (value !== null) {
