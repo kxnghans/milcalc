@@ -56,3 +56,4 @@ yarn.lock
 coverage/
 
 GEMINI.md
+/packages/data

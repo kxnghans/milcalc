@@ -95,7 +95,7 @@ E2E tests should be created to simulate user interaction with the PT Calculator 
 
 ## 3. Data Validation
 
-- Create a test script to validate the integrity of the `packages/ui/src/pt_data/pt-data.json`, `packages/ui/src/pt_data/walk-standards.json`, and `packages/ui/src/pt_data/altitude-adjustments.json` files.
+- Create a test script to validate the integrity of the `packages/data/pt_data/pt-data.json`, `packages/data/pt_data/walk-standards.json`, and `packages/data/pt_data/altitude-adjustments.json` files.
 - The script should check for:
     - Correct data types.
     - Consistent structure.

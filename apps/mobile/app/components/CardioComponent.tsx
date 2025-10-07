@@ -11,7 +11,7 @@ import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon,
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
 
-import altitudeAdjustments from '../../../../packages/ui/src/pt_data/altitude-adjustments.json';
+import { altitudeAdjustments } from '@repo/data';
 
 /**
  * A component that renders the cardio section of the PT calculator.
