@@ -5,9 +5,7 @@
  * handle altitude adjustments, and determine pass/fail status, including exemption logic.
  */
 
-import data from '../../ui/src/pt_data/pt-data.json';
-import walkStandards from '../../ui/src/pt_data/walk-standards.json';
-import altitudeAdjustments from '../../ui/src/pt_data/altitude-adjustments.json';
+import { ptData as data, walkStandards, altitudeAdjustments } from '@repo/data';
 
 /**
  * Converts a time string (e.g., "mm:ss") to seconds.
@@ -380,21 +378,53 @@ export const calculatePtScore = (inputs: any) => {
  * @returns The sum of the best scores from each category (strength, core, cardio).
  */
 export const calculateBestScore = (scores: { [key: string]: number | string }): number => {
-    const strength = Math.max(
+    let totalPossiblePoints = 100;
+    let earnedPoints = 0;
+
+    const strengthScore = Math.max(
         typeof scores.push_ups_1min === 'number' ? scores.push_ups_1min : 0,
         typeof scores.hand_release_pushups_2min === 'number' ? scores.hand_release_pushups_2min : 0
     );
-    const core = Math.max(
+
+    const coreScore = Math.max(
         typeof scores.sit_ups_1min === 'number' ? scores.sit_ups_1min : 0,
         typeof scores.cross_leg_reverse_crunch_2min === 'number' ? scores.cross_leg_reverse_crunch_2min : 0,
         typeof scores.forearm_plank_time === 'number' ? scores.forearm_plank_time : 0
     );
-    const cardio = Math.max(
+
+    const cardioScore = Math.max(
         typeof scores.run === 'number' ? scores.run : 0,
         typeof scores.shuttles === 'number' ? scores.shuttles : 0
     );
 
-    return strength + core + cardio;
+    const isStrengthExempt = scores.push_ups_1min === 'Exempt' || scores.hand_release_pushups_2min === 'Exempt';
+    const isCoreExempt = scores.sit_ups_1min === 'Exempt' || scores.cross_leg_reverse_crunch_2min === 'Exempt' || scores.forearm_plank_time === 'Exempt';
+    const isCardioExempt = scores.run === 'Exempt' || scores.shuttles === 'Exempt';
+
+    if (isStrengthExempt) {
+        totalPossiblePoints -= 20;
+    } else {
+        earnedPoints += strengthScore;
+    }
+
+    if (isCoreExempt) {
+        totalPossiblePoints -= 20;
+    } else {
+        earnedPoints += coreScore;
+    }
+
+    if (isCardioExempt) {
+        totalPossiblePoints -= 60;
+    } else {
+        earnedPoints += cardioScore;
+    }
+
+    if (totalPossiblePoints === 0) {
+        return (isStrengthExempt && isCoreExempt && isCardioExempt) ? 100 : 0;
+    }
+
+    const compositeScore = (earnedPoints / totalPossiblePoints) * 100;
+    return compositeScore;
 };
 
 /**

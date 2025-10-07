@@ -37,6 +37,9 @@ importers:
       '@react-native-picker/picker':
         specifier: 2.11.1
         version: 2.11.1(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)
+      '@repo/data':
+        specifier: workspace:*
+        version: link:../../packages/data
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -112,6 +115,12 @@ importers:
         specifier: ^5.3.3
         version: 5.9.2
 
+  packages/data:
+    devDependencies:
+      typescript:
+        specifier: ^5.4.5
+        version: 5.9.2
+
   packages/eslint-config:
     dependencies:
       '@typescript-eslint/eslint-plugin':
@@ -179,6 +188,10 @@ importers:
         version: 5.9.2
 
   packages/utils:
+    dependencies:
+      '@repo/data':
+        specifier: workspace:*
+        version: link:../data
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*

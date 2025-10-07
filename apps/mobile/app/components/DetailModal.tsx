@@ -9,7 +9,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedba
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, NeumorphicOutset } from '@repo/ui';
 import { BlurView } from 'expo-blur';
-import helpDetails from '../../../../packages/ui/src/pt_data/help-details.json';
+import { helpDetails } from '@repo/data';
 import { getDynamicHelpText } from '@repo/utils';
 
 interface DetailModalProps {

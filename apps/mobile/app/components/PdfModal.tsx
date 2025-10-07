@@ -31,32 +31,32 @@ export default function PdfModal({ isModalVisible, setModalVisible, shadowOpacit
         {
             name: "Fitness Screening Questionnaire",
             type: 'local', // 'local' PDFs are bundled with the app.
-            module: require('../../../../packages/ui/src/pt_data/Air Force Physical Fitness Screening Questionnaire v5.pdf'),
+            module: require('../../../../packages/data/pt_data/Air Force Physical Fitness Screening Questionnaire v5.pdf'),
         },
         {
             name: "Fitness Assessment Scorecard",
             type: 'local',
-            module: require('../../../../packages/ui/src/pt_data/daf4446.pdf'),
+            module: require('../../../../packages/data/pt_data/daf4446.pdf'),
         },
         {
             name: "5 Year Chart Scoring",
             type: 'local',
-            module: require('../../../../packages/ui/src/pt_data/5 Year Chart Scoring Including Optional Component Standards - 20211111 0219.pdf'),
+            module: require('../../../../packages/data/pt_data/5 Year Chart Scoring Including Optional Component Standards - 20211111 0219.pdf'),
         },
         {
             name: "DAFMAN 36-2905",
             type: 'local',
-            module: require('../../../../packages/ui/src/pt_data/dafman36-2905.pdf'),
+            module: require('../../../../packages/data/pt_data/dafman36-2905.pdf'),
         },
         {
             name: "Altitude Adjustments",
             type: 'local',
-            module: require('../../../../packages/ui/src/pt_data/dafman36-2905 altitude adjustments.pdf'),
+            module: require('../../../../packages/data/pt_data/dafman36-2905 altitude adjustments.pdf'),
         },
         {
             name: "Walk Standards",
             type: 'local',
-            module: require('../../../../packages/ui/src/pt_data/dafman36-2905 walk.pdf'),
+            module: require('../../../../packages/data/pt_data/dafman36-2905 walk.pdf'),
         }
     ];
 
