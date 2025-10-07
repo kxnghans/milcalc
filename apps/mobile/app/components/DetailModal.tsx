@@ -9,21 +9,24 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedba
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, NeumorphicOutset } from '@repo/ui';
 import { BlurView } from 'expo-blur';
-import { helpDetails } from '@repo/data';
+import { helpDetails, payHelpDetails } from '@repo/data';
+
 import { getDynamicHelpText } from '@repo/utils';
 
 interface DetailModalProps {
   isVisible: boolean;
   onClose: () => void;
   contentKey: string | null;
+  source: 'pt' | 'pay';
   age?: number;
   gender?: string;
   performance?: any;
 }
 
-export default function DetailModal({ isVisible, onClose, contentKey, age, gender, performance }: DetailModalProps) {
+export default function DetailModal({ isVisible, onClose, contentKey, source, age, gender, performance }: DetailModalProps) {
     const { theme } = useTheme();
-    const content = contentKey ? helpDetails[contentKey] : null;
+    const details = source === 'pay' ? payHelpDetails : helpDetails;
+    const content = contentKey ? details[contentKey] : null;
 
     const dynamicHelpText = (contentKey && age && gender && performance) 
         ? getDynamicHelpText(contentKey, age, gender, performance) 

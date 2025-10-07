@@ -106,6 +106,7 @@ export default function PTCalculator() {
             isVisible={!!detailModalContentKey} 
             onClose={closeDetailModal} 
             contentKey={detailModalContentKey} 
+            source="pt"
             age={demographics.age}
             gender={demographics.gender}
             performance={modalPerformance}

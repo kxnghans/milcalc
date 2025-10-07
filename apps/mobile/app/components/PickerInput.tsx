@@ -48,7 +48,7 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
 
   return (
     <View style={styles.wrapper}>
-        <NeumorphicInset containerStyle={{ borderRadius: theme.borderRadius.m, backgroundColor: theme.colors.inputBackground }}>
+        <NeumorphicInset style={{ borderRadius: theme.borderRadius.m, backgroundColor: theme.colors.inputBackground }}>
             <Pressable onPress={() => setModalVisible(true)} style={styles.pressable}>
                 <Text style={{ color: textColor }}>{selectedLabel}</Text>
                 <MaterialCommunityIcons name="chevron-down" size={20} color={theme.colors.text} />
