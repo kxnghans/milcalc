@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import NeumorphicOutset from './NeumorphicOutset';
 
 interface PayDetail {
   label: string;
@@ -27,16 +26,21 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, de
       marginBottom: theme.spacing.l,
     },
     totalPayLabel: {
-      ...theme.typography.label,
       color: theme.colors.text,
       marginBottom: theme.spacing.s,
+      textTransform: 'uppercase',
     },
     totalPayValue: {
       ...theme.typography.title,
-      color: theme.colors.text,
+      color: theme.colors.primary,
     },
     detailsContainer: {
       width: '100%',
+    },
+    columnHeader: {
+        ...theme.typography.subtitle,
+        color: theme.colors.text,
+        textTransform: 'uppercase',
     },
     detailRow: {
       flexDirection: 'row',
@@ -48,9 +52,9 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, de
       color: theme.colors.text,
     },
     detailValue: {
-      ...theme.typography.body,
+      ...theme.typography.label,
+      fontWeight: '500',
       color: theme.colors.text,
-      fontWeight: 'bold',
     },
   });
 
@@ -63,11 +67,11 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, de
       <View style={{ flexDirection: 'row', width: '100%' }}>
         {/* Left Column: Income */}
         <View style={{ flex: 1, marginRight: theme.spacing.m }}>
-            <Text style={styles.detailLabel}>Income</Text>
+            <Text style={styles.columnHeader}>Income</Text>
             <View style={{marginTop: theme.spacing.s}}>
                 {payDetails.map((detail, index) => (
                 <View key={index} style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{detail.label}</Text>
+                    <Text style={styles.detailLabel}>{detail.label === 'Other' ? detail.label : detail.label.toUpperCase()}</Text>
                     <Text style={styles.detailValue}>{detail.value}</Text>
                 </View>
                 ))}
@@ -75,11 +79,11 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, de
         </View>
         {/* Right Column: Deductions */}
         <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
-            <Text style={styles.detailLabel}>Deductions</Text>
+            <Text style={styles.columnHeader}>Deductions</Text>
             <View style={{marginTop: theme.spacing.s}}>
                 {deductions.map((deduction, index) => (
                 <View key={index} style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{deduction.label}</Text>
+                    <Text style={styles.detailLabel}>{deduction.label === 'Other' ? deduction.label : deduction.label.toUpperCase()}</Text>
                     <Text style={styles.detailValue}>{deduction.value}</Text>
                 </View>
                 ))}

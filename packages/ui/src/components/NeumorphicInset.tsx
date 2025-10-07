@@ -38,6 +38,7 @@ const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style }) =>
       borderRightWidth: theme.colors.neumorphic.inset.borderWidth,
       borderBottomColor: theme.colors.neumorphic.inset.highlight,
       borderRightColor: theme.colors.neumorphic.inset.highlight,
+      overflow: 'hidden',
     },
   });
 
