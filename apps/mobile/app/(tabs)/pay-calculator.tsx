@@ -39,12 +39,15 @@ export default function PayCalculatorScreen() {
     deductionsForDisplay,
     // Data for Pickers
     mhaData,
+    isLoadingMha,
+    mhaError,
     filteredRanks,
     // Form State & Setters
     status, setStatus,
     rank, setRank,
     yearsOfService, setYearsOfService,
     mha, setMha,
+    mhaDisplayName,
     filingStatus, setFilingStatus,
     dependencyStatus, setDependencyStatus,
     isIncomeExpanded, setIncomeExpanded,
@@ -198,7 +201,7 @@ export default function PayCalculatorScreen() {
                         <View style={styles.fieldRow}>
                             <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Status</Text>
                             <SegmentedSelector
-                                options={[{label: 'Officer', value: 'Officer'}, {label: 'Enlisted', value: 'Enlisted'}]}
+                                options={[{label: 'Officer', value: 'Officer'}, {label: 'WO', value: 'Warrant Officer'}, {label: 'Enlisted', value: 'Enlisted'}]}
                                 selectedValues={[status]}
                                 onValueChange={(value) => setStatus(value)}
                                 style={{ marginLeft: 0, marginRight: 0 }}
@@ -230,7 +233,7 @@ export default function PayCalculatorScreen() {
                         <View style={[styles.fieldRow, { marginTop: theme.spacing.s, marginBottom: 0 }]}>
                             <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Dependents</Text>
                             <SegmentedSelector
-                                options={[{label: 'Yes', value: 'WITH_DEPENDENTS'}, {label: 'No', value: 'WITHOUT_DEPENDENTS'}]}
+                                options={[{label: 'No', value: 'WITHOUT_DEPENDENTS'}, {label: 'Yes', value: 'WITH_DEPENDENTS'}]}
                                 selectedValues={[dependencyStatus]}
                                 onValueChange={(value) => setDependencyStatus(value)}
                                 style={{ marginLeft: 0, marginRight: 0 }}
@@ -238,7 +241,7 @@ export default function PayCalculatorScreen() {
                         </View>
                         <View style={[styles.fieldRow, { marginTop: theme.spacing.s }]}>
                             <Text style={styles.boldLabel}>Mil Housing Area</Text>
-                            <TwoColumnPicker mhaData={mhaData} selectedMha={mha} onMhaChange={setMha} />
+                            <TwoColumnPicker mhaData={mhaData} selectedMha={mha} onMhaChange={setMha} displayName={mhaDisplayName} isLoading={isLoadingMha} error={mhaError} />
                         </View>
                     </View>
                 </View>

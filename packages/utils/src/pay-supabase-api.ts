@@ -51,9 +51,11 @@ export const getBasRate = async (rank: string) => {
  * Fetches the full list of Military Housing Areas (MHAs) grouped by state.
  * @returns An object where keys are state codes and values are arrays of MHA info.
  */
-export const getMhaData = async () => {
+export const getMhaData = async (dependencyStatus: 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS') => {
+    const tableName = dependencyStatus === 'WITH_DEPENDENTS' ? 'bah_rates_with_dependants' : 'bah_rates_without_dependants';
+
     const { data, error } = await supabase
-        .from('bah_rates_with_dependants')
+        .from(tableName)
         .select('state, MHA_NAME, MHA');
 
     if (error) {
