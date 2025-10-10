@@ -1,57 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Modal, Button, Text, Pressable } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, StyleSheet, Modal, Button, Text, Pressable, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import { useTheme, NeumorphicInset } from '@repo/ui';
 
-const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha }) => {
+const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoading, error }) => {
   const { theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [states, setStates] = useState([]);
-  const [selectedState, setSelectedState] = useState(null);
-  const [mhasInState, setMhasInState] = useState([]);
+  const [selectedState, setSelectedState] = useState('');
   const [tempSelectedMha, setTempSelectedMha] = useState(selectedMha);
 
-  // This effect runs when the modal is opened
-  useEffect(() => {
-    if (modalVisible) {
-        const stateList = Object.keys(mhaData).sort();
-        setStates(stateList);
-        if (stateList.length > 0) {
-            // Try to find the state and MHA name from the current selection
-            const currentMhaCode = selectedMha;
-            let initialState = stateList[0];
-            let initialMhaName = '';
-
-            if (currentMhaCode) {
-                const stateFromCode = currentMhaCode.substring(0, 2);
-                if (mhaData[stateFromCode]) {
-                    initialState = stateFromCode;
-                    const mhaObject = mhaData[stateFromCode].find(m => m.value === currentMhaCode);
-                    if (mhaObject) {
-                        initialMhaName = mhaObject.label;
-                    }
-                }
-            }
-            setSelectedState(initialState);
-            setTempSelectedMha(currentMhaCode);
-        }
+  const mhasInState = useMemo(() => {
+    if (selectedState && mhaData && mhaData[selectedState]) {
+        return mhaData[selectedState];
     }
-  }, [mhaData, modalVisible, selectedMha]);
-
-  // Update the list of MHAs when a state is selected
-  useEffect(() => {
-    if (selectedState && mhaData[selectedState]) {
-      setMhasInState(mhaData[selectedState]);
-    } else {
-      setMhasInState([]);
-    }
+    return [];
   }, [selectedState, mhaData]);
 
+  useEffect(() => {
+    if (modalVisible) {
+        if (mhaData && Object.keys(mhaData).length > 0) {
+            const stateList = Object.keys(mhaData).sort();
+            setStates(stateList);
+            setSelectedState('');
+            setTempSelectedMha(null);
+        }
+    }
+}, [mhaData, modalVisible]);
+
   const handleStateChange = (state) => {
+    if (!state) return;
     setSelectedState(state);
-    if (mhaData[state] && mhaData[state].length > 0) {
-      setTempSelectedMha(mhaData[state][0].value);
+    const newMhas = mhaData[state] || [];
+    if (newMhas.length > 0) {
+      setTempSelectedMha(newMhas[0].value);
+    } else {
+      setTempSelectedMha(null);
     }
   };
 
@@ -61,23 +46,14 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha }) => {
   };
 
   const handleCancel = () => {
+    setTempSelectedMha(selectedMha);
     setModalVisible(false);
   };
 
-  const getDisplayName = () => {
-      if (!selectedMha || !mhaData) return "Select MHA...";
-      const state = selectedMha.substring(0, 2);
-      if (mhaData[state]) {
-          const mhaObject = mhaData[state].find(m => m.value === selectedMha);
-          return mhaObject ? mhaObject.label : "Select MHA...";
-      }
-      return "Select MHA...";
-  }
-
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     pressableInput: {
         paddingVertical: theme.spacing.s,
-        paddingHorizontal: theme.spacing.m,
+        paddingHorizontal: theme.spacing.s,
         backgroundColor: theme.colors.inputBackground,
     },
     pressableText: {
@@ -88,6 +64,9 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha }) => {
     placeholderText: {
         color: theme.colors.placeholder,
     },
+    errorText: {
+        color: theme.colors.error,
+    },
     modalOverlay: {
         flex: 1,
         justifyContent: 'flex-end',
@@ -97,28 +76,50 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha }) => {
         backgroundColor: theme.colors.background,
         borderTopLeftRadius: theme.borderRadius.l,
         borderTopRightRadius: theme.borderRadius.l,
-        padding: theme.spacing.m,
+        padding: theme.spacing.s,
+        minHeight: 300,
     },
     pickerContainer: {
       flexDirection: 'row',
       alignItems: 'center',
     },
-    picker: {
+    leftPicker: {
       flex: 1,
+    },
+    rightPicker: {
+      flex: 3,
+    },
+    pickerItem: {
+        ...theme.typography.label,
+        color: theme.colors.text,
+        fontWeight: '500',
     },
     buttonContainer: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: theme.spacing.m,
+        justifyContent: 'center',
+        marginTop: theme.spacing.s,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     }
-  });
+  }), [theme]);
+
+  const getDisplayText = () => {
+    if (isLoading) return 'Loading MHA Data...';
+    if (error) return error;
+    return displayName;
+  };
 
   return (
     <>
-        <Pressable onPress={() => setModalVisible(true)}>
+        <Pressable onPress={() => setModalVisible(true)} disabled={isLoading || !!error}>
             <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
                 <View style={styles.pressableInput}>
-                    <Text style={[styles.pressableText, !selectedMha && styles.placeholderText]}>{getDisplayName()}</Text>
+                    <Text style={[styles.pressableText, !selectedMha && styles.placeholderText, error && styles.errorText]}>
+                        {getDisplayText()}
+                    </Text>
                 </View>
             </NeumorphicInset>
         </Pressable>
@@ -131,34 +132,50 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha }) => {
         >
             <SafeAreaView style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                    <View style={styles.pickerContainer}>
-                        <Picker
-                            selectedValue={selectedState}
-                            onValueChange={handleStateChange}
-                            style={styles.picker}
-                            itemStyle={{ color: theme.colors.text }}
-                        >
-                            {states.map(state => (
-                            <Picker.Item key={state} label={state} value={state} />
-                            ))}
-                        </Picker>
-                        <Picker
-                            selectedValue={tempSelectedMha}
-                            onValueChange={(itemValue) => setTempSelectedMha(itemValue)}
-                            style={styles.picker}
-                            enabled={mhasInState.length > 0}
-                            itemStyle={{ color: theme.colors.text }}
-                        >
-                            {mhasInState.map(mha => (
-                            <Picker.Item key={mha.value} label={mha.label} value={mha.value} />
-                            ))}
-                        </Picker>
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <Button title="Cancel" onPress={handleCancel} color={theme.colors.error} />
-                        <View style={{ width: theme.spacing.m }} />
-                        <Button title="Done" onPress={handleConfirm} />
-                    </View>
+                    {isLoading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color={theme.colors.primary} />
+                            <Text style={{...theme.typography.body, color: theme.colors.text, marginTop: theme.spacing.m}}>Loading MHAs...</Text>
+                        </View>
+                    ) : (
+                        <>
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={selectedState}
+                                    onValueChange={handleStateChange}
+                                    style={styles.leftPicker}
+                                    itemStyle={styles.pickerItem}
+                                >
+                                    <Picker.Item label="..." value="" />
+                                    {states.map(state => (
+                                    <Picker.Item key={state} label={state} value={state} />
+                                    ))}
+                                </Picker>
+                                <Picker
+                                    selectedValue={tempSelectedMha}
+                                    onValueChange={(itemValue) => setTempSelectedMha(itemValue)}
+                                    style={styles.rightPicker}
+                                    enabled={mhasInState.length > 0}
+                                    itemStyle={styles.pickerItem}
+                                >
+                                    {!selectedState ? (
+                                        <Picker.Item label="Select State first..." value="" enabled={false} />
+                                    ) : mhasInState.length === 0 ? (
+                                      <Picker.Item label="No MHAs" value="" enabled={false} />
+                                    ) : (
+                                      mhasInState.map(mha => (
+                                        <Picker.Item key={mha.value} label={mha.label} value={mha.value} />
+                                      ))
+                                    )}
+                                </Picker>
+                            </View>
+                            <View style={styles.buttonContainer}>
+                                <Button title="Cancel" onPress={handleCancel} color={theme.colors.error} />
+                                <View style={{ width: theme.spacing.s }} />
+                                <Button title="Done" onPress={handleConfirm} disabled={!tempSelectedMha} />
+                            </View>
+                        </>
+                    )}
                 </View>
             </SafeAreaView>
         </Modal>
