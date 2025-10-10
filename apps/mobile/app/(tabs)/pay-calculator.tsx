@@ -11,23 +11,13 @@ import NumberInput from '../components/NumberInput';
 import CurrencyInput from '../components/CurrencyInput';
 import DetailModal from '../components/DetailModal';
 
+import VerticalDivider from '../components/VerticalDivider';
+import TwoColumnPicker from '../components/TwoColumnPicker';
+
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const officerRanks = [
-  { label: 'O-1', value: 'O-1' }, { label: 'O-2', value: 'O-2' }, { label: 'O-3', value: 'O-3' },
-  { label: 'O-1E', value: 'O-1E' }, { label: 'O-2E', value: 'O-2E' }, { label: 'O-3E', value: 'O-3E' },
-  { label: 'O-4', value: 'O-4' }, { label: 'O-5', value: 'O-5' }, { label: 'O-6', value: 'O-6' },
-  { label: 'O-7', value: 'O-7' }, { label: 'O-8', value: 'O-8' }, { label: 'O-9', value: 'O-9' }, { label: 'O-10', value: 'O-10' },
-];
-
-const enlistedRanks = [
-  { label: 'E-1', value: 'E-1' }, { label: 'E-2', value: 'E-2' }, { label: 'E-3', value: 'E-3' },
-  { label: 'E-4', value: 'E-4' }, { label: 'E-5', value: 'E-5' }, { label: 'E-6', value: 'E-6' },
-  { label: 'E-7', value: 'E-7' }, { label: 'E-8', value: 'E-8' }, { label: 'E-9', value: 'E-9' },
-];
 
 export default function PayCalculatorScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
@@ -48,7 +38,8 @@ export default function PayCalculatorScreen() {
     incomeForDisplay,
     deductionsForDisplay,
     // Data for Pickers
-    mhaList,
+    mhaData,
+    filteredRanks,
     // Form State & Setters
     status, setStatus,
     rank, setRank,
@@ -203,7 +194,7 @@ export default function PayCalculatorScreen() {
                 {/* Two-Column Layout for Demographics */}
                 <View style={{ flexDirection: 'row' }}>
                     {/* Left Column */}
-                    <View style={{ flex: 1, paddingRight: theme.spacing.s, borderRightWidth: 1, borderRightColor: theme.colors.border }}>
+                    <View style={{ flex: 1 }}>
                         <View style={styles.fieldRow}>
                             <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Status</Text>
                             <SegmentedSelector
@@ -215,7 +206,7 @@ export default function PayCalculatorScreen() {
                         </View>
                         <View style={styles.fieldRow}>
                             <Text style={styles.boldLabel}>Pay Grade</Text>
-                            <PickerInput items={status === 'Officer' ? officerRanks : enlistedRanks} selectedValue={rank} onValueChange={setRank} placeholder="Select..." />
+                            <PickerInput items={filteredRanks} selectedValue={rank} onValueChange={setRank} placeholder="Select..." />
                         </View>
                         <View style={styles.fieldRow}>
                             <Text style={styles.boldLabel}>Years of Service</Text>
@@ -223,18 +214,21 @@ export default function PayCalculatorScreen() {
                         </View>
                     </View>
 
+                    <VerticalDivider style={{ marginHorizontal: theme.spacing.m, backgroundColor: 'rgba(0, 0, 0, 0.01)' }} />
+
                     {/* Right Column */}
-                    <View style={{ flex: 1, paddingLeft: theme.spacing.s, paddingRight: theme.spacing.s }}>
+                    <View style={{ flex: 1, paddingRight: theme.spacing.s }}>
                         <View style={styles.fieldRow}>
                             <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Tax Filing Status</Text>
                             <SegmentedSelector
                                 options={[{label: 'Single', value: 'single'}, {label: 'Married', value: 'married'}]}
                                 selectedValues={[filingStatus]}
+                                onValueChange={(value) => setFilingStatus(value)}
                                 style={{ marginLeft: 0, marginRight: 0 }}
                             />
                         </View>
-                        <View style={styles.fieldRow}>
-                            <Text style={styles.boldLabel}>Dependents</Text>
+                        <View style={[styles.fieldRow, { marginTop: theme.spacing.s, marginBottom: 0 }]}>
+                            <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Dependents</Text>
                             <SegmentedSelector
                                 options={[{label: 'Yes', value: 'WITH_DEPENDENTS'}, {label: 'No', value: 'WITHOUT_DEPENDENTS'}]}
                                 selectedValues={[dependencyStatus]}
@@ -242,9 +236,9 @@ export default function PayCalculatorScreen() {
                                 style={{ marginLeft: 0, marginRight: 0 }}
                             />
                         </View>
-                        <View style={styles.fieldRow}>
-                            <Text style={styles.boldLabel}>Military Housing Area</Text>
-                            <PickerInput items={mhaList} selectedValue={mha} onValueChange={setMha} placeholder="Select MHA..." />
+                        <View style={[styles.fieldRow, { marginTop: theme.spacing.s }]}>
+                            <Text style={styles.boldLabel}>Mil Housing Area</Text>
+                            <TwoColumnPicker mhaData={mhaData} selectedMha={mha} onMhaChange={setMha} />
                         </View>
                     </View>
                 </View>
