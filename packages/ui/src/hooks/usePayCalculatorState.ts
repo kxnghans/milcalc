@@ -12,7 +12,20 @@ export const usePayCalculatorState = () => {
 
   // Income States
   const [basePay, setBasePay] = useState('0.00');
-  const [bah, setBah] = useState('0.00');
+    const [bah, setBah] = useState(0);
+    const [isBahLoading, setIsBahLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchBah = async () => {
+            if (debouncedRank && dependencyStatus && debouncedMha) {
+                setIsBahLoading(true);
+                const newBah = await calculateBAH(debouncedRank, dependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS', debouncedMha);
+                setBah(newBah);
+                setIsBahLoading(false);
+            }
+        }
+        fetchBah();
+    }, [debouncedRank, dependencyStatus, debouncedMha]);
   const [bas, setBas] = useState('0.00');
   const [isIncomeExpanded, setIncomeExpanded] = useState(false);
   const [specialPays, setSpecialPays] = useState({

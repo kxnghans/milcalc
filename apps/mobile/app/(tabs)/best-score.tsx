@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import {
   Card,
   IconRow,
@@ -27,6 +27,7 @@ import Demographics from '../components/Demographics';
 import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
 import Divider from '../components/Divider';
 import PdfModal from '../components/PdfModal';
+import { useNavigation } from 'expo-router';
 import DetailModal from '../components/DetailModal';
 
 /**
@@ -182,7 +183,8 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore, isEx
  * It integrates demographics, exercise inputs, and score displays.
  */
 export default function BestScoreScreen() {
-  const { theme, themeMode, toggleTheme } = useTheme();
+  const navigation = useNavigation();
+  const { theme, themeMode, isDarkMode, toggleTheme } = useTheme();
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
   const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
 
@@ -193,6 +195,15 @@ export default function BestScoreScreen() {
   const { age, setAge, gender, setGender, altitudeGroup, setAltitudeGroup } = useDemographicsState();
   // Custom hook to manage the state and logic for the best score calculation
   const { inputs, outputs, exemptions } = useBestScoreState(age, gender, altitudeGroup);
+  const { isLoading } = outputs;
+
+  React.useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        isLoading ? <ActivityIndicator size="small" color={isDarkMode ? theme.colors.text : theme.colors.primary} style={{ marginRight: theme.spacing.s }} /> : null
+      ),
+    });
+  }, [isLoading, navigation, theme]);
 
   /**
    * Gets the appropriate icon for the current theme setting (light, dark, or auto).
@@ -243,6 +254,7 @@ export default function BestScoreScreen() {
 
   return (
     <View style={styles.container}>
+
         <PdfModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
         <DetailModal isVisible={!!detailModalContentKey} onClose={closeDetailModal} contentKey={detailModalContentKey} />
         <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
@@ -302,6 +314,7 @@ export default function BestScoreScreen() {
                 <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} openDetailModal={openDetailModal} />
             </ScrollView>
         </Card>
+
     </View>
   );
 }

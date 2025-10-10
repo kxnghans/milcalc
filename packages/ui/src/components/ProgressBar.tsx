@@ -9,7 +9,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from "../contexts/ThemeContext";
 import NeumorphicOutset from './NeumorphicOutset';
-import { getPerformanceCategory } from '@repo/utils';
+import { getPerformanceCategory, getScoreCategory } from '@repo/utils';
 import { useScoreColors } from '../hooks/useScoreColors';
 
 /**
@@ -30,6 +30,10 @@ interface ProgressBarProps {
   valueIsTime?: boolean;
   /** If true, the bar only shows a pass or fail state based on the passThreshold. */
   isPassFail?: boolean;
+  /** The calculated score for the component. */
+  score?: number;
+  /** The maximum possible score for the component. */
+  maxScore?: number;
 }
 
 /**
@@ -45,6 +49,8 @@ export const ProgressBar = ({
   invertScale = false,
   valueIsTime = false,
   isPassFail = false,
+  score,
+  maxScore,
 }: ProgressBarProps) => {
   const { theme, isDarkMode } = useTheme();
 
@@ -89,7 +95,9 @@ export const ProgressBar = ({
     let progress = 0;
     let category;
 
-    if (isPassFail) {
+    if (score && maxScore) {
+        category = getScoreCategory(score, maxScore, true);
+    } else if (isPassFail) {
       // Simple pass/fail mode
       const passed = invertScale ? value > 0 && value <= passThreshold : value >= passThreshold;
       category = passed ? 'pass' : 'fail';
@@ -99,18 +107,20 @@ export const ProgressBar = ({
     } else {
       // Standard mode with multiple categories
       category = getPerformanceCategory(value, passThreshold, ninetyPercentileThreshold!, invertScale);
-      if (invertScale) {
+    }
+
+    if (invertScale) {
         // For inverted scales (like run time), progress is calculated relative to the pass threshold.
         if (passThreshold > 0) {
-          progress = value / passThreshold;
+            progress = value / passThreshold;
         }
-      } else {
+    } else {
         // For standard scales (like push-ups), progress is calculated relative to the max points threshold.
         if (maxPointsThreshold && maxPointsThreshold > 0) {
-          progress = value / maxPointsThreshold;
+            progress = value / maxPointsThreshold;
         }
-      }
     }
+
     const colors = getColorForCategory(category);
 
     return { progress: Math.max(0, progress), ...colors };

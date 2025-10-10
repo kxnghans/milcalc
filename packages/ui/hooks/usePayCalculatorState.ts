@@ -16,8 +16,8 @@ export const usePayCalculatorState = () => {
     const [yearsOfService, setYearsOfService] = useState('');
     const [zipCode, setZipCode] = useState(''); // To be replaced with MHA
     const [mha, setMha] = useState(''); // Military Housing Area
-    const [filingStatus, setFilingStatus] = useState(['single']);
-    const [dependencyStatus, setDependencyStatus] = useState(['WITHOUT_DEPENDENTS']);
+    const [filingStatus, setFilingStatus] = useState('single');
+    const [dependencyStatus, setDependencyStatus] = useState('WITHOUT_DEPENDENTS');
     const [isIncomeExpanded, setIncomeExpanded] = useState(false);
     const [isDeductionsExpanded, setDeductionsExpanded] = useState(false);
 
@@ -35,7 +35,7 @@ export const usePayCalculatorState = () => {
     // --- DATA EXPORTS ---
     const mhaList = useMemo(() => {
         // Assuming both sections have the same locations
-        const withDepsSection = bahRates2025.default.sections.find(s => s.section_key === 'WITH_DEPENDENTS');
+        const withDepsSection = bahRates2025.sections.find(s => s.section_key === 'WITH_DEPENDENTS');
         if (!withDepsSection) return [];
         return withDepsSection.rows.map(r => ({ label: `${r.MHA_NAME} (${r.MHA})`, value: r.MHA }));
     }, []);
@@ -53,7 +53,7 @@ export const usePayCalculatorState = () => {
     }, [debouncedRank]);
 
     const bah = useMemo(() => {
-        return calculateBAH(debouncedRank, dependencyStatus[0] as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS', debouncedMha);
+        return calculateBAH(debouncedRank, dependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS', debouncedMha);
     }, [debouncedRank, dependencyStatus, debouncedMha]);
 
     const totalIncome = useMemo(() => {
@@ -63,7 +63,7 @@ export const usePayCalculatorState = () => {
     }, [basePay, bas, bah, specialPays, additionalIncomes]);
 
     const federalTax = useMemo(() => {
-        return calculateFederalTax(totalIncome, filingStatus[0]);
+        return calculateFederalTax(totalIncome, filingStatus);
     }, [totalIncome, filingStatus]);
 
     const totalDeductions = useMemo(() => {

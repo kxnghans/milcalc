@@ -38,12 +38,11 @@ export const getScoreCategory = (score: number | string, maxScore: number, treat
 
   // Define thresholds based on percentages of the max score.
   const ninetyPercent = maxScore * 0.9;
-  const seventyFivePercent = maxScore * 0.75;
 
   if (score >= ninetyPercent) {
     return 'excellent';
   }
-  if (score >= seventyFivePercent) {
+  if (score > 0) {
     return 'pass';
   }
   return 'fail';
