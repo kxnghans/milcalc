@@ -187,6 +187,7 @@ export const usePayCalculatorState = () => {
   const lastAdditionalDeduction = additionalDeductions[additionalDeductions.length - 1];
   const showAddDeductionButton = lastAdditionalDeduction && lastAdditionalDeduction.name && lastAdditionalDeduction.amount;
 
+
   const mhaDisplayName = useMemo(() => {
     if (!mha || !mhaData) return "Select MHA...";
     const state = mha.substring(0, 2);
