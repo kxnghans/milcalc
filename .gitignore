@@ -56,4 +56,4 @@ yarn.lock
 coverage/
 
 # Data packages
-/packages/data/
+packages/data/**

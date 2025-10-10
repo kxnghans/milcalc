@@ -1,31 +1,52 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useDebounce } from './useDebounce';
+import { calculateBAH } from '@repo/utils';
 
 // A simple utility to parse currency strings into numbers
-const parseCurrency = (value: string) => parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
+const parseCurrency = (value: string | number) => {
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
+  }
+  return 0; // Return 0 if value is undefined, null, etc.
+};
 
 export const usePayCalculatorState = () => {
   // --- Raw Input State ---
   const [status, setStatus] = useState('Officer');
   const [rank, setRank] = useState(null);
   const [yearsOfService, setYearsOfService] = useState('');
-  const [zipCode, setZipCode] = useState('');
+  const [mha, setMha] = useState('');
+  const [dependencyStatus, setDependencyStatus] = useState('WITHOUT_DEPENDENTS');
+  const [taxFilingStatus, setTaxFilingStatus] = useState('single');
+
+  // Debounced values for calculations
+  const debouncedRank = useDebounce(rank, 500);
+  const debouncedMha = useDebounce(mha, 500);
+  const debouncedDependencyStatus = useDebounce(dependencyStatus, 500);
 
   // Income States
   const [basePay, setBasePay] = useState('0.00');
-    const [bah, setBah] = useState(0);
-    const [isBahLoading, setIsBahLoading] = useState(false);
+  const [bah, setBah] = useState(0);
+  const [isBahLoading, setIsBahLoading] = useState(false);
 
-    useEffect(() => {
-        const fetchBah = async () => {
-            if (debouncedRank && dependencyStatus && debouncedMha) {
-                setIsBahLoading(true);
-                const newBah = await calculateBAH(debouncedRank, dependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS', debouncedMha);
+  useEffect(() => {
+    const fetchBah = async () => {
+        if (debouncedRank && debouncedDependencyStatus && debouncedMha) {
+            setIsBahLoading(true);
+            try {
+                const newBah = await calculateBAH(debouncedRank, debouncedDependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS', debouncedMha);
                 setBah(newBah);
+            } finally {
                 setIsBahLoading(false);
             }
         }
-        fetchBah();
-    }, [debouncedRank, dependencyStatus, debouncedMha]);
+    }
+    fetchBah();
+  }, [debouncedRank, debouncedDependencyStatus, debouncedMha]);
+
   const [bas, setBas] = useState('0.00');
   const [isIncomeExpanded, setIncomeExpanded] = useState(false);
   const [specialPays, setSpecialPays] = useState({
@@ -117,7 +138,9 @@ export const usePayCalculatorState = () => {
     status, setStatus,
     rank, setRank,
     yearsOfService, setYearsOfService,
-    zipCode, setZipCode,
+    mha, setMha,
+    dependencyStatus, setDependencyStatus,
+    taxFilingStatus, setTaxFilingStatus,
     isIncomeExpanded, setIncomeExpanded,
     isDeductionsExpanded, setDeductionsExpanded,
     specialPays, setSpecialPays,
