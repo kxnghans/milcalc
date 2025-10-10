@@ -8,13 +8,14 @@ interface PayDetail {
 }
 
 interface PayDisplayProps {
-  totalPay: string;
+  annualPay: string;
+  biWeeklyPay: string;
   payDetails: PayDetail[];
   deductions: PayDetail[];
   containerStyle?: StyleProp<ViewStyle>;
 }
 
-export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, deductions, containerStyle }) => {
+export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, biWeeklyPay, payDetails, deductions, containerStyle }) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -23,16 +24,24 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, de
     },
     totalPayContainer: {
       alignItems: 'center',
-      marginBottom: theme.spacing.l,
+      marginBottom: theme.spacing.m,
+    },
+    annualLabel: {
+      ...theme.typography.title,
+      color: theme.colors.primary,
     },
     totalPayLabel: {
       color: theme.colors.text,
-      marginBottom: theme.spacing.s,
       textTransform: 'uppercase',
+      ...theme.typography.label
     },
     totalPayValue: {
       ...theme.typography.title,
       color: theme.colors.primary,
+    },
+    payRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
     },
     detailsContainer: {
       width: '100%',
@@ -61,8 +70,14 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ totalPay, payDetails, de
   return (
     <View style={[styles.container, containerStyle]}>
       <View style={styles.totalPayContainer}>
-        <Text style={styles.totalPayLabel}>Total Pay</Text>
-        <Text style={styles.totalPayValue}>{totalPay}</Text>
+        <View style={styles.payRow}>
+          <Text style={styles.annualLabel}>ANNUAL: </Text>
+          <Text style={styles.totalPayValue}>{annualPay}</Text>
+        </View>
+        <View style={[styles.payRow, { marginTop: theme.spacing.s }]}>
+          <Text style={styles.totalPayLabel}>BI-WEEKLY: </Text>
+          <Text style={styles.detailValue}>{biWeeklyPay}</Text>
+        </View>
       </View>
       <View style={{ flexDirection: 'row', width: '100%' }}>
         {/* Left Column: Income */}

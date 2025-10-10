@@ -255,7 +255,7 @@ export default function BestScoreScreen() {
   return (
     <View style={styles.container}>
 
-        <DocumentModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
+        <DocumentModal category="PT" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
         <DetailModal isVisible={!!detailModalContentKey} onClose={closeDetailModal} contentKey={detailModalContentKey} />
         <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
         <IconRow

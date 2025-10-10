@@ -13,11 +13,24 @@ const parseCurrency = (value: string | number) => {
   return 0; // Return 0 if value is undefined, null, etc.
 };
 
+const formatCurrency = (value: number | string) => {
+    const num = parseCurrency(value);
+    return num.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
 const officerRanks = [
   { label: 'O-1', value: 'O-1' }, { label: 'O-2', value: 'O-2' }, { label: 'O-3', value: 'O-3' },
   { label: 'O-1E', value: 'O-1E' }, { label: 'O-2E', value: 'O-2E' }, { label: 'O-3E', value: 'O-3E' },
   { label: 'O-4', value: 'O-4' }, { label: 'O-5', value: 'O-5' }, { label: 'O-6', value: 'O-6' },
   { label: 'O-7', value: 'O-7' }, { label: 'O-8', value: 'O-8' }, { label: 'O-9', value: 'O-9' }, { label: 'O-10', value: 'O-10' },
+];
+
+const warrantOfficerRanks = [
+  { label: 'W-1', value: 'W-1' }, { label: 'W-2', value: 'W-2' }, { label: 'W-3', value: 'W-3' },
+  { label: 'W-4', value: 'W-4' }, { label: 'W-5', value: 'W-5' },
 ];
 
 const enlistedRanks = [
@@ -77,7 +90,13 @@ export const usePayCalculatorState = () => {
 
   // Effect to filter ranks when status changes
   useEffect(() => {
-    setFilteredRanks(status === 'Officer' ? officerRanks : enlistedRanks);
+    if (status === 'Officer') {
+      setFilteredRanks(officerRanks);
+    } else if (status === 'Warrant Officer') {
+      setFilteredRanks(warrantOfficerRanks);
+    } else {
+      setFilteredRanks(enlistedRanks);
+    }
     setRank(null); // Reset rank when status changes
   }, [status]);
 
@@ -138,7 +157,8 @@ export const usePayCalculatorState = () => {
     return standardDeductionsTotal + additionalDeductionsTotal;
   }, [deductions, additionalDeductions]);
 
-  const totalPay = useMemo(() => totalIncome - totalDeductions, [totalIncome, totalDeductions]);
+  const biWeeklyPay = useMemo(() => totalIncome - totalDeductions, [totalIncome, totalDeductions]);
+  const annualPay = useMemo(() => biWeeklyPay * 26, [biWeeklyPay]);
 
   // --- Display-Specific Logic ---
 
@@ -147,13 +167,13 @@ export const usePayCalculatorState = () => {
                              additionalIncomes.reduce((sum, item) => sum + parseCurrency(item.amount), 0);
 
     const details = [
-        { label: 'Base Pay', value: `$${parseCurrency(basePay).toFixed(2)}` },
-        { label: 'BAH', value: `$${parseCurrency(bah).toFixed(2)}` },
-        { label: 'BAS', value: `$${parseCurrency(bas).toFixed(2)}` },
+        { label: 'Base Pay', value: `$${formatCurrency(basePay)}` },
+        { label: 'BAH', value: `$${formatCurrency(bah)}` },
+        { label: 'BAS', value: `$${formatCurrency(bas)}` },
     ];
 
     if (otherIncomeTotal > 0) {
-        details.push({ label: 'Other', value: `$${otherIncomeTotal.toFixed(2)}` });
+        details.push({ label: 'Other', value: `$${formatCurrency(otherIncomeTotal)}` });
     }
 
     return details;
@@ -161,21 +181,21 @@ export const usePayCalculatorState = () => {
 
   const deductionsForDisplay = useMemo(() => {
     const details = [
-        { label: 'FED INC TAX', value: `$${parseCurrency(deductions.fedTax).toFixed(2)}` },
-        { label: 'FICA TAX', value: `$${parseCurrency(deductions.ficaTax).toFixed(2)}` },
-        { label: 'STATE INC TAX', value: `$${parseCurrency(deductions.stateTax).toFixed(2)}` },
+        { label: 'FED INC TAX', value: `$${formatCurrency(deductions.fedTax)}` },
+        { label: 'FICA TAX', value: `$${formatCurrency(deductions.ficaTax)}` },
+        { label: 'STATE INC TAX', value: `$${formatCurrency(deductions.stateTax)}` },
     ];
 
     if (parseCurrency(deductions.sgli) > 0) {
-        details.push({ label: 'SGLI', value: `$${parseCurrency(deductions.sgli).toFixed(2)}` });
+        details.push({ label: 'SGLI', value: `$${formatCurrency(deductions.sgli)}` });
     }
     if (parseCurrency(deductions.tsp) > 0) {
-        details.push({ label: 'TSP CONTRIBUTION', value: `$${parseCurrency(deductions.tsp).toFixed(2)}` });
+        details.push({ label: 'TSP CONTRIBUTION', value: `$${formatCurrency(deductions.tsp)}` });
     }
 
     additionalDeductions.forEach(deduction => {
         if (parseCurrency(deduction.amount) > 0) {
-            details.push({ label: deduction.name, value: `$${parseCurrency(deduction.amount).toFixed(2)}` });
+            details.push({ label: deduction.name, value: `$${formatCurrency(deduction.amount)}` });
         }
     });
 
@@ -211,10 +231,31 @@ export const usePayCalculatorState = () => {
     }
   };
 
+  const resetState = () => {
+    setStatus('Officer');
+    setRank(null);
+    setYearsOfService('');
+    setMha('');
+    setDependencyStatus('WITHOUT_DEPENDENTS');
+    setFilingStatus('single');
+    setSpecialPays({
+      clothing: '', hostileFire: '', imminentDanger: '', hazardousDuty: '',
+      hardshipDuty: '', aviation: '', assignment: '', careerSea: '',
+      healthProfessions: '', foreignLanguage: '', specialDuty: ''
+    });
+    setAdditionalIncomes([{ name: '', amount: '' }]);
+    setDeductions({
+      fedTax: '', ficaTax: '', stateTax: '', sgli: '', tsp: ''
+    });
+    setAdditionalDeductions([{ name: '', amount: '' }]);
+  };
+
   // --- Return Values ---
   return {
+    resetState, // Export the new function
     // Values for Display
-    totalPay: `$${totalPay.toFixed(2)}`,
+    annualPay: `$${formatCurrency(annualPay)}`,
+    biWeeklyPay: `$${formatCurrency(biWeeklyPay)}`,
     incomeForDisplay,
     deductionsForDisplay,
     isBahLoading,

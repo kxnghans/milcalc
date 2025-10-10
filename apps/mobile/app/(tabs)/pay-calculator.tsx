@@ -34,7 +34,8 @@ export default function PayCalculatorScreen() {
 
   const {
     // Display Values
-    totalPay,
+    annualPay,
+    biWeeklyPay,
     incomeForDisplay,
     deductionsForDisplay,
     // Data for Pickers
@@ -58,6 +59,7 @@ export default function PayCalculatorScreen() {
     additionalDeductions, setAdditionalDeductions,
     showAddIncomeButton,
     showAddDeductionButton,
+    resetState,
   } = usePayCalculatorState();
 
   const toggleIncome = () => {
@@ -108,7 +110,7 @@ export default function PayCalculatorScreen() {
     },
     addIconContainer: {
         alignItems: 'center',
-        marginTop: theme.spacing.m,
+        marginBottom: theme.spacing.s,
     }
   });
 
@@ -154,6 +156,8 @@ export default function PayCalculatorScreen() {
             onPress={onPress}
             iconName="plus"
             backgroundColor={theme.colors.primary}
+            size={20}
+            iconSize={14}
         />
     </View>
   );
@@ -163,12 +167,14 @@ export default function PayCalculatorScreen() {
         onPress={onPress}
         iconName="close"
         backgroundColor={theme.colors.error}
+        size={20}
+        iconSize={14}
     />
   );
 
   return (
     <View style={styles.container}>
-        <DocumentModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
+        <DocumentModal category="PAY" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
         <DetailModal
             isVisible={!!detailModalContentKey}
             onClose={closeDetailModal}
@@ -177,12 +183,17 @@ export default function PayCalculatorScreen() {
         />
         <Card containerStyle={{ marginBottom: theme.spacing.s }}>
             <PayDisplay
-                totalPay={totalPay}
+                annualPay={annualPay}
+                biWeeklyPay={biWeeklyPay}
                 payDetails={incomeForDisplay}
                 deductions={deductionsForDisplay}
             />
         </Card>
         <IconRow icons={[
+            {
+                name: ICONS.RESET,
+                onPress: resetState,
+            },
             {
                 name: ICONS.DOCUMENT,
                 onPress: () => setPdfModalVisible(true),
@@ -261,19 +272,19 @@ export default function PayCalculatorScreen() {
                     </Pressable>
                     {isIncomeExpanded && (
                         <View style={styles.expandableContent}>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Clothing Allowance" contentKey="clothing_allowance" /><CurrencyInput placeholder="0.00" value={specialPays.clothing} onChangeText={(text) => setSpecialPays(p => ({...p, clothing: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Hostile Fire Pay" contentKey="hostile_fire_pay" /><CurrencyInput placeholder="0.00" value={specialPays.hostileFire} onChangeText={(text) => setSpecialPays(p => ({...p, hostileFire: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Imminent Danger Pay" contentKey="imminent_danger_pay" /><CurrencyInput placeholder="0.00" value={specialPays.imminentDanger} onChangeText={(text) => setSpecialPays(p => ({...p, imminentDanger: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Hazardous Duty Incentive Pay" contentKey="hazardous_duty_pay" /><CurrencyInput placeholder="0.00" value={specialPays.hazardousDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hazardousDuty: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Hardship Duty Pay" contentKey="hardship_duty_pay_location" /><CurrencyInput placeholder="0.00" value={specialPays.hardshipDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hardshipDuty: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Aviation Incentive Pay" contentKey="aviation_incentive_pay" /><CurrencyInput placeholder="0.00" value={specialPays.aviation} onChangeText={(text) => setSpecialPays(p => ({...p, aviation: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Assignment Incentive Pay" contentKey="assignment_incentive_pay" /><CurrencyInput placeholder="0.00" value={specialPays.assignment} onChangeText={(text) => setSpecialPays(p => ({...p, assignment: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Career Sea Pay" contentKey="career_sea_pay" /><CurrencyInput placeholder="0.00" value={specialPays.careerSea} onChangeText={(text) => setSpecialPays(p => ({...p, careerSea: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Health Professions Officers" contentKey="health_professions_special_pays" /><CurrencyInput placeholder="0.00" value={specialPays.healthProfessions} onChangeText={(text) => setSpecialPays(p => ({...p, healthProfessions: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Foreign Language Proficiency Bonus" contentKey="foreign_language_proficiency_bonus" /><CurrencyInput placeholder="0.00" value={specialPays.foreignLanguage} onChangeText={(text) => setSpecialPays(p => ({...p, foreignLanguage: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Special Duty Assignment Pay" contentKey="special_duty_assignment_pay" /><CurrencyInput placeholder="0.00" value={specialPays.specialDuty} onChangeText={(text) => setSpecialPays(p => ({...p, specialDuty: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Clothing Allowance" contentKey="Clothing Allowance" /><CurrencyInput placeholder="0.00" value={specialPays.clothing} onChangeText={(text) => setSpecialPays(p => ({...p, clothing: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Hostile Fire Pay" contentKey="Hostile Fire Pay (HFP)" /><CurrencyInput placeholder="0.00" value={specialPays.hostileFire} onChangeText={(text) => setSpecialPays(p => ({...p, hostileFire: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Imminent Danger Pay" contentKey="Imminent Danger Pay (IDP)" /><CurrencyInput placeholder="0.00" value={specialPays.imminentDanger} onChangeText={(text) => setSpecialPays(p => ({...p, imminentDanger: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Hazardous Duty Incentive Pay" contentKey="Hazardous Duty Incentive Pay (HDIP)" /><CurrencyInput placeholder="0.00" value={specialPays.hazardousDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hazardousDuty: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Hardship Duty Pay" contentKey="Hardship Duty Pay - Location (HDP-L)" /><CurrencyInput placeholder="0.00" value={specialPays.hardshipDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hardshipDuty: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Aviation Incentive Pay" contentKey="Aviation Incentive Pays (AvIP)" /><CurrencyInput placeholder="0.00" value={specialPays.aviation} onChangeText={(text) => setSpecialPays(p => ({...p, aviation: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Assignment Incentive Pay" contentKey="Assignment Incentive Pay (AIP)" /><CurrencyInput placeholder="0.00" value={specialPays.assignment} onChangeText={(text) => setSpecialPays(p => ({...p, assignment: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Career Sea Pay" contentKey="Career Sea Pay" /><CurrencyInput placeholder="0.00" value={specialPays.careerSea} onChangeText={(text) => setSpecialPays(p => ({...p, careerSea: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Health Professions Officers" contentKey="Health Professions Special Pays" /><CurrencyInput placeholder="0.00" value={specialPays.healthProfessions} onChangeText={(text) => setSpecialPays(p => ({...p, healthProfessions: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Foreign Language Proficiency Bonus" contentKey="Foreign Language Proficiency Bonus (FLPB)" /><CurrencyInput placeholder="0.00" value={specialPays.foreignLanguage} onChangeText={(text) => setSpecialPays(p => ({...p, foreignLanguage: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Special Duty Assignment Pay" contentKey="Special Duty Assignment Pay (SDAP)" /><CurrencyInput placeholder="0.00" value={specialPays.specialDuty} onChangeText={(text) => setSpecialPays(p => ({...p, specialDuty: text}))} /></View>
                             
-                            <LabelWithHelp label="Additional Income" contentKey="additional_income" />
+                            <LabelWithHelp label="Additional Income" contentKey="Additional Income" />
                             {additionalIncomes.map((income, index) => (
                                 <View key={index} style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
                                     <View style={{ flex: 1, marginRight: theme.spacing.s }}>
@@ -325,10 +336,10 @@ export default function PayCalculatorScreen() {
                     </Pressable>
                     {isDeductionsExpanded && (
                         <View style={styles.expandableContent}>
-                            <View style={styles.fieldRow}><LabelWithHelp label="SGLI" contentKey="sgli" /><CurrencyInput placeholder="0.00" value={deductions.sgli} onChangeText={(text) => setDeductions(d => ({...d, sgli: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="TSP CONTRIBUTION" contentKey="tsp" /><CurrencyInput placeholder="0.00" value={deductions.tsp} onChangeText={(text) => setDeductions(d => ({...d, tsp: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="SGLI" contentKey="Servicemembers' Group Life Insurance (SGLI)" /><CurrencyInput placeholder="0.00" value={deductions.sgli} onChangeText={(text) => setDeductions(d => ({...d, sgli: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="TSP CONTRIBUTION" contentKey="Thrift Savings Plan (TSP)" /><CurrencyInput placeholder="0.00" value={deductions.tsp} onChangeText={(text) => setDeductions(d => ({...d, tsp: text}))} /></View>
 
-                            <LabelWithHelp label="Additional Deductions" contentKey="additional_deductions" />
+                            <LabelWithHelp label="Additional Deductions" contentKey="Additional Deductions" />
                             {additionalDeductions.map((deduction, index) => (
                                 <View key={index} style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
                                     <View style={{ flex: 1, marginRight: theme.spacing.s }}>

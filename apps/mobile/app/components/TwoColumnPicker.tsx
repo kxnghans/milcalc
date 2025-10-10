@@ -59,7 +59,7 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
     pressableText: {
         ...theme.typography.body,
         color: theme.colors.text,
-        textAlign: 'center',
+        textAlign: 'left',
     },
     placeholderText: {
         color: theme.colors.placeholder,
@@ -173,7 +173,7 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
                             <View style={styles.buttonContainer}>
                                 <PillButton title="Cancel" onPress={handleCancel} backgroundColor={theme.colors.error} textColor={theme.colors.primaryText} />
                                 <View style={{ width: theme.spacing.s }} />
-                                <PillButton title="Done" onPress={handleConfirm} disabled={!tempSelectedMha} />
+                                <PillButton title="Done" onPress={handleConfirm} disabled={!tempSelectedMha} backgroundColor={theme.colors.primary} />
                             </View>
                         </>
                     )}

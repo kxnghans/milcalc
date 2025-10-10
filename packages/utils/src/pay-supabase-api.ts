@@ -2,18 +2,40 @@ import { supabase } from './supabaseClient';
 
 /**
  * Fetches the monthly base pay for a given pay grade and years of service.
- * @param pay_grade - The service member's pay grade (e.g., 'E-5').
+ * @param pay_grade - The service member's pay grade (e.g., 'O-5').
  * @param years_of_service - The number of years in service.
  * @returns The base pay amount, or 0 if not found.
  */
 export const getBasePay = async (pay_grade: string, years_of_service: number) => {
+  if (!pay_grade) return 0;
+
+  let yearsColumn = 'yos_2_or_less';
+  if (years_of_service >= 40) yearsColumn = 'yos_over_40';
+  else if (years_of_service >= 38) yearsColumn = 'yos_over_38';
+  else if (years_of_service >= 36) yearsColumn = 'yos_over_36';
+  else if (years_of_service >= 34) yearsColumn = 'yos_over_34';
+  else if (years_of_service >= 32) yearsColumn = 'yos_over_32';
+  else if (years_of_service >= 30) yearsColumn = 'yos_over_30';
+  else if (years_of_service >= 28) yearsColumn = 'yos_over_28';
+  else if (years_of_service >= 26) yearsColumn = 'yos_over_26';
+  else if (years_of_service >= 24) yearsColumn = 'yos_over_24';
+  else if (years_of_service >= 22) yearsColumn = 'yos_over_22';
+  else if (years_of_service >= 20) yearsColumn = 'yos_over_20';
+  else if (years_of_service >= 18) yearsColumn = 'yos_over_18';
+  else if (years_of_service >= 16) yearsColumn = 'yos_over_16';
+  else if (years_of_service >= 14) yearsColumn = 'yos_over_14';
+  else if (years_of_service >= 12) yearsColumn = 'yos_over_12';
+  else if (years_of_service >= 10) yearsColumn = 'yos_over_10';
+  else if (years_of_service >= 8) yearsColumn = 'yos_over_8';
+  else if (years_of_service >= 6) yearsColumn = 'yos_over_6';
+  else if (years_of_service >= 4) yearsColumn = 'yos_over_4';
+  else if (years_of_service >= 3) yearsColumn = 'yos_over_3';
+  else if (years_of_service >= 2) yearsColumn = 'yos_over_2';
+
   const { data, error } = await supabase
-    .from('base_pay')
-    .select('pay_2025')
+    .from('base_pay_2024')
+    .select(yearsColumn)
     .eq('pay_grade', pay_grade)
-    .lte('years_of_service', years_of_service)
-    .order('years_of_service', { ascending: false })
-    .limit(1)
     .single();
 
   if (error) {
@@ -21,7 +43,7 @@ export const getBasePay = async (pay_grade: string, years_of_service: number) =>
     return 0;
   }
 
-  return data?.pay_2025 || 0;
+  return data ? data[yearsColumn] : 0;
 };
 
 /**
@@ -53,8 +75,8 @@ export const getBasRate = async (rank: string) => {
  */
 export const getMhaData = async () => {
     const { data, error } = await supabase
-        .from('bah_rates_with_dependants')
-        .select('state, MHA_NAME, MHA');
+        .from('bah_rates_dependents')
+        .select('state, mha_name, mha');
 
     if (error) {
         console.error('Error fetching MHA data:', error);
@@ -63,11 +85,11 @@ export const getMhaData = async () => {
 
     // Group the flat list of MHAs by state
     const groupedData = data.reduce((acc, mha) => {
-        const { state, MHA_NAME, MHA } = mha;
+        const { state, mha_name, mha: mhaCode } = mha;
         if (!acc[state]) {
             acc[state] = [];
         }
-        acc[state].push({ label: MHA_NAME, value: MHA });
+        acc[state].push({ label: mha_name, value: mhaCode });
         return acc;
     }, {});
 
@@ -84,13 +106,19 @@ export const getMhaData = async () => {
 export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS') => {
     if (!mha || !rank || !dependencyStatus) return 0;
 
-    const tableName = dependencyStatus === 'WITH_DEPENDENTS' ? 'bah_rates_with_dependants' : 'bah_rates_without_dependants';
-    const rankColumn = rank.replace('-', ''); // Format rank for column name (e.g., 'E05')
+    const tableName = dependencyStatus === 'WITH_DEPENDENTS' ? 'bah_rates_dependents' : 'bah_rates_no_dependents';
+    
+    // Correctly format the rank into a column name, padding with a zero if necessary
+    const parts = rank.split('-');
+    const letter = parts[0];
+    const number = parts[1];
+    const paddedNumber = number.length === 1 ? '0' + number : number;
+    const rankColumn = (letter + paddedNumber).toLowerCase();
 
     const { data, error } = await supabase
         .from(tableName)
         .select(rankColumn)
-        .eq('MHA', mha)
+        .eq('mha', mha)
         .single();
 
     if (error) {
@@ -99,4 +127,21 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
     }
 
     return data ? data[rankColumn] : 0;
+};
+
+export const getPayHelpContent = async (contentKey: string) => {
+  if (!contentKey) return null;
+
+  const { data, error } = await supabase
+    .from('pay_help_details')
+    .select('*')
+    .eq('title', contentKey)
+    .single();
+
+  if (error) {
+    console.error('Error fetching pay help content:', error);
+    return null;
+  }
+
+  return data;
 };
