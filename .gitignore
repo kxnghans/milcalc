@@ -55,5 +55,5 @@ yarn.lock
 # Test
 coverage/
 
-# Data packages
-packages/data/**
+# Data
+packages/data/
