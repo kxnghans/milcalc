@@ -17,3 +17,4 @@ export * from './StyledTextInput';
 export * from './Icon';
 export * from './ExemptButton';
 export * from './PayDisplay';
+export * from './PillButton';

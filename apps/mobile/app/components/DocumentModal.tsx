@@ -1,12 +1,12 @@
 /**
- * @file PdfModal.tsx
+ * @file DocumentModal.tsx
  * @description This file defines a modal component that displays a list of relevant PDF documents
  * for the user to view. It handles opening both local and web-based PDFs.
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback } from 'react-native';
-import { useTheme, NeumorphicOutset } from '@repo/ui';
+import { useTheme, NeumorphicOutset, PillButton } from '@repo/ui';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import { Asset } from 'expo-asset';
@@ -23,7 +23,7 @@ import { Asset } from 'expo-asset';
  * @param {string} [props.highlightColor] - Custom highlight color for the neumorphic effect.
  * @returns {JSX.Element} The rendered PDF modal component.
  */
-export default function PdfModal({ isModalVisible, setModalVisible, shadowOpacity, highlightOpacity, shadowRadius, highlightRadius, highlightColor: highlightColorProp }) {
+export default function DocumentModal({ isModalVisible, setModalVisible, shadowOpacity, highlightOpacity, shadowRadius, highlightRadius, highlightColor: highlightColorProp }) {
     const { theme, isDarkMode } = useTheme();
 
     // An array of PDF documents to be displayed in the modal.
@@ -108,19 +108,11 @@ export default function PdfModal({ isModalVisible, setModalVisible, shadowOpacit
             elevation: 2,
             marginBottom: 10,
         },
-        buttonClose: {
-            backgroundColor: "#2196F3",
-        },
         textStyle: {
+            ...theme.typography.subtitle,
             color: theme.colors.text,
-            fontWeight: "bold",
-            textAlign: "center"
-        },
-        modalText: {
-            marginBottom: 15,
-            textAlign: "center",
-            color: theme.colors.text
-        },
+        }
+
     });
 
     return (
@@ -155,14 +147,7 @@ export default function PdfModal({ isModalVisible, setModalVisible, shadowOpacit
                                     <Text style={styles.textStyle}>{pdf.name}</Text>
                                 </TouchableOpacity>
                             ))}
-                            <NeumorphicOutset>
-                                <TouchableOpacity
-                                    style={[styles.button, styles.buttonClose]}
-                                    onPress={() => setModalVisible(false)}
-                                >
-                                    <Text style={styles.textStyle}>Close</Text>
-                                </TouchableOpacity>
-                            </NeumorphicOutset>
+                            <PillButton title="Close" onPress={() => setModalVisible(false)} />
                         </View>
                     </NeumorphicOutset>
                 </View>

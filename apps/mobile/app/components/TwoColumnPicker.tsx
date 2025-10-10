@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Modal, Button, Text, Pressable, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
-import { useTheme, NeumorphicInset } from '@repo/ui';
+import { useTheme, NeumorphicInset, PillButton } from '@repo/ui';
 
 const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoading, error }) => {
   const { theme } = useTheme();
@@ -170,9 +170,9 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
                                 </Picker>
                             </View>
                             <View style={styles.buttonContainer}>
-                                <Button title="Cancel" onPress={handleCancel} color={theme.colors.error} />
+                                <PillButton title="Cancel" onPress={handleCancel} backgroundColor={theme.colors.error} textColor={theme.colors.primaryText} />
                                 <View style={{ width: theme.spacing.s }} />
-                                <Button title="Done" onPress={handleConfirm} disabled={!tempSelectedMha} />
+                                <PillButton title="Done" onPress={handleConfirm} disabled={!tempSelectedMha} />
                             </View>
                         </>
                     )}

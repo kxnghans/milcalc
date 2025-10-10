@@ -3,7 +3,7 @@ import { ScrollView, View, Text, StyleSheet, Pressable, LayoutAnimation, UIManag
 import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import PdfModal from '../components/PdfModal';
+import DocumentModal from '../components/DocumentModal';
 import Divider from '../components/Divider';
 import InsetTextInput from '../components/InsetTextInput';
 import PickerInput from '../components/PickerInput';
@@ -168,7 +168,7 @@ export default function PayCalculatorScreen() {
 
   return (
     <View style={styles.container}>
-        <PdfModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
+        <DocumentModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
         <DetailModal
             isVisible={!!detailModalContentKey}
             onClose={closeDetailModal}
@@ -184,7 +184,7 @@ export default function PayCalculatorScreen() {
         </Card>
         <IconRow icons={[
             {
-                name: ICONS.PDF,
+                name: ICONS.DOCUMENT,
                 onPress: () => setPdfModalVisible(true),
             },
             {
@@ -198,7 +198,7 @@ export default function PayCalculatorScreen() {
                 <View style={{ flexDirection: 'row' }}>
                     {/* Left Column */}
                     <View style={{ flex: 1 }}>
-                        <View style={styles.fieldRow}>
+                        <View style={[styles.fieldRow, { marginBottom: theme.spacing.s }]}>
                             <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Status</Text>
                             <SegmentedSelector
                                 options={[{label: 'Officer', value: 'Officer'}, {label: 'WO', value: 'Warrant Officer'}, {label: 'Enlisted', value: 'Enlisted'}]}
@@ -221,7 +221,7 @@ export default function PayCalculatorScreen() {
 
                     {/* Right Column */}
                     <View style={{ flex: 1, paddingRight: theme.spacing.s }}>
-                        <View style={styles.fieldRow}>
+                        <View style={[styles.fieldRow, { marginBottom: theme.spacing.s }]}>
                             <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Tax Filing Status</Text>
                             <SegmentedSelector
                                 options={[{label: 'Single', value: 'single'}, {label: 'Married', value: 'married'}]}
@@ -230,8 +230,8 @@ export default function PayCalculatorScreen() {
                                 style={{ marginLeft: 0, marginRight: 0 }}
                             />
                         </View>
-                        <View style={[styles.fieldRow, { marginTop: theme.spacing.s, marginBottom: 0 }]}>
-                            <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Dependents</Text>
+                        <View style={[styles.fieldRow, { marginBottom: 0 }]}>
+                            <Text style={[styles.boldLabel, { marginTop: 0, marginBottom: 0 }]}>Dependents</Text>
                             <SegmentedSelector
                                 options={[{label: 'No', value: 'WITHOUT_DEPENDENTS'}, {label: 'Yes', value: 'WITH_DEPENDENTS'}]}
                                 selectedValues={[dependencyStatus]}

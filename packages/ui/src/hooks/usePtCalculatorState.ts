@@ -110,6 +110,14 @@ export function usePtCalculatorState() {
                         });
                     }
 
+                    const adjustedShuttles = parseInt(debouncedShuttles) || 0;
+                    if (debouncedCardioComponent === 'shuttles' && altitudeAdjustments && altitudeAdjustments.hamr && debouncedAltitudeGroup && debouncedAltitudeGroup !== 'normal') {
+                        const adjustmentRow = altitudeAdjustments.hamr.find(row => row.altitude_group === debouncedAltitudeGroup);
+                        if (adjustmentRow) {
+                            adjustedShuttles += adjustmentRow.shuttles_to_add;
+                        }
+                    }
+
                     const result = await calculatePtScore({
                         age: ageNum || 0,
                         gender: debouncedGender,
@@ -129,7 +137,7 @@ export function usePtCalculatorState() {
                         cardioComponent: debouncedCardioComponent,
                         runMinutes: parseInt(debouncedRunMinutes) || 0,
                         runSeconds: parseInt(debouncedRunSeconds) || 0,
-                        shuttles: parseInt(debouncedShuttles) || 0,
+                        shuttles: adjustedShuttles,
                         walkMinutes: parseInt(debouncedWalkMinutes) || 0,
                         walkSeconds: parseInt(debouncedWalkSeconds) || 0,
                         isCardioExempt: debouncedCardioExempt,
