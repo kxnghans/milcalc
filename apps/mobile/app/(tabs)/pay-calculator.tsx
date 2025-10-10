@@ -200,51 +200,52 @@ export default function PayCalculatorScreen() {
         ]} />
         <Card style={{ flex: 1 }}>
             <ScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
-                {/* Row 1: Status and Years of Service */}
-                <View style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-                    <View style={{ flex: 1 }}>
-                        <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Status</Text>
-                        <SegmentedSelector
-                            options={[{label: 'Officer', value: 'Officer'}, {label: 'Enlisted', value: 'Enlisted'}]}
-                            selectedValues={[status]}
-                            onValueChange={(value) => setStatus(value)}
-                        />
+                {/* Two-Column Layout for Demographics */}
+                <View style={{ flexDirection: 'row' }}>
+                    {/* Left Column */}
+                    <View style={{ flex: 1, paddingRight: theme.spacing.s, borderRightWidth: 1, borderRightColor: theme.colors.border }}>
+                        <View style={styles.fieldRow}>
+                            <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Status</Text>
+                            <SegmentedSelector
+                                options={[{label: 'Officer', value: 'Officer'}, {label: 'Enlisted', value: 'Enlisted'}]}
+                                selectedValues={[status]}
+                                onValueChange={(value) => setStatus(value)}
+                                style={{ marginLeft: 0, marginRight: 0 }}
+                            />
+                        </View>
+                        <View style={styles.fieldRow}>
+                            <Text style={styles.boldLabel}>Pay Grade</Text>
+                            <PickerInput items={status === 'Officer' ? officerRanks : enlistedRanks} selectedValue={rank} onValueChange={setRank} placeholder="Select..." />
+                        </View>
+                        <View style={styles.fieldRow}>
+                            <Text style={styles.boldLabel}>Years of Service</Text>
+                            <NumberInput placeholder="0" value={yearsOfService} onChangeText={setYearsOfService} />
+                        </View>
                     </View>
-                    <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
-                        <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Years of Service</Text>
-                        <NumberInput placeholder="0" value={yearsOfService} onChangeText={setYearsOfService} style={{ marginVertical: theme.spacing.s }} />
-                    </View>
-                </View>
 
-                {/* Row 2: Pay Grade and MHA */}
-                <View style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between' }]}>
-                    <View style={{ flex: 1, marginRight: theme.spacing.s }}>
-                        <Text style={styles.boldLabel}>Pay Grade</Text>
-                        <PickerInput items={status === 'Officer' ? officerRanks : enlistedRanks} selectedValue={rank} onValueChange={setRank} placeholder="Select..." />
-                    </View>
-                    <View style={{ flex: 1, marginLeft: theme.spacing.s }}>
-                        <Text style={styles.boldLabel}>Military Housing Area</Text>
-                        <PickerInput items={mhaList} selectedValue={mha} onValueChange={setMha} placeholder="Select MHA..." />
-                    </View>
-                </View>
-
-                {/* Row 3: Tax Filing Status and Dependents */}
-                <View style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.s }]}>
-                    <View style={{ flex: 1, marginRight: theme.spacing.s }}>
-                        <Text style={styles.boldLabel}>Tax Filing Status</Text>
-                        <SegmentedSelector
-                            options={[{label: 'Single', value: 'single'}, {label: 'Married', value: 'married'}]}
-                            selectedValues={[filingStatus]}
-                            onValueChange={(value) => setFilingStatus(value)}
-                        />
-                    </View>
-                    <View style={{ flex: 1, marginLeft: theme.spacing.s }}>
-                        <Text style={styles.boldLabel}>Dependents</Text>
-                        <SegmentedSelector
-                            options={[{label: 'Yes', value: 'WITH_DEPENDENTS'}, {label: 'No', value: 'WITHOUT_DEPENDENTS'}]}
-                            selectedValues={[dependencyStatus]}
-                            onValueChange={(value) => setDependencyStatus(value)}
-                        />
+                    {/* Right Column */}
+                    <View style={{ flex: 1, paddingLeft: theme.spacing.s, paddingRight: theme.spacing.s }}>
+                        <View style={styles.fieldRow}>
+                            <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Tax Filing Status</Text>
+                            <SegmentedSelector
+                                options={[{label: 'Single', value: 'single'}, {label: 'Married', value: 'married'}]}
+                                selectedValues={[filingStatus]}
+                                style={{ marginLeft: 0, marginRight: 0 }}
+                            />
+                        </View>
+                        <View style={styles.fieldRow}>
+                            <Text style={styles.boldLabel}>Dependents</Text>
+                            <SegmentedSelector
+                                options={[{label: 'Yes', value: 'WITH_DEPENDENTS'}, {label: 'No', value: 'WITHOUT_DEPENDENTS'}]}
+                                selectedValues={[dependencyStatus]}
+                                onValueChange={(value) => setDependencyStatus(value)}
+                                style={{ marginLeft: 0, marginRight: 0 }}
+                            />
+                        </View>
+                        <View style={styles.fieldRow}>
+                            <Text style={styles.boldLabel}>Military Housing Area</Text>
+                            <PickerInput items={mhaList} selectedValue={mha} onValueChange={setMha} placeholder="Select MHA..." />
+                        </View>
                     </View>
                 </View>
 

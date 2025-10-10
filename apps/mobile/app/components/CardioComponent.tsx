@@ -11,8 +11,6 @@ import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon,
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
 
-import { altitudeAdjustments } from '@repo/data';
-
 /**
  * A component that renders the cardio section of the PT calculator.
  * It manages state for the run, shuttle run, and walk, and displays the correct
@@ -43,6 +41,7 @@ export default function CardioComponent({
     toggleExempt,
     openDetailModal,
     score,
+    altitudeData,
 }) {
     const { theme, isDarkMode } = useTheme();
     // State to hold the calculated altitude adjustment text to be displayed to the user.
@@ -56,51 +55,45 @@ export default function CardioComponent({
         setAdjustment(null);
         setAdjustedWalkMaxTime(null);
 
-        if (altitudeGroup && altitudeGroup !== 'normal') {
-            if (cardioComponent === 'run' && (runMinutes && runSeconds)) {
-                // Calculate adjustment for the 1.5-mile run.
-                const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
-                const correctionGroup = altitudeAdjustments.run.groups[altitudeGroup];
-                if (correctionGroup) {
-                    const correction = correctionGroup.corrections.find(c => runTimeInSeconds >= c.time_range[0] && runTimeInSeconds <= c.time_range[1]);
-                    if (correction) {
-                        setAdjustment(`- ${correction.correction}s`);
-                    }
-                }
-            } else if (cardioComponent === 'walk' && (walkMinutes && walkSeconds)) {
-                // Calculate and display the adjusted max time for the 2km walk.
-                const ageIndex = getAgeGroupIndex(age);
+        if (altitudeData && altitudeGroup && altitudeGroup !== 'normal' && age && gender) {
+            const ageNum = parseInt(age);
 
-                // Defensive checks to prevent the TypeError
-                if (ageIndex !== -1 && gender &&
-                    altitudeAdjustments.walk &&
-                    altitudeAdjustments.walk[gender] &&
-                    altitudeAdjustments.walk[gender][altitudeGroup] &&
-                    altitudeAdjustments.walk[gender][altitudeGroup].max_times &&
-                    altitudeAdjustments.walk[gender][altitudeGroup].max_times[ageIndex]
-                ) {
-                    const maxTime = altitudeAdjustments.walk[gender][altitudeGroup].max_times[ageIndex].max_time;
-                    if (maxTime) {
-                        const minutes = Math.floor(maxTime / 60);
-                        const seconds = maxTime % 60;
-                        setAdjustment(`Max: ${minutes}:${seconds.toString().padStart(2, '0')}`);
-                        setAdjustedWalkMaxTime(maxTime);
-                    }
+            if (cardioComponent === 'run' && (runMinutes || runSeconds)) {
+                const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
+                const adjustmentRow = altitudeData.run.find(row => 
+                    row.altitude_group === altitudeGroup && 
+                    runTimeInSeconds >= row.time_range_start && 
+                    runTimeInSeconds <= row.time_range_end
+                );
+                if (adjustmentRow) {
+                    setAdjustment(`- ${adjustmentRow.correction}s`);
                 }
+
+            } else if (cardioComponent === 'walk' && (walkMinutes || walkSeconds)) {
+                const capitalizedGender = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+                const adjustmentRow = altitudeData.walk.find(row => 
+                    row.gender.toLowerCase() === capitalizedGender.toLowerCase() &&
+                    row.altitude_group === altitudeGroup &&
+                    ageNum >= row.age_range_start &&
+                    ageNum <= row.age_range_end
+                );
+
+                if (adjustmentRow) {
+                    const maxTime = adjustmentRow.max_time;
+                    const minutes = Math.floor(maxTime / 60);
+                    const seconds = maxTime % 60;
+                    setAdjustment(`Max: ${minutes}:${seconds.toString().padStart(2, '0')}`);
+                    setAdjustedWalkMaxTime(maxTime);
+                }
+
             } else if (cardioComponent === 'shuttles') {
-                // Calculate adjustment for the HAMR shuttle run.
-                if (altitudeAdjustments.hamr &&
-                    altitudeAdjustments.hamr.groups &&
-                    altitudeAdjustments.hamr.groups[altitudeGroup]
-                ) {
-                    const shuttlesToAdd = altitudeAdjustments.hamr.groups[altitudeGroup].shuttles_to_add;
-                    if (shuttlesToAdd) {
-                        setAdjustment(`+ ${shuttlesToAdd}`);
-                    }
+                const adjustmentRow = altitudeData.hamr.find(row => row.altitude_group === altitudeGroup);
+                if (adjustmentRow) {
+                    setAdjustment(`+ ${adjustmentRow.shuttles_to_add}`);
                 }
             }
         }
-    }, [runMinutes, runSeconds, walkMinutes, walkSeconds, shuttles, cardioComponent, altitudeGroup, age, gender]);
+    }, [runMinutes, runSeconds, walkMinutes, walkSeconds, shuttles, cardioComponent, altitudeGroup, age, gender, altitudeData]);
 
     /**
      * Helper function to get the age group index for walk standards.

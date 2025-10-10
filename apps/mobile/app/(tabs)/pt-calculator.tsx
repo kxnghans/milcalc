@@ -58,6 +58,7 @@ export default function PTCalculator() {
     minMax,
     cardioMinMax,
     ninetyPercentileThresholds,
+    altitudeData,
   } = usePtCalculatorState();
 
   React.useEffect(() => {
@@ -216,9 +217,8 @@ export default function PTCalculator() {
                                 age={demographics.age}
                                 gender={demographics.gender}
                                 isExempt={cardio.isExempt}
-                                toggleExempt={cardio.toggleExempt}
-                                openDetailModal={openDetailModal}
                                 score={score}
+                                altitudeData={altitudeData}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                             <AltitudeAdjustmentComponent selectedValue={demographics.altitudeGroup} onValueChange={demographics.setAltitudeGroup} openDetailModal={openDetailModal} />

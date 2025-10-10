@@ -122,8 +122,6 @@ export const calculateBAS = (rank: string): number => {
  * @param mha - The Military Housing Area (MHA) code.
  * @returns The monthly BAH amount.
  */
-import { getBahRate, getNonLocalityBahRate } from './pay-supabase-api';
-
 export const calculateBAH = async (rank: string, dependencyStatus: 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS', mha: string): Promise<number> => {
     if (!rank || !dependencyStatus) return 0;
 

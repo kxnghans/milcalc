@@ -42,6 +42,7 @@ export function usePtCalculatorState() {
   const [minMax, setMinMax] = useState({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
   const [cardioMinMax, setCardioMinMax] = useState({ min: 0, max: 0 });
   const [ninetyPercentileThresholds, setNinetyPercentileThresholds] = useState({ pushups: 0, core: 0, cardio: 0 });
+  const [altitudeData, setAltitudeData] = useState(null);
 
   // Debounce all state values that are used in calculations.
   // This is critical for performance, as it prevents recalculating on every single input change (e.g., each keystroke).
@@ -88,6 +89,8 @@ export function usePtCalculatorState() {
                         run: runAltitudeAdjustments || [],
                         hamr: hamrAltitudeAdjustments || [],
                     };
+
+                    setAltitudeData(altitudeAdjustments);
 
                     if (standards) {
                         const pushupValues = getMinMaxValues(standards, debouncedPushupComponent);
@@ -164,5 +167,6 @@ export function usePtCalculatorState() {
     minMax,
     cardioMinMax,
     ninetyPercentileThresholds,
+    altitudeData,
   };
 }

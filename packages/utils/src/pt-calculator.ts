@@ -75,21 +75,26 @@ const getCardioScore = (standards: any[], component: string, performance: any): 
         const shuttles = performance.shuttles;
         if (shuttles === 0) return 0;
 
+        // Since standards are reversed (worst to best), we find the first one the user meets.
         for (const standard of cardioStandards) {
-            const measurement = standard.measurement as string;
+            const measurement = String(standard.measurement).trim();
             if (measurement.includes('-')) {
-                const [start, end] = measurement.split('-').map(s => parseInt(s.trim().replace(/[^0-9]/g, '')));
-                if (shuttles >= start && shuttles <= end) {
+                // Use regex to safely extract numbers, ignoring characters like '*'.
+                const parts = measurement.split('-');
+                const start = parseInt(parts[0].replace(/[^0-9]/g, ''));
+                const end = parseInt(parts[1].replace(/[^0-9]/g, ''));
+
+                if (!isNaN(start) && !isNaN(end) && shuttles >= start && shuttles <= end) {
                     return standard.points;
                 }
-            } else if (measurement.includes('>')) {
+            } else if (measurement.startsWith('>')) {
                 const value = parseInt(measurement.replace(/[^0-9]/g, ''));
-                if (shuttles > value) {
+                if (!isNaN(value) && shuttles > value) {
                     return standard.points;
                 }
             } else {
                 const value = parseInt(measurement.replace(/[^0-9]/g, ''));
-                if (shuttles >= value) {
+                if (!isNaN(value) && shuttles >= value) {
                     return standard.points;
                 }
             }
@@ -133,22 +138,25 @@ const getPlankScore = (standards: any[], performance: any): number => {
  * @param altitudeGroup - The selected altitude group (e.g., 'group1', 'group2').
  * @returns The final score for the exercise.
  */
-export const getScoreForExercise = (standards: any[], component: string, performance: any, altitudeGroup?: string): number => {
+export const getScoreForExercise = (standards: any[], component: string, performance: any, altitudeGroup?: string, altitudeAdjustments?: any): number => {
 
     let adjustedPerformance = { ...performance };
 
     // Apply altitude adjustments for cardio components
-    if (altitudeGroup && altitudeGroup !== 'normal') {
-        if (component === 'run') {
+    if (altitudeGroup && altitudeGroup !== 'normal' && altitudeAdjustments) {
+        if (component === 'run' && altitudeAdjustments.run) {
             const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
-            const correction = altitudeAdjustments.run.groups[altitudeGroup].corrections.find(c => runTimeInSeconds >= c.time_range[0] && runTimeInSeconds <= c.time_range[1]);
+            const correction = altitudeAdjustments.run.find(c => c.altitude_group === altitudeGroup && runTimeInSeconds >= c.time_range_start && runTimeInSeconds <= c.time_range_end);
             if (correction) {
                 const adjustedTimeInSeconds = runTimeInSeconds - correction.correction;
                 adjustedPerformance.minutes = Math.floor(adjustedTimeInSeconds / 60);
                 adjustedPerformance.seconds = adjustedTimeInSeconds % 60;
             }
-        } else if (component === 'shuttles') {
-            adjustedPerformance.shuttles += altitudeAdjustments.hamr.groups[altitudeGroup].shuttles_to_add;
+        } else if (component === 'shuttles' && altitudeAdjustments.hamr) {
+            const adjustment = altitudeAdjustments.hamr.find(a => a.altitude_group === altitudeGroup);
+            if (adjustment) {
+                adjustedPerformance.shuttles = (adjustedPerformance.shuttles || 0) + adjustment.shuttles_to_add;
+            }
         }
     }
 
@@ -203,7 +211,13 @@ export const checkWalkPass = async (age: number, gender: string, minutes: number
 
     if (altitudeGroup && altitudeGroup !== 'normal') {
         if (altitudeAdjustments) {
-            const adjustment = altitudeAdjustments.find(a => a.altitude_group === altitudeGroup && a.gender === gender && age >= a.age_range_start && age <= a.age_range_end);
+            const capitalizedGender = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+            const adjustment = altitudeAdjustments.find(a => 
+                a.altitude_group === altitudeGroup && 
+                a.gender.toLowerCase() === capitalizedGender.toLowerCase() && 
+                age >= a.age_range_start && 
+                age <= a.age_range_end
+            );
             if (adjustment) {
                 maxTimeInSeconds = adjustment.max_time;
             }
