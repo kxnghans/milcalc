@@ -139,7 +139,7 @@ export const getAltitudeAdjustments = async (exercise: string) => {
 export const getHelpContent = async (contentKey: string) => {
   const { data, error } = await supabase
     .from('help_details')
-    .select('*')
+    .select('title, section_header, section_content')
     .eq('exercise', contentKey);
 
   if (error) {
@@ -147,5 +147,17 @@ export const getHelpContent = async (contentKey: string) => {
     return null;
   }
 
-  return data;
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  // Combine the sections into a single object with section_header as keys
+  const combinedContent = data.reduce((acc, item) => {
+    // Use a lowercase, snake_case version of the header as the key
+    const key = item.section_header.toLowerCase().replace(/\s+/g, '_');
+    acc[key] = item.section_content;
+    return acc;
+  }, { title: data[0].title });
+
+  return combinedContent;
 };

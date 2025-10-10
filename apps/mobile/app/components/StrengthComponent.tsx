@@ -54,10 +54,8 @@ export default function StrengthComponent({
         <View>
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <TouchableOpacity onPress={() => openDetailModal(pushupComponent)}>
-                                            <TouchableOpacity onPress={() => openDetailModal(pushupComponent, { reps: pushups })}>
+                    <TouchableOpacity onPress={() => openDetailModal(pushupComponent, { reps: pushups })}>
                         <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
-                    </TouchableOpacity>
                     </TouchableOpacity>
                     <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m}]}>Strength</Text>
                     {/* Conditionally render the progress bar based on the showProgressBars prop. */}

@@ -26,7 +26,7 @@ import TimeInput from '../components/TimeInput';
 import Demographics from '../components/Demographics';
 import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
 import Divider from '../components/Divider';
-import PdfModal from '../components/PdfModal';
+import DocumentModal from '../components/DocumentModal';
 import { useNavigation } from 'expo-router';
 import DetailModal from '../components/DetailModal';
 
@@ -255,7 +255,7 @@ export default function BestScoreScreen() {
   return (
     <View style={styles.container}>
 
-        <PdfModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
+        <DocumentModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
         <DetailModal isVisible={!!detailModalContentKey} onClose={closeDetailModal} contentKey={detailModalContentKey} />
         <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
         <IconRow
@@ -265,7 +265,7 @@ export default function BestScoreScreen() {
                 href: '(tabs)/pt-calculator',
             },
             {
-                name: ICONS.PDF,
+                name: ICONS.DOCUMENT,
                 onPress: () => setPdfModalVisible(true),
             },
             {

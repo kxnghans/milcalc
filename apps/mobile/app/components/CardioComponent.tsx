@@ -151,9 +151,7 @@ export default function CardioComponent({
                     <View style={styles.exerciseBlock}>
                         <View style={styles.componentHeader}>
                             <TouchableOpacity onPress={() => openDetailModal(cardioComponent, getPerformance())}>
-                                                            <TouchableOpacity onPress={() => openDetailModal(cardioComponent)}>
                                 <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
-                            </TouchableOpacity>
                             </TouchableOpacity>
                             <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m }]}>Cardio</Text>
                             {/* Conditionally render the correct progress bar for the selected cardio type. */}
@@ -193,11 +191,24 @@ export default function CardioComponent({
                                         </View>
                                     );
                                 } else { // shuttles
+                                    const getAdjustedShuttleCount = () => {
+                                        const baseShuttles = parseInt(shuttles) || 0;
+                                        
+                                        if (cardioComponent === 'shuttles' && altitudeData && altitudeGroup && altitudeGroup !== 'normal') {
+                                            const adjustmentRow = altitudeData.hamr.find(row => row.altitude_group === altitudeGroup);
+                                            if (adjustmentRow) {
+                                                return baseShuttles + adjustmentRow.shuttles_to_add;
+                                            }
+                                        }
+                                        
+                                        return baseShuttles;
+                                    };
+
                                     return (
                                         <View style={{ flex: 1 }}>
                                             <NeumorphicOutset>
                                                 <ProgressBar
-                                                    value={parseInt(shuttles) || 0}
+                                                    value={getAdjustedShuttleCount()}
                                                     passThreshold={cardioMinMax.min}
                                                     maxPointsThreshold={cardioMinMax.max}
                                                     ninetyPercentileThreshold={ninetyPercentileThreshold}

@@ -9,7 +9,7 @@ import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityI
 import { Card, IconRow, useTheme, usePtCalculatorState } from "@repo/ui";
 import { ICONS } from "@repo/ui/icons";
 import ScoreDisplay from "../components/ScoreDisplay";
-import PdfModal from "../components/PdfModal";
+import DocumentModal from "../components/DocumentModal";
 import StrengthComponent from "../components/StrengthComponent";
 import CoreComponent from "../components/CoreComponent";
 import CardioComponent from "../components/CardioComponent";
@@ -114,7 +114,7 @@ export default function PTCalculator() {
 
   return (
     <View style={styles.container}>
-        <PdfModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
+        <DocumentModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
         <DetailModal 
             isVisible={!!detailModalContentKey} 
             onClose={closeDetailModal} 
@@ -135,7 +135,7 @@ export default function PTCalculator() {
                         href: "/best-score",
                     },
                     {
-                        name: ICONS.PDF,
+                        name: ICONS.DOCUMENT,
                         onPress: () => setPdfModalVisible(true),
                     },
                     {
@@ -219,6 +219,7 @@ export default function PTCalculator() {
                                 isExempt={cardio.isExempt}
                                 score={score}
                                 altitudeData={altitudeData}
+                                openDetailModal={openDetailModal}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                             <AltitudeAdjustmentComponent selectedValue={demographics.altitudeGroup} onValueChange={demographics.setAltitudeGroup} openDetailModal={openDetailModal} />

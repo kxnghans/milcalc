@@ -33,7 +33,7 @@ export const usePayCalculatorState = () => {
   const [yearsOfService, setYearsOfService] = useState('');
   const [mha, setMha] = useState('');
   const [dependencyStatus, setDependencyStatus] = useState('WITHOUT_DEPENDENTS');
-  const [taxFilingStatus, setTaxFilingStatus] = useState('single');
+  const [filingStatus, setFilingStatus] = useState('single');
 
   // --- Data & UI State ---
   const [mhaData, setMhaData] = useState({});
@@ -230,7 +230,7 @@ export const usePayCalculatorState = () => {
     mha, setMha,
     mhaDisplayName,
     dependencyStatus, setDependencyStatus,
-    taxFilingStatus, setTaxFilingStatus,
+    filingStatus, setFilingStatus,
     isIncomeExpanded, setIncomeExpanded,
     isDeductionsExpanded, setDeductionsExpanded,
     specialPays, setSpecialPays,

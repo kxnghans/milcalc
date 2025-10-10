@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Modal, Pressable, SafeAreaView } from 'react-native';
-import { NeumorphicInset, useTheme, StyledPicker } from '@repo/ui';
+import { NeumorphicInset, useTheme, StyledPicker, PillButton } from '@repo/ui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface PickerInputProps {
@@ -40,10 +40,7 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
         borderTopRightRadius: theme.borderRadius.l,
         padding: theme.spacing.m,
     },
-    doneButton: {
-        alignSelf: 'flex-end',
-        padding: theme.spacing.s,
-    }
+
   });
 
   return (
@@ -64,9 +61,7 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
             <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
                 <Pressable>
                     <View style={styles.modalContent}>
-                        <Pressable style={styles.doneButton} onPress={() => setModalVisible(false)}>
-                            <Text style={{ color: theme.colors.primary, fontWeight: 'bold' }}>Done</Text>
-                        </Pressable>
+                        <PillButton title="Done" onPress={() => setModalVisible(false)} style={{ alignSelf: 'flex-end' }} />
                         <StyledPicker
                             items={items || []}
                             selectedValue={selectedValue}

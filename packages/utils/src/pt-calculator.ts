@@ -292,29 +292,10 @@ export const calculatePtScore = async (inputs: any, standards: any[], walkStanda
         walkPassed = await checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds, walkStandards, altitudeAdjustments.walk, inputs.altitudeGroup);
         totalPossiblePoints -= 60; // Walk test does not contribute points, max score is based on other components.
     } else {
-        let adjustedRunTime = { minutes: inputs.runMinutes, seconds: inputs.runSeconds };
-        let adjustedShuttles = inputs.shuttles;
-
-        if (inputs.altitudeGroup && inputs.altitudeGroup !== 'normal') {
-            if (inputs.cardioComponent === 'run' && altitudeAdjustments && altitudeAdjustments.run) {
-                const runTimeInSeconds = inputs.runMinutes * 60 + inputs.runSeconds;
-                const correction = altitudeAdjustments.run.find(c => c.altitude_group === inputs.altitudeGroup && runTimeInSeconds >= c.time_range_start && runTimeInSeconds <= c.time_range_end);
-                if (correction) {
-                    const adjustedTimeInSeconds = runTimeInSeconds - correction.correction;
-                    adjustedRunTime.minutes = Math.floor(adjustedTimeInSeconds / 60);
-                    adjustedRunTime.seconds = adjustedTimeInSeconds % 60;
-                }
-            } else if (inputs.cardioComponent === 'shuttles' && altitudeAdjustments && altitudeAdjustments.hamr) {
-                const adjustment = altitudeAdjustments.hamr.find(a => a.altitude_group === inputs.altitudeGroup);
-                if(adjustment) {
-                    adjustedShuttles += adjustment.shuttles_to_add;
-                }
-            }
-        }
         cardioScore = getCardioScore(standards, inputs.cardioComponent, {
-            minutes: adjustedRunTime.minutes,
-            seconds: adjustedRunTime.seconds,
-            shuttles: adjustedShuttles,
+            minutes: inputs.runMinutes,
+            seconds: inputs.runSeconds,
+            shuttles: inputs.shuttles,
         });
         earnedPoints += cardioScore;
     }
