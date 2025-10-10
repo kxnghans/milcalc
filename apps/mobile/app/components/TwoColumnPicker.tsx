@@ -63,6 +63,7 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
     },
     placeholderText: {
         color: theme.colors.placeholder,
+        textAlign: 'left',
     },
     errorText: {
         color: theme.colors.error,
