@@ -114,7 +114,7 @@ export default function PTCalculator() {
 
   return (
     <View style={styles.container}>
-        <DocumentModal isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
+        <DocumentModal category="PT" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
         <DetailModal 
             isVisible={!!detailModalContentKey} 
             onClose={closeDetailModal} 

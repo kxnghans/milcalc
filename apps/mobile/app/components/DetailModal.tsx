@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedback, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedback, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, NeumorphicOutset, PillButton } from '@repo/ui';
 import { BlurView } from 'expo-blur';
@@ -110,6 +110,10 @@ export default function DetailModal({
             ...theme.typography.body,
             color: theme.colors.text,
         },
+        linkText: {
+            color: theme.colors.primary,
+            textDecorationLine: 'underline',
+        },
         dynamicScoring: {
             ...theme.typography.body,
             color: theme.colors.primary,
@@ -148,11 +152,28 @@ export default function DetailModal({
                                 <>
                                     <Text style={styles.title}>{content.title}</Text>
                                     <ScrollView>
-                                        {content.performance && <><Text style={styles.sectionHeader}>Performance</Text><Text style={styles.sectionContent}>{content.performance}</Text></>}
-                                        {content.resting && <><Text style={styles.sectionHeader}>Resting</Text><Text style={styles.sectionContent}>{content.resting}</Text></>}
-                                        {content.scoring && <><Text style={styles.sectionHeader}>Scoring</Text><Text style={styles.sectionContent}>{content.scoring}</Text></>}
-                                        {content.exemption && <><Text style={styles.sectionHeader}>Exemption</Text><Text style={styles.sectionContent}>{content.exemption}</Text></>}
-                                        {content.purpose && <><Text style={styles.sectionHeader}>Purpose</Text><Text style={styles.sectionContent}>{content.purpose}</Text></>}
+                                        {content.purpose_description && (
+                                            <>
+                                                <Text style={styles.sectionHeader}>Purpose</Text>
+                                                <Text style={styles.sectionContent}>{content.purpose_description}</Text>
+                                            </>
+                                        )}
+                                        {content.recipient_group && (
+                                            <>
+                                                <Text style={styles.sectionHeader}>Recipient</Text>
+                                                <Text style={styles.sectionContent}>{content.recipient_group}</Text>
+                                            </>
+                                        )}
+                                        {content.report_section && (
+                                            <>
+                                                <Text style={styles.sectionHeader}>Source</Text>
+                                                <TouchableOpacity onPress={() => Linking.openURL('https://comptroller.defense.gov/FMR/FMRVolumes.aspx')}>
+                                                    <Text style={[styles.sectionContent, styles.linkText]}>
+                                                        DoD 7000.14-R (Section {content.report_section})
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            </>
+                                        )}
                                         {dynamicHelpText && <Text style={styles.dynamicScoring}>{dynamicHelpText}</Text>}
                                     </ScrollView>
                                     <PillButton title="Close" onPress={onClose} style={{ marginTop: theme.spacing.l }} />

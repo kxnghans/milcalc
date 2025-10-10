@@ -55,5 +55,4 @@ yarn.lock
 # Test
 coverage/
 
-# Ignore data packages
-packages/data/**
+packages/data/

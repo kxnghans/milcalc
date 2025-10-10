@@ -13,6 +13,7 @@ export const ICONS = {
   BEST_SCORE: 'file-chart-outline', // Icon for the Best Score screen.
   PDF: 'file-pdf-box',              // Icon for opening PDF documents.
   DOCUMENT: 'file-document',        // Icon for a generic document.
+  RESET: 'refresh',                 // Icon for resetting form values.
   THEME_LIGHT: 'weather-sunny',     // Icon for the light theme.
   THEME_DARK: 'weather-night',      // Icon for the dark theme.
   THEME_AUTO: 'brightness-auto',    // Icon for the automatic/system theme.

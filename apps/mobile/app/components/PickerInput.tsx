@@ -43,11 +43,16 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
 
   });
 
+  const pickerItems = [
+    { label: placeholder || 'Select...', value: null },
+    ...(items || []),
+  ];
+
   return (
     <View style={styles.wrapper}>
         <NeumorphicInset style={{ borderRadius: theme.borderRadius.m, backgroundColor: theme.colors.inputBackground }}>
             <Pressable onPress={() => setModalVisible(true)} style={styles.pressable}>
-                <Text style={{ color: textColor }}>{selectedLabel}</Text>
+                <Text style={{ color: textColor, flex: 1, textAlign: 'center' }}>{selectedLabel}</Text>
                 <MaterialCommunityIcons name="chevron-down" size={20} color={theme.colors.text} />
             </Pressable>
         </NeumorphicInset>
@@ -63,13 +68,9 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
                     <View style={styles.modalContent}>
                         <PillButton title="Done" onPress={() => setModalVisible(false)} style={{ alignSelf: 'flex-end' }} />
                         <StyledPicker
-                            items={items || []}
+                            items={pickerItems}
                             selectedValue={selectedValue}
-                            onValueChange={(value) => {
-                                if (value !== null) {
-                                    onValueChange(value);
-                                }
-                            }}
+                            onValueChange={onValueChange}
                         />
                     </View>
                 </Pressable>
