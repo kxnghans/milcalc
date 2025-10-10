@@ -12,6 +12,10 @@ import {
   getMinMaxValues,
   getCardioMinMaxValues,
   getPerformanceForScore,
+  getAgeGroupString,
+  getPtStandards,
+  getWalkStandards,
+  getAltitudeAdjustments,
 } from '@repo/utils';
 import { useDebounce } from './useDebounce';
 import { useDemographicsState } from './useDemographicsState';
@@ -34,6 +38,7 @@ export function usePtCalculatorState() {
 
   // State for the calculated results from the core utility functions.
   const [score, setScore] = useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
+  const [isLoading, setIsLoading] = useState(false);
   const [minMax, setMinMax] = useState({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
   const [cardioMinMax, setCardioMinMax] = useState({ min: 0, max: 0 });
   const [ninetyPercentileThresholds, setNinetyPercentileThresholds] = useState({ pushups: 0, core: 0, cardio: 0 });
@@ -65,63 +70,82 @@ export function usePtCalculatorState() {
   const debouncedCardioExempt = useDebounce(cardio.isExempt, 500);
 
   // The main effect hook that runs all calculations whenever a debounced input changes.
-  useEffect(() => {
-    const ageNum = parseInt(debouncedAge);
-    // Only perform calculations if the essential demographic information is present.
-    if (ageNum && debouncedGender) {
-        // Fetch the minimum and maximum possible performance values for the selected components.
-        const pushupValues = getMinMaxValues(ageNum, debouncedGender, debouncedPushupComponent);
-        const coreValues = getMinMaxValues(ageNum, debouncedGender, debouncedCoreComponent);
-        const cardioValues = getCardioMinMaxValues(ageNum, debouncedGender, debouncedCardioComponent);
-        setMinMax({pushups: pushupValues, core: coreValues});
-        setCardioMinMax(cardioValues);
+    useEffect(() => {
+        const runCalculations = async () => {
+            const ageNum = parseInt(debouncedAge);
+            if (ageNum && debouncedGender) {
+                setIsLoading(true);
+                try {
+                    const capitalizedGender = debouncedGender.charAt(0).toUpperCase() + debouncedGender.slice(1);
+                    const standards = await getPtStandards(capitalizedGender, getAgeGroupString(ageNum));
+                    const walkStandards = await getWalkStandards(debouncedGender);
+                    const walkAltitudeAdjustments = await getAltitudeAdjustments('walk');
+                    const runAltitudeAdjustments = await getAltitudeAdjustments('run');
+                    const hamrAltitudeAdjustments = await getAltitudeAdjustments('hamr');
 
-        // Fetch the performance required to get a 90% score for each component.
-        // This is used for the "excellent" category threshold in the UI.
-        const pushupThreshold = getPerformanceForScore(ageNum, debouncedGender, debouncedPushupComponent, 18); // 90% of 20
-        const coreThreshold = getPerformanceForScore(ageNum, debouncedGender, debouncedCoreComponent, 18); // 90% of 20
-        const cardioThreshold = getPerformanceForScore(ageNum, debouncedGender, debouncedCardioComponent, 54); // 90% of 60
+                    const altitudeAdjustments = {
+                        walk: walkAltitudeAdjustments || [],
+                        run: runAltitudeAdjustments || [],
+                        hamr: hamrAltitudeAdjustments || [],
+                    };
 
-        setNinetyPercentileThresholds({
-            pushups: pushupThreshold,
-            core: coreThreshold,
-            cardio: cardioThreshold,
-        });
+                    if (standards) {
+                        const pushupValues = getMinMaxValues(standards, debouncedPushupComponent);
+                        const coreValues = getMinMaxValues(standards, debouncedCoreComponent);
+                        const cardioValues = getCardioMinMaxValues(standards, walkStandards, debouncedCardioComponent);
+                        setMinMax({pushups: pushupValues, core: coreValues});
+                        setCardioMinMax(cardioValues);
 
-        // Call the main calculation function with all the debounced and parsed inputs.
-        const result = calculatePtScore({
-            age: ageNum || 0,
-            gender: debouncedGender,
-            altitudeGroup: debouncedAltitudeGroup,
-            // Strength
-            pushupComponent: debouncedPushupComponent,
-            pushups: parseInt(debouncedPushups) || 0,
-            isStrengthExempt: debouncedStrengthExempt,
-            // Core
-            coreComponent: debouncedCoreComponent,
-            situps: parseInt(debouncedSitups) || 0,
-            reverseCrunches: parseInt(debouncedReverseCrunches) || 0,
-            plankMinutes: parseInt(debouncedPlankMinutes) || 0,
-            plankSeconds: parseInt(debouncedPlankSeconds) || 0,
-            isCoreExempt: debouncedCoreExempt,
-            // Cardio
-            cardioComponent: debouncedCardioComponent,
-            runMinutes: parseInt(debouncedRunMinutes) || 0,
-            runSeconds: parseInt(debouncedRunSeconds) || 0,
-            shuttles: parseInt(debouncedShuttles) || 0,
-            walkMinutes: parseInt(debouncedWalkMinutes) || 0,
-            walkSeconds: parseInt(debouncedWalkSeconds) || 0,
-            isCardioExempt: debouncedCardioExempt,
-        });
-        setScore(result);
-    } else {
-        // If age or gender is missing, reset all calculated data to their initial states.
-        setScore({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
-        setMinMax({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
-        setCardioMinMax({ min: 0, max: 0 });
-        setNinetyPercentileThresholds({ pushups: 0, core: 0, cardio: 0 });
-    }
-  }, [
+                        const pushupThreshold = getPerformanceForScore(standards, debouncedPushupComponent, 18); // 90% of 20
+                        const coreThreshold = getPerformanceForScore(standards, debouncedCoreComponent, 18); // 90% of 20
+                        const cardioThreshold = getPerformanceForScore(standards, debouncedCardioComponent, 54); // 90% of 60
+
+                        setNinetyPercentileThresholds({
+                            pushups: pushupThreshold,
+                            core: coreThreshold,
+                            cardio: cardioThreshold,
+                        });
+                    }
+
+                    const result = await calculatePtScore({
+                        age: ageNum || 0,
+                        gender: debouncedGender,
+                        altitudeGroup: debouncedAltitudeGroup,
+                        // Strength
+                        pushupComponent: debouncedPushupComponent,
+                        pushups: parseInt(debouncedPushups) || 0,
+                        isStrengthExempt: debouncedStrengthExempt,
+                        // Core
+                        coreComponent: debouncedCoreComponent,
+                        situps: parseInt(debouncedSitups) || 0,
+                        reverseCrunches: parseInt(debouncedReverseCrunches) || 0,
+                        plankMinutes: parseInt(debouncedPlankMinutes) || 0,
+                        plankSeconds: parseInt(debouncedPlankSeconds) || 0,
+                        isCoreExempt: debouncedCoreExempt,
+                        // Cardio
+                        cardioComponent: debouncedCardioComponent,
+                        runMinutes: parseInt(debouncedRunMinutes) || 0,
+                        runSeconds: parseInt(debouncedRunSeconds) || 0,
+                        shuttles: parseInt(debouncedShuttles) || 0,
+                        walkMinutes: parseInt(debouncedWalkMinutes) || 0,
+                        walkSeconds: parseInt(debouncedWalkSeconds) || 0,
+                        isCardioExempt: debouncedCardioExempt,
+                    }, standards, walkStandards, altitudeAdjustments);
+                    setScore(result);
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
+                setScore({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
+                setMinMax({ pushups: {min: 0, max: 0}, core: {min: 0, max: 0}});
+                setCardioMinMax({ min: 0, max: 0 });
+                setNinetyPercentileThresholds({ pushups: 0, core: 0, cardio: 0 });
+            }
+        }
+
+        runCalculations();
+
+    }, [
     // This dependency array ensures the effect only re-runs when a debounced value changes.
     debouncedAge, debouncedGender, debouncedAltitudeGroup,
     debouncedPushupComponent, debouncedPushups, debouncedStrengthExempt,
@@ -136,6 +160,7 @@ export function usePtCalculatorState() {
     core,
     cardio,
     score,
+    isLoading,
     minMax,
     cardioMinMax,
     ninetyPercentileThresholds,

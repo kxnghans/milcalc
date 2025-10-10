@@ -16,7 +16,7 @@ MilCalc is a suite of tools for military personnel, delivered as a monorepo appl
 
 ### 1.2. Key Features
 
--   **Air Force PT Calculator**: Calculates PT scores based on official standards.
+-   **Air Force PT Calculator**: Calculates PT scores based on official standards, with data served from a Supabase backend.
 -   **Best Score Tracker**: Helps users track their personal bests for each exercise.
 -   **Dynamic Theming**: The mobile app supports light, dark, and automatic theme switching.
 -   **PDF Viewer**: Provides access to official PT documents.
@@ -55,76 +55,65 @@ The application's core logic is centralized in `packages/utils` to ensure consis
 
 ### 3.1. PT Score Calculation
 
-The PT score calculation is based on the standards outlined in `dafman36-2905.pdf`. The main functions are:
+The PT score calculation logic resides in `packages/utils/src/pt-calculator.ts`. The functions in this file are designed as pure functions, meaning they accept all necessary data as parameters and do not perform their own data fetching. This improves testability and separates concerns.
 
--   **`calculatePtScore`**: Calculates the total PT score for the main calculator screen.
--   **`getScoreForExercise`**: Calculates the score for a single exercise.
--   **`calculateBestScore`**: Calculates the best possible total score from a set of individual scores.
+-   **`calculatePtScore`**: Calculates the total PT score. It takes user inputs, PT standards, walk standards, and altitude adjustments as parameters.
+-   **`getScoreForExercise`**: Calculates the score for a single exercise, taking the standards data as a parameter.
+-   **`checkWalkPass`**: Determines the pass/fail status for the walk component, also accepting walk standards and altitude adjustments as parameters.
 
-Altitude adjustments are automatically applied for cardio exercises based on the selected altitude group.
+### 3.2. Data Fetching (`pt-supabase-api.ts`)
 
-### 3.2. Utility Functions
+All data for the PT calculator is fetched from the Supabase backend via functions in `packages/utils/src/pt-supabase-api.ts`.
 
-Key utility functions are located in `packages/utils`:
+-   **`getPtStandards`**: Fetches scoring standards by querying and joining data from three tables: `pt_age_sex_groups`, `pt_muscular_fitness_standards`, and `pt_cardio_respiratory_standards`. It then transforms this data into a consistent format for the calculation functions.
+-   **`getWalkStandards`**: Fetches standards for the 2km walk from the `walk_standards` table.
+-   **`getAltitudeAdjustments`**: Fetches altitude adjustment data from `run_altitude_adjustments`, `walk_altitude_adjustments`, or `hamr_altitude_adjustments` depending on the exercise.
 
--   **`pt-calculator.ts`**
-    -   `checkWalkPass`: Determines if the 2-kilometer walk is a "pass", "fail", or "n/a".
-    -   `getMinMaxValues`: Returns the minimum and maximum possible performance values for an exercise.
-    -   `getCardioMinMaxValues`: Returns the min/max performance values for a cardio exercise.
-    -   `getPerformanceForScore`: Returns the performance required to achieve a specific score.
+### 3.3. State Management (`usePtCalculatorState.ts`)
 
--   **`color-utils.ts`**
-    -   `getScoreCategory`: Returns a performance category (`excellent`, `pass`, `fail`, `none`) for a score.
-    -   `getPerformanceCategory`: Returns a performance category for a performance value (reps, time, etc.).
+The main calculator screen's state is managed by the `usePtCalculatorState` hook in `packages/ui/src/hooks`.
+
+-   It fetches all necessary data (PT standards, walk standards, altitude adjustments) from Supabase when the component mounts or when user demographics (age, gender) change.
+-   It uses debouncing on user inputs to prevent excessive API calls and recalculations while the user is typing.
+-   It manages a loading state (`isLoading`) which is controlled by a 500ms timer to prevent the loading indicator from flashing on fast network responses.
 
 ## 4. UI and Styling
 
-### 4.1. Neumorphic Design
+### 4.1. Color Conventions & `ProgressBar`
 
-The app uses a neumorphic design style, achieved through two main components:
+Scores and progress bars are color-coded using a centralized system.
 
--   **`NeumorphicInset`**: Creates a "pressed-in" effect using inner shadows.
--   **`NeumorphicOutset`**: Creates a "raised" effect using outer shadows.
+-   **`getScoreCategory`** (`@repo/utils/color-utils`): This function determines the category of a component score (`excellent`, `pass`, `fail`).
+    -   `excellent`: Score is >= 90% of the component's maximum score (e.g., >= 18 for Strength/Core).
+    -   `pass`: Score is > 0.
+    -   `fail`: Score is 0.
+-   **`ProgressBar.tsx`** (`@repo/ui/components`): This component has been updated to reflect the user's desired logic.
+    -   The **fill level** of the bar is determined by the user's raw performance (`value` prop) relative to the maximum possible performance (`maxPointsThreshold` prop).
+    -   The **color** of the bar is determined by the calculated score (`score` and `maxScore` props), which is passed to `getScoreCategory`.
 
-Both components are customizable through `containerStyle` and `contentStyle` props.
+## 5. Development Conventions & Key Findings
 
-### 4.2. Color Conventions
+-   **Pure Calculation Functions**: Functions that perform calculations (`pt-calculator.ts`) should not fetch their own data. Data should be fetched in the state hooks (`usePtCalculatorState.ts`) and passed as parameters.
+-   **Case Sensitivity**: Supabase queries are case-sensitive. The `gender` value from the UI (`male`/`female`) must be capitalized (`Male`/`Female`) before being used in a query.
+-   **Data Parsing**: Values from the database may contain non-numeric characters (e.g., `*`, `>`, `-`). Calculation functions must have robust parsing logic to strip these characters before performing mathematical operations.
+-   **Dependency Management**: Avoid direct API calls from lower-level utility functions. This caused several `ReferenceError` bugs during development. Instead, pass all necessary data and dependencies as function parameters.
 
-Scores are color-coded using a centralized system:
+## 6. Supabase Integration
 
--   **`getScoreCategory`** (`@repo/utils/color-utils`): Determines the performance category.
--   **`useScoreColors`** (`@repo/ui/hooks`): Provides the colors based on the category.
-    -   `excellent`: `theme.colors.ninetyPlus` (blue)
-    -   `pass`: `theme.colors.success` (green)
-    -   `fail`: `theme.colors.error` (red)
+To provide a scalable and maintainable backend, MilCalc is integrated with Supabase. This handles all database, authentication, and storage needs.
 
-This system is used by the `ScoreDisplay`, `ProgressBar`, and on the `best-score` page.
+### 6.1. Supabase MCP Tools
 
-### 4.3. Theming
+This project has access to a special `supabase` MCP tool suite, which allows for direct, programmatic interaction with the Supabase backend. This is the preferred method for all database schema and data migrations.
 
-The `shadowRadius` for the neumorphic effect is set to `5` for both light and dark themes in `packages/ui/src/theme.ts`.
+For a complete list and description of all available Supabase tools, please refer to the `SUPABASE.md` file in the project root.
 
-## 5. Component Library (`packages/ui`)
+### 6.2. Database Migration Workflow
 
-### 5.1. Key Components
+The general workflow for migrating local data to the Supabase database is as follows:
 
--   **`Icon`**: A wrapper around `@expo/vector-icons` for consistent icon usage.
--   **`IconRow`**: A flexible component for displaying icons and text, with an optional non-interactive mode.
--   **`SegmentedSelector`**: A custom segmented control with an optional non-interactive mode (`isTouchable={false}`).
--   **`ProgressBar`**: A progress bar with support for pass/fail modes and conditional neumorphic styling.
--   **`ScoreDisplay`**: Displays the total score and a breakdown of component scores.
--   **`NumberInput` / `TimeInput`**: Custom input components with conditional neumorphic styling.
+1.  **Define Schema**: A `CREATE TABLE` SQL statement is written.
+2.  **Apply Schema Migration**: The `supabase.apply_migration` tool executes the SQL to create the table.
+3.  **Process and Insert Data**: The local data file is read, processed into `INSERT` statements, and executed via the `supabase.execute_sql` tool.
 
-## 6. Development Conventions
-
-### 6.1. General
-
--   **Code Style**: Enforced by a shared ESLint configuration.
--   **TypeScript**: Uses a shared TypeScript configuration.
--   **Code Reuse**: Maximize code reuse by creating shared components and utilities in `packages`.
--   **Focus**: Current development is focused on the mobile application.
--   **Documentation**: Keep this `GEMINI.md` file updated.
-
-### 6.2. Component Design
-
--   **Separation of Concerns**: Components should be self-contained and not impose layout styles on their children. Use `containerStyle` and `contentStyle` props for layout adjustments.
+This automated process is used for all database setup and removes the need for manual data handling.

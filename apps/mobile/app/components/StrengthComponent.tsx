@@ -27,6 +27,7 @@ export default function StrengthComponent({
     isExempt,
     toggleExempt,
     openDetailModal,
+    score,
 }) {
     const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
@@ -68,6 +69,8 @@ export default function StrengthComponent({
                                     passThreshold={minMax.pushups.min}
                                     maxPointsThreshold={minMax.pushups.max}
                                     ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                    score={score.pushupScore}
+                                    maxScore={20}
                                 />
                             </NeumorphicOutset>
                         </View>

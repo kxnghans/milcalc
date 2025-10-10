@@ -4,14 +4,14 @@
  * for a specific PT component, sourced from a JSON file.
  */
 
-import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedback, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, NeumorphicOutset } from '@repo/ui';
 import { BlurView } from 'expo-blur';
-import { helpDetails, payHelpDetails } from '@repo/data';
+import { payHelpDetails } from '@repo/data'; // Keep pay details for now
 
-import { getDynamicHelpText } from '@repo/utils';
+import { getDynamicHelpText, getHelpContent } from '@repo/utils';
 
 interface DetailModalProps {
   isVisible: boolean;
@@ -25,8 +25,28 @@ interface DetailModalProps {
 
 export default function DetailModal({ isVisible, onClose, contentKey, source, age, gender, performance }: DetailModalProps) {
     const { theme } = useTheme();
-    const details = source === 'pay' ? payHelpDetails : helpDetails;
-    const content = contentKey ? details[contentKey] : null;
+    const [content, setContent] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (isVisible && contentKey) {
+            if (source === 'pay') {
+                // Keep fetching pay details locally for now
+                setContent(payHelpDetails[contentKey]);
+            } else {
+                const fetchContent = async () => {
+                    setIsLoading(true);
+                    const data = await getHelpContent(contentKey);
+                    setContent(data);
+                    setIsLoading(false);
+                };
+                fetchContent();
+            }
+        } else {
+            // Reset content when modal is hidden
+            setContent(null);
+        }
+    }, [isVisible, contentKey, source]);
 
     const dynamicHelpText = (contentKey && age && gender && performance) 
         ? getDynamicHelpText(contentKey, age, gender, performance) 
@@ -110,16 +130,17 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ag
                 <View style={styles.centeredView} pointerEvents="box-none">
                     <NeumorphicOutset>
                         <View style={styles.modalView}>
-                            {content ? (
+                            {isLoading ? (
+                                <ActivityIndicator size="large" color={theme.colors.primary} />
+                            ) : content ? (
                                 <>
                                     <Text style={styles.title}>{content.title}</Text>
                                     <ScrollView>
-                                        {content.sections.map((section, index) => (
-                                            <View key={index}>
-                                                <Text style={styles.sectionHeader}>{section.header}</Text>
-                                                <Text style={styles.sectionContent}>{section.content}</Text>
-                                            </View>
-                                        ))}
+                                        {content.performance && <><Text style={styles.sectionHeader}>Performance</Text><Text style={styles.sectionContent}>{content.performance}</Text></>}
+                                        {content.resting && <><Text style={styles.sectionHeader}>Resting</Text><Text style={styles.sectionContent}>{content.resting}</Text></>}
+                                        {content.scoring && <><Text style={styles.sectionHeader}>Scoring</Text><Text style={styles.sectionContent}>{content.scoring}</Text></>}
+                                        {content.exemption && <><Text style={styles.sectionHeader}>Exemption</Text><Text style={styles.sectionContent}>{content.exemption}</Text></>}
+                                        {content.purpose && <><Text style={styles.sectionHeader}>Purpose</Text><Text style={styles.sectionContent}>{content.purpose}</Text></>}
                                         {dynamicHelpText && <Text style={styles.dynamicScoring}>{dynamicHelpText}</Text>}
                                     </ScrollView>
                                     <NeumorphicOutset>
@@ -132,7 +153,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ag
                                     </NeumorphicOutset>
                                 </>
                             ) : (
-                                // Fallback in case contentKey is invalid
+                                // Fallback in case contentKey is invalid or data fetch fails
                                 <Text style={styles.title}>Information not available.</Text>
                             )}
                         </View>

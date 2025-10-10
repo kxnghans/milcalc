@@ -5,7 +5,7 @@
  * handle altitude adjustments, and determine pass/fail status, including exemption logic.
  */
 
-import { ptData as data, walkStandards, altitudeAdjustments } from '@repo/data';
+import { getPtStandards } from './pt-supabase-api';
 
 /**
  * Converts a time string (e.g., "mm:ss") to seconds.
@@ -14,7 +14,8 @@ import { ptData as data, walkStandards, altitudeAdjustments } from '@repo/data';
  */
 const timeToSeconds = (time: string): number => {
     if (!time) return 0;
-    const parts = time.split(':').map(Number);
+    const cleanedTime = String(time).replace(/[^0-9:]/g, '');
+    const parts = cleanedTime.split(':').map(Number);
     if (parts.length === 2) {
         // Valid "mm:ss" format
         return parts[0] * 60 + parts[1];
@@ -23,30 +24,21 @@ const timeToSeconds = (time: string): number => {
 };
 
 /**
- * Finds the appropriate age and gender group from the PT data.
+ * Determines the appropriate age group string based on age.
  * @param age - The person's age.
- * @param sex - The person's gender ("male" or "female").
- * @returns The age group object from the data, or undefined if not found.
+ * @returns The age group string (e.g., "25-29") or null if not found.
  */
-const getAgeGroup = (age: number, sex: string) => {
-    const gender = sex.charAt(0).toUpperCase() + sex.slice(1);
-    return data.age_sex_groups.find(group => {
-        if (group.sex !== gender) return false;
-
-        // Handle age ranges like "<25"
-        if (group.age_range.includes('<')) {
-            const maxAge = parseInt(group.age_range.replace('<', ''));
-            return age < maxAge;
-        }
-        // Handle age ranges like "60+"
-        if (group.age_range.includes('+')) {
-            const minAge = parseInt(group.age_range.replace('+', ''));
-            return age >= minAge;
-        }
-        // Handle standard age ranges like "25-29"
-        const [min, max] = group.age_range.split('-').map(Number);
-        return age >= min && age <= max;
-    });
+export const getAgeGroupString = (age: number): string | null => {
+    if (age < 25) return '<25';
+    if (age >= 25 && age <= 29) return '25-29';
+    if (age >= 30 && age <= 34) return '30-34';
+    if (age >= 35 && age <= 39) return '35-39';
+    if (age >= 40 && age <= 44) return '40-44';
+    if (age >= 45 && age <= 49) return '45-49';
+    if (age >= 50 && age <= 54) return '50-54';
+    if (age >= 55 && age <= 59) return '55-59';
+    if (age >= 60) return '60+';
+    return null;
 };
 
 /**
@@ -56,26 +48,26 @@ const getAgeGroup = (age: number, sex: string) => {
  * @param performance - An object containing the performance metrics (minutes/seconds for run, shuttles count).
  * @returns The calculated score for the cardio component.
  */
-const getCardioScore = (ageGroup: any, component: string, performance: any): number => {
+const getCardioScore = (standards: any[], component: string, performance: any): number => {
+    // For 'more is better' exercises like shuttles, standards are sorted best-to-worst.
+    // We need to reverse them to find the first threshold the user meets from worst-to-best.
+    const cardioStandards = standards.filter(s => s.exercise === component).reverse();
+
     if (component === 'run') {
         const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
         if (runTimeInSeconds === 0) return 0;
 
-        // Find the matching score bracket for the run time
-        for (const bracket of ageGroup.cardiorespiratory.run_time_brackets) {
-            const bracketTime = bracket.run_time.replace('*', '');
-            if (bracketTime.includes('≤')) {
-                if (runTimeInSeconds <= timeToSeconds(bracketTime.replace('≤ ', ''))) {
-                    return bracket.points;
-                }
-            } else if (bracketTime.includes('<')) {
-                if (runTimeInSeconds < timeToSeconds(bracketTime.replace('< ', ''))) {
-                    return bracket.points;
-                }
-            } else if (bracketTime.includes(' - ')) {
-                const [start, end] = bracketTime.split(' - ').map(timeToSeconds);
+        for (const standard of cardioStandards) {
+            const measurement = standard.measurement as string;
+            if (measurement.includes('-')) {
+                const [start, end] = measurement.split('-').map(time => timeToSeconds(time.trim()));
                 if (runTimeInSeconds >= start && runTimeInSeconds <= end) {
-                    return bracket.points;
+                    return standard.points;
+                }
+            } else {
+                const time = timeToSeconds(measurement);
+                if (runTimeInSeconds <= time) {
+                    return standard.points;
                 }
             }
         }
@@ -83,83 +75,53 @@ const getCardioScore = (ageGroup: any, component: string, performance: any): num
         const shuttles = performance.shuttles;
         if (shuttles === 0) return 0;
 
-        // Find the matching score bracket for the shuttle count
-        for (const bracket of ageGroup.cardiorespiratory.run_time_brackets) {
-            const shuttleRange = bracket.shuttles_range.replace('*', '');
-            if (shuttleRange.includes('>')) {
-                const minShuttles = parseInt(shuttleRange.replace('> ', ''));
-                if (shuttles > minShuttles) {
-                    return bracket.points;
-                }
-            } else if (shuttleRange.includes(' - ')) {
-                const [start, end] = shuttleRange.split(' - ').map(Number);
+        for (const standard of cardioStandards) {
+            const measurement = standard.measurement as string;
+            if (measurement.includes('-')) {
+                const [start, end] = measurement.split('-').map(s => parseInt(s.trim().replace(/[^0-9]/g, '')));
                 if (shuttles >= start && shuttles <= end) {
-                    return bracket.points;
+                    return standard.points;
                 }
-            } else if (shuttleRange.includes('≥')) {
-                const minShuttles = parseInt(shuttleRange.replace('≥ ', ''));
-                if (shuttles >= minShuttles) {
-                    return bracket.points;
+            } else if (measurement.includes('>')) {
+                const value = parseInt(measurement.replace(/[^0-9]/g, ''));
+                if (shuttles > value) {
+                    return standard.points;
+                }
+            } else {
+                const value = parseInt(measurement.replace(/[^0-9]/g, ''));
+                if (shuttles >= value) {
+                    return standard.points;
                 }
             }
         }
     }
-    return 0; // Return 0 if no bracket is matched
+
+    return 0;
 };
 
-/**
- * Calculates the score for a muscular fitness exercise (e.g., push-ups, sit-ups).
- * @param ageGroup - The person's age group data.
- * @param component - The specific muscular fitness component.
- * @param reps - The number of repetitions performed.
- * @returns The calculated score for the component.
- */
-const getMuscularFitnessScore = (ageGroup: any, component: string, reps: number): number => {
-    const table = ageGroup.muscular_fitness[component];
-    if (!table || !reps) return 0;
+const getMuscularFitnessScore = (standards: any[], component: string, reps: number): number => {
+    if (!reps) return 0;
+    const exerciseStandards = standards.filter(s => s.exercise === component);
 
-    // Find the matching score for the number of reps
-    for (const row of table) {
-        const rowRepsString = String(row.reps).replace(/[^0-9]/g, '');
-        const rowReps = parseInt(rowRepsString);
-
-        // Handle ranges like ">62" or "≥62"
-        if (String(row.reps).includes('>') || String(row.reps).includes('≥')) {
-            if (reps >= rowReps) {
-                return row.points;
-            }
-        } else {
-            // Handle exact rep counts
-            if (reps >= rowReps) {
-                return row.points;
-            }
+    for (const standard of exerciseStandards) {
+        if (reps >= parseInt(String(standard.measurement).replace(/[^0-9]/g, ''))) {
+            return standard.points;
         }
     }
-    return 0; // Return 0 if no rep count is matched
+    return 0;
 };
 
-/**
- * Calculates the score for the forearm plank exercise.
- * @param ageGroup - The person's age group data.
- * @param performance - An object containing the performance metrics (minutes/seconds).
- * @returns The calculated score for the plank.
- */
-const getPlankScore = (ageGroup: any, performance: any): number => {
+const getPlankScore = (standards: any[], performance: any): number => {
     const plankTimeInSeconds = performance.minutes * 60 + performance.seconds;
     if (plankTimeInSeconds === 0) return 0;
-    const table = ageGroup.muscular_fitness['forearm_plank_time'];
-    if (!table) return 0;
+    const plankStandards = standards.filter(s => s.exercise === 'forearm_plank_time');
 
-    // Find the matching score for the plank time
-    for (const row of table) {
-        const bracketTime = row.time.replace(/[*≥>]/g, '').trim();
-        const rowSeconds = timeToSeconds(bracketTime);
-
-        if (plankTimeInSeconds >= rowSeconds) {
-            return row.points;
+    for (const standard of plankStandards) {
+        if (plankTimeInSeconds >= timeToSeconds(standard.measurement)) {
+            return standard.points;
         }
     }
-    return 0; // Return 0 if no time is matched
+    return 0;
 };
 
 /**
@@ -171,9 +133,7 @@ const getPlankScore = (ageGroup: any, performance: any): number => {
  * @param altitudeGroup - The selected altitude group (e.g., 'group1', 'group2').
  * @returns The final score for the exercise.
  */
-export const getScoreForExercise = (age: number, gender: string, component: string, performance: any, altitudeGroup?: string): number => {
-    const ageGroup = getAgeGroup(age, gender);
-    if (!ageGroup) return 0;
+export const getScoreForExercise = (standards: any[], component: string, performance: any, altitudeGroup?: string): number => {
 
     let adjustedPerformance = { ...performance };
 
@@ -196,14 +156,14 @@ export const getScoreForExercise = (age: number, gender: string, component: stri
     switch (component) {
         case 'run':
         case 'shuttles':
-            return getCardioScore(ageGroup, component, adjustedPerformance);
+            return getCardioScore(standards, component, adjustedPerformance);
         case 'push_ups_1min':
         case 'hand_release_pushups_2min':
         case 'sit_ups_1min':
         case 'cross_leg_reverse_crunch_2min':
-            return getMuscularFitnessScore(ageGroup, component, adjustedPerformance.reps);
+            return getMuscularFitnessScore(standards, component, adjustedPerformance.reps);
         case 'forearm_plank_time':
-            return getPlankScore(ageGroup, adjustedPerformance);
+            return getPlankScore(standards, adjustedPerformance);
         default:
             return 0;
     }
@@ -232,7 +192,7 @@ const getAgeGroupIndex = (age: number): number => {
  * @param altitudeGroup - The selected altitude group.
  * @returns 'pass', 'fail', or 'n/a' if data is insufficient.
  */
-export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number, altitudeGroup?: string): 'pass' | 'fail' | 'n/a' => {
+export const checkWalkPass = async (age: number, gender: string, minutes: number, seconds: number, walkStandards: any[], altitudeAdjustments: any[], altitudeGroup?: string): Promise<'pass' | 'fail' | 'n/a'> => {
     const userTimeInSeconds = minutes * 60 + seconds;
     if (userTimeInSeconds === 0) return 'n/a';
 
@@ -241,26 +201,23 @@ export const checkWalkPass = (age: number, gender: string, minutes: number, seco
 
     let maxTimeInSeconds = 0;
 
-    // Determine the maximum allowed time based on altitude
     if (altitudeGroup && altitudeGroup !== 'normal') {
-        // Defensive checks to prevent errors if data structure is missing expected values
-        if (
-            altitudeAdjustments.walk &&
-            altitudeAdjustments.walk[gender] &&
-            altitudeAdjustments.walk[gender][altitudeGroup] &&
-            altitudeAdjustments.walk[gender][altitudeGroup].max_times &&
-            altitudeAdjustments.walk[gender][altitudeGroup].max_times[ageIndex]
-        ) {
-            maxTimeInSeconds = altitudeAdjustments.walk[gender][altitudeGroup].max_times[ageIndex].max_time;
-        } else {
-            return 'n/a'; // Data not available for this combination
+        if (altitudeAdjustments) {
+            const adjustment = altitudeAdjustments.find(a => a.altitude_group === altitudeGroup && a.gender === gender && age >= a.age_range_start && age <= a.age_range_end);
+            if (adjustment) {
+                maxTimeInSeconds = adjustment.max_time;
+            }
         }
     } else {
-        const standards = walkStandards[gender];
-        if (!standards || !standards[ageIndex]) return 'n/a';
-        const maxTime = standards[ageIndex].max_time;
-        maxTimeInSeconds = timeToSeconds(maxTime);
+        if (walkStandards) {
+            const standard = walkStandards.find(s => s.age_range === getAgeGroupString(age));
+            if (standard) {
+                maxTimeInSeconds = timeToSeconds(standard.max_time);
+            }
+        }
     }
+
+    if (maxTimeInSeconds === 0) return 'n/a';
 
     return userTimeInSeconds <= maxTimeInSeconds ? 'pass' : 'fail';
 };
@@ -270,15 +227,17 @@ export const checkWalkPass = (age: number, gender: string, minutes: number, seco
  * @param inputs - An object containing all user inputs (age, gender, performance, and exemption status for each component).
  * @returns An object with the composite score, component scores, pass/fail status, and walk status.
  */
-export const calculatePtScore = (inputs: any) => {
+export const calculatePtScore = async (inputs: any, standards: any[], walkStandards: any[], altitudeAdjustments: any) => {
     // Validate required inputs
     if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) {
         return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
     }
-    const ageGroup = getAgeGroup(inputs.age, inputs.gender);
-    if (!ageGroup) {
+    const ageGroupString = getAgeGroupString(inputs.age);
+    if (!ageGroupString) {
         return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
     }
+
+
 
     let totalPossiblePoints = 100;
     let earnedPoints = 0;
@@ -289,7 +248,7 @@ export const calculatePtScore = (inputs: any) => {
         pushupScore = 'Exempt';
         totalPossiblePoints -= 20;
     } else {
-        pushupScore = getMuscularFitnessScore(ageGroup, inputs.pushupComponent, inputs.pushups);
+        pushupScore = getMuscularFitnessScore(standards, inputs.pushupComponent, inputs.pushups);
         earnedPoints += pushupScore;
     }
 
@@ -300,11 +259,11 @@ export const calculatePtScore = (inputs: any) => {
         totalPossiblePoints -= 20;
     } else {
         if (inputs.coreComponent === 'sit_ups_1min') {
-            coreScore = getMuscularFitnessScore(ageGroup, 'sit_ups_1min', inputs.situps);
+            coreScore = getMuscularFitnessScore(standards, 'sit_ups_1min', inputs.situps);
         } else if (inputs.coreComponent === 'cross_leg_reverse_crunch_2min') {
-            coreScore = getMuscularFitnessScore(ageGroup, 'cross_leg_reverse_crunch_2min', inputs.reverseCrunches);
+            coreScore = getMuscularFitnessScore(standards, 'cross_leg_reverse_crunch_2min', inputs.reverseCrunches);
         } else if (inputs.coreComponent === 'forearm_plank_time') {
-            coreScore = getPlankScore(ageGroup, { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds });
+            coreScore = getPlankScore(standards, { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds });
         }
         earnedPoints += coreScore;
     }
@@ -316,26 +275,29 @@ export const calculatePtScore = (inputs: any) => {
         cardioScore = 'Exempt';
         totalPossiblePoints -= 60;
     } else if (inputs.cardioComponent === 'walk') {
-        walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds, inputs.altitudeGroup);
+        walkPassed = await checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds, walkStandards, altitudeAdjustments.walk, inputs.altitudeGroup);
         totalPossiblePoints -= 60; // Walk test does not contribute points, max score is based on other components.
     } else {
         let adjustedRunTime = { minutes: inputs.runMinutes, seconds: inputs.runSeconds };
         let adjustedShuttles = inputs.shuttles;
 
         if (inputs.altitudeGroup && inputs.altitudeGroup !== 'normal') {
-            if (inputs.cardioComponent === 'run') {
+            if (inputs.cardioComponent === 'run' && altitudeAdjustments && altitudeAdjustments.run) {
                 const runTimeInSeconds = inputs.runMinutes * 60 + inputs.runSeconds;
-                const correction = altitudeAdjustments.run.groups[inputs.altitudeGroup]?.corrections.find(c => runTimeInSeconds >= c.time_range[0] && runTimeInSeconds <= c.time_range[1]);
+                const correction = altitudeAdjustments.run.find(c => c.altitude_group === inputs.altitudeGroup && runTimeInSeconds >= c.time_range_start && runTimeInSeconds <= c.time_range_end);
                 if (correction) {
                     const adjustedTimeInSeconds = runTimeInSeconds - correction.correction;
                     adjustedRunTime.minutes = Math.floor(adjustedTimeInSeconds / 60);
                     adjustedRunTime.seconds = adjustedTimeInSeconds % 60;
                 }
-            } else if (inputs.cardioComponent === 'shuttles') {
-                adjustedShuttles += altitudeAdjustments.hamr.groups[inputs.altitudeGroup]?.shuttles_to_add || 0;
+            } else if (inputs.cardioComponent === 'shuttles' && altitudeAdjustments && altitudeAdjustments.hamr) {
+                const adjustment = altitudeAdjustments.hamr.find(a => a.altitude_group === inputs.altitudeGroup);
+                if(adjustment) {
+                    adjustedShuttles += adjustment.shuttles_to_add;
+                }
             }
         }
-        cardioScore = getCardioScore(ageGroup, inputs.cardioComponent, {
+        cardioScore = getCardioScore(standards, inputs.cardioComponent, {
             minutes: adjustedRunTime.minutes,
             seconds: adjustedRunTime.seconds,
             shuttles: adjustedShuttles,
@@ -348,8 +310,6 @@ export const calculatePtScore = (inputs: any) => {
     if (totalPossiblePoints > 0) {
         compositeScore = (earnedPoints / totalPossiblePoints) * 100;
     } else if (inputs.isStrengthExempt && inputs.isCoreExempt && inputs.isCardioExempt) {
-        // If all components are exempt, member is exempt from the test.
-        // No score is given, but they "pass".
         compositeScore = 100;
     }
 
@@ -434,91 +394,74 @@ export const calculateBestScore = (scores: { [key: string]: number | string }): 
  * @param component - The muscular fitness component.
  * @returns An object with the min and max performance values.
  */
-export const getMinMaxValues = (age: number, sex: string, component: string) => {
-    const ageGroup = getAgeGroup(age, sex);
-    if (!ageGroup) return { min: 0, max: 0 };
+export const getMinMaxValues = (standards: any[], component: string) => {
+    if (!standards || standards.length === 0) return { min: 0, max: 0 };
 
-    const table = ageGroup.muscular_fitness[component];
-    if (!table || table.length === 0) return { min: 0, max: 0 };
+    const exerciseStandards = standards.filter(s => s.exercise === component);
+    if (exerciseStandards.length === 0) return { min: 0, max: 0 };
 
-    // Handle time-based components like the plank
     if (component === 'forearm_plank_time') {
-        const timesInSeconds = table.map(row => {
-            const timeString = String(row.time).replace(/[^0-9:]/g, '').trim();
-            return timeToSeconds(timeString);
+        const timesInSeconds = exerciseStandards.flatMap(row => {
+            const measurement = row.measurement as string;
+            if (measurement.includes('-')) {
+                return measurement.split('-').map(time => timeToSeconds(time.trim()));
+            } else {
+                return timeToSeconds(measurement);
+            }
         });
-        const min = Math.min(...timesInSeconds.filter(t => t > 0));
-        const max = Math.max(...timesInSeconds);
-        return { min, max };
+        return {
+            min: Math.min(...timesInSeconds.filter(t => t > 0)),
+            max: Math.max(...timesInSeconds),
+        };
     }
 
-    // Handle rep-based components
-    const reps = table.map(row => {
-        if (typeof row.reps === 'string') {
-            const match = row.reps.replace(/[^0-9]/g, '');
-            return match ? parseInt(match, 10) : 0;
+    const reps = exerciseStandards.flatMap(row => {
+        const measurement = String(row.measurement);
+        if (measurement.includes('-')) {
+            return measurement.split('-').map(s => parseInt(s.trim()));
+        } else {
+            return parseInt(measurement.replace(/[^0-9]/g, ''));
         }
-        return row.reps;
     });
-
-    const min = Math.min(...reps.filter(r => r > 0));
-    const max = Math.max(...reps);
-
-    return { min, max };
+    return {
+        min: Math.min(...reps.filter(r => r > 0)),
+        max: Math.max(...reps),
+    };
 };
 
-/**
- * Gets the minimum and maximum possible performance values for a given cardio component.
- * @param age - The person's age.
- * @param sex - The person's gender.
- * @param component - The cardio component ('run', 'shuttles', or 'walk').
- * @returns An object with the min and max performance values. For run, min is slowest and max is fastest.
- */
-export const getCardioMinMaxValues = (age: number, sex: string, component: string) => {
-    const ageGroup = getAgeGroup(age, sex);
-    if (!ageGroup) return { min: 0, max: 0 };
-
-    // For the walk, "min" holds the passing time threshold
+export const getCardioMinMaxValues = (standards: any[], walkStandards: any[], component: string) => {
     if (component === 'walk') {
-        const ageIndex = getAgeGroupIndex(age);
-        if (ageIndex === -1) return { min: 0, max: 0 };
-
-        const standards = walkStandards[sex];
-        if (!standards) return { min: 0, max: 0 };
-
-        const maxTime = standards[ageIndex].max_time;
-        const maxTimeInSeconds = timeToSeconds(maxTime);
-        return { min: maxTimeInSeconds, max: 0 }; // Using min to hold the passThreshold
+        if (!walkStandards || walkStandards.length === 0) return { min: 0, max: 0 };
+        const maxTime = walkStandards[0].max_time;
+        return { min: timeToSeconds(maxTime), max: 0 };
     }
 
-    const brackets = ageGroup.cardiorespiratory.run_time_brackets;
-    if (!brackets || brackets.length === 0) return { min: 0, max: 0 };
+    if (!standards || standards.length === 0) return { min: 0, max: 0 };
+    const exerciseStandards = standards.filter(s => s.exercise === component);
+    if (exerciseStandards.length === 0) return { min: 0, max: 0 };
 
     if (component === 'run') {
-        const times = brackets.map(bracket => {
-            const timeString = bracket.run_time.replace(/[≤*<>]/g, '').trim();
-            if (timeString.includes(' - ')) {
-                return timeToSeconds(timeString.split(' - ')[1]);
+        const times = exerciseStandards.flatMap(s => {
+            const measurement = s.measurement as string;
+            if (measurement.includes('-')) {
+                return measurement.split('-').map(time => timeToSeconds(time.trim()));
+            } else {
+                return timeToSeconds(measurement);
             }
-            return timeToSeconds(timeString);
-        }).filter(t => t > 0);
-
+        });
         return {
             min: Math.max(...times), // Slowest time
-            max: Math.min(...times), // Fastest time
+            max: Math.min(...times.filter(t => t > 0)), // Fastest time
         };
     } else if (component === 'shuttles') {
-        const shuttleCounts = brackets.map(bracket => {
-            const shuttleRange = bracket.shuttles_range;
-            if (shuttleRange.includes(' - ')) {
-                const parts = shuttleRange.split(' - ');
-                const highEnd = parts[1].replace(/[^0-9]/g, '');
-                return parseInt(highEnd, 10);
+        const shuttleCounts = exerciseStandards.flatMap(s => {
+            const measurement = s.measurement as string;
+            if (measurement.includes('-')) {
+                return measurement.split('-').map(s => parseInt(s.trim()));
+            } else {
+                return parseInt(measurement.replace(/[^0-9]/g, ''));
             }
-            const singleValue = shuttleRange.replace(/[^0-9]/g, '');
-            return parseInt(singleValue, 10);
-        }).filter(s => !isNaN(s));
-
+        });
         return {
             min: Math.min(...shuttleCounts.filter(s => s > 0)),
             max: Math.max(...shuttleCounts),
@@ -528,57 +471,20 @@ export const getCardioMinMaxValues = (age: number, sex: string, component: strin
     return { min: 0, max: 0 };
 };
 
-/**
- * Gets the required performance for a given component to achieve a target score.
- * @param age - The person's age.
- * @param sex - The person's gender.
- * @param component - The exercise component.
- * @param targetScore - The desired score.
- * @returns The performance value (time in seconds, reps, or shuttle count) required to meet the target score.
- */
-export const getPerformanceForScore = (age: number, sex: string, component: string, targetScore: number): number => {
-    const ageGroup = getAgeGroup(age, sex);
-    if (!ageGroup) return 0;
+export const getPerformanceForScore = (standards: any[], component: string, targetScore: number): number => {
+    if (!standards || standards.length === 0) return 0;
 
-    if (component === 'run') {
-        const brackets = ageGroup.cardiorespiratory.run_time_brackets;
-        const candidates = brackets.filter(b => b.points >= targetScore);
-        if (candidates.length === 0) return 9999; // Return a very high time if no score is high enough
-        const times = candidates.map(b => {
-            const timeString = b.run_time.replace(/[≤*<>]/g, '').trim();
-            const timeParts = timeString.split(' - ');
-            return timeToSeconds(timeParts[timeParts.length - 1]);
-        });
-        return Math.max(...times);
-    }
+    const exerciseStandards = standards.filter(s => s.exercise === component);
+    const candidates = exerciseStandards.filter(s => s.points >= targetScore);
+    if (candidates.length === 0) return 999;
 
-    if (component === 'shuttles') {
-        const brackets = ageGroup.cardiorespiratory.run_time_brackets;
-        const candidates = brackets.filter(b => b.points >= targetScore);
-        if (candidates.length === 0) return 999; // Return a high number if not achievable
-        const shuttles = candidates.map(b => {
-            const shuttleString = b.shuttles_range.replace(/[≥*<>]/g, '').trim();
-            const shuttleParts = shuttleString.split(' - ');
-            return parseInt(shuttleParts[0], 10);
-        });
-        return Math.min(...shuttles);
-    }
-
-    if (component === 'forearm_plank_time') {
-        const table = ageGroup.muscular_fitness[component];
-        const candidates = table.filter(row => row.points >= targetScore);
-        if (candidates.length === 0) return 999; // Return a high number if not achievable
-        const times = candidates.map(row => timeToSeconds(String(row.time).replace(/[^0-9:]/g, '')));
+    if (component === 'run' || component === 'forearm_plank_time') {
+        const times = candidates.map(c => timeToSeconds(c.measurement));
         return Math.min(...times);
+    } else {
+        const reps = candidates.map(c => parseInt(c.measurement));
+        return Math.min(...reps);
     }
-
-    // Handles push-ups, sit-ups, and reverse crunches
-    const table = ageGroup.muscular_fitness[component];
-    if (!table) return 0;
-    const candidates = table.filter(row => row.points >= targetScore);
-    if (candidates.length === 0) return 999; // Return a high number if not achievable
-    const reps = candidates.map(row => parseInt(String(row.reps).replace(/[^0-9]/g, '')));
-    return Math.min(...reps);
 };
 
 /**

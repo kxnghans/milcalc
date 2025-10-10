@@ -207,7 +207,7 @@ export default function PayCalculatorScreen() {
                         <SegmentedSelector
                             options={[{label: 'Officer', value: 'Officer'}, {label: 'Enlisted', value: 'Enlisted'}]}
                             selectedValues={[status]}
-                            onValueChange={setStatus}
+                            onValueChange={(value) => setStatus(value)}
                         />
                     </View>
                     <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
@@ -234,16 +234,16 @@ export default function PayCalculatorScreen() {
                         <Text style={styles.boldLabel}>Tax Filing Status</Text>
                         <SegmentedSelector
                             options={[{label: 'Single', value: 'single'}, {label: 'Married', value: 'married'}]}
-                            selectedValues={filingStatus}
-                            onValueChange={(value) => setFilingStatus([value])}
+                            selectedValues={[filingStatus]}
+                            onValueChange={(value) => setFilingStatus(value)}
                         />
                     </View>
                     <View style={{ flex: 1, marginLeft: theme.spacing.s }}>
                         <Text style={styles.boldLabel}>Dependents</Text>
                         <SegmentedSelector
                             options={[{label: 'Yes', value: 'WITH_DEPENDENTS'}, {label: 'No', value: 'WITHOUT_DEPENDENTS'}]}
-                            selectedValues={dependencyStatus}
-                            onValueChange={(value) => setDependencyStatus([value])}
+                            selectedValues={[dependencyStatus]}
+                            onValueChange={(value) => setDependencyStatus(value)}
                         />
                     </View>
                 </View>

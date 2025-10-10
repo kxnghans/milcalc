@@ -35,6 +35,7 @@ export default function CoreComponent({
     isExempt,
     toggleExempt,
     openDetailModal,
+    score,
 }) {
     const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
@@ -96,6 +97,8 @@ export default function CoreComponent({
                                             maxPointsThreshold={minMax.core.max}
                                             ninetyPercentileThreshold={ninetyPercentileThreshold}
                                             valueIsTime={true}
+                                            score={score.coreScore}
+                                            maxScore={20}
                                         />
                                     </NeumorphicOutset>
                                 </View>
@@ -110,6 +113,8 @@ export default function CoreComponent({
                                         passThreshold={minMax.core.min}
                                         maxPointsThreshold={minMax.core.max}
                                         ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                        score={score.coreScore}
+                                        maxScore={20}
                                     />
                                 </NeumorphicOutset>
                             </View>

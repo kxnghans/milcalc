@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { getScoreForExercise, calculateBestScore, checkWalkPass } from '@repo/utils';
+import { getScoreForExercise, calculateBestScore, checkWalkPass, getPtStandards, getAgeGroupString } from '@repo/utils';
 import { useDebounce } from './useDebounce';
 
 /**
@@ -39,6 +39,8 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   // State to store the calculated scores for each component and the final best score.
   const [scores, setScores] = useState({});
   const [bestScore, setBestScore] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [standards, setStandards] = useState([]);
 
   // Debounce all user inputs to prevent recalculating scores on every keystroke.
   const debouncedAge = useDebounce(age, 500);
@@ -96,24 +98,42 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
 
   // This effect runs whenever a debounced input value changes.
   useEffect(() => {
-    if (!debouncedAge || !debouncedGender) {
-        setScores({});
-        setBestScore(0);
-        return;
+    const fetchStandards = async () => {
+      setIsLoading(true);
+      try {
+        if (!debouncedAge || !debouncedGender) {
+            setScores({});
+            setBestScore(0);
+            return;
+        }
+
+        const ageNum = Number(debouncedAge);
+        const ageGroupString = getAgeGroupString(ageNum);
+        if (!ageGroupString) return;
+
+        const capitalizedGender = debouncedGender.charAt(0).toUpperCase() + debouncedGender.slice(1);
+        const fetchedStandards = await getPtStandards(capitalizedGender, ageGroupString);
+        if (!fetchedStandards) return;
+        setStandards(fetchedStandards);
+
+        const newScores = {
+            push_ups_1min: isStrengthExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'push_ups_1min', { reps: Number(debouncedPushUps) }),
+            hand_release_pushups_2min: isStrengthExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'hand_release_pushups_2min', { reps: Number(debouncedHrPushUps) }),
+            sit_ups_1min: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'sit_ups_1min', { reps: Number(debouncedSitUps) }),
+            cross_leg_reverse_crunch_2min: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'cross_leg_reverse_crunch_2min', { reps: Number(debouncedCrunches) }),
+            forearm_plank_time: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'forearm_plank_time', { minutes: Number(debouncedPlankMinutes), seconds: Number(debouncedPlankSeconds) }),
+            run: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'run', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup),
+            shuttles: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'shuttles', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup),
+            walk: isCardioExempt ? 'Exempt' : await checkWalkPass(Number(debouncedAge), debouncedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), debouncedAltitudeGroup),
+        };
+        setScores(newScores);
+        setBestScore(calculateBestScore(newScores));
+      } finally {
+        setIsLoading(false);
+      }
     }
 
-    const newScores = {
-        push_ups_1min: isStrengthExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'push_ups_1min', { reps: Number(debouncedPushUps) }),
-        hand_release_pushups_2min: isStrengthExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'hand_release_pushups_2min', { reps: Number(debouncedHrPushUps) }),
-        sit_ups_1min: isCoreExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'sit_ups_1min', { reps: Number(debouncedSitUps) }),
-        cross_leg_reverse_crunch_2min: isCoreExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'cross_leg_reverse_crunch_2min', { reps: Number(debouncedCrunches) }),
-        forearm_plank_time: isCoreExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'forearm_plank_time', { minutes: Number(debouncedPlankMinutes), seconds: Number(debouncedPlankSeconds) }),
-        run: isCardioExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'run', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup),
-        shuttles: isCardioExempt ? 'Exempt' : getScoreForExercise(Number(debouncedAge), debouncedGender, 'shuttles', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup),
-        walk: isCardioExempt ? 'Exempt' : checkWalkPass(Number(debouncedAge), debouncedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), debouncedAltitudeGroup),
-    };
-    setScores(newScores);
-    setBestScore(calculateBestScore(newScores));
+    fetchStandards();
   }, [
     debouncedAge, debouncedGender, debouncedAltitudeGroup,
     debouncedPushUps, debouncedHrPushUps, debouncedSitUps, debouncedCrunches,
@@ -139,6 +159,7 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
     outputs: {
         scores,
         bestScore,
+        isLoading,
     },
     exemptions: {
         isStrengthExempt,

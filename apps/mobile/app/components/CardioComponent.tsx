@@ -42,6 +42,7 @@ export default function CardioComponent({
     isExempt,
     toggleExempt,
     openDetailModal,
+    score,
 }) {
     const { theme, isDarkMode } = useTheme();
     // State to hold the calculated altitude adjustment text to be displayed to the user.
@@ -82,7 +83,7 @@ export default function CardioComponent({
                     if (maxTime) {
                         const minutes = Math.floor(maxTime / 60);
                         const seconds = maxTime % 60;
-                        setAdjustment(`Max time: ${minutes}:${seconds.toString().padStart(2, '0')}`);
+                        setAdjustment(`Max: ${minutes}:${seconds.toString().padStart(2, '0')}`);
                         setAdjustedWalkMaxTime(maxTime);
                     }
                 }
@@ -176,6 +177,8 @@ export default function CardioComponent({
                                                     maxPointsThreshold={cardioMinMax.max}
                                                     ninetyPercentileThreshold={ninetyPercentileThreshold}
                                                     valueIsTime={true}
+                                                    score={score.cardioScore}
+                                                    maxScore={60}
                                                 />
                                             </NeumorphicOutset>
                                         </View>
@@ -205,6 +208,8 @@ export default function CardioComponent({
                                                     passThreshold={cardioMinMax.min}
                                                     maxPointsThreshold={cardioMinMax.max}
                                                     ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                                    score={score.cardioScore}
+                                                    maxScore={60}
                                                 />
                                             </NeumorphicOutset>
                                         </View>

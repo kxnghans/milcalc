@@ -122,23 +122,27 @@ export const calculateBAS = (rank: string): number => {
  * @param mha - The Military Housing Area (MHA) code.
  * @returns The monthly BAH amount.
  */
-export const calculateBAH = (rank: string, dependencyStatus: 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS', mha: string): number => {
-    if (!rank || !dependencyStatus || !mha) return 0;
+import { getBahRate, getNonLocalityBahRate } from './pay-supabase-api';
 
-    const bahData = bahRates2025 as BahData;
-    const section = bahData.sections.find(s => s.section_key === dependencyStatus);
+export const calculateBAH = async (rank: string, dependencyStatus: 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS', mha: string): Promise<number> => {
+    if (!rank || !dependencyStatus) return 0;
 
-    if (!section) return 0;
+    if (mha && mha !== 'non-locality') {
+        const bahData = await getBahRate(mha);
+        if (!bahData) return 0;
 
-    const locationRates = section.rows.find(r => r.MHA === mha);
+        const rankColumn = `${rank.replace('-', '').toLowerCase()}_${dependencyStatus.toLowerCase()}`;
+        return bahData[rankColumn] || 0;
 
-    if (!locationRates) return 0;
+    } else if (mha === 'non-locality') {
+        const nonLocalityBahData = await getNonLocalityBahRate(rank);
+        if (!nonLocalityBahData) return 0;
 
-    // The rank in the BAH table doesn't have a dash, e.g., 'E05' not 'E-5'
-    const formattedRank = rank.replace('-', '');
-    const rate = locationRates[formattedRank];
+        const rateColumn = dependencyStatus === 'WITH_DEPENDENTS' ? 'rate_with_deps' : 'rate_without_deps';
+        return nonLocalityBahData[rateColumn] || 0;
+    }
 
-    return typeof rate === 'number' ? rate : 0;
+    return 0;
 };
 
 /**
@@ -164,7 +168,7 @@ export const calculateFederalTax = (totalIncome: number, filingStatus: string): 
             { rate: 0.35, threshold: 243725 },
             { rate: 0.37, threshold: 609350 },
         ],
-        married: [
+        married_filing_jointly: [
             { rate: 0.10, threshold: 0 },
             { rate: 0.12, threshold: 23200 },
             { rate: 0.22, threshold: 94300 },

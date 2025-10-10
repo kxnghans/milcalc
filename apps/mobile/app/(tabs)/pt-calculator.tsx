@@ -5,7 +5,7 @@
  * all state management and calculation logic. This makes the component much cleaner and easier to maintain.
  */
 import * as React from "react";
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Modal } from "react-native";
 import { Card, IconRow, useTheme, usePtCalculatorState } from "@repo/ui";
 import { ICONS } from "@repo/ui/icons";
 import ScoreDisplay from "../components/ScoreDisplay";
@@ -17,6 +17,8 @@ import Demographics from "../components/Demographics";
 import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
 import Divider from "../components/Divider";
 
+import { useNavigation } from "expo-router";
+
 import DetailModal from "../components/DetailModal";
 
 /**
@@ -24,7 +26,8 @@ import DetailModal from "../components/DetailModal";
  * It renders the UI and delegates all logic and state management to the `usePtCalculatorState` hook.
  */
 export default function PTCalculator() {
-  const { theme, themeMode, toggleTheme } = useTheme();
+  const navigation = useNavigation();
+  const { theme, themeMode, isDarkMode, toggleTheme } = useTheme();
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
   const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
   const [modalPerformance, setModalPerformance] = React.useState<any>(null);
@@ -51,10 +54,19 @@ export default function PTCalculator() {
     core,
     cardio,
     score,
+    isLoading,
     minMax,
     cardioMinMax,
     ninetyPercentileThresholds,
   } = usePtCalculatorState();
+
+  React.useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        isLoading ? <ActivityIndicator size="small" color={isDarkMode ? theme.colors.text : theme.colors.primary} style={{ marginRight: theme.spacing.s }} /> : null
+      ),
+    });
+  }, [isLoading, navigation, theme]);
 
   /**
    * A layout handler to measure the height of the segmented controls.
@@ -112,6 +124,7 @@ export default function PTCalculator() {
             performance={modalPerformance}
         />
         <View style={{flex: 1}}>
+
             {/* Top section with score display and main action icons. */}
             <View>
                 <ScoreDisplay score={score} cardioComponent={cardio.cardioComponent} containerStyle={{ marginBottom: theme.spacing.s }} />
@@ -159,6 +172,7 @@ export default function PTCalculator() {
                                 isExempt={strength.isExempt}
                                 toggleExempt={strength.toggleExempt}
                                 openDetailModal={openDetailModal}
+                                score={score}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <CoreComponent
@@ -180,6 +194,7 @@ export default function PTCalculator() {
                                 isExempt={core.isExempt}
                                 toggleExempt={core.toggleExempt}
                                 openDetailModal={openDetailModal}
+                                score={score}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
                             <CardioComponent
@@ -203,6 +218,7 @@ export default function PTCalculator() {
                                 isExempt={cardio.isExempt}
                                 toggleExempt={cardio.toggleExempt}
                                 openDetailModal={openDetailModal}
+                                score={score}
                             />
                             <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
                             <AltitudeAdjustmentComponent selectedValue={demographics.altitudeGroup} onValueChange={demographics.setAltitudeGroup} openDetailModal={openDetailModal} />
@@ -211,6 +227,7 @@ export default function PTCalculator() {
                 </View>
             </KeyboardAvoidingView>
         </View>
+
     </View>
   );
 }
