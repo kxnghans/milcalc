@@ -212,7 +212,7 @@ export default function PayCalculatorScreen() {
                         <View style={[styles.fieldRow, { marginBottom: theme.spacing.s }]}>
                             <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Status</Text>
                             <SegmentedSelector
-                                options={[{label: 'Officer', value: 'Officer'}, {label: 'WO', value: 'Warrant Officer'}, {label: 'Enlisted', value: 'Enlisted'}]}
+                                options={[{label: 'Officer', value: 'Officer', flex: 3}, {label: 'WO', value: 'Warrant Officer', flex: 2}, {label: 'Enlisted', value: 'Enlisted', flex: 3}]}
                                 selectedValues={[status]}
                                 onValueChange={(value) => setStatus(value)}
                                 style={{ marginLeft: 0, marginRight: 0 }}
