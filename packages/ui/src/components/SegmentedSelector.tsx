@@ -13,8 +13,8 @@ import { useTheme } from "../contexts/ThemeContext";
  * Props for the SegmentedSelector component.
  */
 interface SegmentedSelectorProps {
-  /** An array of options to display, where each option has a label, a value, and an optional flex property. */
-  options: { label: string; value: string; flex?: number }[];
+  /** An array of options to display, where each option has a label and a value. */
+  options: { label: string; value: string }[];
   /** An array of values corresponding to the currently selected options. */
   selectedValues: string[];
   /** A function to be called when an option is selected. */
@@ -41,6 +41,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
       borderRadius: theme.borderRadius.m,
     },
     segment: {
+      flex: 1,
       paddingVertical: theme.spacing.s,
       paddingHorizontal: theme.spacing.xs,
       justifyContent: 'center',
@@ -93,7 +94,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
               <NeumorphicOutset
                 key={option.value}
                 containerStyle={{
-                  flex: option.flex ?? 1,
+                  flex: 1,
                   borderRadius: theme.borderRadius.m,
                   marginTop: theme.spacing.xs,
                   marginBottom: theme.spacing.xs,
@@ -103,8 +104,6 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
                 }}
                 contentStyle={{ backgroundColor: theme.colors.primary, borderRadius: theme.borderRadius.m, overflow: 'hidden', flex: 1 }}
                 highlightStyle={{ flex: 1 }}
-                shadowOffset={isDarkMode ? { width: theme.spacing.xs, height: 1.5 } : { width: theme.spacing.xs, height: theme.spacing.xs }}
-                highlightOffset={{ width: -theme.spacing.xs, height: -1.5 }}
                 shadowOpacity={isDarkMode ? undefined : 0.3}
                 highlightOpacity={isDarkMode ? 0.55 : 1}
               >
@@ -126,7 +125,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
           return (
             <Wrapper
               key={option.value}
-              style={[styles.segment, { flex: option.flex ?? 1 }]}
+              style={styles.segment}
               onPress={() => onValueChange(option.value)}
             >
               {lines.map((line, index) => (
