@@ -19,14 +19,13 @@ const localAssetMap = {
     'DAFMAN_36_2905': require('../../../../packages/data/pt_data/dafman36-2905.pdf'),
     'ALTITUDE_ADJUSTMENTS': require('../../../../packages/data/pt_data/dafman36-2905 altitude adjustments.pdf'),
     'WALK_STANDARDS': require('../../../../packages/data/pt_data/dafman36-2905 walk.pdf'),
-    'FMR_HDIP': require('../../../../packages/data/pay_data/finance_charts/DoD 7000.14-R Financial Management Regulation Hazardous Duty Incentive Pay HDIP Aerial.pdf'),
+    'FMR_BASE_PAY': require('../../../../packages/data/pay_data/finance_charts/DoD 7000.14-R Financial Management Regulation Base Pay.pdf'),
     'FMR_BAS': require('../../../../packages/data/pay_data/finance_charts/DoD 7000.14-R Financial Management Regulation Basic Allowance for Subsistence BAS.pdf'),
     'IRS_TAX_ADJUSTMENTS_2025': require('../../../../packages/data/pay_data/finance_charts/IRS Revenue Procedure 2024-40.pdf'),
-    'BAH_RATES_2025': require('../../../../packages/data/pay_data/BAH/2025 BAH Rates.pdf'),
-    'BAH_OOP_2025': require('../../../../packages/data/pay_data/BAH/2025a-BAH_OOP_Amounts.pdf'),
-    'BAH_COMPONENTS_2025': require('../../../../packages/data/pay_data/BAH/2025a-BAH-Rate-Component-Breakdown.pdf'),
-    'BAH_NON_LOCALITY_2025': require('../../../../packages/data/pay_data/BAH/2025a-Non-Locality-BAH-Rates.pdf'),
-    'FMR_BAH': require('../../../../packages/data/pay_data/BAH/DoD 7000.14-R Financial Management Regulation 07a_26.pdf'),
+    'BAH_RATES_2025': require('../../../../packages/data/pay_data/2025 BAH Rates.pdf'),
+    'BAH_OOP_2025': require('../../../../packages/data/pay_data/2025a-BAH_OOP_Amounts.pdf'),
+    'BAH_COMPONENTS_2025': require('../../../../packages/data/pay_data/2025a-BAH-Rate-Component-Breakdown.pdf'),
+    'BAH_NON_LOCALITY_2025': require('../../../../packages/data/pay_data/2025a-Non-Locality-BAH-Rates.pdf'),
 };
 
 export default function DocumentModal({ category, isModalVisible, setModalVisible, shadowOpacity, highlightOpacity, shadowRadius, highlightRadius, highlightColor: highlightColorProp }) {
