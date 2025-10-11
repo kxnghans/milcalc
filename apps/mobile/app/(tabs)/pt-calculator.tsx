@@ -207,6 +207,8 @@ export default function PTCalculator() {
                                 setRunMinutes={cardio.setRunMinutes}
                                 runSeconds={cardio.runSeconds}
                                 setRunSeconds={cardio.setRunSeconds}
+                                shuttles={cardio.shuttles}
+                                setShuttles={cardio.setShuttles}
                                 walkMinutes={cardio.walkMinutes}
                                 setWalkMinutes={cardio.setWalkMinutes}
                                 walkSeconds={cardio.walkSeconds}
@@ -217,6 +219,7 @@ export default function PTCalculator() {
                                 age={demographics.age}
                                 gender={demographics.gender}
                                 isExempt={cardio.isExempt}
+                                toggleExempt={cardio.toggleExempt}
                                 score={score}
                                 altitudeData={altitudeData}
                                 openDetailModal={openDetailModal}

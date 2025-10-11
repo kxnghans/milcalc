@@ -110,7 +110,7 @@ export function usePtCalculatorState() {
                         });
                     }
 
-                    const adjustedShuttles = parseInt(debouncedShuttles) || 0;
+                    let adjustedShuttles = parseInt(debouncedShuttles) || 0;
                     if (debouncedCardioComponent === 'shuttles' && altitudeAdjustments && altitudeAdjustments.hamr && debouncedAltitudeGroup && debouncedAltitudeGroup !== 'normal') {
                         const adjustmentRow = altitudeAdjustments.hamr.find(row => row.altitude_group === debouncedAltitudeGroup);
                         if (adjustmentRow) {
