@@ -55,7 +55,7 @@ export default function CardioComponent({
         setAdjustment(null);
         setAdjustedWalkMaxTime(null);
 
-        if (altitudeData && altitudeGroup && altitudeGroup !== 'normal' && age && gender) {
+        if (altitudeData && altitudeGroup && altitudeGroup !== 'normal' && age && gender && !isExempt) {
             const ageNum = parseInt(age);
 
             if (cardioComponent === 'run' && (runMinutes || runSeconds)) {

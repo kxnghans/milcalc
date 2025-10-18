@@ -21,3 +21,25 @@ export const getDocumentsByCategory = async (category: string) => {
 
   return data || [];
 };
+
+/**
+ * Fetches help details for a specific exercise from the database.
+ * @param exercise - The exercise to fetch help details for.
+ * @returns An array of help detail objects.
+ */
+export const getHelpDetailsByExercise = async (exercise: string) => {
+  if (!exercise) return [];
+
+  const { data, error } = await supabase
+    .from('help_details')
+    .select('*')
+    .eq('exercise', exercise)
+    .order('id');
+
+  if (error) {
+    console.error('Error fetching help details:', error);
+    return [];
+  }
+
+  return data || [];
+};

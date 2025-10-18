@@ -9,7 +9,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedba
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, NeumorphicOutset, PillButton } from '@repo/ui';
 import { BlurView } from 'expo-blur';
-import { getDynamicHelpText, getHelpContent, getPayHelpContent } from '@repo/utils';
+import { getDynamicHelpText, getHelpDetailsByExercise } from '@repo/utils';
 
 interface DetailModalProps {
   isVisible: boolean;
@@ -41,19 +41,14 @@ export default function DetailModal({
     highlightColor: highlightColorProp,
 }: DetailModalProps) {
     const { theme, isDarkMode } = useTheme();
-    const [content, setContent] = useState<any>(null);
+    const [content, setContent] = useState<any[]>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (isVisible && contentKey) {
             const fetchContent = async () => {
                 setIsLoading(true);
-                let data = null;
-                if (source === 'pay') {
-                    data = await getPayHelpContent(contentKey);
-                } else {
-                    data = await getHelpContent(contentKey);
-                }
+                const data = await getHelpDetailsByExercise(contentKey);
                 setContent(data);
                 setIsLoading(false);
             };
@@ -62,7 +57,7 @@ export default function DetailModal({
             // Reset content when modal is hidden
             setContent(null);
         }
-    }, [isVisible, contentKey, source]);
+    }, [isVisible, contentKey]);
 
     const dynamicHelpText = (contentKey && age && gender && performance) 
         ? getDynamicHelpText(contentKey, age, gender, performance) 
@@ -148,32 +143,16 @@ export default function DetailModal({
                         <View style={styles.modalView}>
                             {isLoading ? (
                                 <ActivityIndicator size="large" color={theme.colors.primary} />
-                            ) : content ? (
+                            ) : content && content.length > 0 ? (
                                 <>
-                                    <Text style={styles.title}>{content.title}</Text>
+                                    <Text style={styles.title}>{content[0].title}</Text>
                                     <ScrollView>
-                                        {content.purpose_description && (
-                                            <>
-                                                <Text style={styles.sectionHeader}>Purpose</Text>
-                                                <Text style={styles.sectionContent}>{content.purpose_description}</Text>
-                                            </>
-                                        )}
-                                        {content.recipient_group && (
-                                            <>
-                                                <Text style={styles.sectionHeader}>Recipient</Text>
-                                                <Text style={styles.sectionContent}>{content.recipient_group}</Text>
-                                            </>
-                                        )}
-                                        {content.report_section && (
-                                            <>
-                                                <Text style={styles.sectionHeader}>Source</Text>
-                                                <TouchableOpacity onPress={() => Linking.openURL('https://comptroller.defense.gov/FMR/FMRVolumes.aspx')}>
-                                                    <Text style={[styles.sectionContent, styles.linkText]}>
-                                                        DoD 7000.14-R (Section {content.report_section})
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            </>
-                                        )}
+                                        {content.map((item, index) => (
+                                            <View key={index}>
+                                                <Text style={styles.sectionHeader}>{item.section_header}</Text>
+                                                <Text style={styles.sectionContent}>{item.section_content}</Text>
+                                            </View>
+                                        ))}
                                         {dynamicHelpText && <Text style={styles.dynamicScoring}>{dynamicHelpText}</Text>}
                                     </ScrollView>
                                     <PillButton title="Close" onPress={onClose} style={{ marginTop: theme.spacing.l }} />

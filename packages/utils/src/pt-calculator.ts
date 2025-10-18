@@ -51,7 +51,7 @@ export const getAgeGroupString = (age: number): string | null => {
 const getCardioScore = (standards: any[], component: string, performance: any): number => {
     // For 'more is better' exercises like shuttles, standards are sorted best-to-worst.
     // We need to reverse them to find the first threshold the user meets from worst-to-best.
-    const cardioStandards = standards.filter(s => s.exercise === component).reverse();
+    const cardioStandards = standards.filter(s => s.exercise === component);
 
     if (component === 'run') {
         const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
