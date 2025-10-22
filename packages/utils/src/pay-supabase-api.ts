@@ -145,3 +145,61 @@ export const getPayHelpContent = async (contentKey: string) => {
 
   return data;
 };
+
+export const getFederalTaxData = async (year: number) => {
+  const { data, error } = await supabase
+    .from('federal_tax_data')
+    .select('*')
+    .eq('year', year);
+
+  if (error) {
+    console.error('Error fetching federal tax data:', error);
+    return [];
+  }
+
+  return data || [];
+};
+
+export const getStateTaxData = async (year: number) => {
+  const { data, error } = await supabase
+    .from('state_tax_data')
+    .select('*')
+    .eq('year', year);
+
+  if (error) {
+    console.error('Error fetching state tax data:', error);
+    return [];
+  }
+
+  return data || [];
+};
+
+export const getMaxFederalTaxYear = async () => {
+  const { data, error } = await supabase
+    .from('federal_tax_data')
+    .select('year')
+    .order('year', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error('Error fetching max federal tax year:', error);
+    return null;
+  }
+  return data ? data.year : null;
+};
+
+export const getMaxStateTaxYear = async () => {
+  const { data, error } = await supabase
+    .from('state_tax_data')
+    .select('year')
+    .order('year', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error('Error fetching max state tax year:', error);
+    return null;
+  }
+  return data ? data.year : null;
+};

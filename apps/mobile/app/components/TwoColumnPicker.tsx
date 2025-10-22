@@ -21,27 +21,49 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
   useEffect(() => {
     if (modalVisible) {
         if (mhaData && Object.keys(mhaData).length > 0) {
-            const stateList = Object.keys(mhaData).sort();
+            const stateKeys = Object.keys(mhaData).filter(k => k !== 'ON BASE').sort();
+            const stateList = ['...', ...stateKeys];
             setStates(stateList);
-            setSelectedState('');
-            setTempSelectedMha(null);
+            
+            // Set initial state based on selectedMha
+            if (selectedMha === 'initial') {
+                setSelectedState('...');
+                setTempSelectedMha('');
+            } else if (selectedMha === 'ON_BASE') {
+                setSelectedState('ON BASE');
+                setTempSelectedMha('ON_BASE');
+            } else if (selectedMha) {
+                const state = selectedMha.substring(0, 2);
+                setSelectedState(state);
+                setTempSelectedMha(selectedMha);
+            } else {
+                setSelectedState('...');
+                setTempSelectedMha('');
+            }
         }
     }
-}, [mhaData, modalVisible]);
+}, [mhaData, modalVisible, selectedMha]);
 
   const handleStateChange = (state) => {
-    if (!state) return;
     setSelectedState(state);
-    const newMhas = mhaData[state] || [];
-    if (newMhas.length > 0) {
-      setTempSelectedMha(newMhas[0].value);
+    if (state === '...') {
+        setTempSelectedMha('');
+    } else if (state === 'ON BASE') {
+        setTempSelectedMha('ON_BASE');
+    } else if (state) {
+        const newMhas = mhaData[state] || [];
+        if (newMhas.length > 0) {
+          setTempSelectedMha(newMhas[0].value);
+        } else {
+          setTempSelectedMha(null);
+        }
     } else {
-      setTempSelectedMha(null);
+        setTempSelectedMha(null);
     }
   };
 
   const handleConfirm = () => {
-    onMhaChange(tempSelectedMha);
+    onMhaChange(tempSelectedMha, selectedState);
     setModalVisible(false);
   };
 
@@ -118,7 +140,7 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
         <Pressable onPress={() => setModalVisible(true)} disabled={isLoading || !!error}>
             <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
                 <View style={styles.pressableInput}>
-                    <Text style={[styles.pressableText, !selectedMha && styles.placeholderText, error && styles.errorText]}>
+                    <Text style={[styles.pressableText, selectedMha === 'initial' && styles.placeholderText, error && styles.errorText]}>
                         {getDisplayText()}
                     </Text>
                 </View>
@@ -147,7 +169,6 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
                                     style={styles.leftPicker}
                                     itemStyle={styles.pickerItem}
                                 >
-                                    <Picker.Item label="..." value="" />
                                     {states.map(state => (
                                     <Picker.Item key={state} label={state} value={state} />
                                     ))}
@@ -156,11 +177,15 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
                                     selectedValue={tempSelectedMha}
                                     onValueChange={(itemValue) => setTempSelectedMha(itemValue)}
                                     style={styles.rightPicker}
-                                    enabled={mhasInState.length > 0}
+                                    enabled={selectedState !== 'N/A' && mhasInState.length > 0}
                                     itemStyle={styles.pickerItem}
                                 >
-                                    {!selectedState ? (
-                                        <Picker.Item label="Select State first..." value="" enabled={false} />
+                                    {selectedState === '...' ? (
+                                        <Picker.Item label="Select your state" value="" enabled={false} />
+                                    ) : selectedState === 'N/A' ? (
+                                        <Picker.Item label="ON BASE" value="ON_BASE" />
+                                    ) : !selectedState ? (
+                                        <Picker.Item label="Select..." value="" enabled={false} />
                                     ) : mhasInState.length === 0 ? (
                                       <Picker.Item label="No MHAs" value="" enabled={false} />
                                     ) : (

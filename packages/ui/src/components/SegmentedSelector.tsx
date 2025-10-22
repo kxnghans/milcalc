@@ -19,6 +19,8 @@ interface SegmentedSelectorProps {
   selectedValues: string[];
   /** A function to be called when an option is selected. */
   onValueChange: (value: string) => void;
+  /** An array of numbers to set the flex ratio for each segment. */
+  ratios?: number[];
   /** Optional custom style for the container. */
   style?: StyleProp<ViewStyle>;
   /** Optional layout event handler. */
@@ -32,7 +34,7 @@ interface SegmentedSelectorProps {
  * It can handle multiple selections and has a distinct neumorphic style for selected items.
  * It can also be used as a non-interactive display.
  */
-export const SegmentedSelector = ({ options, selectedValues, onValueChange, style, onLayout, isTouchable = true }: SegmentedSelectorProps) => {
+export const SegmentedSelector = ({ options, selectedValues, onValueChange, style, onLayout, isTouchable = true, ratios }: SegmentedSelectorProps) => {
   const { theme, isDarkMode } = useTheme();
 
   const styles = StyleSheet.create({
@@ -81,7 +83,8 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
       highlightOpacity={isDarkMode ? 0.05 : 1}
     >
       <View style={styles.container} onLayout={onLayout}>
-        {options.map((option) => {
+        {options.map((option, index) => {
+          const flexRatio = ratios && ratios.length === options.length ? ratios[index] : 1;
           const lines = option.label.split('\n');
           const isSelected = (selectedValues || []).includes(option.value);
 
@@ -94,7 +97,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
               <NeumorphicOutset
                 key={option.value}
                 containerStyle={{
-                  flex: 1,
+                  flex: flexRatio,
                   borderRadius: theme.borderRadius.m,
                   marginTop: theme.spacing.xs,
                   marginBottom: theme.spacing.xs,
@@ -125,7 +128,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
           return (
             <Wrapper
               key={option.value}
-              style={styles.segment}
+              style={[styles.segment, { flex: flexRatio }]}
               onPress={() => onValueChange(option.value)}
             >
               {lines.map((line, index) => (
