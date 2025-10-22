@@ -9,10 +9,11 @@ interface PillButtonProps {
   backgroundColor?: string;
   textColor?: string;
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<any>;
   disabled?: boolean;
 }
 
-export const PillButton = ({ title, onPress, backgroundColor, textColor, style, disabled }: PillButtonProps) => {
+export const PillButton = ({ title, onPress, backgroundColor, textColor, style, textStyle, disabled }: PillButtonProps) => {
   const { theme } = useTheme();
 
   const buttonColor = disabled ? theme.colors.disabled : backgroundColor || theme.colors.primary;
@@ -42,7 +43,7 @@ export const PillButton = ({ title, onPress, backgroundColor, textColor, style, 
         onPress={onPress}
         disabled={disabled}
       >
-        <Text style={styles.text}>{title}</Text>
+        <Text style={[styles.text, textStyle]}>{title}</Text>
       </TouchableOpacity>
     </NeumorphicOutset>
   );

@@ -34,12 +34,12 @@ Thumbs.db
 # Other
 .pnp
 .pnp.js
+
+# MilCalc specific
+packages/data
 /coverage
 .env
 .env.local
 
 # Vercel
 .vercel
-
-# Ignore packages/data
-packages/data

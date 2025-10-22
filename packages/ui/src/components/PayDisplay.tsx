@@ -9,13 +9,15 @@ interface PayDetail {
 
 interface PayDisplayProps {
   annualPay: string;
-  biWeeklyPay: string;
+  monthlyPay: string;
   payDetails: PayDetail[];
   deductions: PayDetail[];
   containerStyle?: StyleProp<ViewStyle>;
+  federalStandardDeduction: number;
+  stateStandardDeduction: number;
 }
 
-export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, biWeeklyPay, payDetails, deductions, containerStyle }) => {
+export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, payDetails, deductions, containerStyle, federalStandardDeduction, stateStandardDeduction }) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -75,8 +77,8 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, biWeeklyPay, 
           <Text style={styles.totalPayValue}>{annualPay}</Text>
         </View>
         <View style={[styles.payRow, { marginTop: theme.spacing.s }]}>
-          <Text style={styles.totalPayLabel}>BI-WEEKLY: </Text>
-          <Text style={styles.detailValue}>{biWeeklyPay}</Text>
+          <Text style={styles.totalPayLabel}>MONTHLY: </Text>
+          <Text style={styles.detailValue}>{monthlyPay}</Text>
         </View>
       </View>
       <View style={{ flexDirection: 'row', width: '100%' }}>
@@ -102,6 +104,19 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, biWeeklyPay, 
                     <Text style={styles.detailValue}>{deduction.value}</Text>
                 </View>
                 ))}
+            </View>
+        </View>
+      </View>
+      <View style={{ marginTop: theme.spacing.m, width: '100%' }}>
+        <Text style={styles.columnHeader}>Standard Deductions</Text>
+        <View style={{marginTop: theme.spacing.s}}>
+            <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Federal</Text>
+                <Text style={styles.detailValue}>${federalStandardDeduction.toLocaleString()}</Text>
+            </View>
+            <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>State</Text>
+                <Text style={styles.detailValue}>${stateStandardDeduction.toLocaleString()}</Text>
             </View>
         </View>
       </View>

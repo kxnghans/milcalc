@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View, Text, StyleSheet, Pressable, LayoutAnimation, UIManager, Platform, TouchableOpacity } from 'react-native';
-import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme } from '@repo/ui';
+import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DocumentModal from '../components/DocumentModal';
@@ -35,7 +35,7 @@ export default function PayCalculatorScreen() {
   const {
     // Display Values
     annualPay,
-    biWeeklyPay,
+    monthlyPay,
     incomeForDisplay,
     deductionsForDisplay,
     // Data for Pickers
@@ -48,6 +48,7 @@ export default function PayCalculatorScreen() {
     rank, setRank,
     yearsOfService, setYearsOfService,
     mha, setMha,
+    handleMhaChange,
     mhaDisplayName,
     filingStatus, setFilingStatus,
     dependencyStatus, setDependencyStatus,
@@ -59,6 +60,10 @@ export default function PayCalculatorScreen() {
     additionalDeductions, setAdditionalDeductions,
     showAddIncomeButton,
     showAddDeductionButton,
+    isTaxOverride, 
+    setIsTaxOverride,
+    federalStandardDeduction,
+    stateStandardDeduction,
     resetState,
   } = usePayCalculatorState();
 
@@ -184,9 +189,11 @@ export default function PayCalculatorScreen() {
         <Card containerStyle={{ marginBottom: theme.spacing.s }}>
             <PayDisplay
                 annualPay={annualPay}
-                biWeeklyPay={biWeeklyPay}
+                monthlyPay={monthlyPay}
                 payDetails={incomeForDisplay}
                 deductions={deductionsForDisplay}
+                federalStandardDeduction={federalStandardDeduction}
+                stateStandardDeduction={stateStandardDeduction}
             />
         </Card>
         <IconRow icons={[
@@ -213,6 +220,7 @@ export default function PayCalculatorScreen() {
                             <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Status</Text>
                             <SegmentedSelector
                                 options={[{label: 'Officer', value: 'Officer'}, {label: 'WO', value: 'Warrant Officer'}, {label: 'Enlisted', value: 'Enlisted'}]}
+                                ratios={[4, 2.75, 5]}
                                 selectedValues={[status]}
                                 onValueChange={(value) => setStatus(value)}
                                 style={{ marginLeft: 0, marginRight: 0 }}
@@ -252,7 +260,7 @@ export default function PayCalculatorScreen() {
                         </View>
                         <View style={[styles.fieldRow, { marginTop: theme.spacing.s }]}>
                             <Text style={styles.boldLabel}>Mil Housing Area</Text>
-                            <TwoColumnPicker mhaData={mhaData} selectedMha={mha} onMhaChange={setMha} displayName={mhaDisplayName} isLoading={isLoadingMha} error={mhaError} />
+                            <TwoColumnPicker mhaData={mhaData} selectedMha={mha} onMhaChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoadingMha} error={mhaError} />
                         </View>
                     </View>
                 </View>
@@ -335,9 +343,25 @@ export default function PayCalculatorScreen() {
                         />
                     </Pressable>
                     {isDeductionsExpanded && (
-                        <View style={styles.expandableContent}>
+                        <View style={[styles.expandableContent, { marginTop: 0 }]}>
+                            <View style={{alignItems: 'center'}}>
+                                <PillButton 
+                                    title={isTaxOverride ? 'Use Calculated Taxes' : 'Override Taxes'} 
+                                    onPress={() => setIsTaxOverride(!isTaxOverride)} 
+                                    textStyle={theme.typography.subtitle}
+                                />
+                            </View>
+
+                            {isTaxOverride && (
+                                <>
+                                    <View style={styles.fieldRow}><LabelWithHelp label="Federal Tax" contentKey="Federal Tax" /><CurrencyInput placeholder="0.00" value={deductions.overrideFedTax} onChangeText={(text) => setDeductions(d => ({...d, overrideFedTax: text}))} /></View>
+                                    <View style={styles.fieldRow}><LabelWithHelp label="State Tax" contentKey="State Tax" /><CurrencyInput placeholder="0.00" value={deductions.overrideStateTax} onChangeText={(text) => setDeductions(d => ({...d, overrideStateTax: text}))} /></View>
+                                    <View style={styles.fieldRow}><LabelWithHelp label="FICA" contentKey="FICA" /><CurrencyInput placeholder="0.00" value={deductions.overrideFicaTax} onChangeText={(text) => setDeductions(d => ({...d, overrideFicaTax: text}))} /></View>
+                                </>
+                            )}
+
                             <View style={styles.fieldRow}><LabelWithHelp label="SGLI" contentKey="Servicemembers' Group Life Insurance (SGLI)" /><CurrencyInput placeholder="0.00" value={deductions.sgli} onChangeText={(text) => setDeductions(d => ({...d, sgli: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="TSP CONTRIBUTION" contentKey="Thrift Savings Plan (TSP)" /><CurrencyInput placeholder="0.00" value={deductions.tsp} onChangeText={(text) => setDeductions(d => ({...d, tsp: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="TSP" contentKey="Thrift Savings Plan (TSP)" /><CurrencyInput placeholder="0.00" value={deductions.tsp} onChangeText={(text) => setDeductions(d => ({...d, tsp: text}))} /></View>
 
                             <LabelWithHelp label="Additional Deductions" contentKey="Additional Deductions" />
                             {additionalDeductions.map((deduction, index) => (

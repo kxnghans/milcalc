@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useDebounce } from './useDebounce';
-import { getBasePay, getBasRate, getBahRate, getMhaData } from '@repo/utils';
+import { getBasePay, getBasRate, getBahRate, getMhaData, getFederalTaxData, getStateTaxData, calculatePay, getMaxFederalTaxYear, getMaxStateTaxYear } from '@repo/utils';
 
 // A simple utility to parse currency strings into numbers
 const parseCurrency = (value: string | number) => {
@@ -44,19 +44,23 @@ export const usePayCalculatorState = () => {
   const [status, setStatus] = useState('Officer');
   const [rank, setRank] = useState(null);
   const [yearsOfService, setYearsOfService] = useState('');
-  const [mha, setMha] = useState('');
+  const [mha, setMha] = useState('initial');
   const [dependencyStatus, setDependencyStatus] = useState('WITHOUT_DEPENDENTS');
   const [filingStatus, setFilingStatus] = useState('single');
+  const [state, setState] = useState('');
 
   // --- Data & UI State ---
   const [mhaData, setMhaData] = useState({});
   const [filteredRanks, setFilteredRanks] = useState(officerRanks);
+  const [isTaxOverride, setIsTaxOverride] = useState(false);
+
 
   // Debounced values for calculations
   const debouncedRank = useDebounce(rank, 500);
   const debouncedYears = useDebounce(yearsOfService, 500);
   const debouncedMha = useDebounce(mha, 500);
   const debouncedDependencyStatus = useDebounce(dependencyStatus, 500);
+  const debouncedFilingStatus = useDebounce(filingStatus, 500);
 
   // --- Fetched & Calculated Income State ---
   const [basePay, setBasePay] = useState(0);
@@ -75,17 +79,50 @@ export const usePayCalculatorState = () => {
   const [additionalIncomes, setAdditionalIncomes] = useState([{ name: '', amount: '' }]);
   const [isDeductionsExpanded, setDeductionsExpanded] = useState(false);
   const [deductions, setDeductions] = useState({
-    fedTax: '', ficaTax: '', stateTax: '', sgli: '', tsp: ''
+    sgli: '',
+    tsp: '',
+    overrideFedTax: '',
+    overrideStateTax: '',
+    overrideFicaTax: '',
   });
   const [additionalDeductions, setAdditionalDeductions] = useState([{ name: '', amount: '' }]);
+  const [calculatedTaxes, setCalculatedTaxes] = useState({ fedTax: 0, stateTax: 0, ficaTax: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 });
 
   // Effect to fetch MHA data once on mount
   useEffect(() => {
     const fetchMhaData = async () => {
         const data = await getMhaData();
+        for (const state in data) {
+            data[state].unshift({ label: 'ON BASE', value: 'ON_BASE' });
+        }
         setMhaData(data);
     };
     fetchMhaData();
+  }, []);
+
+  const [federalTaxData, setFederalTaxData] = useState([]);
+  const [stateTaxData, setStateTaxData] = useState([]);
+  const [federalTaxYear, setFederalTaxYear] = useState<number | null>(null);
+  const [stateTaxYear, setStateTaxYear] = useState<number | null>(null);
+
+  // Effect to fetch tax data once on mount
+  useEffect(() => {
+    const fetchTaxYearsAndData = async () => {
+      const maxFederalYear = await getMaxFederalTaxYear();
+      const maxStateYear = await getMaxStateTaxYear();
+      setFederalTaxYear(maxFederalYear);
+      setStateTaxYear(maxStateYear);
+
+      if (maxFederalYear) {
+        const federalData = await getFederalTaxData(maxFederalYear);
+        setFederalTaxData(federalData);
+      }
+      if (maxStateYear) {
+        const stateData = await getStateTaxData(maxStateYear);
+        setStateTaxData(stateData);
+      }
+    };
+    fetchTaxYearsAndData();
   }, []);
 
   // Effect to filter ranks when status changes
@@ -100,48 +137,55 @@ export const usePayCalculatorState = () => {
     setRank(null); // Reset rank when status changes
   }, [status]);
 
-  // Effect to fetch Base Pay
+  // Main calculation effect
   useEffect(() => {
-    const fetchBasePay = async () => {
-        if (debouncedRank && debouncedYears) {
-            setIsBasePayLoading(true);
-            try {
-                const newBasePay = await getBasePay(debouncedRank, Number(debouncedYears));
-                setBasePay(newBasePay);
-            } finally {
-                setIsBasePayLoading(false);
-            }
+    const calculateAll = async () => {
+      if (debouncedRank && debouncedYears) {
+        setIsBasePayLoading(true);
+        try {
+          const newBasePay = await getBasePay(debouncedRank, Number(debouncedYears));
+          setBasePay(newBasePay);
+        } finally {
+          setIsBasePayLoading(false);
         }
-    };
-    fetchBasePay();
-  }, [debouncedRank, debouncedYears]);
+      }
 
-  // Effect to fetch BAS
-  useEffect(() => {
-    const fetchBas = async () => {
-        if (debouncedRank) {
-            const newBas = await getBasRate(debouncedRank);
-            setBas(newBas);
-        }
-    };
-    fetchBas();
-  }, [debouncedRank]);
+      if (debouncedRank) {
+        const newBas = await getBasRate(debouncedRank);
+        setBas(newBas);
+      }
 
-  // Effect to fetch BAH
-  useEffect(() => {
-    const fetchBah = async () => {
-        if (debouncedRank && debouncedDependencyStatus && debouncedMha) {
-            setIsBahLoading(true);
-            try {
-                const newBah = await getBahRate(debouncedMha, debouncedRank, debouncedDependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS');
-                setBah(newBah);
-            } finally {
-                setIsBahLoading(false);
-            }
+      if (debouncedMha === 'initial' || debouncedMha === 'ON_BASE') {
+        setBah(0);
+      } else if (debouncedRank && debouncedDependencyStatus && debouncedMha) {
+        setIsBahLoading(true);
+        try {
+          const newBah = await getBahRate(debouncedMha, debouncedRank, debouncedDependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS');
+          setBah(newBah);
+        } finally {
+          setIsBahLoading(false);
         }
+      }
+
+      if (federalTaxData.length > 0 && stateTaxData.length > 0 && debouncedMha !== 'initial') {
+        const payInputs = {
+          basePay,
+          bah,
+          bas,
+          specialPays,
+          additionalIncomes,
+          deductions,
+          additionalDeductions,
+          filingStatus: debouncedFilingStatus,
+          state,
+        };
+        const { federalTax, stateTax, ficaTax, federalStandardDeduction, stateStandardDeduction } = await calculatePay(payInputs, federalTaxData, stateTaxData);
+        setCalculatedTaxes({ fedTax: federalTax, stateTax: stateTax, ficaTax: ficaTax, federalStandardDeduction, stateStandardDeduction });
+      }
     };
-    fetchBah();
-  }, [debouncedRank, debouncedDependencyStatus, debouncedMha]);
+
+    calculateAll();
+  }, [debouncedRank, debouncedYears, debouncedMha, debouncedDependencyStatus, debouncedFilingStatus, federalTaxData, stateTaxData, federalTaxYear, stateTaxYear, basePay, bah, bas, specialPays, additionalIncomes, deductions, additionalDeductions]);
 
   // --- Aggregation Logic ---
 
@@ -152,13 +196,20 @@ export const usePayCalculatorState = () => {
   }, [basePay, bah, bas, specialPays, additionalIncomes]);
 
   const totalDeductions = useMemo(() => {
-    const standardDeductionsTotal = Object.values(deductions).reduce((sum, val) => sum + parseCurrency(val), 0);
-    const additionalDeductionsTotal = additionalDeductions.reduce((sum, item) => sum + parseCurrency(item.amount), 0);
-    return standardDeductionsTotal + additionalDeductionsTotal;
-  }, [deductions, additionalDeductions]);
+    const sgliAndTsp = parseCurrency(deductions.sgli) + parseCurrency(deductions.tsp);
+  
+    let taxesTotal = 0;
+    if (isTaxOverride) {
+      taxesTotal = parseCurrency(deductions.overrideFedTax) + parseCurrency(deductions.overrideStateTax) + parseCurrency(deductions.overrideFicaTax);
+    } else {
+      taxesTotal = calculatedTaxes.fedTax + calculatedTaxes.stateTax + calculatedTaxes.ficaTax;
+    }
+  
+    return taxesTotal + sgliAndTsp;
+  }, [deductions, calculatedTaxes, isTaxOverride]);
 
-  const biWeeklyPay = useMemo(() => totalIncome - totalDeductions, [totalIncome, totalDeductions]);
-  const annualPay = useMemo(() => biWeeklyPay * 26, [biWeeklyPay]);
+  const monthlyPay = useMemo(() => totalIncome - totalDeductions, [totalIncome, totalDeductions]);
+  const annualPay = useMemo(() => monthlyPay * 12, [monthlyPay]);
 
   // --- Display-Specific Logic ---
 
@@ -180,27 +231,27 @@ export const usePayCalculatorState = () => {
   }, [basePay, bah, bas, specialPays, additionalIncomes]);
 
   const deductionsForDisplay = useMemo(() => {
+    const fedTaxValue = isTaxOverride ? deductions.overrideFedTax : calculatedTaxes.fedTax;
+    const stateTaxValue = isTaxOverride ? deductions.overrideStateTax : calculatedTaxes.stateTax;
+    const ficaTaxValue = isTaxOverride ? deductions.overrideFicaTax : calculatedTaxes.ficaTax;
+
     const details = [
-        { label: 'FED INC TAX', value: `$${formatCurrency(deductions.fedTax)}` },
-        { label: 'FICA TAX', value: `$${formatCurrency(deductions.ficaTax)}` },
-        { label: 'STATE INC TAX', value: `$${formatCurrency(deductions.stateTax)}` },
+        { label: 'FED INC TAX', value: `$${formatCurrency(fedTaxValue)}` },
+        { label: 'FICA TAX', value: `$${formatCurrency(ficaTaxValue)}` },
+        { label: 'STATE INC TAX', value: `$${formatCurrency(stateTaxValue)}` },
     ];
 
-    if (parseCurrency(deductions.sgli) > 0) {
-        details.push({ label: 'SGLI', value: `$${formatCurrency(deductions.sgli)}` });
-    }
-    if (parseCurrency(deductions.tsp) > 0) {
-        details.push({ label: 'TSP CONTRIBUTION', value: `$${formatCurrency(deductions.tsp)}` });
-    }
+    const otherDeductionsTotal =
+      parseCurrency(deductions.sgli) +
+      parseCurrency(deductions.tsp);
 
-    additionalDeductions.forEach(deduction => {
-        if (parseCurrency(deduction.amount) > 0) {
-            details.push({ label: deduction.name, value: `$${formatCurrency(deduction.amount)}` });
-        }
-    });
+    if (otherDeductionsTotal > 0) {
+      details.push({ label: 'Other', value: `$${formatCurrency(otherDeductionsTotal)}` });
+    }
 
     return details;
-  }, [deductions, additionalDeductions]);
+  }, [deductions, calculatedTaxes, isTaxOverride]);
+
   const lastAdditionalIncome = additionalIncomes[additionalIncomes.length - 1];
   const showAddIncomeButton = lastAdditionalIncome && lastAdditionalIncome.name && lastAdditionalIncome.amount;
 
@@ -209,14 +260,22 @@ export const usePayCalculatorState = () => {
 
 
   const mhaDisplayName = useMemo(() => {
-    if (!mha || !mhaData) return "Select MHA...";
-    const state = mha.substring(0, 2);
-    if (mhaData[state]) {
+    if (mha === 'initial') return "Select a state";
+    if (mha === 'ON_BASE') return "ON BASE";
+    if (!mha || !mhaData) return "...";
+    for (const state in mhaData) {
         const mhaObject = mhaData[state].find(m => m.value === mha);
-        return mhaObject ? mhaObject.label : "Select MHA...";
+        if (mhaObject) {
+            return mhaObject.label;
+        }
     }
-    return "Select MHA...";
+    return "...";
   }, [mha, mhaData]);
+
+  const handleMhaChange = (mha, state) => {
+    setMha(mha);
+    setState(state);
+  };
 
 
   const setRankAndStatus = (selectedRank) => {
@@ -235,7 +294,8 @@ export const usePayCalculatorState = () => {
     setStatus('Officer');
     setRank(null);
     setYearsOfService('');
-    setMha('');
+    setMha('initial');
+    setState('');
     setDependencyStatus('WITHOUT_DEPENDENTS');
     setFilingStatus('single');
     setSpecialPays({
@@ -245,9 +305,14 @@ export const usePayCalculatorState = () => {
     });
     setAdditionalIncomes([{ name: '', amount: '' }]);
     setDeductions({
-      fedTax: '', ficaTax: '', stateTax: '', sgli: '', tsp: ''
+        sgli: '',
+        tsp: '',
+        overrideFedTax: '',
+        overrideStateTax: '',
+        overrideFicaTax: '',
     });
     setAdditionalDeductions([{ name: '', amount: '' }]);
+    setIsTaxOverride(false);
   };
 
   // --- Return Values ---
@@ -255,11 +320,13 @@ export const usePayCalculatorState = () => {
     resetState, // Export the new function
     // Values for Display
     annualPay: `$${formatCurrency(annualPay)}`,
-    biWeeklyPay: `$${formatCurrency(biWeeklyPay)}`,
+    monthlyPay: `$${formatCurrency(monthlyPay)}`,
     incomeForDisplay,
     deductionsForDisplay,
     isBahLoading,
     isBasePayLoading,
+    federalStandardDeduction: calculatedTaxes.federalStandardDeduction,
+    stateStandardDeduction: calculatedTaxes.stateStandardDeduction,
 
     // Data for Pickers
     mhaData,
@@ -270,6 +337,7 @@ export const usePayCalculatorState = () => {
     rank, setRank: setRankAndStatus, // Override setRank with our custom function
     yearsOfService, setYearsOfService,
     mha, setMha,
+    handleMhaChange,
     mhaDisplayName,
     dependencyStatus, setDependencyStatus,
     filingStatus, setFilingStatus,
@@ -281,5 +349,7 @@ export const usePayCalculatorState = () => {
     additionalDeductions, setAdditionalDeductions,
     showAddIncomeButton,
     showAddDeductionButton,
+    isTaxOverride, 
+    setIsTaxOverride,
   };
 };
