@@ -51,9 +51,11 @@ export default function PayCalculatorScreen() {
     handleMhaChange,
     mhaDisplayName,
     filingStatus, setFilingStatus,
+    state,
     dependencyStatus, setDependencyStatus,
     isIncomeExpanded, setIncomeExpanded,
     isDeductionsExpanded, setDeductionsExpanded,
+    isStandardDeductionsExpanded, setIsStandardDeductionsExpanded,
     specialPays, setSpecialPays,
     additionalIncomes, setAdditionalIncomes,
     deductions, setDeductions,
@@ -194,6 +196,8 @@ export default function PayCalculatorScreen() {
                 deductions={deductionsForDisplay}
                 federalStandardDeduction={federalStandardDeduction}
                 stateStandardDeduction={stateStandardDeduction}
+                isStandardDeductionsExpanded={isStandardDeductionsExpanded}
+                onToggleStandardDeductions={() => setIsStandardDeductionsExpanded(!isStandardDeductionsExpanded)}
             />
         </Card>
         <IconRow icons={[
@@ -219,8 +223,8 @@ export default function PayCalculatorScreen() {
                         <View style={[styles.fieldRow, { marginBottom: theme.spacing.s }]}>
                             <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Status</Text>
                             <SegmentedSelector
-                                options={[{label: 'Officer', value: 'Officer'}, {label: 'WO', value: 'Warrant Officer'}, {label: 'Enlisted', value: 'Enlisted'}]}
-                                ratios={[4, 2.75, 5]}
+                                options={[{label: 'Enlisted', value: 'Enlisted'}, {label: 'WO', value: 'Warrant Officer'}, {label: 'Officer', value: 'Officer'}]}
+                                ratios={[5, 2.75, 4]}
                                 selectedValues={[status]}
                                 onValueChange={(value) => setStatus(value)}
                                 style={{ marginLeft: 0, marginRight: 0 }}
@@ -260,7 +264,7 @@ export default function PayCalculatorScreen() {
                         </View>
                         <View style={[styles.fieldRow, { marginTop: theme.spacing.s }]}>
                             <Text style={styles.boldLabel}>Mil Housing Area</Text>
-                            <TwoColumnPicker mhaData={mhaData} selectedMha={mha} onMhaChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoadingMha} error={mhaError} />
+                            <TwoColumnPicker mhaData={mhaData} selectedMha={mha} onMhaChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoadingMha} error={mhaError} state={state} />
                         </View>
                     </View>
                 </View>

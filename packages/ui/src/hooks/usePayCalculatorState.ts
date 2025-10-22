@@ -22,8 +22,9 @@ const formatCurrency = (value: number | string) => {
   };
 
 const officerRanks = [
-  { label: 'O-1', value: 'O-1' }, { label: 'O-2', value: 'O-2' }, { label: 'O-3', value: 'O-3' },
-  { label: 'O-1E', value: 'O-1E' }, { label: 'O-2E', value: 'O-2E' }, { label: 'O-3E', value: 'O-3E' },
+  { label: 'O-1', value: 'O-1' }, { label: 'O-1E', value: 'O-1E' }, 
+  { label: 'O-2', value: 'O-2' }, { label: 'O-2E', value: 'O-2E' }, 
+  { label: 'O-3', value: 'O-3' }, { label: 'O-3E', value: 'O-3E' },
   { label: 'O-4', value: 'O-4' }, { label: 'O-5', value: 'O-5' }, { label: 'O-6', value: 'O-6' },
   { label: 'O-7', value: 'O-7' }, { label: 'O-8', value: 'O-8' }, { label: 'O-9', value: 'O-9' }, { label: 'O-10', value: 'O-10' },
 ];
@@ -41,7 +42,7 @@ const enlistedRanks = [
 
 export const usePayCalculatorState = () => {
   // --- Raw Input State ---
-  const [status, setStatus] = useState('Officer');
+  const [status, setStatus] = useState('Enlisted');
   const [rank, setRank] = useState(null);
   const [yearsOfService, setYearsOfService] = useState('');
   const [mha, setMha] = useState('initial');
@@ -61,6 +62,7 @@ export const usePayCalculatorState = () => {
   const debouncedMha = useDebounce(mha, 500);
   const debouncedDependencyStatus = useDebounce(dependencyStatus, 500);
   const debouncedFilingStatus = useDebounce(filingStatus, 500);
+  const debouncedState = useDebounce(state, 500);
 
   // --- Fetched & Calculated Income State ---
   const [basePay, setBasePay] = useState(0);
@@ -78,6 +80,7 @@ export const usePayCalculatorState = () => {
   });
   const [additionalIncomes, setAdditionalIncomes] = useState([{ name: '', amount: '' }]);
   const [isDeductionsExpanded, setDeductionsExpanded] = useState(false);
+  const [isStandardDeductionsExpanded, setIsStandardDeductionsExpanded] = useState(false);
   const [deductions, setDeductions] = useState({
     sgli: '',
     tsp: '',
@@ -185,7 +188,7 @@ export const usePayCalculatorState = () => {
     };
 
     calculateAll();
-  }, [debouncedRank, debouncedYears, debouncedMha, debouncedDependencyStatus, debouncedFilingStatus, federalTaxData, stateTaxData, federalTaxYear, stateTaxYear, basePay, bah, bas, specialPays, additionalIncomes, deductions, additionalDeductions]);
+  }, [debouncedRank, debouncedYears, debouncedMha, debouncedDependencyStatus, debouncedFilingStatus, debouncedState, federalTaxData, stateTaxData, federalTaxYear, stateTaxYear, basePay, bah, bas, specialPays, additionalIncomes, deductions, additionalDeductions]);
 
   // --- Aggregation Logic ---
 
@@ -236,9 +239,9 @@ export const usePayCalculatorState = () => {
     const ficaTaxValue = isTaxOverride ? deductions.overrideFicaTax : calculatedTaxes.ficaTax;
 
     const details = [
-        { label: 'FED INC TAX', value: `$${formatCurrency(fedTaxValue)}` },
+        { label: 'FED TAX', value: `$${formatCurrency(fedTaxValue)}` },
         { label: 'FICA TAX', value: `$${formatCurrency(ficaTaxValue)}` },
-        { label: 'STATE INC TAX', value: `$${formatCurrency(stateTaxValue)}` },
+        { label: 'STATE TAX', value: `$${formatCurrency(stateTaxValue)}` },
     ];
 
     const otherDeductionsTotal =
@@ -339,10 +342,12 @@ export const usePayCalculatorState = () => {
     mha, setMha,
     handleMhaChange,
     mhaDisplayName,
+    state, setState,
     dependencyStatus, setDependencyStatus,
     filingStatus, setFilingStatus,
     isIncomeExpanded, setIncomeExpanded,
     isDeductionsExpanded, setDeductionsExpanded,
+    isStandardDeductionsExpanded, setIsStandardDeductionsExpanded,
     specialPays, setSpecialPays,
     additionalIncomes, setAdditionalIncomes,
     deductions, setDeductions,

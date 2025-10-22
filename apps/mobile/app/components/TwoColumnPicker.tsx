@@ -4,11 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import { useTheme, NeumorphicInset, PillButton } from '@repo/ui';
 
-const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoading, error }) => {
+const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoading, error, state: propState }) => {
   const { theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [states, setStates] = useState([]);
-  const [selectedState, setSelectedState] = useState('');
+  const [selectedState, setSelectedState] = useState(propState || '');
   const [tempSelectedMha, setTempSelectedMha] = useState(selectedMha);
 
   const mhasInState = useMemo(() => {
@@ -30,7 +30,8 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
                 setSelectedState('...');
                 setTempSelectedMha('');
             } else if (selectedMha === 'ON_BASE') {
-                setSelectedState('ON BASE');
+                // If ON_BASE is selected, we retain the previously selected state
+                setSelectedState(propState || '...');
                 setTempSelectedMha('ON_BASE');
             } else if (selectedMha) {
                 const state = selectedMha.substring(0, 2);
@@ -181,13 +182,9 @@ const TwoColumnPicker = ({ mhaData, onMhaChange, selectedMha, displayName, isLoa
                                     itemStyle={styles.pickerItem}
                                 >
                                     {selectedState === '...' ? (
-                                        <Picker.Item label="Select your state" value="" enabled={false} />
-                                    ) : selectedState === 'N/A' ? (
-                                        <Picker.Item label="ON BASE" value="ON_BASE" />
-                                    ) : !selectedState ? (
-                                        <Picker.Item label="Select..." value="" enabled={false} />
+                                        <Picker.Item label="Select a state" value="" enabled={false} />
                                     ) : mhasInState.length === 0 ? (
-                                      <Picker.Item label="No MHAs" value="" enabled={false} />
+                                        <Picker.Item label="No MHAs" value="" enabled={false} />
                                     ) : (
                                       mhasInState.map(mha => (
                                         <Picker.Item key={mha.value} label={mha.label} value={mha.value} />

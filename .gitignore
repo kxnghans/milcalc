@@ -36,10 +36,10 @@ Thumbs.db
 .pnp.js
 
 # MilCalc specific
-packages/data
 /coverage
 .env
 .env.local
+packages/data
 
 # Vercel
 .vercel
