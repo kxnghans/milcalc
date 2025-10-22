@@ -9,6 +9,10 @@ import { supabase } from './supabaseClient';
 export const getBasePay = async (pay_grade: string, years_of_service: number) => {
   if (!pay_grade) return 0;
 
+  // If the pay grade is a prior-enlisted officer rank (e.g., 'O-1E'), strip the 'E' 
+  // to match the format in the database (e.g., 'O-1').
+  const adjusted_pay_grade = pay_grade.endsWith('E') ? pay_grade.slice(0, -1) : pay_grade;
+
   let yearsColumn = 'yos_2_or_less';
   if (years_of_service >= 40) yearsColumn = 'yos_over_40';
   else if (years_of_service >= 38) yearsColumn = 'yos_over_38';
@@ -35,7 +39,7 @@ export const getBasePay = async (pay_grade: string, years_of_service: number) =>
   const { data, error } = await supabase
     .from('base_pay_2024')
     .select(yearsColumn)
-    .eq('pay_grade', pay_grade)
+    .eq('pay_grade', adjusted_pay_grade)
     .single();
 
   if (error) {
@@ -111,9 +115,20 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
     // Correctly format the rank into a column name, padding with a zero if necessary
     const parts = rank.split('-');
     const letter = parts[0];
-    const number = parts[1];
+    let number = parts[1];
+    let isEnlisted = false;
+
+    if (number.endsWith('E')) {
+        isEnlisted = true;
+        number = number.slice(0, -1);
+    }
+
     const paddedNumber = number.length === 1 ? '0' + number : number;
-    const rankColumn = (letter + paddedNumber).toLowerCase();
+    let rankColumn = (letter + paddedNumber).toLowerCase();
+
+    if (isEnlisted) {
+        rankColumn += 'e';
+    }
 
     const { data, error } = await supabase
         .from(tableName)

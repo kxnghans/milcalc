@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, StyleProp, ViewStyle, Pressable } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface PayDetail {
@@ -15,9 +16,11 @@ interface PayDisplayProps {
   containerStyle?: StyleProp<ViewStyle>;
   federalStandardDeduction: number;
   stateStandardDeduction: number;
+  isStandardDeductionsExpanded: boolean;
+  onToggleStandardDeductions: () => void;
 }
 
-export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, payDetails, deductions, containerStyle, federalStandardDeduction, stateStandardDeduction }) => {
+export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, payDetails, deductions, containerStyle, federalStandardDeduction, stateStandardDeduction, isStandardDeductionsExpanded, onToggleStandardDeductions }) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -107,19 +110,33 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
             </View>
         </View>
       </View>
-      <View style={{ marginTop: theme.spacing.m, width: '100%' }}>
-        <Text style={styles.columnHeader}>Standard Deductions</Text>
-        <View style={{marginTop: theme.spacing.s}}>
-            <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Federal</Text>
-                <Text style={styles.detailValue}>${federalStandardDeduction.toLocaleString()}</Text>
-            </View>
-            <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>State</Text>
-                <Text style={styles.detailValue}>${stateStandardDeduction.toLocaleString()}</Text>
-            </View>
+      {!isStandardDeductionsExpanded && (
+        <View style={{ marginTop: 0, width: '100%', alignItems: 'center' }}>
+          <Pressable onPress={onToggleStandardDeductions}>
+            <MaterialCommunityIcons name='chevron-down' size={24} color={theme.colors.primary} />
+          </Pressable>
         </View>
-      </View>
+      )}
+      {isStandardDeductionsExpanded && (
+        <View style={{ marginTop: theme.spacing.m, width: '100%' }}>
+          <Text style={styles.columnHeader}>Standard Deductions</Text>
+          <View style={{marginTop: theme.spacing.s}}>
+              <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Federal</Text>
+                  <Text style={styles.detailValue}>${federalStandardDeduction.toLocaleString()}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>State</Text>
+                  <Text style={styles.detailValue}>${stateStandardDeduction.toLocaleString()}</Text>
+              </View>
+          </View>
+          <View style={{ marginTop: 0, width: '100%', alignItems: 'center' }}>
+            <Pressable onPress={onToggleStandardDeductions}>
+              <MaterialCommunityIcons name='chevron-up' size={24} color={theme.colors.primary} />
+            </Pressable>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

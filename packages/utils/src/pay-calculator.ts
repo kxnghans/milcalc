@@ -50,48 +50,48 @@ export const calculatePay = async (inputs, federalTaxData, stateTaxData) => {
 };
 const calculateFederalTax = (taxableIncome, filingStatus, federalTaxData) => {
   const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
-  const brackets = federalTaxData.filter(row => row.filing_status === capitalizedFilingStatus);
+  const brackets = federalTaxData
+    .filter(row => row.filing_status === capitalizedFilingStatus)
+    .sort((a, b) => parseFloat(a.income_bracket_low) - parseFloat(b.income_bracket_low));
+
   let tax = 0;
-  let remainingTaxableIncome = taxableIncome;
+  let remainingIncome = taxableIncome;
 
   for (const bracket of brackets) {
+    if (remainingIncome <= 0) break;
+
     const bracketMin = parseFloat(bracket.income_bracket_low);
     const bracketMax = bracket.income_bracket_high === 'inf' ? Infinity : parseFloat(bracket.income_bracket_high);
     const taxRate = parseFloat(bracket.tax_rate);
 
-    if (remainingTaxableIncome <= 0) break;
-
-    // Calculate the portion of the remaining taxable income that falls into this bracket
-    const amountInThisBracket = Math.min(remainingTaxableIncome, bracketMax) - bracketMin;
-
-    if (amountInThisBracket > 0) {
-      tax += amountInThisBracket * taxRate;
-      remainingTaxableIncome -= amountInThisBracket;
-    }
+    const incomeInBracket = Math.min(remainingIncome, bracketMax - bracketMin);
+    tax += incomeInBracket * taxRate;
+    remainingIncome -= incomeInBracket;
   }
+
   return tax;
 };
 
 const calculateStateTax = (taxableIncome, filingStatus, state, stateTaxData) => {
   const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
-  const brackets = stateTaxData.filter(row => row.state === state && row.filing_status === capitalizedFilingStatus);
+  const brackets = stateTaxData
+    .filter(row => row.state === state && row.filing_status === capitalizedFilingStatus)
+    .sort((a, b) => parseFloat(a.income_bracket_low) - parseFloat(b.income_bracket_low));
+
   let tax = 0;
-  let remainingTaxableIncome = taxableIncome;
+  let remainingIncome = taxableIncome;
 
   for (const bracket of brackets) {
+    if (remainingIncome <= 0) break;
+
     const bracketMin = parseFloat(bracket.income_bracket_low);
     const bracketMax = bracket.income_bracket_high === 'inf' ? Infinity : parseFloat(bracket.income_bracket_high);
     const taxRate = parseFloat(bracket.tax_rate);
 
-    if (remainingTaxableIncome <= 0) break;
-
-    // Calculate the portion of the remaining taxable income that falls into this bracket
-    const amountInThisBracket = Math.min(remainingTaxableIncome, bracketMax) - bracketMin;
-
-    if (amountInThisBracket > 0) {
-      tax += amountInThisBracket * taxRate;
-      remainingTaxableIncome -= amountInThisBracket;
-    }
+    const incomeInBracket = Math.min(remainingIncome, bracketMax - bracketMin);
+    tax += incomeInBracket * taxRate;
+    remainingIncome -= incomeInBracket;
   }
+
   return tax;
 };
