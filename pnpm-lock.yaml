@@ -120,8 +120,17 @@ importers:
 
   packages/data:
     devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.1
       typescript:
-        specifier: ^5.4.5
+        specifier: ^5.3.3
         version: 5.9.2
 
   packages/eslint-config:
