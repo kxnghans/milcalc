@@ -39,7 +39,6 @@ Thumbs.db
 /coverage
 .env
 .env.local
-/packages/data
 
 # Vercel
 .vercel
