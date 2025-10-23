@@ -18,7 +18,7 @@ Thumbs.db
 # Build artifacts
 /build
 /dist
-/.next
+.next/
 /out
 
 # Expo
@@ -39,7 +39,8 @@ Thumbs.db
 /coverage
 .env
 .env.local
-packages/data
 
 # Vercel
 .vercel
+
+/packages/data

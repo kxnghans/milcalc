@@ -9,5 +9,7 @@ export * from './color-utils';
 export * from './pay-calculator';
 export * from './pay-supabase-api';
 export * from './pt-supabase-api';
+export * from './supabaseClient';
+export * from './disability-supabase-api';
 export * from './pay-supabase-api';
 export * from './documents-supabase-api';

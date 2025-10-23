@@ -294,7 +294,7 @@ export const usePayCalculatorState = () => {
   };
 
   const resetState = () => {
-    setStatus('Officer');
+    setStatus('Enlisted');
     setRank(null);
     setYearsOfService('');
     setMha('initial');

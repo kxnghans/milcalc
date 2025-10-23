@@ -33,7 +33,6 @@ const CurrencyInput = React.forwardRef<TextInput, CurrencyInputProps>(({ style, 
       textAlign: 'left',
       ...theme.typography.label,
       color: theme.colors.text,
-      flex: 1,
       backgroundColor: 'transparent',
     },
   });
