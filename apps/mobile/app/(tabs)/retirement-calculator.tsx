@@ -7,6 +7,7 @@ import { ICONS } from '@repo/ui/icons';
 import DisabilityPicker from '../components/DisabilityPicker';
 import CurrencyInput from '../components/CurrencyInput';
 import NumberInput from '../components/NumberInput';
+import TwoColumnPicker from '../components/TwoColumnPicker';
 
 export default function RetirementCalculatorScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
@@ -29,6 +30,14 @@ export default function RetirementCalculatorScreen() {
     goodYears,
     setGoodYears,
     resetState,
+    mha,
+    setMha,
+    state,
+    mhaData,
+    isLoadingMha,
+    mhaError,
+    handleMhaChange,
+    mhaDisplayName,
     disabilityPercentage,
     setDisabilityPercentage,
     dependentStatus,
@@ -175,6 +184,10 @@ export default function RetirementCalculatorScreen() {
                       </View>
                     </View>
                   )}
+                    <View style={styles.fieldRow}>
+                      <Text style={styles.boldLabel}>MHA</Text>
+                      <TwoColumnPicker mhaData={mhaData} selectedMha={mha} onMhaChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoadingMha} error={mhaError} state={state} />
+                    </View>
                     <View style={styles.fieldRow}>
                       <Text style={styles.boldLabel}>Disability</Text>
                       <DisabilityPicker

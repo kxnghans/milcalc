@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useDebounce } from './useDebounce';
-import { getDisabilityData } from '@repo/utils';
+import { getDisabilityData, getMhaData } from '@repo/utils';
 
 export const useRetirementCalculatorState = () => {
   const [component, setComponent] = useState('Active');
@@ -19,6 +19,13 @@ export const useRetirementCalculatorState = () => {
   const [tspContributionAmount, setTspContributionAmount] = useState('');
   const [tspContributionPercentage, setTspContributionPercentage] = useState('');
   const [tspContributionYears, setTspContributionYears] = useState('');
+
+  // MHA State
+  const [mha, setMha] = useState('initial');
+  const [state, setState] = useState('');
+  const [mhaData, setMhaData] = useState({});
+  const [isLoadingMha, setIsLoadingMha] = useState(false);
+  const [mhaError, setMhaError] = useState(null);
 
   // Disability State
   const [disabilityPercentage, setDisabilityPercentage] = useState(null);
@@ -40,6 +47,22 @@ export const useRetirementCalculatorState = () => {
       setShowGoodYears(true);
     }
   }, [component]);
+
+  // Effect to fetch MHA data once on mount
+  useEffect(() => {
+    const fetchMhaData = async () => {
+      setIsLoadingMha(true);
+      try {
+        const data = await getMhaData();
+        setMhaData(data);
+      } catch (error) {
+        setMhaError(error.message);
+      } finally {
+        setIsLoadingMha(false);
+      }
+    };
+    fetchMhaData();
+  }, []);
 
   const percentageItems = [
     { label: '10%', value: '10' },
@@ -74,6 +97,24 @@ export const useRetirementCalculatorState = () => {
     fetchDisabilityData();
   }, []);
 
+  const mhaDisplayName = useMemo(() => {
+    if (mha === 'initial') return "Select a state";
+    if (mha === 'ON_BASE') return "ON BASE";
+    if (!mha || !mhaData) return "...";
+    for (const state in mhaData) {
+      const mhaObject = mhaData[state].find(m => m.value === mha);
+      if (mhaObject) {
+        return mhaObject.label;
+      }
+    }
+    return "...";
+  }, [mha, mhaData]);
+
+  const handleMhaChange = (mha, state) => {
+    setMha(mha);
+    setState(state);
+  };
+
   const resetState = () => {
     setComponent('Active');
     setRetirementSystem('High 3');
@@ -83,6 +124,8 @@ export const useRetirementCalculatorState = () => {
     setTspAmount('');
     setServicePoints('');
     setGoodYears('');
+    setMha('initial');
+    setState('');
     setDisabilityPercentage(null);
     setDependentStatus(null);
     setIsTspCalculatorVisible(false);
@@ -109,6 +152,14 @@ export const useRetirementCalculatorState = () => {
     goodYears,
     setGoodYears,
     resetState,
+    mha,
+    setMha,
+    state,
+    mhaData,
+    isLoadingMha,
+    mhaError,
+    handleMhaChange,
+    mhaDisplayName,
     disabilityPercentage,
     setDisabilityPercentage,
     dependentStatus,
