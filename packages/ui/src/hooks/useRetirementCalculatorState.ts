@@ -20,15 +20,26 @@ export const useRetirementCalculatorState = () => {
   const [tspContributionPercentage, setTspContributionPercentage] = useState('');
   const [tspContributionYears, setTspContributionYears] = useState('');
 
-  // BRS State
-  const [brsContribution, setBrsContribution] = useState('');
-
   // Disability State
   const [disabilityPercentage, setDisabilityPercentage] = useState(null);
   const [dependentStatus, setDependentStatus] = useState(null);
   const [disabilityData, setDisabilityData] = useState([]);
   const [isDisabilityLoading, setIsDisabilityLoading] = useState(false);
   const [disabilityError, setDisabilityError] = useState(null);
+
+  // Conditional Inputs
+  const [showServicePoints, setShowServicePoints] = useState(true);
+  const [showGoodYears, setShowGoodYears] = useState(true);
+
+  useEffect(() => {
+    if (component === 'Active') {
+      setShowServicePoints(false);
+      setShowGoodYears(false);
+    } else {
+      setShowServicePoints(true);
+      setShowGoodYears(true);
+    }
+  }, [component]);
 
   const percentageItems = [
     { label: '10%', value: '10' },
@@ -72,7 +83,6 @@ export const useRetirementCalculatorState = () => {
     setTspAmount('');
     setServicePoints('');
     setGoodYears('');
-    setBrsContribution('');
     setDisabilityPercentage(null);
     setDependentStatus(null);
     setIsTspCalculatorVisible(false);
@@ -98,8 +108,6 @@ export const useRetirementCalculatorState = () => {
     setServicePoints,
     goodYears,
     setGoodYears,
-    brsContribution,
-    setBrsContribution,
     resetState,
     disabilityPercentage,
     setDisabilityPercentage,
@@ -118,5 +126,7 @@ export const useRetirementCalculatorState = () => {
     setTspContributionPercentage,
     tspContributionYears,
     setTspContributionYears,
+    showServicePoints,
+    showGoodYears,
   };
 };
