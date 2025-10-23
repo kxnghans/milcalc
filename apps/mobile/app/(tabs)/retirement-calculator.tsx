@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRetirementCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, StyledTextInput, PillButton } from '@repo/ui';
 import PickerInput from '../components/PickerInput';
 import DocumentModal from '../components/DocumentModal';
@@ -28,8 +28,6 @@ export default function RetirementCalculatorScreen() {
     setServicePoints,
     goodYears,
     setGoodYears,
-    brsContribution,
-    setBrsContribution,
     resetState,
     disabilityPercentage,
     setDisabilityPercentage,
@@ -48,6 +46,8 @@ export default function RetirementCalculatorScreen() {
     setTspContributionPercentage,
     tspContributionYears,
     setTspContributionYears,
+    showServicePoints,
+    showGoodYears,
   } = useRetirementCalculatorState();
 
   const styles = StyleSheet.create({
@@ -67,15 +67,39 @@ export default function RetirementCalculatorScreen() {
       width: '100%',
       marginBottom: 8,
     },
-        label: {
-          ...theme.typography.body,
-          color: theme.colors.text,
-          marginBottom: theme.spacing.s,
-        },
-        centerLabel: {
-          textAlign: 'center',
-        },
-      });
+    label: {
+      ...theme.typography.body,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.s,
+    },
+    centerLabel: {
+      textAlign: 'center',
+    },
+    boldLabel: {
+        ...theme.typography.subtitle,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.s,
+    },
+    labelRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: theme.spacing.s,
+    },
+    expandableHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    expandableContent: {
+        overflow: 'hidden',
+        marginTop: theme.spacing.s,
+    },
+    addIconContainer: {
+        alignItems: 'center',
+        marginBottom: theme.spacing.s,
+    }
+  });
     
       const getThemeIcon = () => {
         if (themeMode === 'light') return ICONS.THEME_LIGHT;
@@ -84,116 +108,126 @@ export default function RetirementCalculatorScreen() {
       };
     
       return (
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
           <DocumentModal category="RETIREMENT" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
-          <Card containerStyle={{ marginBottom: theme.spacing.s }}>
-            <PayDisplay
-              annualPay="$0.00"
-              monthlyPay="$0.00"
-              payDetails={[]}
-              deductions={[]}
-              federalStandardDeduction={0}
-              stateStandardDeduction={0}
-              isStandardDeductionsExpanded={false}
-              onToggleStandardDeductions={() => {}}
-            />
-          </Card>
-          <IconRow icons={[
-            {
-                name: ICONS.RESET,
-                onPress: resetState,
-            },
-            {
-                name: ICONS.DOCUMENT,
-                onPress: () => setPdfModalVisible(true),
-            },
-            {
-                name: getThemeIcon(),
-                onPress: toggleTheme,
-            },
-          ]} />
-          <Card style={{ flex: 1, paddingBottom: 0 }}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <SegmentedSelector
-                options={[{label: 'Active', value: 'Active'}, {label: 'Reserves', value: 'Reserves'}, {label: 'Guard', value: 'Guard'}]}
-                selectedValues={[component]}
-                onValueChange={(value) => setComponent(value)}
+          <View>
+            <Card containerStyle={{ marginBottom: theme.spacing.s }}>
+              <PayDisplay
+                annualPay="$0.00"
+                monthlyPay="$0.00"
+                payDetails={[]}
+                deductions={[]}
+                federalStandardDeduction={0}
+                stateStandardDeduction={0}
+                isStandardDeductionsExpanded={false}
+                onToggleStandardDeductions={() => {}}
               />
-              <SegmentedSelector
-                options={[{label: 'High 3', value: 'High 3'}, {label: 'BRS', value: 'BRS'}]}
-                selectedValues={[retirementSystem]}
-                onValueChange={(value) => setRetirementSystem(value)}
-              />
-    
-              {retirementSystem === 'High 3' && (
-                <View>
-                  <View style={styles.row}>
-                    <View style={{flex: 1, marginRight: 8}}>
-                      <Text style={[styles.label, styles.centerLabel]}>Year 1</Text>
-                      <PickerInput items={[{label: '2023', value: '2023'}]} selectedValue={high3Year1} onValueChange={setHigh3Year1} placeholder="Select..." />
-                    </View>
-                    <View style={{flex: 1, marginRight: 8}}>
-                      <Text style={[styles.label, styles.centerLabel]}>Year 2</Text>
-                      <PickerInput items={[{label: '2022', value: '2022'}]} selectedValue={high3Year2} onValueChange={setHigh3Year2} placeholder="Select..." />
-                    </View>
-                    <View style={{flex: 1}}>
-                      <Text style={[styles.label, styles.centerLabel]}>Year 3</Text>
-                      <PickerInput items={[{label: '2021', value: '2021'}]} selectedValue={high3Year3} onValueChange={setHigh3Year3} placeholder="Select..." />
-                    </View>
-                  </View>
-                  <View style={styles.fieldRow}>
-                    <Text style={styles.label}>Disability</Text>
-                    <DisabilityPicker
-                      onDisabilityChange={(percentage, status) => {
-                        setDisabilityPercentage(percentage);
-                        setDependentStatus(status);
-                      }}
-                      selectedDisability={{ percentage: disabilityPercentage, status: dependentStatus }}
-                      displayName="Select Disability"
-                      isLoading={isDisabilityLoading}
-                      error={disabilityError}
-                      percentageItems={percentageItems}
-                      statusItems={statusItems}
-                    />
-                  </View>
-                  <View style={styles.fieldRow}>
-                    <Text style={styles.label}>TSP Amount</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <CurrencyInput style={{ flex: 1 }} placeholder="0.00" value={tspAmount} onChangeText={setTspAmount} />
-                      <View style={{ width: theme.spacing.s }} />
-                      <PillButton title={isTspCalculatorVisible ? "Input TSP" : "Calculate TSP"} onPress={() => setIsTspCalculatorVisible(!isTspCalculatorVisible)} backgroundColor={isTspCalculatorVisible ? theme.colors.disabled : theme.colors.primary} />
-                    </View>
-                  </View>
-
-                  {isTspCalculatorVisible && (
+            </Card>
+            <IconRow icons={[
+              {
+                  name: ICONS.RESET,
+                  onPress: resetState,
+              },
+              {
+                  name: ICONS.DOCUMENT,
+                  onPress: () => setPdfModalVisible(true),
+              },
+              {
+                  name: getThemeIcon(),
+                  onPress: toggleTheme,
+              },
+            ]} />
+          </View>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+          >
+            <View style={{ flex: 1 }}>
+              <Card style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
+                  <SegmentedSelector
+                    style={{ marginLeft: 0, marginRight: 0 }}
+                    options={[{label: 'Active', value: 'Active'}, {label: 'Reserves', value: 'Reserves'}, {label: 'Guard', value: 'Guard'}]}
+                    selectedValues={[component]}
+                    onValueChange={(value) => setComponent(value)}
+                  />
+                  <SegmentedSelector
+                    style={{ marginLeft: 0, marginRight: 0, marginBottom: theme.spacing.m }}
+                    options={[{label: 'High 3', value: 'High 3'}, {label: 'BRS', value: 'BRS'}]}
+                    selectedValues={[retirementSystem]}
+                    onValueChange={(value) => setRetirementSystem(value)}
+                  />
+        
+                  <View>
+                  {retirementSystem === 'High 3' && (
                     <View style={styles.row}>
-                        <View style={{flex: 5, marginRight: 8}}>
-                            <Text style={[styles.label, styles.centerLabel]}>Avg Salary</Text>
-                            <CurrencyInput placeholder="0.00" value={tspContributionAmount} onChangeText={setTspContributionAmount} />
-                        </View>
-                        <View style={{flex: 2, marginRight: 8}}>
-                            <Text style={[styles.label, styles.centerLabel]}>Cont. %</Text>
-                            <NumberInput placeholder="0" value={tspContributionPercentage} onChangeText={setTspContributionPercentage} />
-                        </View>
-                        <View style={{flex: 2}}>
-                            <Text style={[styles.label, styles.centerLabel]}>Years</Text>
-                            <NumberInput placeholder="0" value={tspContributionYears} onChangeText={setTspContributionYears} />
-                        </View>
+                      <View style={{flex: 1, marginRight: 8}}>
+                        <Text style={[styles.boldLabel, styles.centerLabel]}>Year 1</Text>
+                        <PickerInput items={[{label: '2023', value: '2023'}]} selectedValue={high3Year1} onValueChange={setHigh3Year1} placeholder="Select..." />
+                      </View>
+                      <View style={{flex: 1, marginRight: 8}}>
+                        <Text style={[styles.boldLabel, styles.centerLabel]}>Year 2</Text>
+                        <PickerInput items={[{label: '2022', value: '2022'}]} selectedValue={high3Year2} onValueChange={setHigh3Year2} placeholder="Select..." />
+                      </View>
+                      <View style={{flex: 1}}>
+                        <Text style={[styles.boldLabel, styles.centerLabel]}>Year 3</Text>
+                        <PickerInput items={[{label: '2021', value: '2021'}]} selectedValue={high3Year3} onValueChange={setHigh3Year3} placeholder="Select..." />
+                      </View>
                     </View>
                   )}
-                  <View style={styles.fieldRow}>
-                    <Text style={styles.label}>Service Points</Text>
-                    <NumberInput placeholder="0" value={servicePoints} onChangeText={setServicePoints} />
+                    <View style={styles.fieldRow}>
+                      <Text style={styles.boldLabel}>Disability</Text>
+                      <DisabilityPicker
+                        onDisabilityChange={(percentage, status) => {
+                          setDisabilityPercentage(percentage);
+                          setDependentStatus(status);
+                        }}
+                        selectedDisability={{ percentage: disabilityPercentage, status: dependentStatus }}
+                        displayName="Select Disability"
+                        isLoading={isDisabilityLoading}
+                        error={disabilityError}
+                        percentageItems={percentageItems}
+                        statusItems={statusItems}
+                      />
+                    </View>
+                    <View style={styles.fieldRow}>
+                      <Text style={styles.boldLabel}>TSP Amount</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <CurrencyInput style={{ flex: 1 }} placeholder="0.00" value={tspAmount} onChangeText={setTspAmount} />
+                        <View style={{ width: theme.spacing.s }} />
+                        <PillButton title={isTspCalculatorVisible ? "Input TSP" : "Calculate TSP"} onPress={() => setIsTspCalculatorVisible(!isTspCalculatorVisible)} backgroundColor={isTspCalculatorVisible ? theme.colors.disabled : theme.colors.primary} style={{ marginTop: 0, marginBottom: 0 }} />
+                      </View>
+                    </View>
+    
+                    {isTspCalculatorVisible && (
+                      <View style={styles.row}>
+                          <View style={{flex: 5, marginRight: 8}}>
+                              <Text style={[styles.boldLabel, styles.centerLabel]}>Avg Salary</Text>
+                              <CurrencyInput placeholder="0.00" value={tspContributionAmount} onChangeText={setTspContributionAmount} />
+                          </View>
+                          <View style={{flex: 2, marginRight: 8}}>
+                              <Text style={[styles.boldLabel, styles.centerLabel]}>Cont. %</Text>
+                              <NumberInput placeholder="0" value={tspContributionPercentage} onChangeText={setTspContributionPercentage} />
+                          </View>
+                          <View style={{flex: 2}}>
+                              <Text style={[styles.boldLabel, styles.centerLabel]}>Years</Text>
+                              <NumberInput placeholder="0" value={tspContributionYears} onChangeText={setTspContributionYears} />
+                          </View>
+                      </View>
+                    )}
+                    {showServicePoints && <View style={styles.fieldRow}>
+                      <Text style={styles.boldLabel}>Service Points</Text>
+                      <NumberInput placeholder="0" value={servicePoints} onChangeText={setServicePoints} />
+                    </View>}
+                    {showGoodYears && <View style={styles.fieldRow}>
+                      <Text style={styles.boldLabel}>Good Years</Text>
+                      <NumberInput placeholder="0" value={goodYears} onChangeText={setGoodYears} />
+                    </View>}
                   </View>
-                  <View style={styles.fieldRow}>
-                    <Text style={styles.label}>Good Years</Text>
-                    <NumberInput placeholder="0" value={goodYears} onChangeText={setGoodYears} />
-                  </View>
-                </View>
-              )}
-            </ScrollView>
-          </Card>
-        </ScrollView>
+                </ScrollView>
+              </Card>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
       );
     }
-    
