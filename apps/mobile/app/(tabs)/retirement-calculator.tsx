@@ -4,7 +4,6 @@ import { useRetirementCalculatorState, Card, IconRow, PayDisplay, SegmentedSelec
 import PickerInput from '../components/PickerInput';
 import DocumentModal from '../components/DocumentModal';
 import { ICONS } from '@repo/ui/icons';
-import DisabilityPicker from '../components/DisabilityPicker';
 import CurrencyInput from '../components/CurrencyInput';
 import NumberInput from '../components/NumberInput';
 import TwoColumnPicker from '../components/TwoColumnPicker';
@@ -17,12 +16,18 @@ export default function RetirementCalculatorScreen() {
     setComponent,
     retirementSystem,
     setRetirementSystem,
-    high3Year1,
-    setHigh3Year1,
-    high3Year2,
-    setHigh3Year2,
-    high3Year3,
-    setHigh3Year3,
+    high3PayGrade1,
+    setHigh3PayGrade1,
+    high3PayGrade2,
+    setHigh3PayGrade2,
+    high3PayGrade3,
+    setHigh3PayGrade3,
+    yearsOfService,
+    setYearsOfService,
+    filingStatus,
+    setFilingStatus,
+    brsPayGrade,
+    setBrsPayGrade,
     tspAmount,
     setTspAmount,
     servicePoints,
@@ -45,8 +50,6 @@ export default function RetirementCalculatorScreen() {
     disabilityData,
     isDisabilityLoading,
     disabilityError,
-    percentageItems,
-    statusItems,
     isTspCalculatorVisible,
     setIsTspCalculatorVisible,
     tspContributionAmount,
@@ -55,8 +58,22 @@ export default function RetirementCalculatorScreen() {
     setTspContributionPercentage,
     tspContributionYears,
     setTspContributionYears,
+    tspType,
+    setTspType,
+    tspReturn,
+    setTspReturn,
     showServicePoints,
     showGoodYears,
+    payGrades,
+    pension,
+    disabilityIncome,
+    tsp,
+    taxes,
+    isTspCalculated,
+    calculateAndSetTsp,
+    disabilityPickerData,
+    handleDisabilityChange,
+    disabilityDisplayName,
   } = useRetirementCalculatorState();
 
   const styles = StyleSheet.create({
@@ -116,16 +133,31 @@ export default function RetirementCalculatorScreen() {
         return ICONS.THEME_AUTO;
       };
     
+      const tspWithdrawal = tsp * 0.04;
+      const annualPay = pension * 12 + disabilityIncome * 12 - taxes.federal - taxes.state + tspWithdrawal;
+      const monthlyPay = pension + disabilityIncome - (taxes.federal / 12) - (taxes.state / 12) + (tspWithdrawal / 12);
+
+      const payDetails = [
+        { label: 'Pension', value: `$${pension.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+        { label: 'Disability', value: `$${disabilityIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+        { label: 'TSP', value: `$${(tspWithdrawal / 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+      ];
+
+      const deductions = [
+        { label: 'Federal Tax', value: `$${taxes.federal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+        { label: 'State Tax', value: `$${taxes.state.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+      ];
+
       return (
         <View style={styles.container}>
           <DocumentModal category="RETIREMENT" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
           <View>
             <Card containerStyle={{ marginBottom: theme.spacing.s }}>
               <PayDisplay
-                annualPay="$0.00"
-                monthlyPay="$0.00"
-                payDetails={[]}
-                deductions={[]}
+                annualPay={annualPay}
+                monthlyPay={monthlyPay}
+                payDetails={payDetails}
+                deductions={deductions}
                 federalStandardDeduction={0}
                 stateStandardDeduction={0}
                 isStandardDeductionsExpanded={false}
@@ -166,47 +198,59 @@ export default function RetirementCalculatorScreen() {
                     selectedValues={[retirementSystem]}
                     onValueChange={(value) => setRetirementSystem(value)}
                   />
+
+                  <View style={styles.fieldRow}>
+                    <Text style={styles.boldLabel}>Years of Service</Text>
+                    <NumberInput placeholder="0" value={yearsOfService} onChangeText={setYearsOfService} />
+                  </View>
+
+                  <View style={styles.row}>
+                    <View style={{flex: 1, marginRight: 8}}>
+                      <Text style={[styles.boldLabel, styles.centerLabel]}>Year -2</Text>
+                      <PickerInput items={payGrades.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade1} onValueChange={setHigh3PayGrade1} placeholder="Select..." disabled={!yearsOfService || yearsOfService < 3} />
+                    </View>
+                    <View style={{flex: 1, marginRight: 8}}>
+                      <Text style={[styles.boldLabel, styles.centerLabel]}>Year -1</Text>
+                      <PickerInput items={payGrades.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade2} onValueChange={setHigh3PayGrade2} placeholder="Select..." disabled={!yearsOfService || yearsOfService < 3} />
+                    </View>
+                    <View style={{flex: 1}}>
+                      <Text style={[styles.boldLabel, styles.centerLabel]}>Final Year</Text>
+                      <PickerInput items={payGrades.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade3} onValueChange={setHigh3PayGrade3} placeholder="Select..." disabled={!yearsOfService || yearsOfService < 3} />
+                    </View>
+                  </View>
+
+                  <View style={styles.fieldRow}>
+                    <Text style={styles.boldLabel}>Filing Status</Text>
+                    <SegmentedSelector
+                      style={{ marginLeft: 0, marginRight: 0 }}
+                      options={[{label: 'Single', value: 'Single'}, {label: 'Married', value: 'Married'}]}
+                      selectedValues={[filingStatus]}
+                      onValueChange={(value) => setFilingStatus(value)}
+                    />
+                  </View>
+
+
         
                   <View>
-                  {retirementSystem === 'High 3' && (
-                    <View style={styles.row}>
-                      <View style={{flex: 1, marginRight: 8}}>
-                        <Text style={[styles.boldLabel, styles.centerLabel]}>Year 1</Text>
-                        <PickerInput items={[{label: '2023', value: '2023'}]} selectedValue={high3Year1} onValueChange={setHigh3Year1} placeholder="Select..." />
-                      </View>
-                      <View style={{flex: 1, marginRight: 8}}>
-                        <Text style={[styles.boldLabel, styles.centerLabel]}>Year 2</Text>
-                        <PickerInput items={[{label: '2022', value: '2022'}]} selectedValue={high3Year2} onValueChange={setHigh3Year2} placeholder="Select..." />
-                      </View>
-                      <View style={{flex: 1}}>
-                        <Text style={[styles.boldLabel, styles.centerLabel]}>Year 3</Text>
-                        <PickerInput items={[{label: '2021', value: '2021'}]} selectedValue={high3Year3} onValueChange={setHigh3Year3} placeholder="Select..." />
-                      </View>
-                    </View>
-                  )}
+
                     <View style={styles.fieldRow}>
                       <Text style={styles.boldLabel}>MHA</Text>
-                      <TwoColumnPicker mhaData={mhaData} selectedMha={mha} onMhaChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoadingMha} error={mhaError} state={state} />
+                      <TwoColumnPicker data={mhaData} selectedValue={mha} onChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoadingMha} error={mhaError} primaryColumnValue={state} />
                     </View>
                     <View style={styles.fieldRow}>
-                      <Text style={styles.boldLabel}>Disability</Text>
-                      <DisabilityPicker
-                        onDisabilityChange={(percentage, status) => {
-                          setDisabilityPercentage(percentage);
-                          setDependentStatus(status);
-                        }}
-                        selectedDisability={{ percentage: disabilityPercentage, status: dependentStatus }}
-                        displayName="Select Disability"
-                        isLoading={isDisabilityLoading}
-                        error={disabilityError}
-                        percentageItems={percentageItems}
-                        statusItems={statusItems}
+                      <Text style={styles.boldLabel}>VA Disability</Text>
+                      <TwoColumnPicker data={disabilityPickerData} selectedValue={dependentStatus} onChange={handleDisabilityChange} displayName={disabilityDisplayName} isLoading={isDisabilityLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryPlaceholder="N/A" secondaryPlaceholder="No Disability" />
+                    </View>
+                    <View style={styles.fieldRow}>
+                      <Text style={styles.boldLabel}>TSP</Text>
+                      <SegmentedSelector
+                        style={{ marginLeft: 0, marginRight: 0, marginBottom: theme.spacing.m }}
+                        options={[{label: 'Roth', value: 'Roth'}, {label: 'Traditional', value: 'Traditional'}]}
+                        selectedValues={[tspType]}
+                        onValueChange={(value) => setTspType(value)}
                       />
-                    </View>
-                    <View style={styles.fieldRow}>
-                      <Text style={styles.boldLabel}>TSP Amount</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <CurrencyInput style={{ flex: 1 }} placeholder="0.00" value={tspAmount} onChangeText={setTspAmount} />
+                        <CurrencyInput style={{ flex: 1 }} placeholder="0.00" value={tspAmount} onChangeText={setTspAmount} editable={!isTspCalculatorVisible} />
                         <View style={{ width: theme.spacing.s }} />
                         <PillButton title={isTspCalculatorVisible ? "Input TSP" : "Calculate TSP"} onPress={() => setIsTspCalculatorVisible(!isTspCalculatorVisible)} backgroundColor={isTspCalculatorVisible ? theme.colors.disabled : theme.colors.primary} style={{ marginTop: 0, marginBottom: 0 }} />
                       </View>
@@ -214,7 +258,7 @@ export default function RetirementCalculatorScreen() {
     
                     {isTspCalculatorVisible && (
                       <View style={styles.row}>
-                          <View style={{flex: 5, marginRight: 8}}>
+                          <View style={{flex: 4.75, marginRight: 8}}>
                               <Text style={[styles.boldLabel, styles.centerLabel]}>Avg Salary</Text>
                               <CurrencyInput placeholder="0.00" value={tspContributionAmount} onChangeText={setTspContributionAmount} />
                           </View>
@@ -222,9 +266,13 @@ export default function RetirementCalculatorScreen() {
                               <Text style={[styles.boldLabel, styles.centerLabel]}>Cont. %</Text>
                               <NumberInput placeholder="0" value={tspContributionPercentage} onChangeText={setTspContributionPercentage} />
                           </View>
-                          <View style={{flex: 2}}>
+                          <View style={{flex: 2, marginRight: 8}}>
                               <Text style={[styles.boldLabel, styles.centerLabel]}>Years</Text>
                               <NumberInput placeholder="0" value={tspContributionYears} onChangeText={setTspContributionYears} />
+                          </View>
+                          <View style={{flex: 3}}>
+                              <Text style={[styles.boldLabel, styles.centerLabel]}>Return</Text>
+                              <PickerInput items={Array.from({ length: 51 }, (_, i) => ({ label: `${i}%`, value: i }))} selectedValue={tspReturn} onValueChange={setTspReturn} placeholder="Select..." />
                           </View>
                       </View>
                     )}

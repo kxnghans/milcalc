@@ -316,14 +316,17 @@ export const usePayCalculatorState = () => {
     });
     setAdditionalDeductions([{ name: '', amount: '' }]);
     setIsTaxOverride(false);
+    setIncomeExpanded(false);
+    setDeductionsExpanded(false);
+    setIsStandardDeductionsExpanded(false);
   };
 
   // --- Return Values ---
   return {
     resetState, // Export the new function
     // Values for Display
-    annualPay: `$${formatCurrency(annualPay)}`,
-    monthlyPay: `$${formatCurrency(monthlyPay)}`,
+    annualPay,
+    monthlyPay,
     incomeForDisplay,
     deductionsForDisplay,
     isBahLoading,

@@ -218,3 +218,16 @@ export const getMaxStateTaxYear = async () => {
   }
   return data ? data.year : null;
 };
+
+export const getPayGrades = async () => {
+  const { data, error } = await supabase
+    .from('base_pay_2024')
+    .select('pay_grade');
+
+  if (error) {
+    console.error('Error fetching pay grades:', error);
+    return [];
+  }
+
+  return data ? data.map(item => item.pay_grade) : [];
+};
