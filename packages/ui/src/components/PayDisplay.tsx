@@ -5,12 +5,12 @@ import { useTheme } from '../contexts/ThemeContext';
 
 interface PayDetail {
   label: string;
-  value: string;
+  value: any;
 }
 
 interface PayDisplayProps {
-  annualPay: string;
-  monthlyPay: string;
+  annualPay: number;
+  monthlyPay: number;
   payDetails: PayDetail[];
   deductions: PayDetail[];
   containerStyle?: StyleProp<ViewStyle>;
@@ -72,16 +72,23 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
     },
   });
 
+  const renderCurrency = (value: any) => {
+    if (typeof value === 'number') {
+      return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return value;
+  };
+
   return (
     <View style={[styles.container, containerStyle]}>
       <View style={styles.totalPayContainer}>
         <View style={styles.payRow}>
           <Text style={styles.annualLabel}>ANNUAL: </Text>
-          <Text style={styles.totalPayValue}>{annualPay}</Text>
+          <Text style={styles.totalPayValue}>${renderCurrency(annualPay)}</Text>
         </View>
         <View style={[styles.payRow, { marginTop: theme.spacing.s }]}>
           <Text style={styles.totalPayLabel}>MONTHLY: </Text>
-          <Text style={styles.detailValue}>{monthlyPay}</Text>
+          <Text style={styles.detailValue}>${renderCurrency(monthlyPay)}</Text>
         </View>
       </View>
       <View style={{ flexDirection: 'row', width: '100%' }}>
@@ -92,7 +99,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                 {payDetails.map((detail, index) => (
                 <View key={index} style={styles.detailRow}>
                     <Text style={styles.detailLabel}>{detail.label === 'Other' ? detail.label : detail.label.toUpperCase()}</Text>
-                    <Text style={styles.detailValue}>{detail.value}</Text>
+                    <Text style={styles.detailValue}>{renderCurrency(detail.value)}</Text>
                 </View>
                 ))}
             </View>
@@ -104,7 +111,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                 {deductions.map((deduction, index) => (
                 <View key={index} style={styles.detailRow}>
                     <Text style={styles.detailLabel}>{deduction.label === 'Other' ? deduction.label : deduction.label.toUpperCase()}</Text>
-                    <Text style={styles.detailValue}>{deduction.value}</Text>
+                    <Text style={styles.detailValue}>{renderCurrency(deduction.value)}</Text>
                 </View>
                 ))}
             </View>

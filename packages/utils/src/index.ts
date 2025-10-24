@@ -13,3 +13,4 @@ export * from './supabaseClient';
 export * from './disability-supabase-api';
 export * from './pay-supabase-api';
 export * from './documents-supabase-api';
+export * from './retirement-calculator';
