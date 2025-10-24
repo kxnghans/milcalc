@@ -21,6 +21,34 @@ export const useRetirementCalculatorState = () => {
   const [tspType, setTspType] = useState('Roth');
   const [tspReturn, setTspReturn] = useState(8);
 
+  const [federalStandardDeduction, setFederalStandardDeduction] = useState(0);
+  const [stateStandardDeduction, setStateStandardDeduction] = useState(0);
+  const [birthDate, setBirthDate] = useState(null);
+  const [serviceEntryDate, setServiceEntryDate] = useState(null);
+  const [qualifyingDeploymentDays, setQualifyingDeploymentDays] = useState('');
+  const [isPayDisplayExpanded, setIsPayDisplayExpanded] = useState(false);
+  const [isRetirementAgeCalculatorVisible, setIsRetirementAgeCalculatorVisible] = useState(false);
+  const [retirementAge, setRetirementAge] = useState(null);
+
+  const calculateRetirementAge = () => {
+    if (!birthDate || !serviceEntryDate) return;
+
+    if (component === 'Active') {
+      const retirementDate = new Date(serviceEntryDate);
+      retirementDate.setFullYear(retirementDate.getFullYear() + parseInt(yearsOfService, 10));
+      const ageAtRetirement = retirementDate.getFullYear() - birthDate.getFullYear();
+      const m = retirementDate.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && retirementDate.getDate() < birthDate.getDate())) {
+        setRetirementAge(ageAtRetirement - 1);
+      } else {
+        setRetirementAge(ageAtRetirement);
+      }
+    } else {
+      const retirementAgeYears = 60 - Math.floor(qualifyingDeploymentDays / 90) * 0.25;
+      setRetirementAge(retirementAgeYears);
+    }
+  };
+
   const [payGrades, setPayGrades] = useState([]);
   const [isPayGradesLoading, setIsPayGradesLoading] = useState(false);
   const [payGradesError, setPayGradesError] = useState(null);
@@ -50,8 +78,12 @@ export const useRetirementCalculatorState = () => {
   const debouncedTspContributionYears = useDebounce(tspContributionYears, 500);
 
   useEffect(() => {
+    calculateRetirementAge();
+  }, [birthDate, serviceEntryDate, yearsOfService, qualifyingDeploymentDays, component]);
+
+  useEffect(() => {
     const calculate = async () => {
-      const pensionValue = await calculatePension(component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints);
+      const pensionValue = await calculatePension(component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, goodYears);
       setPension(pensionValue);
 
       const disabilityIncomeValue = await calculateDisabilityIncome(disabilityPercentage, dependentStatus);
@@ -65,8 +97,10 @@ export const useRetirementCalculatorState = () => {
       }
 
       const grossIncome = pensionValue + disabilityIncomeValue;
-      const taxesValue = calculateTaxes(grossIncome, state, filingStatus, federalTaxData, stateTaxData);
-      setTaxes(taxesValue);
+      const { federal, state, federalStandardDeduction, stateStandardDeduction } = calculateTaxes(grossIncome, state, filingStatus, federalTaxData, stateTaxData);
+      setTaxes({ federal, state });
+      setFederalStandardDeduction(federalStandardDeduction);
+      setStateStandardDeduction(stateStandardDeduction);
     };
 
     calculate();
@@ -81,14 +115,16 @@ export const useRetirementCalculatorState = () => {
 
   // Disability State
   const [disabilityPercentage, setDisabilityPercentage] = useState(null);
-  const [dependentStatus, setDependentStatus] = useState('initial');
+  const [dependentStatus, setDependentStatus] = useState(null);
   const [disabilityData, setDisabilityData] = useState([]);
   const [isDisabilityLoading, setIsDisabilityLoading] = useState(false);
   const [disabilityError, setDisabilityError] = useState(null);
 
   const disabilityPickerData = useMemo(() => {
     if (!disabilityData) return {};
-    const groupedData = {};
+    const groupedData = {
+        '0%': [{ label: 'No Disability', value: 'none' }]
+    };
     disabilityData.forEach(item => {
       for (const key in item) {
         if (key.endsWith('%')) {
@@ -239,7 +275,8 @@ export const useRetirementCalculatorState = () => {
   }, [mha, mhaData]);
 
   const disabilityDisplayName = useMemo(() => {
-    if (dependentStatus === 'initial') return "Select disability";
+    if (!dependentStatus) return "Select disability";
+    if (disabilityPercentage === '0%') return "No Disability";
     return `${disabilityPercentage}% / ${dependentStatus}`;
   }, [disabilityPercentage, dependentStatus]);
 
@@ -251,6 +288,9 @@ export const useRetirementCalculatorState = () => {
   const handleDisabilityChange = (status, percentage) => {
     setDependentStatus(status);
     setDisabilityPercentage(percentage);
+    if (percentage === '0%') {
+        setDependentStatus('none');
+    }
   };
 
   const resetState = () => {
@@ -265,7 +305,7 @@ export const useRetirementCalculatorState = () => {
     setMha('initial');
     setState('');
     setDisabilityPercentage(null);
-    setDependentStatus('initial');
+    setDependentStatus(null);
     setIsTspCalculatorVisible(false);
     setTspContributionAmount('');
     setTspContributionPercentage('');
@@ -345,6 +385,20 @@ export const useRetirementCalculatorState = () => {
     stateTaxData,
     isStateTaxDataLoading,
     stateTaxDataError,
+    birthDate,
+    setBirthDate,
+    serviceEntryDate,
+    setServiceEntryDate,
+    qualifyingDeploymentDays,
+    setQualifyingDeploymentDays,
+    isPayDisplayExpanded,
+    setIsPayDisplayExpanded,
+    isRetirementAgeCalculatorVisible,
+    setIsRetirementAgeCalculatorVisible,
+    retirementAge,
+
+    federalStandardDeduction,
+    stateStandardDeduction,
 
     // Calculated values
     pension,

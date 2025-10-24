@@ -2,7 +2,17 @@
 import { getBasePay } from './pay-supabase-api';
 import { getDisabilityData } from './disability-supabase-api';
 
-export const calculatePension = async (component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, points) => {
+export const calculatePension = async (component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, points, goodYears) => {
+
+  if (component === 'Active') {
+    if (yearsOfService < 20) {
+      return 0;
+    }
+  } else {
+    if (goodYears < 20) {
+      return 0;
+    }
+  }
 
   if (!high3PayGrade1 || !high3PayGrade2 || !high3PayGrade3 || !yearsOfService || yearsOfService < 3) {
 
@@ -47,7 +57,7 @@ export const calculatePension = async (component, retirementSystem, high3PayGrad
 };
 
 export const calculateDisabilityIncome = async (disabilityPercentage, dependentStatus) => {
-  if (!disabilityPercentage || !dependentStatus) {
+  if (!disabilityPercentage || !dependentStatus || dependentStatus === 'none') {
     return 0;
   }
 
@@ -92,19 +102,67 @@ export const calculateTsp = (tspAmount, isTspCalculatorVisible, avgSalary, contr
 
 export const calculateTaxes = (grossIncome, state, filingStatus, federalTaxData, stateTaxData) => {
   if (!grossIncome || !state || !filingStatus) {
-    return { federal: 0, state: 0 };
+    return { federal: 0, state: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 };
   }
 
-  // Federal Tax
-  const federalBracket = federalTaxData.find(d => d.filing_status === filingStatus && grossIncome >= d.income_bracket_low && (d.income_bracket_high === 'over' || grossIncome < d.income_bracket_high));
-  const federalTaxableIncome = grossIncome - (federalBracket ? federalBracket.standard_deduction : 0);
-  const federalTax = federalTaxableIncome * (federalBracket ? federalBracket.tax_rate : 0);
+  const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
+  const federalStandardDeduction = federalTaxData.find(row => row.filing_status === capitalizedFilingStatus)?.standard_deduction || 0;
+  const stateStandardDeduction = stateTaxData.find(row => row.state === state && row.filing_status === capitalizedFilingStatus)?.standard_deduction || 0;
 
-  // State Tax
-  const stateBracket = stateTaxData.find(d => d.state === state && d.filing_status === filingStatus && grossIncome >= d.income_bracket_low && (d.income_bracket_high === 'over' || grossIncome < d.income_bracket_high));
-  const stateTaxableIncome = grossIncome - (stateBracket ? stateBracket.standard_deduction : 0);
-  const stateTax = stateTaxableIncome * (stateBracket ? stateBracket.tax_rate : 0);
+  const federalTaxableIncomeForBrackets = Math.max(0, grossIncome - federalStandardDeduction);
+  const stateTaxableIncomeForBrackets = Math.max(0, grossIncome - stateStandardDeduction);
 
-  return { federal: federalTax > 0 ? federalTax : 0, state: stateTax > 0 ? stateTax : 0 };
+  const federalTax = calculateFederalTax(federalTaxableIncomeForBrackets, filingStatus, federalTaxData);
+  const stateTax = calculateStateTax(stateTaxableIncomeForBrackets, filingStatus, state, stateTaxData);
+
+  return { federal: federalTax > 0 ? federalTax : 0, state: stateTax > 0 ? stateTax : 0, federalStandardDeduction, stateStandardDeduction };
+};
+
+const calculateFederalTax = (taxableIncome, filingStatus, federalTaxData) => {
+  const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
+  const brackets = federalTaxData
+    .filter(row => row.filing_status === capitalizedFilingStatus)
+    .sort((a, b) => parseFloat(a.income_bracket_low) - parseFloat(b.income_bracket_low));
+
+  let tax = 0;
+  let remainingIncome = taxableIncome;
+
+  for (const bracket of brackets) {
+    if (remainingIncome <= 0) break;
+
+    const bracketMin = parseFloat(bracket.income_bracket_low);
+    const bracketMax = bracket.income_bracket_high === 'inf' ? Infinity : parseFloat(bracket.income_bracket_high);
+    const taxRate = parseFloat(bracket.tax_rate);
+
+    const incomeInBracket = Math.min(remainingIncome, bracketMax - bracketMin);
+    tax += incomeInBracket * taxRate;
+    remainingIncome -= incomeInBracket;
+  }
+
+  return tax;
+};
+
+const calculateStateTax = (taxableIncome, filingStatus, state, stateTaxData) => {
+  const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
+  const brackets = stateTaxData
+    .filter(row => row.state === state && row.filing_status === capitalizedFilingStatus)
+    .sort((a, b) => parseFloat(a.income_bracket_low) - parseFloat(b.income_bracket_low));
+
+  let tax = 0;
+  let remainingIncome = taxableIncome;
+
+  for (const bracket of brackets) {
+    if (remainingIncome <= 0) break;
+
+    const bracketMin = parseFloat(bracket.income_bracket_low);
+    const bracketMax = bracket.income_bracket_high === 'inf' ? Infinity : parseFloat(bracket.income_bracket_high);
+    const taxRate = parseFloat(bracket.tax_rate);
+
+    const incomeInBracket = Math.min(remainingIncome, bracketMax - bracketMin);
+    tax += incomeInBracket * taxRate;
+    remainingIncome -= incomeInBracket;
+  }
+
+  return tax;
 };
 

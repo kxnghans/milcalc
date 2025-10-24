@@ -18,3 +18,4 @@ export * from './Icon';
 export * from './ExemptButton';
 export * from './PayDisplay';
 export * from './PillButton';
+export * from './DatePickerModal';

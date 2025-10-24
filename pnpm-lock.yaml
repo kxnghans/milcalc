@@ -37,6 +37,9 @@ importers:
       '@expo/metro-runtime':
         specifier: 6.1.2
         version: 6.1.2(expo@54.0.13)(react-dom@19.1.0(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)
+      '@react-native-community/datetimepicker':
+        specifier: ^8.4.5
+        version: 8.4.5(expo@54.0.13)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)
       '@react-native-picker/picker':
         specifier: 2.11.1
         version: 2.11.1(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)
@@ -1272,6 +1275,19 @@ packages:
       react: 19.1.0
     peerDependenciesMeta:
       '@types/react':
+        optional: true
+
+  '@react-native-community/datetimepicker@8.4.5':
+    resolution: {integrity: sha512-vvVOJAHjU8TFBzTUjQzANCL6C3pZSE2zjfutCATk790uz7ASEc2tOBD+EIG4BTelWtP2G9jqvXp2L7XGdhEBRg==}
+    peerDependencies:
+      expo: '>=52.0.0'
+      react: 19.1.0
+      react-native: '*'
+      react-native-windows: '*'
+    peerDependenciesMeta:
+      expo:
+        optional: true
+      react-native-windows:
         optional: true
 
   '@react-native-picker/picker@2.11.1':
@@ -6269,6 +6285,14 @@ snapshots:
       react: 19.1.0
     optionalDependencies:
       '@types/react': 19.1.0
+
+  '@react-native-community/datetimepicker@8.4.5(expo@54.0.13)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      invariant: 2.2.4
+      react: 19.1.0
+      react-native: 0.81.4(@babel/core@7.28.4)(@types/react@19.1.0)(react@19.1.0)
+    optionalDependencies:
+      expo: 54.0.13(@babel/core@7.28.4)(@expo/metro-runtime@6.1.2)(expo-router@6.0.11)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)
 
   '@react-native-picker/picker@2.11.1(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)':
     dependencies:
