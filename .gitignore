@@ -42,4 +42,5 @@ Thumbs.db
 
 # Vercel
 .vercel
-packages/data
+
+/packages/data

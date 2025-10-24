@@ -167,28 +167,28 @@ const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading
                                     <Picker.Item key={item} label={item} value={item} />
                                     ))}
                                 </Picker>
-                                <Picker
-                                    selectedValue={tempSelectedValue}
-                                    onValueChange={(itemValue) => setTempSelectedValue(itemValue)}
-                                    style={styles.rightPicker}
-                                    enabled={selectedPrimary !== primaryPlaceholder && secondaryColumnItems.length > 0}
-                                    itemStyle={styles.pickerItem}
-                                >
-                                    {selectedPrimary === primaryPlaceholder ? (
-                                        <Picker.Item label={secondaryPlaceholder} value="" enabled={false} />
-                                    ) : secondaryColumnItems.length === 0 ? (
-                                        <Picker.Item label="No options" value="" enabled={false} />
-                                    ) : (
-                                      secondaryColumnItems.map(item => (
-                                        <Picker.Item key={item.value} label={item.label} value={item.value} />
-                                      ))
-                                    )}
-                                </Picker>
+                                {secondaryColumnItems.length > 0 && (
+                                    <Picker
+                                        selectedValue={tempSelectedValue}
+                                        onValueChange={(itemValue) => setTempSelectedValue(itemValue)}
+                                        style={styles.rightPicker}
+                                        enabled={selectedPrimary !== primaryPlaceholder}
+                                        itemStyle={styles.pickerItem}
+                                    >
+                                        {selectedPrimary === primaryPlaceholder ? (
+                                            <Picker.Item label={secondaryPlaceholder} value="" enabled={false} />
+                                        ) : (
+                                        secondaryColumnItems.map(item => (
+                                            <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                        ))
+                                        )}
+                                    </Picker>
+                                )}
                             </View>
                             <View style={styles.buttonContainer}>
                                 <PillButton title="Cancel" onPress={handleCancel} backgroundColor={theme.colors.error} textColor={theme.colors.primaryText} />
                                 <View style={{ width: theme.spacing.s }} />
-                                <PillButton title="Done" onPress={handleConfirm} disabled={!tempSelectedValue} backgroundColor={theme.colors.primary} />
+                                <PillButton title="Done" onPress={handleConfirm} disabled={!selectedPrimary || selectedPrimary === primaryPlaceholder} backgroundColor={theme.colors.primary} />
                             </View>
                         </>
                     )}

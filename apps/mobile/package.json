@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "6.1.2",
+    "@react-native-community/datetimepicker": "^8.4.5",
     "@react-native-picker/picker": "2.11.1",
     "@repo/data": "workspace:*",
     "@repo/ui": "workspace:*",

@@ -11,6 +11,7 @@ import TwoColumnPicker from '../components/TwoColumnPicker';
 export default function RetirementCalculatorScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
+
   const {
     component,
     setComponent,
@@ -74,6 +75,19 @@ export default function RetirementCalculatorScreen() {
     disabilityPickerData,
     handleDisabilityChange,
     disabilityDisplayName,
+    federalStandardDeduction,
+    stateStandardDeduction,
+    isPayDisplayExpanded,
+    setIsPayDisplayExpanded,
+    birthDate,
+    setBirthDate,
+    serviceEntryDate,
+    setServiceEntryDate,
+    qualifyingDeploymentDays,
+    setQualifyingDeploymentDays,
+    retirementAge,
+    isRetirementAgeCalculatorVisible,
+    setIsRetirementAgeCalculatorVisible,
   } = useRetirementCalculatorState();
 
   const styles = StyleSheet.create({
@@ -138,14 +152,14 @@ export default function RetirementCalculatorScreen() {
       const monthlyPay = pension + disabilityIncome - (taxes.federal / 12) - (taxes.state / 12) + (tspWithdrawal / 12);
 
       const payDetails = [
-        { label: 'Pension', value: `$${pension.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
-        { label: 'Disability', value: `$${disabilityIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
-        { label: 'TSP', value: `$${(tspWithdrawal / 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+        { label: 'Pension', value: pension },
+        { label: 'VA DISABILITY', value: disabilityIncome },
+        { label: 'TSP', value: tspWithdrawal / 12 },
       ];
 
       const deductions = [
-        { label: 'Federal Tax', value: `$${taxes.federal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
-        { label: 'State Tax', value: `$${taxes.state.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+        { label: 'Federal Tax', value: taxes.federal },
+        { label: 'State Tax', value: taxes.state },
       ];
 
       return (
@@ -158,10 +172,18 @@ export default function RetirementCalculatorScreen() {
                 monthlyPay={monthlyPay}
                 payDetails={payDetails}
                 deductions={deductions}
-                federalStandardDeduction={0}
-                stateStandardDeduction={0}
-                isStandardDeductionsExpanded={false}
-                onToggleStandardDeductions={() => {}}
+                federalStandardDeduction={federalStandardDeduction}
+                stateStandardDeduction={stateStandardDeduction}
+                isStandardDeductionsExpanded={isPayDisplayExpanded}
+                onToggleStandardDeductions={() => setIsPayDisplayExpanded(!isPayDisplayExpanded)}
+                onGetRetirementAge={() => setIsRetirementAgeCalculatorVisible(!isRetirementAgeCalculatorVisible)}
+                isRetirementAgeCalculatorVisible={isRetirementAgeCalculatorVisible}
+                birthDate={birthDate}
+                setBirthDate={setBirthDate}
+                serviceEntryDate={serviceEntryDate}
+                setServiceEntryDate={setServiceEntryDate}
+                retirementAge={retirementAge}
+                component={component}
               />
             </Card>
             <IconRow icons={[
@@ -239,7 +261,7 @@ export default function RetirementCalculatorScreen() {
                     </View>
                     <View style={styles.fieldRow}>
                       <Text style={styles.boldLabel}>VA Disability</Text>
-                      <TwoColumnPicker data={disabilityPickerData} selectedValue={dependentStatus} onChange={handleDisabilityChange} displayName={disabilityDisplayName} isLoading={isDisabilityLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryPlaceholder="N/A" secondaryPlaceholder="No Disability" />
+                      <TwoColumnPicker data={disabilityPickerData} selectedValue={dependentStatus} onChange={handleDisabilityChange} displayName={disabilityDisplayName} isLoading={isDisabilityLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryPlaceholder="Select..." secondaryPlaceholder="No Disability" />
                     </View>
                     <View style={styles.fieldRow}>
                       <Text style={styles.boldLabel}>TSP</Text>
@@ -252,7 +274,7 @@ export default function RetirementCalculatorScreen() {
                       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <CurrencyInput style={{ flex: 1 }} placeholder="0.00" value={tspAmount} onChangeText={setTspAmount} editable={!isTspCalculatorVisible} />
                         <View style={{ width: theme.spacing.s }} />
-                        <PillButton title={isTspCalculatorVisible ? "Input TSP" : "Calculate TSP"} onPress={() => setIsTspCalculatorVisible(!isTspCalculatorVisible)} backgroundColor={isTspCalculatorVisible ? theme.colors.disabled : theme.colors.primary} style={{ marginTop: 0, marginBottom: 0 }} />
+                        <PillButton title={isTspCalculatorVisible ? "Input TSP" : "Calculate TSP"} onPress={() => setIsTspCalculatorVisible(!isTspCalculatorVisible)} backgroundColor={isTspCalculatorVisible ? theme.colors.disabled : theme.colors.primary} style={{ marginTop: 0, marginBottom: 0 }} textStyle={theme.typography.bodybold} />
                       </View>
                     </View>
     
@@ -283,6 +305,10 @@ export default function RetirementCalculatorScreen() {
                     {showGoodYears && <View style={styles.fieldRow}>
                       <Text style={styles.boldLabel}>Good Years</Text>
                       <NumberInput placeholder="0" value={goodYears} onChangeText={setGoodYears} />
+                    </View>}
+                    {component !== 'Active' && <View style={styles.fieldRow}>
+                      <Text style={styles.boldLabel}>Qualifying Deployment Days</Text>
+                      <NumberInput placeholder="0" value={qualifyingDeploymentDays} onChangeText={setQualifyingDeploymentDays} />
                     </View>}
                   </View>
                 </ScrollView>
