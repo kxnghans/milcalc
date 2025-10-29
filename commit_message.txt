@@ -1,0 +1,10 @@
+feat(docs): Overhaul documentation and enhance help system
+
+This commit introduces a comprehensive overhaul of the project's documentation and significantly enhances the in-app contextual help system.
+
+Key changes include:
+- Refactored all .md files to be cohesive, consistent, and up-to-date, with GEMINI.md serving as the master architectural document.
+- Implemented a robust, centralized DetailModal component that correctly parses markdown (bold, italics, paragraphs) and centers content both vertically and horizontally.
+- Enhanced the PayDisplay component with a right-aligned, contextual help icon.
+- Added and updated detailed, segmented help content in the Supabase backend for all calculators, improving user guidance.
+- Added `packages/data` to .gitignore to exclude local data files from version control.
