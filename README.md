@@ -22,16 +22,6 @@ This project is a monorepo built with [pnpm workspaces](https://pnpm.io/workspac
 -   **Shared Logic**: Core calculation utilities and Supabase clients in `packages/utils`.
 -   **Configuration**: Shared ESLint and TypeScript configurations for consistent code quality.
 
-## Project Structure
-
--   `apps/mobile`: The primary Expo (React Native) application.
--   `apps/web`: A Next.js web application (secondary focus).
--   `packages/ui`: Shared React Native components (ProgressBar, Buttons, Inputs, etc.).
--   `packages/utils`: Core business logic (`pt-calculator.ts`) and Supabase clients (`pt-supabase-api.ts`).
--   `packages/data`: Contains static data and assets used by the applications.
--   `packages/eslint-config`: Shared ESLint rules.
--   `packages/typescript-config`: Shared TypeScript `tsconfig.json` files.
-
 ## Getting Started
 
 ### Prerequisites
@@ -73,6 +63,7 @@ To view the web app, open the URL provided in the terminal (typically `http://lo
 ## File Structure
 Here is a brief overview of the project's file structure:
 
+```
 .
 ├── apps
 │   ├── mobile
@@ -119,29 +110,30 @@ Here is a brief overview of the project's file structure:
 ├── pnpm-workspace.yaml
 ├── README.md
 └── tsconfig.json
+```
 
-apps/: Contains the source code for the applications.
+`apps`: Contains the source code for the applications.
 
-mobile/: The Expo mobile application.
+`mobile`: The Expo mobile application.
 
-web/: The Next.js web application.
+`web`: The Next.js web application.
 
-packages/: Contains the shared packages used by the applications.
+`packages`: Contains the shared packages used by the applications.
 
-config/: Shared configuration files (ESLint, TypeScript, etc.).
+`config`: Shared configuration files (ESLint, TypeScript, etc.).
 
-ui/: Shared UI components.
+`ui`: Shared UI components.
 
-utils/: Shared utility functions.
+`utils`: Shared utility functions.
 
-.gitignore: Specifies which files and directories to ignore in version control.
+`.gitignore`: Specifies which files and directories to ignore in version control.
 
-package.json: Contains the project's dependencies and scripts.
+`package.json`: Contains the project's dependencies and scripts.
 
-pnpm-lock.yaml: The lockfile for pnpm, ensuring consistent dependency versions.
+`pnpm-lock.yaml`: The lockfile for pnpm, ensuring consistent dependency versions.
 
-pnpm-workspace.yaml: The configuration file for the pnpm workspace.
+`pnpm-workspace.yaml`: The configuration file for the pnpm workspace.
 
-README.md: This file.
+`README.md`: This file.
 
-tsconfig.json: The root TypeScript configuration file.
+`tsconfig.json`: The root TypeScript configuration file.
