@@ -121,15 +121,27 @@ Here is a brief overview of the project's file structure:
 └── tsconfig.json
 
 apps/: Contains the source code for the applications.
+
 mobile/: The Expo mobile application.
+
 web/: The Next.js web application.
+
 packages/: Contains the shared packages used by the applications.
+
 config/: Shared configuration files (ESLint, TypeScript, etc.).
+
 ui/: Shared UI components.
+
 utils/: Shared utility functions.
+
 .gitignore: Specifies which files and directories to ignore in version control.
+
 package.json: Contains the project's dependencies and scripts.
+
 pnpm-lock.yaml: The lockfile for pnpm, ensuring consistent dependency versions.
+
 pnpm-workspace.yaml: The configuration file for the pnpm workspace.
+
 README.md: This file.
+
 tsconfig.json: The root TypeScript configuration file.
