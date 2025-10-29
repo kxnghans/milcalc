@@ -1,7 +1,0 @@
-.expo/
-android/
-ios/
-node_modules/
-expo-env.d.ts
-metro.config.js
-.eslintrc.js
