@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Pressable } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Pressable, ImageSourcePropType } from 'react-native';
 import { useRetirementCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, StyledTextInput, PillButton } from '@repo/ui';
 import PickerInput from '../components/PickerInput';
 import DocumentModal from '../components/DocumentModal';
@@ -15,13 +15,16 @@ export default function RetirementCalculatorScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
   const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
+  const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
 
-  const openDetailModal = (key: string) => {
+  const openDetailModal = (key: string, mascot: ImageSourcePropType) => {
     setDetailModalContentKey(key);
+    setDetailModalMascot(mascot);
   };
 
   const closeDetailModal = () => {
     setDetailModalContentKey(null);
+    setDetailModalMascot(null);
   };
 
   const {
@@ -166,10 +169,10 @@ export default function RetirementCalculatorScreen() {
     }
   });
 
-  const LabelWithHelp = ({ label, contentKey }) => (
+  const LabelWithHelp = ({ label, contentKey, mascot }) => (
     <View style={styles.labelRow}>
         <Text style={styles.boldLabel}>{label}</Text>
-        <Pressable onPress={() => openDetailModal(contentKey)}>
+        <Pressable onPress={() => openDetailModal(contentKey, mascot)}>
             <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
         </Pressable>
     </View>
@@ -203,12 +206,13 @@ export default function RetirementCalculatorScreen() {
             onClose={closeDetailModal}
             contentKey={detailModalContentKey}
             source="retirement"
+            mascotAsset={detailModalMascot}
           />
           <DocumentModal category="RETIREMENT" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
           <View>
             <Card containerStyle={{ marginBottom: theme.spacing.s }}>
                               <PayDisplay
-                                  onHelpPress={() => openDetailModal('Retirement Display Summary')}                annualPay={annualPay}
+                                  onHelpPress={() => openDetailModal('Retirement Display Summary', require('../../assets/3d_retirement.png'))}                annualPay={annualPay}
                 monthlyPay={monthlyPay}
                 payDetails={payDetails}
                 deductions={deductions}
@@ -262,7 +266,7 @@ export default function RetirementCalculatorScreen() {
                   />
 
                   <View style={styles.fieldRow}>
-                    <LabelWithHelp label="Years of Service" contentKey="High-3" />
+                    <LabelWithHelp label="Years of Service" contentKey="High-3" mascot={require('../../assets/3d_retirement.png')} />
                     <NumberInput placeholder="0" value={yearsOfService} onChangeText={setYearsOfService} />
                   </View>
 
@@ -304,7 +308,7 @@ export default function RetirementCalculatorScreen() {
                       <TwoColumnPicker data={disabilityPickerData} selectedValue={dependentStatus} onChange={handleDisabilityChange} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select Disability" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} />
                     </View>
                     <View style={styles.fieldRow}>
-                      <LabelWithHelp label="TSP" contentKey="TSP" />
+                      <LabelWithHelp label="TSP" contentKey="TSP" mascot={require('../../assets/3d_retirement.png')} />
                       <SegmentedSelector
                         style={{ marginLeft: 0, marginRight: 0, marginBottom: theme.spacing.m }}
                         options={[{label: 'Roth', value: 'Roth'}, {label: 'Traditional', value: 'Traditional'}]}
@@ -339,15 +343,15 @@ export default function RetirementCalculatorScreen() {
                       </View>
                     )}
                     {showServicePoints && <View style={styles.fieldRow}>
-                      <LabelWithHelp label="Service Points" contentKey="Service Points" />
+                      <LabelWithHelp label="Service Points" contentKey="Service Points" mascot={require('../../assets/3d_retirement.png')} />
                       <NumberInput placeholder="0" value={servicePoints} onChangeText={setServicePoints} />
                     </View>}
                     {showGoodYears && <View style={styles.fieldRow}>
-                      <LabelWithHelp label="Good Years" contentKey="Good Years" />
+                      <LabelWithHelp label="Good Years" contentKey="Good Years" mascot={require('../../assets/3d_retirement.png')} />
                       <NumberInput placeholder="0" value={goodYears} onChangeText={setGoodYears} />
                     </View>}
                     {component !== 'Active' && <View style={styles.fieldRow}>
-                      <LabelWithHelp label="Qualifying Deployment Days" contentKey="Qualifying Deployment Days" />
+                      <LabelWithHelp label="Qualifying Deployment Days" contentKey="Qualifying Deployment Days" mascot={require('../../assets/3d_retirement.png')} />
                       <NumberInput placeholder="0" value={qualifyingDeploymentDays} onChangeText={setQualifyingDeploymentDays} />
                     </View>}
                   </View>

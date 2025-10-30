@@ -36,3 +36,4 @@ pnpm-debug.log*
 
 # Data packages
 packages/data/
+apps/mobile/assets/

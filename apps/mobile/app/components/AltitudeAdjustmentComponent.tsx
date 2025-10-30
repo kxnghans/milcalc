@@ -4,8 +4,14 @@
  * to apply the appropriate adjustments to their cardio scores.
  */
 
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { useTheme, SegmentedSelector, Icon, ICONS } from '@repo/ui';
+import React from 'react';
+
+const altitudeMascots = [
+  require('../../assets/3d_altitude.png'),
+  require('../../assets/3d_altitude1.png'),
+];
 
 /**
  * Props for the AltitudeAdjustmentComponent.
@@ -16,7 +22,7 @@ interface AltitudeAdjustmentComponentProps {
   /** A function to be called when the selected value changes. */
   onValueChange: (value: string) => void;
   /** A function to open the detail modal. */
-  openDetailModal: (key: string) => void;
+  openDetailModal: (key: string, mascot: ImageSourcePropType) => void;
 }
 
 /**
@@ -26,6 +32,13 @@ interface AltitudeAdjustmentComponentProps {
  */
 export default function AltitudeAdjustmentComponent({ selectedValue, onValueChange, openDetailModal }: AltitudeAdjustmentComponentProps) {
   const { theme } = useTheme();
+  const [altitudeMascotIndex, setAltitudeMascotIndex] = React.useState(0);
+
+  const getRandomAltitudeMascot = () => {
+    const mascot = altitudeMascots[altitudeMascotIndex];
+    setAltitudeMascotIndex((prevIndex) => (prevIndex + 1) % altitudeMascots.length);
+    return mascot;
+  };
 
   const styles = StyleSheet.create({
     cardTitle: {
@@ -46,7 +59,7 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <TouchableOpacity onPress={() => openDetailModal('altitude_adjustment')}>
+        <TouchableOpacity onPress={() => openDetailModal('altitude_adjustment', getRandomAltitudeMascot())}>
             <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} />
         </TouchableOpacity>
         <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s }]}>Altitude Adjustment (ft)</Text>

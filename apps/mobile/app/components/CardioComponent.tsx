@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
@@ -141,6 +141,15 @@ export default function CardioComponent({
         }
     };
 
+    const getMascot = (): ImageSourcePropType => {
+        if (cardioComponent === "run" || cardioComponent === "shuttles") {
+            return require('../../assets/3d_run.png');
+        } else if (cardioComponent === "walk") {
+            return require('../../assets/3d_walk.png');
+        }
+        return require('../../assets/3d_run.png'); // Default mascot
+    };
+
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -150,7 +159,7 @@ export default function CardioComponent({
                 <View>
                     <View style={styles.exerciseBlock}>
                         <View style={styles.componentHeader}>
-                            <TouchableOpacity onPress={() => openDetailModal(cardioComponent, getPerformance())}>
+                            <TouchableOpacity onPress={() => openDetailModal(cardioComponent, getMascot(), getPerformance())}>
                                 <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
                             </TouchableOpacity>
                             <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m }]}>Cardio</Text>
