@@ -32,6 +32,7 @@ export const lightColors = {
   placeholder: 'rgba(143, 157, 178, 1)',// Color for placeholder text in inputs.
   disabled: 'rgba(60, 60, 67, 0.45)',   // Color for disabled elements.
   primaryText: 'rgba(255, 255, 255, 1)',// Text color for components with a primary color background.
+  mascotBlue: '#719caf',
   neumorphic: {
     outset: {
       shadow: 'rgba(0, 0, 0, 1)',
@@ -69,6 +70,7 @@ export const darkColors = {
   placeholder: 'rgba(142, 142, 147, 1)',// Color for placeholder text.
   disabled: 'rgba(235, 235, 245, 0.5)', // Color for disabled elements.
   primaryText: 'rgba(255, 255, 255, 1)',// Text color for primary-colored components.
+  mascotBlue: '#719ab1',
   neumorphic: {
     outset: {
       shadow: 'rgba(0, 0, 0, 0.77)',
@@ -136,5 +138,9 @@ export const theme = {
     s: 4,   // Small border radius
     m: 8,   // Medium border radius
     l: 16,  // Large border radius
+  },
+  mascot: {
+    width: 200,
+    height: 200,
   },
 };

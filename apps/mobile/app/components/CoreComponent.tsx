@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
@@ -71,15 +71,22 @@ export default function CoreComponent({
         }
     };
 
+    const getMascot = (): ImageSourcePropType => {
+        if (coreComponent === "sit_ups_1min" || coreComponent === "cross_leg_reverse_crunch_2min") {
+            return require('../../assets/3d_crunch.png');
+        } else if (coreComponent === "forearm_plank_time") {
+            return require('../../assets/3d_plank.png');
+        }
+        return require('../../assets/3d_crunch.png'); // Default mascot
+    };
+
     return (
         <View>
             
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <TouchableOpacity onPress={() => openDetailModal(coreComponent, getPerformance())}>
-                                            <TouchableOpacity onPress={() => openDetailModal(coreComponent)}>
+                    <TouchableOpacity onPress={() => openDetailModal(coreComponent, getMascot(), getPerformance())}>
                         <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
-                    </TouchableOpacity>
                     </TouchableOpacity>
                     <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m}]}>Core</Text>
                     {/* Conditionally render the progress bar based on the showProgressBars prop. */}

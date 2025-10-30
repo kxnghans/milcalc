@@ -4,12 +4,14 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback, ActivityIndicator, Image, ScrollView } from 'react-native';
 import { useTheme, NeumorphicOutset, PillButton } from '@repo/ui';
 import { getDocumentsByCategory } from '@repo/utils';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import { Asset } from 'expo-asset';
+
+const mascotAsset = require('../../assets/3d_documents.png');
 
 // Asset map to link database source keys to local require() paths
 const localAssetMap = {
@@ -68,6 +70,10 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
     const finalHighlightOpacity = isDarkMode ? 0.05 : 0.02;
 
     const styles = StyleSheet.create({
+        mascot: {
+            width: theme.mascot.width,
+            height: theme.mascot.height,
+        },
         centeredView: {
             flex: 1,
             justifyContent: "center",
@@ -127,22 +133,28 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                             {isLoading ? (
                                 <ActivityIndicator size="large" color={theme.colors.primary} />
                             ) : (
-                                documents.map((doc, index) => (
-                                                                                                    <View key={index} style={{alignItems: 'center', marginBottom: 10}}>
-                                                                                                        <TouchableOpacity
-                                                                                                            style={styles.button}
-                                                                                                            onPress={() => doc.learn_more_uri ? handleLearnMore(doc.learn_more_uri) : handlePress(doc)}
-                                                                                                        >
-                                                                                                            <Text style={styles.textStyle}>
-                                                                                                                {doc.name}
-                                                                                                                {doc.learn_more_uri && (
-                                                                                                                    <Text style={{...theme.typography.body, color: theme.colors.primary}}> - Details</Text>
-                                                                                                                )}
-                                                                                                            </Text>
-                                                                                                        </TouchableOpacity>
-                                                                                                    </View>                                ))
+                                <>
+                                    <Image source={mascotAsset} style={styles.mascot} resizeMode="contain" />
+                                    <ScrollView style={{width: '100%'}}>
+                                        {documents.map((doc, index) => (
+                                            <View key={index} style={{alignItems: 'center', marginBottom: 10}}>
+                                                <TouchableOpacity
+                                                    style={styles.button}
+                                                    onPress={() => doc.learn_more_uri ? handleLearnMore(doc.learn_more_uri) : handlePress(doc)}
+                                                >
+                                                    <Text style={styles.textStyle}>
+                                                        {doc.name}
+                                                        {doc.learn_more_uri && (
+                                                            <Text style={{...theme.typography.body, color: theme.colors.primary}}> - Details</Text>
+                                                        )}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        ))}
+                                    </ScrollView>
+                                    <PillButton title="Close" onPress={() => setModalVisible(false)} style={{marginTop: theme.spacing.m}} />
+                                </>
                             )}
-                            <PillButton title="Close" onPress={() => setModalVisible(false)} />
                         </View>
                     </NeumorphicOutset>
                 </View>

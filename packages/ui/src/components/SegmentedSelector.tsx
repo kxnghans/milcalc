@@ -80,7 +80,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
       containerStyle={style}
       contentStyle={{ backgroundColor: theme.colors.secondary, borderRadius: theme.borderRadius.m, overflow: 'hidden' }}
       highlightColor={isDarkMode ? 'rgba(0,0,0,1)' : undefined}
-      highlightOpacity={isDarkMode ? 0.05 : 1}
+      highlightOpacity={isDarkMode ? 0.05 : theme.colors.neumorphic.outset.highlightOpacity}
     >
       <View style={styles.container} onLayout={onLayout}>
         {options.map((option, index) => {
@@ -108,7 +108,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
                 contentStyle={{ backgroundColor: theme.colors.primary, borderRadius: theme.borderRadius.m, overflow: 'hidden', flex: 1 }}
                 highlightStyle={{ flex: 1 }}
                 shadowOpacity={isDarkMode ? undefined : 0.3}
-                highlightOpacity={isDarkMode ? 0.55 : 1}
+                highlightOpacity={isDarkMode ? 0.55 : theme.colors.neumorphic.outset.highlightOpacity}
               >
                 <Wrapper
                   style={[styles.segment, styles.selectedSegment]}

@@ -1,11 +1,5 @@
-/**
- * @file This file contains the main component for the Air Force PT Calculator mobile app.
- * @summary The PTCalculator component allows users to input their PT test data and see their calculated score.
- * @description This component has been refactored to use the `usePtCalculatorState` hook, which centralizes
- * all state management and calculation logic. This makes the component much cleaner and easier to maintain.
- */
 import * as React from "react";
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Modal } from "react-native";
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Modal, ImageSourcePropType } from "react-native";
 import { Card, IconRow, useTheme, usePtCalculatorState } from "@repo/ui";
 import { ICONS } from "@repo/ui/icons";
 import ScoreDisplay from "../components/ScoreDisplay";
@@ -31,9 +25,11 @@ export default function PTCalculator() {
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
   const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
   const [modalPerformance, setModalPerformance] = React.useState<any>(null);
+  const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
 
-  const openDetailModal = (key: string, performance?: any) => {
+  const openDetailModal = (key: string, mascot: ImageSourcePropType, performance?: any) => {
     setDetailModalContentKey(key);
+    setDetailModalMascot(mascot);
     if (performance) {
       setModalPerformance(performance);
     }
@@ -42,6 +38,7 @@ export default function PTCalculator() {
   const closeDetailModal = () => {
     setDetailModalContentKey(null);
     setModalPerformance(null);
+    setDetailModalMascot(null);
   };
 
   // State to store the heights of the segmented controls in each component.
@@ -123,6 +120,7 @@ export default function PTCalculator() {
             age={demographics.age}
             gender={demographics.gender}
             performance={modalPerformance}
+            mascotAsset={detailModalMascot}
         />
         <View style={{flex: 1}}>
 

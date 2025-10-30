@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, ExemptButton } from '@repo/ui';
 import NumberInput from './NumberInput';
 
@@ -50,11 +50,20 @@ export default function StrengthComponent({
         },
     });
 
+    const getMascot = (): ImageSourcePropType => {
+        if (pushupComponent === "push_ups_1min" || pushupComponent === "hand_release_pushups_2min") {
+            return require('../../assets/3d_pushup.png');
+        } else if (pushupComponent === "crunches") {
+            return require('../../assets/3d_crunch.png');
+        }
+        return require('../../assets/3d_pushup.png'); // Default mascot
+    };
+
     return (
         <View>
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <TouchableOpacity onPress={() => openDetailModal(pushupComponent, { reps: pushups })}>
+                    <TouchableOpacity onPress={() => openDetailModal(pushupComponent, getMascot(), { reps: pushups })}>
                         <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
                     </TouchableOpacity>
                     <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m}]}>Strength</Text>
