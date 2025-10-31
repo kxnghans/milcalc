@@ -32,11 +32,6 @@ export default function PayCalculatorScreen() {
   const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
   const [payMascotIndex, setPayMascotIndex] = React.useState(0);
 
-  const openDetailModal = (key: string, mascot: ImageSourcePropType) => {
-    setDetailModalContentKey(key);
-    setDetailModalMascot(mascot);
-  };
-
   const closeDetailModal = () => {
     setDetailModalContentKey(null);
     setDetailModalMascot(null);
@@ -155,10 +150,10 @@ export default function PayCalculatorScreen() {
     return ICONS.THEME_AUTO;
   };
 
-  const LabelWithHelp = ({ label, contentKey, mascot }) => (
+  const LabelWithHelp = ({ label, contentKey }) => (
     <View style={styles.labelRow}>
         <Text style={styles.label}>{label}</Text>
-        <Pressable onPress={() => openDetailModal(contentKey, mascot)}>
+        <Pressable onPress={() => openDetailModal(contentKey)}>
             <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
         </Pressable>
     </View>
@@ -207,10 +202,15 @@ export default function PayCalculatorScreen() {
     />
   );
 
-  const getRandomPayMascot = () => {
+  const getNextPayMascot = () => {
     const mascot = payMascots[payMascotIndex];
     setPayMascotIndex((prevIndex) => (prevIndex + 1) % payMascots.length);
     return mascot;
+  };
+
+  const openDetailModal = (key: string) => {
+    setDetailModalContentKey(key);
+    setDetailModalMascot(getNextPayMascot());
   };
 
   return (
@@ -225,7 +225,7 @@ export default function PayCalculatorScreen() {
         />
         <Card containerStyle={{ marginBottom: theme.spacing.s }}>
                             <PayDisplay
-                                onHelpPress={() => openDetailModal('Pay Display Summary', getRandomPayMascot())}
+                                onHelpPress={() => openDetailModal('Pay Display Summary')}
                 annualPay={annualPay}
                 monthlyPay={monthlyPay}
                 payDetails={incomeForDisplay}
@@ -335,19 +335,19 @@ export default function PayCalculatorScreen() {
                     </Pressable>
                     {isIncomeExpanded && (
                         <View style={styles.expandableContent}>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Clothing Allowance" contentKey="Clothing Allowance" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.clothing} onChangeText={(text) => setSpecialPays(p => ({...p, clothing: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Hostile Fire Pay" contentKey="Hostile Fire Pay (HFP)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.hostileFire} onChangeText={(text) => setSpecialPays(p => ({...p, hostileFire: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Imminent Danger Pay" contentKey="Imminent Danger Pay (IDP)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.imminentDanger} onChangeText={(text) => setSpecialPays(p => ({...p, imminentDanger: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Hazardous Duty Incentive Pay" contentKey="Hazardous Duty Incentive Pay (HDIP)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.hazardousDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hazardousDuty: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Hardship Duty Pay" contentKey="Hardship Duty Pay - Location (HDP-L)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.hardshipDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hardshipDuty: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Aviation Incentive Pay" contentKey="Aviation Incentive Pays (AvIP)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.aviation} onChangeText={(text) => setSpecialPays(p => ({...p, aviation: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Assignment Incentive Pay" contentKey="Assignment Incentive Pay (AIP)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.assignment} onChangeText={(text) => setSpecialPays(p => ({...p, assignment: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Career Sea Pay" contentKey="Career Sea Pay" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.careerSea} onChangeText={(text) => setSpecialPays(p => ({...p, careerSea: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Health Professions Officers" contentKey="Health Professions Special Pays" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.healthProfessions} onChangeText={(text) => setSpecialPays(p => ({...p, healthProfessions: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Foreign Language Proficiency Bonus" contentKey="Foreign Language Proficiency Bonus (FLPB)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.foreignLanguage} onChangeText={(text) => setSpecialPays(p => ({...p, foreignLanguage: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="Special Duty Assignment Pay" contentKey="Special Duty Assignment Pay (SDAP)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={specialPays.specialDuty} onChangeText={(text) => setSpecialPays(p => ({...p, specialDuty: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Clothing Allowance" contentKey="Clothing Allowance" /><CurrencyInput placeholder="0.00" value={specialPays.clothing} onChangeText={(text) => setSpecialPays(p => ({...p, clothing: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Hostile Fire Pay" contentKey="Hostile Fire Pay (HFP)" /><CurrencyInput placeholder="0.00" value={specialPays.hostileFire} onChangeText={(text) => setSpecialPays(p => ({...p, hostileFire: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Imminent Danger Pay" contentKey="Imminent Danger Pay (IDP)" /><CurrencyInput placeholder="0.00" value={specialPays.imminentDanger} onChangeText={(text) => setSpecialPays(p => ({...p, imminentDanger: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Hazardous Duty Incentive Pay" contentKey="Hazardous Duty Incentive Pay (HDIP)" /><CurrencyInput placeholder="0.00" value={specialPays.hazardousDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hazardousDuty: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Hardship Duty Pay" contentKey="Hardship Duty Pay - Location (HDP-L)" /><CurrencyInput placeholder="0.00" value={specialPays.hardshipDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hardshipDuty: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Aviation Incentive Pay" contentKey="Aviation Incentive Pays (AvIP)" /><CurrencyInput placeholder="0.00" value={specialPays.aviation} onChangeText={(text) => setSpecialPays(p => ({...p, aviation: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Assignment Incentive Pay" contentKey="Assignment Incentive Pay (AIP)" /><CurrencyInput placeholder="0.00" value={specialPays.assignment} onChangeText={(text) => setSpecialPays(p => ({...p, assignment: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Career Sea Pay" contentKey="Career Sea Pay" /><CurrencyInput placeholder="0.00" value={specialPays.careerSea} onChangeText={(text) => setSpecialPays(p => ({...p, careerSea: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Health Professions Officers" contentKey="Health Professions Special Pays" /><CurrencyInput placeholder="0.00" value={specialPays.healthProfessions} onChangeText={(text) => setSpecialPays(p => ({...p, healthProfessions: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Foreign Language Proficiency Bonus" contentKey="Foreign Language Proficiency Bonus (FLPB)" /><CurrencyInput placeholder="0.00" value={specialPays.foreignLanguage} onChangeText={(text) => setSpecialPays(p => ({...p, foreignLanguage: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="Special Duty Assignment Pay" contentKey="Special Duty Assignment Pay (SDAP)" /><CurrencyInput placeholder="0.00" value={specialPays.specialDuty} onChangeText={(text) => setSpecialPays(p => ({...p, specialDuty: text}))} /></View>
                             
-                            <LabelWithHelp label="Additional Income" contentKey="Additional Income" mascot={getRandomPayMascot()} />
+                            <LabelWithHelp label="Additional Income" contentKey="Additional Income" />
                             {additionalIncomes.map((income, index) => (
                                 <View key={index} style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
                                     <View style={{ flex: 1, marginRight: theme.spacing.s }}>
@@ -409,16 +409,16 @@ export default function PayCalculatorScreen() {
 
                             {isTaxOverride && (
                                 <>
-                                    <View style={styles.fieldRow}><LabelWithHelp label="Federal Tax" contentKey="Federal Tax" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={deductions.overrideFedTax} onChangeText={(text) => setDeductions(d => ({...d, overrideFedTax: text}))} /></View>
-                                    <View style={styles.fieldRow}><LabelWithHelp label="State Tax" contentKey="State Tax" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={deductions.overrideStateTax} onChangeText={(text) => setDeductions(d => ({...d, overrideStateTax: text}))} /></View>
-                                    <View style={styles.fieldRow}><LabelWithHelp label="FICA" contentKey="FICA" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={deductions.overrideFicaTax} onChangeText={(text) => setDeductions(d => ({...d, overrideFicaTax: text}))} /></View>
+                                    <View style={styles.fieldRow}><LabelWithHelp label="Federal Tax" contentKey="Federal Tax" /><CurrencyInput placeholder="0.00" value={deductions.overrideFedTax} onChangeText={(text) => setDeductions(d => ({...d, overrideFedTax: text}))} /></View>
+                                    <View style={styles.fieldRow}><LabelWithHelp label="State Tax" contentKey="State Tax" /><CurrencyInput placeholder="0.00" value={deductions.overrideStateTax} onChangeText={(text) => setDeductions(d => ({...d, overrideStateTax: text}))} /></View>
+                                    <View style={styles.fieldRow}><LabelWithHelp label="FICA" contentKey="FICA" /><CurrencyInput placeholder="0.00" value={deductions.overrideFicaTax} onChangeText={(text) => setDeductions(d => ({...d, overrideFicaTax: text}))} /></View>
                                 </>
                             )}
 
-                            <View style={styles.fieldRow}><LabelWithHelp label="SGLI" contentKey="Servicemembers' Group Life Insurance (SGLI)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={deductions.sgli} onChangeText={(text) => setDeductions(d => ({...d, sgli: text}))} /></View>
-                            <View style={styles.fieldRow}><LabelWithHelp label="TSP" contentKey="Thrift Savings Plan (TSP)" mascot={getRandomPayMascot()} /><CurrencyInput placeholder="0.00" value={deductions.tsp} onChangeText={(text) => setDeductions(d => ({...d, tsp: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="SGLI" contentKey="Servicemembers' Group Life Insurance (SGLI)" /><CurrencyInput placeholder="0.00" value={deductions.sgli} onChangeText={(text) => setDeductions(d => ({...d, sgli: text}))} /></View>
+                            <View style={styles.fieldRow}><LabelWithHelp label="TSP" contentKey="Thrift Savings Plan (TSP)" /><CurrencyInput placeholder="0.00" value={deductions.tsp} onChangeText={(text) => setDeductions(d => ({...d, tsp: text}))} /></View>
 
-                            <LabelWithHelp label="Additional Deductions" contentKey="Additional Deductions" mascot={getRandomPayMascot()} />
+                            <LabelWithHelp label="Additional Deductions" contentKey="Additional Deductions" />
                             {additionalDeductions.map((deduction, index) => (
                                 <View key={index} style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
                                     <View style={{ flex: 1, marginRight: theme.spacing.s }}>

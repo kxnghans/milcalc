@@ -44,6 +44,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, onClo
                       setTempDate(date);
                     }
                   }}
+                  textColor={theme.colors.text}
                 />
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>

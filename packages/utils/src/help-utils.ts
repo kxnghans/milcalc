@@ -1,14 +1,30 @@
 import { supabase } from './supabaseClient';
 
-export const getHelpContentFromSource = async (source: 'pt' | 'pay' | 'retirement', contentKey: string) => {
+export const getHelpContentFromSource = async (source: 'pt' | 'pay' | 'retirement' | 'best_score', contentKey: string) => {
+  let tableName = '';
+  switch (source) {
+    case 'pt':
+      tableName = 'pt_help_details';
+      break;
+    case 'pay':
+      tableName = 'pay_help_details';
+      break;
+    case 'retirement':
+      tableName = 'retirement_help_details';
+      break;
+    case 'best_score':
+      tableName = 'best_score_help_details';
+      break;
+  }
+
+  const queryColumn = source === 'pay' ? 'title' : 'content_key';
   const { data, error } = await supabase
-    .from('help_details')
+    .from(tableName)
     .select('*')
-    .eq('source', source)
-    .eq('content_key', contentKey);
+    .eq(queryColumn, contentKey);
 
   if (error) {
-    console.error(`Error fetching help content from help_details for source ${source} and key ${contentKey}:`, error);
+    console.error(`Error fetching help content from ${tableName} for key ${contentKey}:`, error);
     return null;
   }
 

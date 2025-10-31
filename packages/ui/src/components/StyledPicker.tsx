@@ -35,6 +35,9 @@ export const StyledPicker = ({ selectedValue, onValueChange, items, placeholder,
         borderRadius: theme.borderRadius.m,
         color: theme.colors.text, // Ensure text color matches the theme.
     },
+    pickerItem: {
+        color: theme.colors.text,
+    },
   });
 
   return (
@@ -42,6 +45,7 @@ export const StyledPicker = ({ selectedValue, onValueChange, items, placeholder,
         selectedValue={selectedValue}
         onValueChange={onValueChange}
         style={[styles.picker, style]}
+        itemStyle={styles.pickerItem}
         {...props}
     >
         {/* Render a disabled placeholder item if one is provided. */}

@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./card": "./src/card.tsx",
-    "./icons": "./src/icons.ts"
+    "./icons": "./src/icons.ts",
+    "./contexts/ThemeContext": "./src/contexts/ThemeContext.tsx"
   },
   "scripts": {
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
