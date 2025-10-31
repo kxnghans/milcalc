@@ -9,8 +9,9 @@ import {
   Animated,
   useWindowDimensions,
 } from 'react-native';
-import { useTheme, SegmentedSelector, PillButton } from '@repo/ui';
+import { useTheme, SegmentedSelector } from '@repo/ui';
 import { BlurView } from 'expo-blur';
+import { PillButton } from '@repo/ui';
 
 const splashImage = require('../assets/3d_splash.png');
 
@@ -22,7 +23,7 @@ const getSeason = () => {
   return 'winter';
 };
 
-const Particle = ({ children, minSize, maxSize }) => {
+const Particle = ({ children }) => {
   const { height, width } = useWindowDimensions();
   const fallAnim = useMemo(() => new Animated.Value(0), []);
   const spinAnim = useMemo(() => new Animated.Value(0), []);
@@ -89,7 +90,7 @@ const Particle = ({ children, minSize, maxSize }) => {
     outputRange: [-20, 20],
   });
   const left = useMemo(() => Math.random() * width, []);
-  const fontSize = Math.random() * (maxSize - minSize) + minSize;
+  const fontSize = Math.random() * 10 + 14;
 
   return (
     <Animated.View
@@ -110,7 +111,7 @@ const SeasonalEffects = ({ season, styles }) => {
       Array.from({ length: 50 }).map((_, i) => {
         if (season === 'winter') {
           return (
-            <Particle key={i} minSize={10} maxSize={18}>
+            <Particle key={i}>
               <Text style={styles.snowflake}>❄️</Text>
             </Particle>
           );
@@ -118,14 +119,14 @@ const SeasonalEffects = ({ season, styles }) => {
         if (season === 'fall') {
           const leafColor = ['#ff8c00', '#d2691e', '#a0522d'][Math.floor(Math.random() * 3)];
           return (
-            <Particle key={i} minSize={10} maxSize={26}>
+            <Particle key={i}>
               <Text style={[styles.leaf, { color: leafColor }]}>🍂</Text>
             </Particle>
           );
         }
         if (season === 'spring') {
           return (
-            <Particle key={i} minSize={10} maxSize={26}>
+            <Particle key={i}>
               <Text style={styles.flower}>🌸</Text>
             </Particle>
           );
@@ -152,7 +153,7 @@ const SeasonalEffects = ({ season, styles }) => {
             outputRange: [0.5, 1],
           });
           return (
-            <Particle key={i} minSize={10} maxSize={18}>
+            <Particle key={i}>
               <Animated.Text style={[styles.sun, { opacity }]}>☀️</Animated.Text>
             </Particle>
           );
@@ -165,13 +166,13 @@ const SeasonalEffects = ({ season, styles }) => {
   return <View style={StyleSheet.absoluteFill}>{particles}</View>;
 };
 
-export default function SplashScreen() {
+export default function Index() {
   const router = useRouter();
-  const { theme, isDarkMode } = useTheme();
+  const { theme } = useTheme();
   const [season, setSeason] = useState(getSeason());
 
   const handleContinue = () => {
-    router.replace('/(tabs)/pt-calculator');
+    router.replace('/pt-calculator');
   };
 
   const styles = StyleSheet.create({
@@ -196,7 +197,7 @@ export default function SplashScreen() {
       width: '100%',
       paddingHorizontal: theme.spacing.m,
       alignItems: 'center',
-      gap: theme.spacing.m,
+      justifyContent: 'space-between',
     },
     disclaimerContainer: {
       borderRadius: 10,
@@ -205,7 +206,6 @@ export default function SplashScreen() {
       textAlign: 'center',
       fontSize: 18,
       fontWeight: 'bold',
-      color: theme.colors.text,
     },
     snowflake: {
       color: 'white',
@@ -227,36 +227,28 @@ export default function SplashScreen() {
       </View>
 
       {/* Blur Layer */}
-      <BlurView intensity={isDarkMode ? 5 : 3.25} style={StyleSheet.absoluteFill} />
+      <BlurView intensity={8} style={StyleSheet.absoluteFill} />
 
       {/* Foreground Layer */}
       <View style={styles.foregroundLayer}>
         <Image source={splashImage} style={styles.image} resizeMode="contain" />
         <View style={styles.bottomContainer}>
-          <View style={{ justifyContent: 'center' }}>
-            <View style={styles.disclaimerContainer}>
-                <Text style={styles.disclaimer}>
-                    Not an official USAF or US military product.
-                </Text>
-            </View>
+          <View style={styles.disclaimerContainer}>
+              <Text style={[styles.disclaimer, { color: theme.colors.text }]}>
+                  Not an official USAF or US military product.
+              </Text>
           </View>
-          <View style={{ width: '100%' }}>
-            <SegmentedSelector
-              options={[{label: 'Spring', value: 'spring'}, {label: 'Summer', value: 'summer'}, {label: 'Fall', value: 'fall'}, {label: 'Winter', value: 'winter'}]}
-              selectedValues={[season]}
-              onValueChange={setSeason}
-              selectedBackgroundColor={theme.colors.mascotBlue}
-              selectedTextStyle={theme.typography.subtitle}
-            />
-          </View>
-          <View style={{ justifyContent: 'center' }}>
-            <PillButton
-              title="Continue"
-              onPress={handleContinue}
-              backgroundColor="rgba(255, 255, 255, 0.8)"
-              textColor="black"
-            />
-          </View>
+          <SegmentedSelector
+            options={[{label: 'Spring', value: 'spring'}, {label: 'Summer', value: 'summer'}, {label: 'Fall', value: 'fall'}, {label: 'Winter', value: 'winter'}]}
+            selectedValues={[season]}
+            onValueChange={setSeason}
+          />
+          <PillButton
+            title="Continue"
+            onPress={handleContinue}
+            backgroundColor="rgba(255, 255, 255, 0.8)"
+            textColor="black"
+          />
         </View>
       </View>
     </View>
