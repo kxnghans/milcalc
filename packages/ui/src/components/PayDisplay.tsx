@@ -178,10 +178,10 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                   <Text style={styles.detailLabel}>State Std Deduction</Text>
                   <Text style={styles.detailValue}>${stateStandardDeduction.toLocaleString()}</Text>
               </View>
-              {retirementAge && (
+              {retirementAge !== null && retirementAge !== undefined && (
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>Retirement Age</Text>
-                  <Text style={styles.detailValue}>{retirementAge}</Text>
+                  <Text style={styles.detailValue}>{String(retirementAge)}</Text>
                 </View>
               )}
           </View>

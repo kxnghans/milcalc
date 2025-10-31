@@ -34,7 +34,7 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
   const { theme } = useTheme();
   const [altitudeMascotIndex, setAltitudeMascotIndex] = React.useState(0);
 
-  const getRandomAltitudeMascot = () => {
+  const getNextAltitudeMascot = () => {
     const mascot = altitudeMascots[altitudeMascotIndex];
     setAltitudeMascotIndex((prevIndex) => (prevIndex + 1) % altitudeMascots.length);
     return mascot;
@@ -59,7 +59,7 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <TouchableOpacity onPress={() => openDetailModal('altitude_adjustment', getRandomAltitudeMascot())}>
+        <TouchableOpacity onPress={() => openDetailModal('altitude_adjustment', getNextAltitudeMascot())}>
             <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} />
         </TouchableOpacity>
         <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s }]}>Altitude Adjustment (ft)</Text>
