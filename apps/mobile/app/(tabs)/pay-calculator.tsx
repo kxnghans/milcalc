@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, Pressable, LayoutAnimation, UIManager, Platform, TouchableOpacity, ActivityIndicator, ImageSourcePropType } from 'react-native';
+import { View, Text, StyleSheet, Pressable, LayoutAnimation, UIManager, Platform, TouchableOpacity, ActivityIndicator, ImageSourcePropType } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -252,7 +253,7 @@ export default function PayCalculatorScreen() {
             },
         ]} />
         <Card style={{ flex: 1 }}>
-            <ScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
+            <KeyboardAwareScrollView extraScrollHeight={-60} contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
                 {/* Two-Column Layout for Demographics */}
                 <View style={{ flexDirection: 'row' }}>
                     {/* Left Column */}
@@ -311,11 +312,11 @@ export default function PayCalculatorScreen() {
                         </View>
                         <View style={[styles.fieldRow, { marginTop: theme.spacing.s }]}>
                             <Text style={styles.boldLabel}>Mil Housing Area</Text>
-                            <TwoColumnPicker data={mhaData} selectedValue={mha} onChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoading} error={mhaError} primaryColumnValue={state} />
+                            <TwoColumnPicker data={mhaData} selectedValue={mha} onChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoading} error={mhaError} primaryColumnValue={state} secondaryPlaceholder="Select a location" />
                         </View>
                         <View style={[styles.fieldRow, { marginTop: theme.spacing.s }]}>
                             <Text style={styles.boldLabel}>VA Disability</Text>
-                            <TwoColumnPicker data={disabilityPickerData} selectedValue={vaDependencyStatus} onChange={handleDisabilityChange} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select Disability" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} />
+                            <TwoColumnPicker data={disabilityPickerData} selectedValue={vaDependencyStatus} onChange={handleDisabilityChange} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select disability rating" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} />
                         </View>
                     </View>
                 </View>
@@ -454,7 +455,7 @@ export default function PayCalculatorScreen() {
                         </View>
                     )}
                 </View>
-            </ScrollView>
+            </KeyboardAwareScrollView>
         </Card>
     </View>
   );

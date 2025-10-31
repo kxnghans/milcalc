@@ -1,5 +1,6 @@
 import * as React from "react";
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Modal, ImageSourcePropType } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Modal, ImageSourcePropType } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Card, IconRow, useTheme, usePtCalculatorState } from "@repo/ui";
 import { ICONS } from "@repo/ui/icons";
 import ScoreDisplay from "../components/ScoreDisplay";
@@ -142,92 +143,87 @@ export default function PTCalculator() {
                     },
                 ]} />
             </View>
-            {/* The main input area, wrapped in a KeyboardAvoidingView and ScrollView. */}
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-            >
-                <View style={{ flex: 1 }}>
-                    <Card style={{ flex: 1 }}>
-                        <ScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
-                            {/* Each section of the calculator is rendered as a separate component. */}
-                            <Demographics
-                                age={demographics.age}
-                                setAge={demographics.setAge}
-                                gender={demographics.gender}
-                                setGender={demographics.setGender}
-                            />
-                            <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
-                            <StrengthComponent 
-                                showProgressBars={showProgressBars}
-                                minMax={minMax}
-                                pushups={strength.pushups}
-                                setPushups={strength.setPushups}
-                                pushupComponent={strength.pushupComponent}
-                                setPushupComponent={strength.setPushupComponent}
-                                ninetyPercentileThreshold={ninetyPercentileThresholds.pushups}
-                                handleSegmentedLayout={handleSegmentedLayout}
-                                segmentedStyle={segmentedStyle}
-                                isExempt={strength.isExempt}
-                                toggleExempt={strength.toggleExempt}
-                                openDetailModal={openDetailModal}
-                                score={score}
-                            />
-                            <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
-                            <CoreComponent
-                                showProgressBars={showProgressBars}
-                                minMax={minMax}
-                                coreComponent={core.coreComponent}
-                                setCoreComponent={core.setCoreComponent}
-                                situps={core.situps}
-                                setSitups={core.setSitups}
-                                reverseCrunches={core.reverseCrunches}
-                                setReverseCrunches={core.setReverseCrunches}
-                                plankMinutes={core.plankMinutes}
-                                setPlankMinutes={core.setPlankMinutes}
-                                plankSeconds={core.plankSeconds}
-                                setPlankSeconds={core.setPlankSeconds}
-                                ninetyPercentileThreshold={ninetyPercentileThresholds.core}
-                                handleSegmentedLayout={handleSegmentedLayout}
-                                segmentedStyle={segmentedStyle}
-                                isExempt={core.isExempt}
-                                toggleExempt={core.toggleExempt}
-                                openDetailModal={openDetailModal}
-                                score={score}
-                            />
-                            <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
-                            <CardioComponent
-                                showProgressBars={showProgressBars}
-                                cardioMinMax={cardioMinMax}
-                                cardioComponent={cardio.cardioComponent}
-                                setCardioComponent={cardio.setCardioComponent}
-                                runMinutes={cardio.runMinutes}
-                                setRunMinutes={cardio.setRunMinutes}
-                                runSeconds={cardio.runSeconds}
-                                setRunSeconds={cardio.setRunSeconds}
-                                shuttles={cardio.shuttles}
-                                setShuttles={cardio.setShuttles}
-                                walkMinutes={cardio.walkMinutes}
-                                setWalkMinutes={cardio.setWalkMinutes}
-                                walkSeconds={cardio.walkSeconds}
-                                setWalkSeconds={cardio.setWalkSeconds}
-                                ninetyPercentileThreshold={ninetyPercentileThresholds.cardio}
-                                segmentedStyle={segmentedStyle}
-                                altitudeGroup={demographics.altitudeGroup}
-                                age={demographics.age}
-                                gender={demographics.gender}
-                                isExempt={cardio.isExempt}
-                                toggleExempt={cardio.toggleExempt}
-                                score={score}
-                                altitudeData={altitudeData}
-                                openDetailModal={openDetailModal}
-                            />
-                            <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
-                            <AltitudeAdjustmentComponent selectedValue={demographics.altitudeGroup} onValueChange={demographics.setAltitudeGroup} openDetailModal={openDetailModal} />
-                        </ScrollView>
-                    </Card>
-                </View>
-            </KeyboardAvoidingView>
+            {/* The main input area, wrapped in a ScrollView. */}
+            <View style={{ flex: 1 }}>
+                <Card style={{ flex: 1, marginTop: theme.spacing.s }}>
+                    <KeyboardAwareScrollView extraScrollHeight={-60} contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
+                        {/* Each section of the calculator is rendered as a separate component. */}
+                        <Demographics
+                            age={demographics.age}
+                            setAge={demographics.setAge}
+                            gender={demographics.gender}
+                            setGender={demographics.setGender}
+                        />
+                        <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
+                        <StrengthComponent 
+                            showProgressBars={showProgressBars}
+                            minMax={minMax}
+                            pushups={strength.pushups}
+                            setPushups={strength.setPushups}
+                            pushupComponent={strength.pushupComponent}
+                            setPushupComponent={strength.setPushupComponent}
+                            ninetyPercentileThreshold={ninetyPercentileThresholds.pushups}
+                            handleSegmentedLayout={handleSegmentedLayout}
+                            segmentedStyle={segmentedStyle}
+                            isExempt={strength.isExempt}
+                            toggleExempt={strength.toggleExempt}
+                            openDetailModal={openDetailModal}
+                            score={score}
+                        />
+                        <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
+                        <CoreComponent
+                            showProgressBars={showProgressBars}
+                            minMax={minMax}
+                            coreComponent={core.coreComponent}
+                            setCoreComponent={core.setCoreComponent}
+                            situps={core.situps}
+                            setSitups={core.setSitups}
+                            reverseCrunches={core.reverseCrunches}
+                            setReverseCrunches={core.setReverseCrunches}
+                            plankMinutes={core.plankMinutes}
+                            setPlankMinutes={core.setPlankMinutes}
+                            plankSeconds={core.plankSeconds}
+                            setPlankSeconds={core.setPlankSeconds}
+                            ninetyPercentileThreshold={ninetyPercentileThresholds.core}
+                            handleSegmentedLayout={handleSegmentedLayout}
+                            segmentedStyle={segmentedStyle}
+                            isExempt={core.isExempt}
+                            toggleExempt={core.toggleExempt}
+                            openDetailModal={openDetailModal}
+                            score={score}
+                        />
+                        <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
+                        <CardioComponent
+                            showProgressBars={showProgressBars}
+                            cardioMinMax={cardioMinMax}
+                            cardioComponent={cardio.cardioComponent}
+                            setCardioComponent={cardio.setCardioComponent}
+                            runMinutes={cardio.runMinutes}
+                            setRunMinutes={cardio.setRunMinutes}
+                            runSeconds={cardio.runSeconds}
+                            setRunSeconds={cardio.setRunSeconds}
+                            shuttles={cardio.shuttles}
+                            setShuttles={cardio.setShuttles}
+                            walkMinutes={cardio.walkMinutes}
+                            setWalkMinutes={cardio.setWalkMinutes}
+                            walkSeconds={cardio.walkSeconds}
+                            setWalkSeconds={cardio.setWalkSeconds}
+                            ninetyPercentileThreshold={ninetyPercentileThresholds.cardio}
+                            segmentedStyle={segmentedStyle}
+                            altitudeGroup={demographics.altitudeGroup}
+                            age={demographics.age}
+                            gender={demographics.gender}
+                            isExempt={cardio.isExempt}
+                            toggleExempt={cardio.toggleExempt}
+                            score={score}
+                            altitudeData={altitudeData}
+                            openDetailModal={openDetailModal}
+                        />
+                        <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
+                        <AltitudeAdjustmentComponent selectedValue={demographics.altitudeGroup} onValueChange={demographics.setAltitudeGroup} openDetailModal={openDetailModal} />
+                    </KeyboardAwareScrollView>
+                </Card>
+            </View>
         </View>
 
     </View>

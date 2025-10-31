@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Modal, Button, Text, Pressable, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import { useTheme, NeumorphicInset, PillButton } from '@repo/ui';
 
 const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading, error, primaryColumnValue: propPrimaryColumnValue, primaryPlaceholder = '...', secondaryPlaceholder = 'Select an option', primarySort }) => {
   const { theme } = useTheme();
+  const { bottom } = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
   const [primaryColumnItems, setPrimaryColumnItems] = useState([]);
   const [selectedPrimary, setSelectedPrimary] = useState(propPrimaryColumnValue || '');
@@ -147,51 +148,53 @@ const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading
             visible={modalVisible}
             onRequestClose={handleCancel}
         >
-            <SafeAreaView style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                    {isLoading ? (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color={theme.colors.primary} />
-                            <Text style={{...theme.typography.body, color: theme.colors.text, marginTop: theme.spacing.m}}>Loading...</Text>
-                        </View>
-                    ) : (
-                        <>
-                            <View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={selectedPrimary}
-                                    onValueChange={handlePrimaryChange}
-                                    style={styles.leftPicker}
-                                    itemStyle={styles.pickerItem}
-                                >
-                                    {primaryColumnItems.map(item => (
-                                    <Picker.Item key={item} label={item} value={item} />
-                                    ))}
-                                </Picker>
-                                <Picker
-                                    selectedValue={tempSelectedValue}
-                                    onValueChange={(itemValue) => setTempSelectedValue(itemValue)}
-                                    style={styles.rightPicker}
-                                    enabled={selectedPrimary !== primaryPlaceholder}
-                                    itemStyle={styles.pickerItem}
-                                >
-                                    {secondaryColumnItems.length > 0 ? (
-                                    secondaryColumnItems.map(item => (
-                                        <Picker.Item key={item.value} label={item.label} value={item.value} />
-                                    ))
-                                    ) : (
-                                        <Picker.Item label={secondaryPlaceholder} value="" enabled={false} />
-                                    )}
-                                </Picker>
+            <Pressable style={styles.modalOverlay} onPress={handleCancel}>
+                <Pressable>
+                    <View style={[styles.modalContent, { paddingBottom: bottom || theme.spacing.s }]}>
+                        {isLoading ? (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="large" color={theme.colors.primary} />
+                                <Text style={{...theme.typography.body, color: theme.colors.text, marginTop: theme.spacing.m}}>Loading...</Text>
                             </View>
-                            <View style={styles.buttonContainer}>
-                                <PillButton title="Cancel" onPress={handleCancel} backgroundColor={theme.colors.error} textColor={theme.colors.primaryText} />
-                                <View style={{ width: theme.spacing.s }} />
-                                <PillButton title="Done" onPress={handleConfirm} disabled={!selectedPrimary || selectedPrimary === primaryPlaceholder} backgroundColor={theme.colors.primary} />
-                            </View>
-                        </>
-                    )}
-                </View>
-            </SafeAreaView>
+                        ) : (
+                            <>
+                                <View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={selectedPrimary}
+                                        onValueChange={handlePrimaryChange}
+                                        style={styles.leftPicker}
+                                        itemStyle={styles.pickerItem}
+                                    >
+                                        {primaryColumnItems.map(item => (
+                                        <Picker.Item key={item} label={item} value={item} />
+                                        ))}
+                                    </Picker>
+                                    <Picker
+                                        selectedValue={tempSelectedValue}
+                                        onValueChange={(itemValue) => setTempSelectedValue(itemValue)}
+                                        style={styles.rightPicker}
+                                        enabled={selectedPrimary !== primaryPlaceholder}
+                                        itemStyle={styles.pickerItem}
+                                    >
+                                        {secondaryColumnItems.length > 0 ? (
+                                        secondaryColumnItems.map(item => (
+                                            <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                        ))
+                                        ) : (
+                                            <Picker.Item label={secondaryPlaceholder} value="" enabled={false} />
+                                        )}
+                                    </Picker>
+                                </View>
+                                <View style={styles.buttonContainer}>
+                                    <PillButton title="Cancel" onPress={handleCancel} backgroundColor={theme.colors.error} textColor={theme.colors.primaryText} />
+                                    <View style={{ width: theme.spacing.s }} />
+                                    <PillButton title="Done" onPress={handleConfirm} disabled={!selectedPrimary || selectedPrimary === primaryPlaceholder} backgroundColor={theme.colors.primary} />
+                                </View>
+                            </>
+                        )}
+                    </View>
+                </Pressable>
+            </Pressable>
         </Modal>
     </>
   );

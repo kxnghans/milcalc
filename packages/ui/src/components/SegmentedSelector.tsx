@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import NeumorphicOutset from './NeumorphicOutset';
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -27,6 +27,10 @@ interface SegmentedSelectorProps {
   onLayout?: (event: any) => void;
   /** If false, the selector will be non-interactive. Defaults to true. */
   isTouchable?: boolean;
+  /** Optional background color for the selected segment. */
+  selectedBackgroundColor?: string;
+  /** Optional text style for the selected segment. */
+  selectedTextStyle?: StyleProp<TextStyle>;
 }
 
 /**
@@ -34,7 +38,7 @@ interface SegmentedSelectorProps {
  * It can handle multiple selections and has a distinct neumorphic style for selected items.
  * It can also be used as a non-interactive display.
  */
-export const SegmentedSelector = ({ options, selectedValues, onValueChange, style, onLayout, isTouchable = true, ratios }: SegmentedSelectorProps) => {
+export const SegmentedSelector = ({ options, selectedValues, onValueChange, style, onLayout, isTouchable = true, ratios, selectedBackgroundColor, selectedTextStyle }: SegmentedSelectorProps) => {
   const { theme, isDarkMode } = useTheme();
 
   const styles = StyleSheet.create({
@@ -105,7 +109,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
                   marginRight: theme.spacing.xs,
                   alignSelf: 'stretch'
                 }}
-                contentStyle={{ backgroundColor: theme.colors.primary, borderRadius: theme.borderRadius.m, overflow: 'hidden', flex: 1 }}
+                contentStyle={{ backgroundColor: selectedBackgroundColor || theme.colors.primary, borderRadius: theme.borderRadius.m, overflow: 'hidden', flex: 1 }}
                 highlightStyle={{ flex: 1 }}
                 shadowOpacity={isDarkMode ? undefined : 0.3}
                 highlightOpacity={isDarkMode ? 0.55 : theme.colors.neumorphic.outset.highlightOpacity}
@@ -116,7 +120,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
                 >
                   {/* Support for multi-line labels */}
                   {lines.map((line, index) => (
-                    <Text key={index} style={index === 0 ? styles.selectedText : styles.selectedCaptionText}>
+                    <Text key={index} style={[index === 0 ? styles.selectedText : styles.selectedCaptionText, selectedTextStyle]}>
                       {line}
                     </Text>
                   ))}

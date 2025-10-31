@@ -10,6 +10,7 @@ MilCalc is a suite of tools for military personnel, delivered as a monorepo appl
 
 -   `apps/web`: A Next.js web application.
 -   `apps/mobile`: A React Native mobile application using Expo.
+-   `packages/data`: Contains data files for the application.
 -   `packages/ui`: A shared UI component library.
 -   `packages/utils`: Shared utilities and functions.
 -   `packages/eslint-config`: Shared ESLint configurations.

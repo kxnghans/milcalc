@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity, ImageSourcePropType } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
@@ -98,7 +98,7 @@ export default function CardioComponent({
     /**
      * Helper function to get the age group index for walk standards.
      * @param {number} age - The user's age.
-     * @returns {number} The index for the age group.
+     * @returns {number} The index for the age group. 
      */
     const getAgeGroupIndex = (age: number) => {
         if (age < 30) return 0;
@@ -151,136 +151,129 @@ export default function CardioComponent({
     };
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
-        >
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                <View>
-                    <View style={styles.exerciseBlock}>
-                        <View style={styles.componentHeader}>
-                            <TouchableOpacity onPress={() => openDetailModal(cardioComponent, getMascot(), getPerformance())}>
-                                <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
-                            </TouchableOpacity>
-                            <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m }]}>Cardio</Text>
-                            {/* Conditionally render the correct progress bar for the selected cardio type. */}
-                            {showProgressBars && (() => {
-                                if (cardioComponent === 'run') {
-                                    const timeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
-                                    return (
-                                        <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset>
-                                                <ProgressBar
-                                                    invertScale={true} // Lower time is better.
-                                                    value={timeInSeconds}
-                                                    passThreshold={cardioMinMax.min}
-                                                    maxPointsThreshold={cardioMinMax.max}
-                                                    ninetyPercentileThreshold={ninetyPercentileThreshold}
-                                                    valueIsTime={true}
-                                                    score={score.cardioScore}
-                                                    maxScore={60}
-                                                />
-                                            </NeumorphicOutset>
-                                        </View>
-                                    );
-                                } else if (cardioComponent === 'walk') {
-                                    const timeInSeconds = (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0);
-                                    const passThreshold = adjustedWalkMaxTime !== null ? adjustedWalkMaxTime : cardioMinMax.min;
-                                    return (
-                                        <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset>
-                                                <ProgressBar
-                                                    invertScale={true} // Lower time is better.
-                                                    value={timeInSeconds}
-                                                    passThreshold={passThreshold}
-                                                    valueIsTime={true}
-                                                    isPassFail={true} // Walk is a simple pass/fail event.
-                                                />
-                                            </NeumorphicOutset>
-                                        </View>
-                                    );
-                                } else { // shuttles
-                                    const getAdjustedShuttleCount = () => {
-                                        const baseShuttles = parseInt(shuttles) || 0;
-                                        
-                                        if (cardioComponent === 'shuttles' && altitudeData && altitudeGroup && altitudeGroup !== 'normal') {
-                                            const adjustmentRow = altitudeData.hamr.find(row => row.altitude_group === altitudeGroup);
-                                            if (adjustmentRow) {
-                                                return baseShuttles + adjustmentRow.shuttles_to_add;
-                                            }
-                                        }
-                                        
-                                        return baseShuttles;
-                                    };
-
-                                    return (
-                                        <View style={{ flex: 1 }}>
-                                            <NeumorphicOutset>
-                                                <ProgressBar
-                                                    value={getAdjustedShuttleCount()}
-                                                    passThreshold={cardioMinMax.min}
-                                                    maxPointsThreshold={cardioMinMax.max}
-                                                    ninetyPercentileThreshold={ninetyPercentileThreshold}
-                                                    score={score.cardioScore}
-                                                    maxScore={60}
-                                                />
-                                            </NeumorphicOutset>
-                                        </View>
-                                    );
+        <View>
+            <View style={styles.exerciseBlock}>
+                <View style={styles.componentHeader}>
+                    <TouchableOpacity onPress={() => openDetailModal(cardioComponent, getMascot(), getPerformance())}>
+                        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                    </TouchableOpacity>
+                    <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m }]}>Cardio</Text>
+                    {/* Conditionally render the correct progress bar for the selected cardio type. */}
+                    {showProgressBars && (() => {
+                        if (cardioComponent === 'run') {
+                            const timeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
+                            return (
+                                <View style={{ flex: 1 }}>
+                                    <NeumorphicOutset>
+                                        <ProgressBar
+                                            invertScale={true} // Lower time is better.
+                                            value={timeInSeconds}
+                                            passThreshold={cardioMinMax.min}
+                                            maxPointsThreshold={cardioMinMax.max}
+                                            ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                            valueIsTime={true}
+                                            score={score.cardioScore}
+                                            maxScore={60}
+                                        />
+                                    </NeumorphicOutset>
+                                </View>
+                            );
+                        } else if (cardioComponent === 'walk') {
+                            const timeInSeconds = (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0);
+                            const passThreshold = adjustedWalkMaxTime !== null ? adjustedWalkMaxTime : cardioMinMax.min;
+                            return (
+                                <View style={{ flex: 1 }}>
+                                    <NeumorphicOutset>
+                                        <ProgressBar
+                                            invertScale={true} // Lower time is better.
+                                            value={timeInSeconds}
+                                            passThreshold={passThreshold}
+                                            valueIsTime={true}
+                                            isPassFail={true} // Walk is a simple pass/fail event.
+                                        />
+                                    </NeumorphicOutset>
+                                </View>
+                            );
+                        } else { // shuttles
+                            const getAdjustedShuttleCount = () => {
+                                const baseShuttles = parseInt(shuttles) || 0;
+                                
+                                if (cardioComponent === 'shuttles' && altitudeData && altitudeGroup && altitudeGroup !== 'normal') {
+                                    const adjustmentRow = altitudeData.hamr.find(row => row.altitude_group === altitudeGroup);
+                                    if (adjustmentRow) {
+                                        return baseShuttles + adjustmentRow.shuttles_to_add;
+                                    }
                                 }
-                            })()}
-                        </View>
-                        <SegmentedSelector
-                            options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]}
-                            selectedValues={isExempt ? [] : [cardioComponent]}
-                            onValueChange={setCardioComponent}
-                        />
-                        {/* Conditionally render the correct input field for the selected cardio type. */}
-                        {cardioComponent === "run" && (
-                            <TimeInput
-                                minutes={runMinutes}
-                                setMinutes={setRunMinutes}
-                                seconds={runSeconds}
-                                setSeconds={setRunSeconds}
-                                adjustment={adjustment}
-                                minutesPlaceholder="Minutes"
-                                secondsPlaceholder="Seconds"
-                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                                disabled={isExempt}
-                                onToggleExempt={toggleExempt}
-                                isExempt={isExempt}
-                            />
-                        )}
-                        {cardioComponent === "shuttles" && (
-                            <NumberInput
-                                value={shuttles}
-                                onChangeText={setShuttles}
-                                placeholder="Enter shuttle count"
-                                adjustment={adjustment}
-                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                                disabled={isExempt}
-                                onToggleExempt={toggleExempt}
-                                isExempt={isExempt}
-                            />
-                        )}
-                        {cardioComponent === "walk" && (
-                            <TimeInput
-                                minutes={walkMinutes}
-                                setMinutes={setWalkMinutes}
-                                seconds={walkSeconds}
-                                setSeconds={setWalkSeconds}
-                                adjustment={adjustment}
-                                minutesPlaceholder="Minutes"
-                                secondsPlaceholder="Seconds"
-                                style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                                disabled={isExempt}
-                                onToggleExempt={toggleExempt}
-                                isExempt={isExempt}
-                            />
-                        )}
-                    </View>
+                                
+                                return baseShuttles;
+                            };
+
+                            return (
+                                <View style={{ flex: 1 }}>
+                                    <NeumorphicOutset>
+                                        <ProgressBar
+                                            value={getAdjustedShuttleCount()}
+                                            passThreshold={cardioMinMax.min}
+                                            maxPointsThreshold={cardioMinMax.max}
+                                            ninetyPercentileThreshold={ninetyPercentileThreshold}
+                                            score={score.cardioScore}
+                                            maxScore={60}
+                                        />
+                                    </NeumorphicOutset>
+                                </View>
+                            );
+                        }
+                    })()}
                 </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
+                <SegmentedSelector
+                    options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]} 
+                    selectedValues={isExempt ? [] : [cardioComponent]}
+                    onValueChange={setCardioComponent}
+                />
+                {/* Conditionally render the correct input field for the selected cardio type. */}
+                {cardioComponent === "run" && (
+                    <TimeInput
+                        minutes={runMinutes}
+                        setMinutes={setRunMinutes}
+                        seconds={runSeconds}
+                        setSeconds={setRunSeconds}
+                        adjustment={adjustment}
+                        minutesPlaceholder="Minutes"
+                        secondsPlaceholder="Seconds"
+                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                        disabled={isExempt}
+                        onToggleExempt={toggleExempt}
+                        isExempt={isExempt}
+                    />
+                )}
+                {cardioComponent === "shuttles" && (
+                    <NumberInput
+                        value={shuttles}
+                        onChangeText={setShuttles}
+                        placeholder="Enter shuttle count"
+                        adjustment={adjustment}
+                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                        disabled={isExempt}
+                        onToggleExempt={toggleExempt}
+                        isExempt={isExempt}
+                    />
+                )}
+                {cardioComponent === "walk" && (
+                    <TimeInput
+                        minutes={walkMinutes}
+                        setMinutes={setWalkMinutes}
+                        seconds={walkSeconds}
+                        setSeconds={setWalkSeconds}
+                        adjustment={adjustment}
+                        minutesPlaceholder="Minutes"
+                        secondsPlaceholder="Seconds"
+                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                        disabled={isExempt}
+                        onToggleExempt={toggleExempt}
+                        isExempt={isExempt}
+                    />
+                )}
+            </View>
+        </View>
     );
 };
