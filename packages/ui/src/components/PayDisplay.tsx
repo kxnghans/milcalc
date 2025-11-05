@@ -12,6 +12,7 @@ interface PayDetail {
 import { DatePickerModal } from './DatePickerModal';
 import { PillButton } from './PillButton';
 import Divider from './Divider';
+import { StyledTextInput } from './StyledTextInput';
 
 import NeumorphicInset from './NeumorphicInset';
 
@@ -35,9 +36,11 @@ interface PayDisplayProps {
   component?: string;
   paySource?: string;
   onHelpPress?: () => void;
+  breakInService?: string;
+  setBreakInService?: (text: string) => void;
 }
 
-export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, payDetails, deductions, containerStyle, federalStandardDeduction, stateStandardDeduction, isStandardDeductionsExpanded, onToggleStandardDeductions, onGetRetirementAge, isRetirementAgeCalculatorVisible, birthDate, setBirthDate, serviceEntryDate, setServiceEntryDate, retirementAge, component, paySource, onHelpPress }) => {
+export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, payDetails, deductions, containerStyle, federalStandardDeduction, stateStandardDeduction, isStandardDeductionsExpanded, onToggleStandardDeductions, onGetRetirementAge, isRetirementAgeCalculatorVisible, birthDate, setBirthDate, serviceEntryDate, setServiceEntryDate, retirementAge, component, paySource, onHelpPress, breakInService, setBreakInService }) => {
   const { theme } = useTheme();
   const [showBirthDatePicker, setShowBirthDatePicker] = React.useState(false);
   const [showServiceEntryDatePicker, setShowServiceEntryDatePicker] = React.useState(false);
@@ -112,8 +115,17 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
   });
 
   const renderCurrency = (value: number) => {
-    const numberValue = value || 0;
-    return `$${numberValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (value === null || value === undefined || isNaN(value)) {
+      return 'N/A';
+    }
+    return `${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const renderNumber = (value: number) => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return 'N/A';
+    }
+    return value.toLocaleString();
   };
 
   return (
@@ -172,16 +184,16 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
           <View style={{marginTop: theme.spacing.s}}>
               <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>Federal Std Deduction</Text>
-                  <Text style={styles.detailValue}>${federalStandardDeduction.toLocaleString()}</Text>
+                  <Text style={styles.detailValue}>${renderNumber(federalStandardDeduction)}</Text>
               </View>
               <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>State Std Deduction</Text>
-                  <Text style={styles.detailValue}>${stateStandardDeduction.toLocaleString()}</Text>
+                  <Text style={styles.detailValue}>${renderNumber(stateStandardDeduction)}</Text>
               </View>
               {retirementAge !== null && retirementAge !== undefined && (
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>Retirement Age</Text>
-                  <Text style={styles.detailValue}>{String(retirementAge)}</Text>
+                  <Text style={styles.detailValue}>{renderNumber(retirementAge)}</Text>
                 </View>
               )}
           </View>
@@ -213,7 +225,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                   value={birthDate}
                 />
               </View>
-              <View style={{ flex: 1, marginLeft: theme.spacing.s }}>
+              <View style={{ flex: 1, marginLeft: theme.spacing.s, marginRight: theme.spacing.s }}>
                 <Text style={[styles.detailLabel, { marginBottom: theme.spacing.s, marginTop: theme.spacing.s }]}>Service Entry Date</Text>
                 <Pressable style={{ marginBottom: theme.spacing.s }} onPress={() => setShowServiceEntryDatePicker(true)}>
                   <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
@@ -233,6 +245,29 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                   }}
                   value={serviceEntryDate}
                 />
+              </View>
+              <View style={{ flex: 1, marginLeft: theme.spacing.s }}>
+                <Text style={[styles.detailLabel, { marginBottom: theme.spacing.s, marginTop: theme.spacing.s }]}>Service Break</Text>
+                <NeumorphicInset style={{ borderRadius: theme.borderRadius.m, marginBottom: theme.spacing.s }}>
+                  <View style={styles.pressableInput}>
+                    <StyledTextInput
+                      keyboardType="number-pad"
+                      value={breakInService}
+                      onChangeText={setBreakInService}
+                      placeholder="Years"
+                      style={[
+                        styles.pressableText,
+                        {
+                            textAlign: 'center',
+                            borderWidth: 0,
+                            backgroundColor: 'transparent',
+                            padding: 0,
+                            borderRadius: 0,
+                        }
+                      ]}
+                    />
+                  </View>
+                </NeumorphicInset>
               </View>
             </View>
           )}

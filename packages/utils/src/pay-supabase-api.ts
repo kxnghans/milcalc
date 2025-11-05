@@ -4,13 +4,11 @@ import { supabase } from './supabaseClient';
  * Fetches the monthly base pay for a given pay grade and years of service.
  * @param pay_grade - The service member's pay grade (e.g., 'O-5').
  * @param years_of_service - The number of years in service.
- * @returns The base pay amount, or 0 if not found.
+ * @returns The base pay amount, or null if not found.
  */
-export const getBasePay = async (pay_grade: string, years_of_service: number) => {
-  if (!pay_grade) return 0;
+export const getBasePay = async (pay_grade: string, years_of_service: number): Promise<number | null> => {
+  if (!pay_grade) return null;
 
-  // If the pay grade is a prior-enlisted officer rank (e.g., 'O-1E'), strip the 'E' 
-  // to match the format in the database (e.g., 'O-1').
   const adjusted_pay_grade = pay_grade.endsWith('E') ? pay_grade.slice(0, -1) : pay_grade;
 
   let yearsColumn = 'yos_2_or_less';
@@ -44,10 +42,10 @@ export const getBasePay = async (pay_grade: string, years_of_service: number) =>
 
   if (error) {
     console.error('Error fetching base pay:', error);
-    return 0;
+    return null;
   }
 
-  return data ? data[yearsColumn] : 0;
+  return data ? data[yearsColumn] : null;
 };
 
 /**
@@ -105,14 +103,13 @@ export const getMhaData = async () => {
  * @param mha - The Military Housing Area code.
  * @param rank - The service member's rank (e.g., 'E-5').
  * @param dependencyStatus - The member's dependency status.
- * @returns The BAH rate, or 0 if not found.
+ * @returns The BAH rate, or null if not found.
  */
-export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS') => {
-    if (!mha || !rank || !dependencyStatus) return 0;
+export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS'): Promise<number | null> => {
+    if (!mha || !rank || !dependencyStatus) return null;
 
     const tableName = dependencyStatus === 'WITH_DEPENDENTS' ? 'bah_rates_dependents' : 'bah_rates_no_dependents';
     
-    // Correctly format the rank into a column name, padding with a zero if necessary
     const parts = rank.split('-');
     const letter = parts[0];
     let number = parts[1];
@@ -130,6 +127,20 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
         rankColumn += 'e';
     }
 
+    // This is a hardcoded list of columns that exist in the table.
+    // A dynamic check against information_schema was attempted but is not supported by the Supabase client.
+    const existingColumns = [
+        'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09',
+        'w01', 'w02', 'w03', 'w04', 'w05',
+        'o01e', 'o02e', 'o03e',
+        'o01', 'o02', 'o03', 'o04', 'o05', 'o06', 'o07'
+    ];
+
+    if (!existingColumns.includes(rankColumn)) {
+        console.warn(`Column ${rankColumn} does not exist in ${tableName}. Returning null.`);
+        return null;
+    }
+
     const { data, error } = await supabase
         .from(tableName)
         .select(rankColumn)
@@ -138,10 +149,10 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
 
     if (error) {
         console.error(`Error fetching BAH rate from ${tableName}:`, error);
-        return 0;
+        return null;
     }
 
-    return data ? data[rankColumn] : 0;
+    return data ? data[rankColumn] : null;
 };
 
 export const getPayHelpContent = async (contentKey: string) => {

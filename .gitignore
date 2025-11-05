@@ -34,6 +34,8 @@ pnpm-debug.log*
 *.mobileprovision
 *.orig.*
 
-# Data packages
-packages/data/
-apps/mobile/assets/
+# Ignore all assets in the mobile assets folder...
+apps/mobile/assets/*
+
+# ...except for the splash screen
+!apps/mobile/assets/3d_splash.png

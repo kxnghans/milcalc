@@ -6,30 +6,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback, ActivityIndicator, Image, ScrollView, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, PillButton } from '@repo/ui';
-import { getDocumentsByCategory } from '@repo/utils';
+import { getDocumentsByCategory, supabase } from '@repo/utils';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
-import { Asset } from 'expo-asset';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const mascotAsset = require('../../assets/3d_documents.png');
-
-// Asset map to link database source keys to local require() paths
-const localAssetMap = {
-    'FITNESS_SCREENING_QUESTIONNAIRE': require('../../../../packages/data/pt_data/Air Force Physical Fitness Screening Questionnaire v5.pdf'),
-    'FITNESS_ASSESSMENT_SCORECARD': require('../../../../packages/data/pt_data/daf4446.pdf'),
-    '5_YEAR_CHART_SCORING': require('../../../../packages/data/pt_data/5 Year Chart Scoring Including Optional Component Standards - 20211111 0219.pdf'),
-    'DAFMAN_36_2905': require('../../../../packages/data/pt_data/dafman36-2905.pdf'),
-    'ALTITUDE_ADJUSTMENTS': require('../../../../packages/data/pt_data/dafman36-2905 altitude adjustments.pdf'),
-    'WALK_STANDARDS': require('../../../../packages/data/pt_data/dafman36-2905 walk.pdf'),
-    'FMR_BASE_PAY': require('../../../../packages/data/pay_data/finance_charts/DoD 7000.14-R Financial Management Regulation Base Pay.pdf'),
-    'FMR_BAS': require('../../../../packages/data/pay_data/finance_charts/DoD 7000.14-R Financial Management Regulation Basic Allowance for Subsistence BAS.pdf'),
-    'IRS_TAX_ADJUSTMENTS_2025': require('../../../../packages/data/pay_data/finance_charts/IRS Revenue Procedure 2024-40.pdf'),
-    'BAH_RATES_2025': require('../../../../packages/data/pay_data/BAH/2025 BAH Rates.pdf'),
-    'BAH_OOP_2025': require('../../../../packages/data/pay_data/BAH/2025a-BAH_OOP_Amounts.pdf'),
-    'BAH_COMPONENTS_2025': require('../../../../packages/data/pay_data/BAH/2025a-BAH-Rate-Component-Breakdown.pdf'),
-    'BAH_NON_LOCALITY_2025': require('../../../../packages/data/pay_data/BAH/2025a-Non-Locality-BAH-Rates.pdf'),
-};
+const mascotAsset = { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_documents.png' };
 
 export default function DocumentModal({ category, isModalVisible, setModalVisible }) {
     const { theme } = useTheme();
@@ -88,17 +70,25 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
         }
     };
 
-    const handlePress = async (doc: { type: string; source: any; }) => {
+    const handlePress = async (doc: { source: any; }) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        if (doc.type === 'web') {
-            await Linking.openURL(doc.source);
-        } else if (doc.type === 'local') {
-            const assetModule = localAssetMap[doc.source];
-            if (assetModule) {
-                const asset = Asset.fromModule(assetModule);
-                await asset.downloadAsync();
-                await Linking.openURL(asset.localUri);
+        try {
+            const { data, error } = await supabase.functions.invoke('get-signed-url', {
+                body: { filePath: doc.source },
+            });
+    
+            if (error) {
+                throw error;
             }
+    
+            if (data.signedURL) {
+                await Linking.openURL(data.signedURL);
+            } else {
+                // Handle case where signedURL is not returned
+                console.error('No signed URL returned from edge function');
+            }
+        } catch (error) {
+            console.error('Error getting signed URL:', error.message);
         }
     };
 

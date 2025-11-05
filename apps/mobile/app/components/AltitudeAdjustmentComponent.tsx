@@ -9,8 +9,8 @@ import { useTheme, SegmentedSelector, Icon, ICONS } from '@repo/ui';
 import React from 'react';
 
 const altitudeMascots = [
-  require('../../assets/3d_altitude.png'),
-  require('../../assets/3d_altitude1.png'),
+  { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_altitude.png' },
+  { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_altitude1.png' },
 ];
 
 /**

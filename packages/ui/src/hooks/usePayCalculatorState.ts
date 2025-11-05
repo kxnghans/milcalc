@@ -76,8 +76,8 @@ export const usePayCalculatorState = () => {
   const debouncedState = useDebounce(state, 500);
 
   // --- Fetched & Calculated Income State ---
-  const [basePay, setBasePay] = useState(0);
-  const [bah, setBah] = useState(0);
+  const [basePay, setBasePay] = useState<number | null>(0);
+  const [bah, setBah] = useState<number | null>(0);
   const [bas, setBas] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -162,7 +162,14 @@ export const usePayCalculatorState = () => {
 
   useEffect(() => {
     const calculateAll = async () => {
-      if (!debouncedRank && !debouncedYears) return;
+      if (!debouncedRank) {
+        setBasePay(0);
+        setBah(0);
+        setBas(0);
+        setCalculatedTaxes({ fedTax: 0, stateTax: 0, ficaTax: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 });
+        setVaDisabilityPay(0);
+        return;
+      }
       setIsLoading(true);
       try {
         const militaryPayPromise =
@@ -170,19 +177,19 @@ export const usePayCalculatorState = () => {
             ? component === 'Active'
               ? getBasePay(debouncedRank, Number(debouncedYears))
               : getReserveDrillPay(debouncedRank, Number(debouncedYears))
-            : Promise.resolve(basePay);
+            : Promise.resolve(null);
 
-        const basPromise = debouncedRank ? getBasRate(debouncedRank) : Promise.resolve(bas);
+        const basPromise = debouncedRank ? getBasRate(debouncedRank) : Promise.resolve(0);
         const bahPromise = (debouncedMha && debouncedMha !== 'initial' && debouncedMha !== 'ON_BASE' && debouncedRank && bahDependencyStatus)
             ? getBahRate(debouncedMha, debouncedRank, bahDependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS')
-            : Promise.resolve(0);
+            : Promise.resolve(null);
 
         const [newMilitaryPay, newBas, newBah] = await Promise.all([militaryPayPromise, basPromise, bahPromise]);
 
         const vaDisabilityPayResult = await calculateDisabilityIncome(disabilityPercentage, vaDependencyStatus);
         setVaDisabilityPay(vaDisabilityPayResult);
 
-        const militaryMonthlyPay = newMilitaryPay + newBas + newBah;
+        const militaryMonthlyPay = (newMilitaryPay || 0) + (newBas || 0) + (newBah || 0);
 
         if (vaDisabilityPayResult > militaryMonthlyPay) {
           setPaySource('VA Disability');
@@ -190,7 +197,7 @@ export const usePayCalculatorState = () => {
         } else {
           setPaySource('Military');
           setBasePay(newMilitaryPay);
-          setBas(newBas);
+          setBas(newBas || 0);
           setBah(newBah);
 
           if (federalTaxData.length > 0 && stateTaxData.length > 0 && debouncedMha !== 'initial') {
@@ -223,7 +230,7 @@ export const usePayCalculatorState = () => {
     }
     const specialPayTotal = Object.values(specialPays).reduce((sum, val) => sum + parseCurrency(val), 0);
     const additionalIncomesTotal = additionalIncomes.reduce((sum, item) => sum + parseCurrency(item.amount), 0);
-    return basePay + bah + bas + specialPayTotal + additionalIncomesTotal;
+    return (basePay || 0) + (bah || 0) + (bas || 0) + specialPayTotal + additionalIncomesTotal;
   }, [basePay, bah, bas, specialPays, additionalIncomes, paySource, vaDisabilityPay]);
 
   const totalDeductions = useMemo(() => {
@@ -371,71 +378,21 @@ export const usePayCalculatorState = () => {
     setRank(null);
     setYearsOfService('');
     setMha('initial');
-    setState('');
     setBahDependencyStatus('WITHOUT_DEPENDENTS');
-    setVaDependencyStatus(null);
-    setDisabilityPercentage(null);
     setFilingStatus('single');
-    setSpecialPays({
-      clothing: '', hostileFire: '', imminentDanger: '', hazardousDuty: '',
-      hardshipDuty: '', aviation: '', assignment: '', careerSea: '',
-      healthProfessions: '', foreignLanguage: '', specialDuty: ''
-    });
+    setState('');
+    setComponent('Active');
+    setDisabilityPercentage(null);
+    setVaDependencyStatus(null);
+    setPaySource('Military');
+    setSpecialPays({ clothing: '', hostileFire: '', imminentDanger: '', hazardousDuty: '', hardshipDuty: '', aviation: '', assignment: '', careerSea: '', healthProfessions: '', foreignLanguage: '', specialDuty: '' });
     setAdditionalIncomes([{ name: '', amount: '' }]);
-    setDeductions({
-        sgli: '',
-        tsp: '',
-        overrideFedTax: '',
-        overrideStateTax: '',
-        overrideFicaTax: '',
-    });
+    setDeductions({ sgli: '', tsp: '', overrideFedTax: '', overrideStateTax: '', overrideFicaTax: '' });
     setAdditionalDeductions([{ name: '', amount: '' }]);
     setIsTaxOverride(false);
-    setIncomeExpanded(false);
-    setDeductionsExpanded(false);
-    setIsStandardDeductionsExpanded(false);
   };
 
   return {
-    resetState,
-    annualPay,
-    monthlyPay,
-    incomeForDisplay,
-    deductionsForDisplay,
-    isLoading,
-    federalStandardDeduction: calculatedTaxes.federalStandardDeduction,
-    stateStandardDeduction: calculatedTaxes.stateStandardDeduction,
-    mhaData,
-    mhaError,
-    filteredRanks,
-    status, setStatus,
-    rank, setRank: setRankAndStatus,
-    yearsOfService, setYearsOfService,
-    mha, setMha,
-    handleMhaChange,
-    mhaDisplayName,
-    state, setState,
-    bahDependencyStatus, setBahDependencyStatus,
-    vaDependencyStatus, setVaDependencyStatus,
-    filingStatus, setFilingStatus,
-    isIncomeExpanded, setIncomeExpanded,
-    isDeductionsExpanded, setDeductionsExpanded,
-    isStandardDeductionsExpanded, setIsStandardDeductionsExpanded,
-    specialPays, setSpecialPays,
-    additionalIncomes, setAdditionalIncomes,
-    deductions, setDeductions,
-    additionalDeductions, setAdditionalDeductions,
-    showAddIncomeButton,
-    showAddDeductionButton,
-    isTaxOverride, 
-    setIsTaxOverride,
-    paySource,
-    component, setComponent,
-    disabilityPercentage, setDisabilityPercentage,
-    disabilityData, disabilityError,
-    disabilityPickerData,
-    disabilityPercentageItems,
-    handleDisabilityChange,
-    disabilityDisplayName,
+    status, setStatus, rank, setRank: setRankAndStatus, yearsOfService, setYearsOfService, mha, handleMhaChange, bahDependencyStatus, setBahDependencyStatus, filingStatus, setFilingStatus, state, setState, component, setComponent, disabilityPercentage, disabilityData, disabilityError, reserveDrillPayData, paySource, vaDisabilityPay, mhaData, mhaError, filteredRanks, isTaxOverride, setIsTaxOverride, basePay, bah, bas, isLoading, isIncomeExpanded, setIncomeExpanded, specialPays, setSpecialPays, additionalIncomes, setAdditionalIncomes, isDeductionsExpanded, setDeductionsExpanded, isStandardDeductionsExpanded, setIsStandardDeductionsExpanded, deductions, setDeductions, additionalDeductions, setAdditionalDeductions, calculatedTaxes, federalTaxData, stateTaxData, federalTaxYear, stateTaxYear, federalTaxDataError, stateTaxDataError, totalIncome, totalDeductions, monthlyPay, annualPay, incomeForDisplay, deductionsForDisplay, showAddIncomeButton, showAddDeductionButton, mhaDisplayName, disabilityPercentageItems, disabilityPickerData, disabilityDisplayName, handleDisabilityChange, resetState
   };
 };

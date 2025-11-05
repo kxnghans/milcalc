@@ -12,6 +12,8 @@ import TwoColumnPicker from '../components/TwoColumnPicker';
 import DetailModal from '../components/DetailModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+const retirementMascot = { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_retirement.png' };
+
 export default function RetirementCalculatorScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
@@ -107,6 +109,8 @@ export default function RetirementCalculatorScreen() {
     disabilityIncome,
     tsp,
     taxes,
+    breakInService,
+    setBreakInService,
   } = useRetirementCalculatorState();
 
   const navigation = useNavigation();
@@ -213,7 +217,7 @@ export default function RetirementCalculatorScreen() {
           <View>
             <Card containerStyle={{ marginBottom: theme.spacing.s }}>
                               <PayDisplay
-                                  onHelpPress={() => openDetailModal('Retirement Display Summary', require('../../assets/3d_retirement.png'))}                annualPay={annualPay}
+                                  onHelpPress={() => openDetailModal('Retirement Display Summary', retirementMascot)}                annualPay={annualPay}
                 monthlyPay={monthlyPay}
                 payDetails={payDetails}
                 deductions={deductions}
@@ -229,6 +233,8 @@ export default function RetirementCalculatorScreen() {
                 setServiceEntryDate={setServiceEntryDate}
                 retirementAge={retirementAge}
                 component={component}
+                breakInService={breakInService}
+                setBreakInService={setBreakInService}
               />
             </Card>
             <IconRow icons={[
@@ -248,7 +254,7 @@ export default function RetirementCalculatorScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Card style={{ flex: 1 }}>
-              <KeyboardAwareScrollView extraScrollHeight={-60} contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
+              <KeyboardAwareScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
                 <SegmentedSelector
                   style={{ marginLeft: 0, marginRight: 0 }}
                   options={[{label: 'Active', value: 'Active'}, {label: 'Reserves', value: 'Reserves'}, {label: 'Guard', value: 'Guard'}]}
@@ -263,7 +269,7 @@ export default function RetirementCalculatorScreen() {
                 />
 
                 <View style={styles.fieldRow}>
-                  <LabelWithHelp label="Years of Service" contentKey="High-3" mascot={require('../../assets/3d_retirement.png')} />
+                  <LabelWithHelp label="Years of Service" contentKey="High-3" mascot={retirementMascot} />
                   <NumberInput placeholder="0" value={yearsOfService} onChangeText={setYearsOfService} />
                 </View>
 
@@ -305,7 +311,7 @@ export default function RetirementCalculatorScreen() {
                     <TwoColumnPicker data={disabilityPickerData} selectedValue={dependentStatus} onChange={handleDisabilityChange} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select disability rating" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} />
                   </View>
                   <View style={styles.fieldRow}>
-                    <LabelWithHelp label="TSP" contentKey="TSP" mascot={require('../../assets/3d_retirement.png')} />
+                    <LabelWithHelp label="TSP" contentKey="TSP" mascot={retirementMascot} />
                     <SegmentedSelector
                       style={{ marginLeft: 0, marginRight: 0, marginBottom: theme.spacing.m }}
                       options={[{label: 'Roth', value: 'Roth'}, {label: 'Traditional', value: 'Traditional'}]}
@@ -340,15 +346,15 @@ export default function RetirementCalculatorScreen() {
                     </View>
                   )}
                   {showServicePoints && <View style={styles.fieldRow}>
-                    <LabelWithHelp label="Service Points" contentKey="Service Points" mascot={require('../../assets/3d_retirement.png')} />
+                    <LabelWithHelp label="Service Points" contentKey="Service Points" mascot={retirementMascot} />
                     <NumberInput placeholder="0" value={servicePoints} onChangeText={setServicePoints} />
                   </View>}
                   {showGoodYears && <View style={styles.fieldRow}>
-                    <LabelWithHelp label="Good Years" contentKey="Good Years" mascot={require('../../assets/3d_retirement.png')} />
+                    <LabelWithHelp label="Good Years" contentKey="Good Years" mascot={retirementMascot} />
                     <NumberInput placeholder="0" value={goodYears} onChangeText={setGoodYears} />
                   </View>}
                   {component !== 'Active' && <View style={styles.fieldRow}>
-                    <LabelWithHelp label="Qualifying Deployment Days" contentKey="Qualifying Deployment Days" mascot={require('../../assets/3d_retirement.png')} />
+                    <LabelWithHelp label="Qualifying Deployment Days" contentKey="Qualifying Deployment Days" mascot={retirementMascot} />
                     <NumberInput placeholder="0" value={qualifyingDeploymentDays} onChangeText={setQualifyingDeploymentDays} />
                   </View>}
                 </View>
