@@ -146,7 +146,7 @@ export default function PTCalculator() {
             {/* The main input area, wrapped in a ScrollView. */}
             <View style={{ flex: 1 }}>
                 <Card style={{ flex: 1, marginTop: theme.spacing.s }}>
-                    <KeyboardAwareScrollView extraScrollHeight={-60} contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
+                    <KeyboardAwareScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
                         {/* Each section of the calculator is rendered as a separate component. */}
                         <Demographics
                             age={demographics.age}

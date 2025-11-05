@@ -143,11 +143,11 @@ export default function CardioComponent({
 
     const getMascot = (): ImageSourcePropType => {
         if (cardioComponent === "run" || cardioComponent === "shuttles") {
-            return require('../../assets/3d_run.png');
+            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_run.png' };
         } else if (cardioComponent === "walk") {
-            return require('../../assets/3d_walk.png');
+            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_walk.png' };
         }
-        return require('../../assets/3d_run.png'); // Default mascot
+        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_run.png' }; // Default mascot
     };
 
     return (

@@ -9,9 +9,9 @@ const parseCurrency = (value: string | number) => {
 export const calculatePay = async (inputs, federalTaxData, stateTaxData) => {
   const { basePay, bah, bas, specialPays, additionalIncomes, filingStatus, mha, additionalDeductions, state } = inputs;
 
-  const monthlyBasePay = basePay;
-  const monthlyBah = bah;
-  const monthlyBas = bas;
+  const monthlyBasePay = basePay || 0;
+  const monthlyBah = bah || 0;
+  const monthlyBas = bas || 0;
   const monthlySpecialPays = Object.values(specialPays).reduce((a, b) => a + parseCurrency(b), 0);
   const monthlyAdditionalIncomes = additionalIncomes.reduce((sum, item) => sum + parseCurrency(item.amount), 0);
   const monthlyAdditionalDeductions = additionalDeductions.reduce((sum, item) => sum + parseCurrency(item.amount), 0);
@@ -39,8 +39,6 @@ export const calculatePay = async (inputs, federalTaxData, stateTaxData) => {
 
   const federalTaxableIncomeForBrackets = Math.max(0, taxableIncome - federalStandardDeduction - annualAdditionalDeductions);
   const stateTaxableIncomeForBrackets = Math.max(0, taxableIncome - stateStandardDeduction - annualAdditionalDeductions);
-
-  console.log({taxableIncome, federalStandardDeduction, stateStandardDeduction, federalTaxableIncomeForBrackets, stateTaxableIncomeForBrackets});
 
   const federalTax = calculateFederalTax(federalTaxableIncomeForBrackets, filingStatus, federalTaxData);
   const stateTax = calculateStateTax(stateTaxableIncomeForBrackets, filingStatus, state, stateTaxData);
@@ -74,9 +72,30 @@ const calculateFederalTax = (taxableIncome, filingStatus, federalTaxData) => {
 
 const calculateStateTax = (taxableIncome, filingStatus, state, stateTaxData) => {
   const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
-  const brackets = stateTaxData
+  const rawBrackets = stateTaxData
     .filter(row => row.state === state && row.filing_status === capitalizedFilingStatus)
     .sort((a, b) => parseFloat(a.income_bracket_low) - parseFloat(b.income_bracket_low));
+
+  if (rawBrackets.length === 0) {
+    return 0;
+  }
+
+  // Reconstruct brackets from the flawed data structure
+  const brackets = rawBrackets.map((bracket, index) => {
+    const nextBracket = rawBrackets[index + 1];
+    let rate = parseFloat(bracket.tax_rate);
+
+    // Hardcoded fix for incorrect tax rate in the data for CA's first bracket
+    if (state === 'CA' && parseFloat(bracket.income_bracket_low) === 0 && rate === 1.0) {
+      rate = 0.01;
+    }
+
+    return {
+      min: parseFloat(bracket.income_bracket_low),
+      max: nextBracket ? parseFloat(nextBracket.income_bracket_low) - 1 : Infinity, // -1 to make it non-overlapping
+      rate: rate,
+    };
+  });
 
   let tax = 0;
   let remainingIncome = taxableIncome;
@@ -84,12 +103,9 @@ const calculateStateTax = (taxableIncome, filingStatus, state, stateTaxData) => 
   for (const bracket of brackets) {
     if (remainingIncome <= 0) break;
 
-    const bracketMin = parseFloat(bracket.income_bracket_low);
-    const bracketMax = bracket.income_bracket_high === 'inf' ? Infinity : parseFloat(bracket.income_bracket_high);
-    const taxRate = parseFloat(bracket.tax_rate);
-
-    const incomeInBracket = Math.min(remainingIncome, bracketMax - bracketMin);
-    tax += incomeInBracket * taxRate;
+    const bracketSize = bracket.max - bracket.min + 1;
+    const incomeInBracket = Math.min(remainingIncome, bracketSize);
+    tax += incomeInBracket * bracket.rate;
     remainingIncome -= incomeInBracket;
   }
 

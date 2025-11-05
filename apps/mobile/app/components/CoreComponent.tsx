@@ -73,11 +73,11 @@ export default function CoreComponent({
 
     const getMascot = (): ImageSourcePropType => {
         if (coreComponent === "sit_ups_1min" || coreComponent === "cross_leg_reverse_crunch_2min") {
-            return require('../../assets/3d_crunch.png');
+            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_crunch.png' };
         } else if (coreComponent === "forearm_plank_time") {
-            return require('../../assets/3d_plank.png');
+            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_plank.png' };
         }
-        return require('../../assets/3d_crunch.png'); // Default mascot
+        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_crunch.png' }; // Default mascot
     };
 
     return (

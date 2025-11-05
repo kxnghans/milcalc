@@ -29,6 +29,7 @@ export const useRetirementCalculatorState = () => {
   const [isPayDisplayExpanded, setIsPayDisplayExpanded] = useState(false);
   const [isRetirementAgeCalculatorVisible, setIsRetirementAgeCalculatorVisible] = useState(false);
   const [retirementAge, setRetirementAge] = useState(null);
+  const [breakInService, setBreakInService] = useState('');
 
   const [payGrades, setPayGrades] = useState([]);
   const [payGradesError, setPayGradesError] = useState(null);
@@ -68,7 +69,8 @@ export const useRetirementCalculatorState = () => {
   
       if (component === 'Active') {
         const retirementDate = new Date(serviceEntryDate);
-        retirementDate.setFullYear(retirementDate.getFullYear() + parseInt(yearsOfService, 10));
+        const totalYears = (parseInt(yearsOfService, 10) || 0) + (parseInt(breakInService, 10) || 0);
+        retirementDate.setFullYear(retirementDate.getFullYear() + totalYears);
         const ageAtRetirement = retirementDate.getFullYear() - birthDate.getFullYear();
         const m = retirementDate.getMonth() - birthDate.getMonth();
         if (m < 0 || (m === 0 && retirementDate.getDate() < birthDate.getDate())) {
@@ -82,8 +84,36 @@ export const useRetirementCalculatorState = () => {
       }
     };
     calculateRetirementAge();
-  }, [birthDate, serviceEntryDate, yearsOfService, qualifyingDeploymentDays, component]);
+  }, [birthDate, serviceEntryDate, yearsOfService, qualifyingDeploymentDays, component, breakInService]);
 
+  // This effect handles the TSP calculation logic separately to avoid infinite loops.
+  useEffect(() => {
+    const tspValue = calculateTsp(
+      tspAmount,
+      isTspCalculatorVisible,
+      debouncedTspContributionAmount,
+      debouncedTspContributionPercentage,
+      debouncedTspContributionYears,
+      retirementSystem,
+      tspReturn
+    );
+    setTsp(tspValue);
+
+    // If the calculator is visible, sync the main TSP amount input with the calculated value.
+    if (isTspCalculatorVisible) {
+      setTspAmount(tspValue.toString());
+    }
+  }, [
+    tspAmount,
+    isTspCalculatorVisible,
+    debouncedTspContributionAmount,
+    debouncedTspContributionPercentage,
+    debouncedTspContributionYears,
+    retirementSystem,
+    tspReturn,
+  ]);
+
+  // This is the main calculation effect, now simplified to not include TSP logic.
   useEffect(() => {
     const calculate = async () => {
       try {
@@ -92,13 +122,6 @@ export const useRetirementCalculatorState = () => {
 
         const disabilityIncomeValue = await calculateDisabilityIncome(disabilityPercentage, dependentStatus);
         setDisabilityIncome(disabilityIncomeValue);
-
-        const tspValue = calculateTsp(tspAmount, isTspCalculatorVisible, debouncedTspContributionAmount, debouncedTspContributionPercentage, debouncedTspContributionYears, retirementSystem, tspReturn);
-        setTsp(tspValue);
-
-        if (isTspCalculatorVisible) {
-          setTspAmount(tspValue.toString());
-        }
 
         const grossIncome = pensionValue + disabilityIncomeValue;
         const { federal, state, federalStandardDeduction, stateStandardDeduction } = calculateTaxes(grossIncome, state, filingStatus, federalTaxData, stateTaxData);
@@ -111,7 +134,7 @@ export const useRetirementCalculatorState = () => {
     };
 
     calculate();
-  }, [component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, disabilityPercentage, dependentStatus, tspAmount, state, filingStatus, isTspCalculatorVisible, debouncedTspContributionAmount, debouncedTspContributionPercentage, debouncedTspContributionYears, tspReturn, tspType, federalTaxData, stateTaxData]);
+  }, [component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, disabilityPercentage, dependentStatus, state, filingStatus, federalTaxData, stateTaxData]);
 
   // MHA State
   const [mha, setMha] = useState('initial');
@@ -422,5 +445,7 @@ export const useRetirementCalculatorState = () => {
     federalTaxDataError,
     stateTaxDataError,
     disabilityError,
+    breakInService,
+    setBreakInService,
   };
 };

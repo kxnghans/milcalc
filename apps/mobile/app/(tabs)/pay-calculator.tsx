@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, LayoutAnimation, UIManager, Platform, TouchableOpacity, ActivityIndicator, ImageSourcePropType } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
 import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -17,8 +18,8 @@ import VerticalDivider from '../components/VerticalDivider';
 import TwoColumnPicker from '../components/TwoColumnPicker';
 
 const payMascots = [
-  require('../../assets/3d_pay.png'),
-  require('../../assets/3d_pay1.png'),
+  { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_pay.png' },
+  { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_pay1.png' },
 ];
 
 // Enable LayoutAnimation for Android
@@ -253,7 +254,7 @@ export default function PayCalculatorScreen() {
             },
         ]} />
         <Card style={{ flex: 1 }}>
-            <KeyboardAwareScrollView extraScrollHeight={-60} contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
+            <KeyboardAwareScrollView enableOnAndroid contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
                 {/* Two-Column Layout for Demographics */}
                 <View style={{ flexDirection: 'row' }}>
                     {/* Left Column */}
@@ -278,7 +279,7 @@ export default function PayCalculatorScreen() {
                                 style={{ marginLeft: 0, marginRight: 0 }}
                             />
                         </View>
-                        <View style={styles.fieldRow}>
+                        <View style={styles.fieldRow} collapsable={false}>
                             <Text style={styles.boldLabel}>Pay Grade</Text>
                             <PickerInput items={filteredRanks} selectedValue={rank} onValueChange={setRank} placeholder="Select..." />
                         </View>

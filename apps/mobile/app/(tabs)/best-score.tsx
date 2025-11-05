@@ -211,19 +211,19 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore, isEx
 
       case "Strength":
 
-        return require('../../assets/3d_pushup.png');
+        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_pushup.png' };
 
       case "Core":
 
-        return require('../../assets/3d_crunch.png');
+        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_crunch.png' };
 
       case "Cardio":
 
-        return require('../../assets/3d_run.png');
+        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_run.png' };
 
       default:
 
-        return require('../../assets/3d_splash.png'); // Default or generic mascot
+        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_splash.png' }; // Default or generic mascot
 
     }
 
