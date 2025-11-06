@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { getScoreForExercise, calculateBestScore, checkWalkPass, getPtStandards, getWalkStandards, getAltitudeAdjustments, getAgeGroupString } from '@repo/utils';
 import { useDebounce } from './useDebounce';
+import { useTimeInput } from './useTimeInput';
 
 /**
  * A custom hook to manage the state for the Best Score calculator.
@@ -23,13 +24,10 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   const [hrPushUps, setHrPushUps] = useState("");
   const [sitUps, setSitUps] = useState("");
   const [crunches, setCrunches] = useState("");
-  const [plankMinutes, setPlankMinutes] = useState("");
-  const [plankSeconds, setPlankSeconds] = useState("");
-  const [runMinutes, setRunMinutes] = useState("");
-  const [runSeconds, setRunSeconds] = useState("");
+  const { minutes: plankMinutes, setMinutes: setPlankMinutes, seconds: plankSeconds, setSeconds: setPlankSeconds } = useTimeInput();
+  const { minutes: runMinutes, setMinutes: setRunMinutes, seconds: runSeconds, setSeconds: setRunSeconds } = useTimeInput();
   const [shuttles, setShuttles] = useState("");
-  const [walkMinutes, setWalkMinutes] = useState("");
-  const [walkSeconds, setWalkSeconds] = useState("");
+  const { minutes: walkMinutes, setMinutes: setWalkMinutes, seconds: walkSeconds, setSeconds: setWalkSeconds } = useTimeInput();
 
   // State for exemption status of each component category.
   const [isStrengthExempt, setIsStrengthExempt] = useState(false);
