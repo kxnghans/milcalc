@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { useTimeInput } from './useTimeInput';
 
 /**
  * A custom hook to manage the state for the core component section.
@@ -30,9 +31,7 @@ export function useCoreState(
   // State for the number of reverse crunches.
   const [reverseCrunches, setReverseCrunches] = useState(initialCrunches);
   // State for the minutes part of the plank time.
-  const [plankMinutes, setPlankMinutes] = useState(initialPlankMinutes);
-  // State for the seconds part of the plank time.
-  const [plankSeconds, setPlankSeconds] = useState(initialPlankSeconds);
+  const { minutes: plankMinutes, setMinutes: setPlankMinutes, seconds: plankSeconds, setSeconds: setPlankSeconds } = useTimeInput(initialPlankMinutes, initialPlankSeconds);
   // State for the exemption status of the component.
   const [isExempt, setIsExempt] = useState(false);
 

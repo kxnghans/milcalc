@@ -63,8 +63,18 @@ const TimeInput: React.FC<TimeInputProps> = ({
   const handleMinutesChange = (value: string) => {
     setMinutes(value);
     // Auto-focus the seconds input when the minutes field is filled.
-    if (value.length === 2 || parseInt(value) >= 6) {
+    if (value.length === 2 || parseInt(value, 10) >= 6) {
       secondsInput.current?.focus();
+    }
+  };
+
+  const handleSecondsChange = (value: string) => {
+    setSeconds(value);
+  };
+
+  const handleSecondsBlur = () => {
+    if (seconds.length === 1) {
+      setSeconds(`0${seconds}`);
     }
   };
 
@@ -123,7 +133,8 @@ const TimeInput: React.FC<TimeInputProps> = ({
         <StyledTextInput
             ref={secondsInput}
             value={seconds}
-            onChangeText={setSeconds}
+            onChangeText={handleSecondsChange}
+            onBlur={handleSecondsBlur}
             placeholder={currentSecondsPlaceholder}
             maxLength={2}
             keyboardType="numeric"

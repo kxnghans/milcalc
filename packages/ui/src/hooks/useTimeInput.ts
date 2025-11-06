@@ -24,7 +24,9 @@ export function useTimeInput(initialMinutes: string = '', initialSeconds: string
    */
   const handleMinutesChange = (text: string) => {
     const numericValue = text.replace(/[^0-9]/g, '');
-    setMinutes(numericValue);
+    if (numericValue === '' || parseInt(numericValue, 10) < 60) {
+      setMinutes(numericValue);
+    }
   };
 
   /**
@@ -35,7 +37,9 @@ export function useTimeInput(initialMinutes: string = '', initialSeconds: string
   const handleSecondsChange = (text: string) => {
     // Sanitize the input to allow only numeric characters.
     const numericValue = text.replace(/[^0-9]/g, '');
-    setSeconds(numericValue);
+    if (numericValue === '' || parseInt(numericValue, 10) < 60) {
+      setSeconds(numericValue);
+    }
   };
 
   return {
