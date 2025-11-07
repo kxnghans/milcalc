@@ -23,6 +23,8 @@ export const ICONS = {
   HOME_FILLED: 'home',              // Icon for the home/main tab (selected).
   HELP: 'help-circle-outline',      // Icon for help or information tooltips.
   WEIGHT_LIFTER: 'weight-lifter',   // A general-purpose fitness icon.
+  PAY: 'cash-multiple',             // Icon for the Pay Calculator.
+  RETIREMENT: 'run',                // Icon for the Retirement Calculator.
 };
 
 /**

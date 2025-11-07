@@ -150,3 +150,19 @@ The general workflow for migrating local data to the Supabase database is as fol
 3.  **Process and Insert Data**: The local data file is read, processed into `INSERT` statements, and executed via the `supabase.execute_sql` tool.
 
 This automated process is used for all database setup and removes the need for manual data handling.
+
+## 8. Project Status
+
+The MilCalc project is a suite of military calculators developed as a monorepo application. The current status is as follows:
+
+-   **`apps/mobile`**: The React Native mobile application is considered **complete and stable**. No further development or changes should be made to the mobile app to avoid regressions.
+
+-   **`apps/web`**: The Next.js web application is the **primary focus of current development**. The goal is to build out the web version to match the functionality of the mobile app, following the plan outlined in `WEB.md`. This will involve using **Next.js** and **Tailwind CSS**.
+
+## 9. Web Development Plan
+
+All web development should follow the strategic plan detailed in the `WEB.md` document. This includes the architecture, component strategy, and phased implementation for each calculator.
+
+## 10. Core Logic & Shared Packages
+
+**IMPORTANT:** To prevent regressions in the completed mobile app, **do not modify existing components** in `packages/ui` or `packages/utils` in a way that would introduce breaking changes. If web-specific functionality is needed, create new components or utilities in the `apps/web` directory.
