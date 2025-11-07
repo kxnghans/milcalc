@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./card": "./src/card.tsx",
     "./icons": "./src/icons.ts",
+    "./theme": "./src/theme.ts",
     "./contexts/ThemeContext": "./src/contexts/ThemeContext.tsx"
   },
   "scripts": {

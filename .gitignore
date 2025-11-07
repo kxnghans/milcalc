@@ -12,7 +12,7 @@ pnpm-debug.log*
 # Build output
 /dist
 /build
-/.next/
+.next/
 
 # Turbo
 .turbo
@@ -39,3 +39,7 @@ apps/mobile/assets/*
 
 # ...except for the splash screen
 !apps/mobile/assets/3d_splash.png
+
+# Images
+*.png
+*.jpg
