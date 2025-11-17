@@ -5,22 +5,15 @@
   "scripts": {
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
-    "lint": "turbo run lint",
-    "depcheck": "depcheck"
+    "lint": "turbo run lint"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "devDependencies": {
-    "depcheck": "^1.4.7",
     "turbo": "latest",
     "typescript": "^5.9.2"
   },
   "pnpm": {
     "overrides": {
       "react": "19.1.0",
-      "react-dom": "19.1.0",
       "react-native-reanimated": "4.1.0",
       "@expo/vector-icons": "15.0.2",
       "@types/react": "19.1.0"

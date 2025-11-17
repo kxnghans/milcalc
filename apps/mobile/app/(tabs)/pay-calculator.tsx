@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, LayoutAnimation, UIManager, Platform, TouchableOpacity, ActivityIndicator, ImageSourcePropType } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton } from '@repo/ui';
+import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -18,8 +18,8 @@ import VerticalDivider from '../components/VerticalDivider';
 import TwoColumnPicker from '../components/TwoColumnPicker';
 
 const payMascots = [
-  { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_pay.png' },
-  { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_pay1.png' },
+  { uri: MASCOT_URLS.PAY },
+  { uri: MASCOT_URLS.PAY1 },
 ];
 
 // Enable LayoutAnimation for Android

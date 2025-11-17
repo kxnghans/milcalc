@@ -5,13 +5,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback, ActivityIndicator, Image, ScrollView, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme, PillButton } from '@repo/ui';
-import { getDocumentsByCategory, supabase } from '@repo/utils';
-import * as Haptics from 'expo-haptics';
+import { useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
+import { getDocumentsByCategory, openDocument } from '@repo/utils';
 import { BlurView } from 'expo-blur';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const mascotAsset = { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_documents.png' };
+const mascotAsset = { uri: MASCOT_URLS.DOCUMENTS };
 
 export default function DocumentModal({ category, isModalVisible, setModalVisible }) {
     const { theme } = useTheme();
@@ -68,33 +67,6 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
         if (!isScrollable) {
             setShowTopChevron(false);
         }
-    };
-
-    const handlePress = async (doc: { source: any; }) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        try {
-            const { data, error } = await supabase.functions.invoke('get-signed-url', {
-                body: { filePath: doc.source },
-            });
-    
-            if (error) {
-                throw error;
-            }
-    
-            if (data.signedURL) {
-                await Linking.openURL(data.signedURL);
-            } else {
-                // Handle case where signedURL is not returned
-                console.error('No signed URL returned from edge function');
-            }
-        } catch (error) {
-            console.error('Error getting signed URL:', error.message);
-        }
-    };
-
-    const handleLearnMore = (uri: string) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        Linking.openURL(uri);
     };
 
     const CHEVRON_HEIGHT = 24 + theme.spacing.s;
@@ -213,7 +185,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                                         <View key={index} style={{alignItems: 'center', marginBottom: 10}}>
                                             <TouchableOpacity
                                                 style={styles.button}
-                                                onPress={() => doc.learn_more_uri ? handleLearnMore(doc.learn_more_uri) : handlePress(doc)}
+                                                onPress={() => openDocument(doc)}
                                             >
                                                 <Text style={styles.textStyle}>
                                                     {doc.name}

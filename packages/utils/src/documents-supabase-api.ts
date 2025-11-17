@@ -1,4 +1,6 @@
 import { supabase } from './supabaseClient';
+import { Linking } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
 /**
  * Fetches a list of documents from the database based on a category.
@@ -42,4 +44,49 @@ export const getHelpDetailsByExercise = async (exercise: string) => {
   }
 
   return data || [];
+};
+
+/**
+ * Handles opening a document, either by fetching a signed URL for private files
+ * or by opening a public web link.
+ * @param doc - The document object from the database.
+ */
+export const openDocument = async (doc: any) => {
+    // Use learn_more_uri if it exists, otherwise use the source based on type.
+    const urlToOpen = doc.learn_more_uri || (doc.type === 'web' ? doc.source : null);
+
+    if (urlToOpen) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        try {
+            await Linking.openURL(urlToOpen);
+        } catch (error) {
+            console.error('Error opening URL:', error);
+        }
+        return;
+    }
+
+    // Handle private files that need a signed URL.
+    if (doc.type === 'local' && doc.source) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        try {
+            const { data, error } = await supabase.functions.invoke('get-signed-url', {
+                body: { filePath: doc.source },
+            });
+    
+            if (error) {
+                throw error;
+            }
+    
+            if (data.signedURL) {
+                await Linking.openURL(data.signedURL);
+            } else {
+                console.error('No signed URL returned from edge function');
+            }
+        } catch (error) {
+            console.error('Error getting signed URL:', error.message);
+        }
+        return;
+    }
+
+    console.error('No valid URL or source found for this document:', doc);
 };

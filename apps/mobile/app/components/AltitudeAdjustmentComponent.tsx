@@ -5,12 +5,12 @@
  */
 
 import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import { useTheme, SegmentedSelector, Icon, ICONS } from '@repo/ui';
+import { useTheme, SegmentedSelector, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
 import React from 'react';
 
 const altitudeMascots = [
-  { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_altitude.png' },
-  { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_altitude1.png' },
+  { uri: MASCOT_URLS.ALTITUDE },
+  { uri: MASCOT_URLS.ALTITUDE1 },
 ];
 
 /**

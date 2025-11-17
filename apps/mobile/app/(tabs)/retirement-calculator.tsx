@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Platform, ActivityIndicator, Pressable, ImageSourcePropType } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { useRetirementCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, StyledTextInput, PillButton } from '@repo/ui';
+import { useRetirementCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, StyledTextInput, PillButton, MASCOT_URLS } from '@repo/ui';
 import PickerInput from '../components/PickerInput';
 import DocumentModal from '../components/DocumentModal';
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +12,7 @@ import TwoColumnPicker from '../components/TwoColumnPicker';
 import DetailModal from '../components/DetailModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const retirementMascot = { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_retirement.png' };
+const retirementMascot = { uri: MASCOT_URLS.RETIREMENT };
 
 export default function RetirementCalculatorScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();

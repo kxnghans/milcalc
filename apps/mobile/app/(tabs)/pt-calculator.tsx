@@ -118,9 +118,6 @@ export default function PTCalculator() {
             onClose={closeDetailModal} 
             contentKey={detailModalContentKey} 
             source="pt"
-            age={demographics.age}
-            gender={demographics.gender}
-            performance={modalPerformance}
             mascotAsset={detailModalMascot}
         />
         <View style={{flex: 1}}>
