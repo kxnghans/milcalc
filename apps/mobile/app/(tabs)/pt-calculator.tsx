@@ -15,6 +15,7 @@ import Divider from "../components/Divider";
 import { useNavigation } from "expo-router";
 
 import DetailModal from "../components/DetailModal";
+import { useCallback } from "react";
 
 /**
  * The main component for the PT Calculator screen.
@@ -28,19 +29,19 @@ export default function PTCalculator() {
   const [modalPerformance, setModalPerformance] = React.useState<any>(null);
   const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
 
-  const openDetailModal = (key: string, mascot: ImageSourcePropType, performance?: any) => {
+  const openDetailModal = useCallback((key: string, mascot: ImageSourcePropType, performance?: any) => {
     setDetailModalContentKey(key);
     setDetailModalMascot(mascot);
     if (performance) {
       setModalPerformance(performance);
     }
-  };
+  }, []);
 
-  const closeDetailModal = () => {
+  const closeDetailModal = useCallback(() => {
     setDetailModalContentKey(null);
     setModalPerformance(null);
     setDetailModalMascot(null);
-  };
+  }, []);
 
   // State to store the heights of the segmented controls in each component.
   const [segmentedHeights, setSegmentedHeights] = React.useState({ strength: 0, core: 0, cardio: 0 });
@@ -65,7 +66,7 @@ export default function PTCalculator() {
         isLoading ? <ActivityIndicator size="small" color={isDarkMode ? theme.colors.text : theme.colors.primary} style={{ marginRight: theme.spacing.s }} /> : null
       ),
     });
-  }, [isLoading, navigation, theme]);
+  }, [isLoading, navigation, theme, isDarkMode]);
 
   /**
    * A layout handler to measure the height of the segmented controls.
@@ -73,7 +74,7 @@ export default function PTCalculator() {
    * @param {string} block - The component block ('strength', 'core', 'cardio').
    * @param {object} event - The layout event.
    */
-  const handleSegmentedLayout = (block, event) => {
+  const handleSegmentedLayout = useCallback((block, event) => {
     const { height } = event.nativeEvent.layout;
     setSegmentedHeights(heights => {
         if (heights[block] !== height) {
@@ -81,7 +82,7 @@ export default function PTCalculator() {
         }
         return heights;
     });
-  };
+  }, []);
 
   /**
    * Gets the appropriate icon for the current theme setting (light, dark, or auto).
@@ -92,6 +93,8 @@ export default function PTCalculator() {
     if (themeMode === 'dark') return ICONS.THEME_DARK;
     return ICONS.THEME_AUTO;
   };
+
+  const onPdfIconPress = useCallback(() => setPdfModalVisible(true), []);
 
   // Progress bars are only shown once age and gender have been entered.
   const showProgressBars = demographics.age && demographics.gender;
@@ -124,7 +127,7 @@ export default function PTCalculator() {
 
             {/* Top section with score display and main action icons. */}
             <View>
-                <ScoreDisplay score={score} cardioComponent={cardio.cardioComponent} containerStyle={{ marginBottom: theme.spacing.s }} />
+                <ScoreDisplay score={score} cardioComponent={cardio.cardioComponent} />
                 <IconRow icons={[
                     {
                         name: ICONS.WEIGHT_LIFTER,
@@ -132,7 +135,7 @@ export default function PTCalculator() {
                     },
                     {
                         name: ICONS.DOCUMENT,
-                        onPress: () => setPdfModalVisible(true),
+                        onPress: onPdfIconPress,
                     },
                     {
                         name: getThemeIcon(),
@@ -141,8 +144,8 @@ export default function PTCalculator() {
                 ]} />
             </View>
             {/* The main input area, wrapped in a ScrollView. */}
-            <View style={{ flex: 1 }}>
-                <Card style={{ flex: 1, marginTop: theme.spacing.s }}>
+            <View style={{ flex: 1, marginTop: theme.spacing.s }}>
+                <Card style={{ flex: 1 }}>
                     <KeyboardAwareScrollView contentContainerStyle={{paddingBottom: 0}} showsVerticalScrollIndicator={false}>
                         {/* Each section of the calculator is rendered as a separate component. */}
                         <Demographics

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from './useDebounce';
 import { getDisabilityData, getMhaData, getPayGrades, getFederalTaxData, getStateTaxData, calculatePension, calculateDisabilityIncome, calculateTsp, calculateTaxes } from '@repo/utils';
 
@@ -31,19 +32,6 @@ export const useRetirementCalculatorState = () => {
   const [retirementAge, setRetirementAge] = useState(null);
   const [breakInService, setBreakInService] = useState('');
 
-  const [payGrades, setPayGrades] = useState([]);
-  const [payGradesError, setPayGradesError] = useState(null);
-  const [federalTaxData, setFederalTaxData] = useState([]);
-  const [federalTaxDataError, setFederalTaxDataError] = useState(null);
-  const [stateTaxData, setStateTaxData] = useState([]);
-  const [stateTaxDataError, setStateTaxDataError] = useState(null);
-  const [mhaData, setMhaData] = useState({});
-  const [mhaError, setMhaError] = useState(null);
-  const [disabilityData, setDisabilityData] = useState([]);
-  const [disabilityError, setDisabilityError] = useState(null);
-
-  const [isLoading, setIsLoading] = useState(true);
-
   // Calculated values
   const [pension, setPension] = useState(0);
   const [disabilityIncome, setDisabilityIncome] = useState(0);
@@ -62,6 +50,57 @@ export const useRetirementCalculatorState = () => {
 
   const [disabilityPercentage, setDisabilityPercentage] = useState(null);
   const [dependentStatus, setDependentStatus] = useState(null);
+
+  // MHA State
+  const [mha, setMha] = useState('initial');
+  const [state, setState] = useState('');
+
+    // --- Data Fetching with React Query ---
+    const { data: mhaData, error: mhaError, isLoading: isLoadingMha } = useQuery({
+      queryKey: ['mhaData'],
+      queryFn: getMhaData,
+      staleTime: Infinity,
+    });
+  
+    const { data: payGrades, error: payGradesError, isLoading: isLoadingPayGrades } = useQuery({
+      queryKey: ['payGrades'],
+      queryFn: async () => {
+        const data = await getPayGrades();
+        const getRankOrder = (payGrade) => {
+          const rankType = payGrade.charAt(0);
+          const rankNum = parseInt(payGrade.substring(2));
+          if (rankType === 'E') return rankNum;
+          if (rankType === 'W') return 100 + rankNum;
+          if (rankType === 'O') {
+            if (payGrade.endsWith('E')) return 200 + rankNum + 0.5;
+            return 200 + rankNum;
+          }
+          return 400;
+        };
+        return data.sort((a, b) => getRankOrder(a) - getRankOrder(b));
+      },
+      staleTime: Infinity,
+    });
+  
+    const { data: federalTaxData, error: federalTaxDataError, isLoading: isLoadingFedTax } = useQuery({
+      queryKey: ['federalTaxData', 2024],
+      queryFn: () => getFederalTaxData(2024),
+      staleTime: Infinity,
+    });
+  
+    const { data: stateTaxData, error: stateTaxDataError, isLoading: isLoadingStateTax } = useQuery({
+      queryKey: ['stateTaxData', 2024],
+      queryFn: () => getStateTaxData(2024),
+      staleTime: Infinity,
+    });
+  
+    const { data: disabilityData, error: disabilityError, isLoading: isLoadingDisability } = useQuery({
+      queryKey: ['disabilityData'],
+      queryFn: getDisabilityData,
+      staleTime: Infinity,
+    });
+  
+    const isLoading = isLoadingMha || isLoadingPayGrades || isLoadingFedTax || isLoadingStateTax || isLoadingDisability;
 
   useEffect(() => {
     const calculateRetirementAge = () => {
@@ -116,6 +155,7 @@ export const useRetirementCalculatorState = () => {
   // This is the main calculation effect, now simplified to not include TSP logic.
   useEffect(() => {
     const calculate = async () => {
+      if (isLoading) return;
       try {
         const pensionValue = await calculatePension(component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, goodYears);
         setPension(pensionValue);
@@ -124,24 +164,22 @@ export const useRetirementCalculatorState = () => {
         setDisabilityIncome(disabilityIncomeValue);
 
         const grossIncome = pensionValue + disabilityIncomeValue;
-        const { federal, state, federalStandardDeduction, stateStandardDeduction } = calculateTaxes(grossIncome, state, filingStatus, federalTaxData, stateTaxData);
-        setTaxes({ federal, state });
-        setFederalStandardDeduction(federalStandardDeduction);
-        setStateStandardDeduction(stateStandardDeduction);
-      } finally {
-        setIsLoading(false);
+        if (federalTaxData && stateTaxData) {
+            const { federal, state, federalStandardDeduction, stateStandardDeduction } = calculateTaxes(grossIncome, state, filingStatus, federalTaxData, stateTaxData);
+            setTaxes({ federal, state });
+            setFederalStandardDeduction(federalStandardDeduction);
+            setStateStandardDeduction(stateStandardDeduction);
+        }
+      } catch(e) {
+        // console.error("Calculation error: ", e)
       }
     };
 
     calculate();
-  }, [component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, disabilityPercentage, dependentStatus, state, filingStatus, federalTaxData, stateTaxData]);
-
-  // MHA State
-  const [mha, setMha] = useState('initial');
-  const [state, setState] = useState('');
+  }, [component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, disabilityPercentage, dependentStatus, state, filingStatus, federalTaxData, stateTaxData, isLoading]);
 
   useEffect(() => {
-    if (high3PayGrade1 && high3PayGrade2) {
+    if (high3PayGrade1 && high3PayGrade2 && payGrades) {
       const year1Index = payGrades.findIndex(p => p === high3PayGrade1);
       const year2Index = payGrades.findIndex(p => p === high3PayGrade2);
       if (year1Index > year2Index) {
@@ -152,7 +190,7 @@ export const useRetirementCalculatorState = () => {
   }, [high3PayGrade1, high3PayGrade2, payGrades]);
 
   useEffect(() => {
-    if (high3PayGrade2 && high3PayGrade3) {
+    if (high3PayGrade2 && high3PayGrade3 && payGrades) {
       const year2Index = payGrades.findIndex(p => p === high3PayGrade2);
       const year3Index = payGrades.findIndex(p => p === high3PayGrade3);
       if (year2Index > year3Index) {
@@ -161,11 +199,11 @@ export const useRetirementCalculatorState = () => {
     }
   }, [high3PayGrade2, high3PayGrade3, payGrades]);
 
-  const payGradesForYear1 = useMemo(() => payGrades, [payGrades]);
+  const payGradesForYear1 = useMemo(() => payGrades || [], [payGrades]);
 
   const payGradesForYear2 = useMemo(() => {
-    if (!high3PayGrade1) {
-      return payGrades;
+    if (!high3PayGrade1 || !payGrades) {
+      return payGrades || [];
     }
     const selectedIndex = payGrades.findIndex(p => p === high3PayGrade1);
     if (selectedIndex === -1) {
@@ -228,66 +266,6 @@ export const useRetirementCalculatorState = () => {
       setTspAmount('');
     }
   }, [isTspCalculatorVisible]);
-
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      try {
-        await Promise.all([
-          (async () => {
-            try {
-              const data = await getMhaData();
-              setMhaData(data);
-            } catch (error) {
-              setMhaError(error.message);
-            }
-          })(),
-          (async () => {
-            try {
-              const data = await getPayGrades();
-              const getRankOrder = (payGrade) => {
-                const rankType = payGrade.charAt(0);
-                const rankNum = parseInt(payGrade.substring(2));
-                if (rankType === 'E') return rankNum;
-                if (rankType === 'W') return 100 + rankNum;
-                if (rankType === 'O') {
-                  if (payGrade.endsWith('E')) return 200 + rankNum + 0.5;
-                  return 200 + rankNum;
-                }
-                return 400;
-              };
-              const sortedData = data.sort((a, b) => getRankOrder(a) - getRankOrder(b));
-              setPayGrades(sortedData);
-            } catch (error) {
-              setPayGradesError(error.message);
-            }
-          })(),
-          (async () => {
-            try {
-              const federalData = await getFederalTaxData(2024);
-              const stateData = await getStateTaxData(2024);
-              setFederalTaxData(federalData);
-              setStateTaxData(stateData);
-            } catch (error) {
-              setFederalTaxDataError(error.message);
-              setStateTaxDataError(error.message);
-            }
-          })(),
-          (async () => {
-            try {
-              const data = await getDisabilityData();
-              setDisabilityData(data);
-            } catch (error) {
-              setDisabilityError(error.message);
-            }
-          })(),
-        ]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchInitialData();
-  }, []);
 
   const mhaDisplayName = useMemo(() => {
     if (mha === 'initial') return "Select a state";

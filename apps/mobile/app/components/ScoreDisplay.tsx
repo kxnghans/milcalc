@@ -17,7 +17,7 @@ import { getScoreCategory } from '@repo/utils';
  * @param {boolean} [props.showBreakdown=true] - Whether to show the breakdown of individual component scores.
  * @returns {JSX.Element} The rendered score display component.
  */
-export default function ScoreDisplay({ score, cardioComponent, showBreakdown = true }) {
+const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }) => {
   const { theme } = useTheme();
   const excellentColors = useScoreColors('excellent');
   const passColors = useScoreColors('pass');
@@ -130,3 +130,5 @@ export default function ScoreDisplay({ score, cardioComponent, showBreakdown = t
     </NeumorphicOutset>
   );
 };
+
+export default React.memo(ScoreDisplay);

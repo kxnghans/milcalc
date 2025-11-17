@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from './useDebounce';
 import { getBasePay, getBasRate, getBahRate, getMhaData, getFederalTaxData, getStateTaxData, calculatePay, getMaxFederalTaxYear, getMaxStateTaxYear, getDisabilityData, getReserveDrillPay } from '@repo/utils';
 import { calculateDisabilityIncome } from '@repo/utils';
@@ -13,14 +14,6 @@ const parseCurrency = (value: string | number) => {
   }
   return 0; // Return 0 if value is undefined, null, etc.
 };
-
-const formatCurrency = (value: number | string) => {
-    const num = parseCurrency(value);
-    return num.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
 
 const officerRanks = [
   { label: 'O-1', value: 'O-1' }, { label: 'O-1E', value: 'O-1E' }, 
@@ -53,33 +46,20 @@ export const usePayCalculatorState = () => {
   const [state, setState] = useState('');
   const [component, setComponent] = useState('Active');
   const [disabilityPercentage, setDisabilityPercentage] = useState(null);
-  const [disabilityData, setDisabilityData] = useState([]);
-  const [disabilityError, setDisabilityError] = useState(null);
-  const [reserveDrillPayData, setReserveDrillPayData] = useState([]);
   const [paySource, setPaySource] = useState('Military');
   const [vaDisabilityPay, setVaDisabilityPay] = useState(0);
 
   // --- Data & UI State ---
-  const [mhaData, setMhaData] = useState({});
-  const [mhaError, setMhaError] = useState(null);
   const [filteredRanks, setFilteredRanks] = useState(enlistedRanks);
   const [isTaxOverride, setIsTaxOverride] = useState(false);
-
 
   // Debounced values for calculations
   const debouncedRank = useDebounce(rank, 500);
   const debouncedYears = useDebounce(yearsOfService, 500);
   const debouncedMha = useDebounce(mha, 500);
   const debouncedBahDependencyStatus = useDebounce(bahDependencyStatus, 500);
-
   const debouncedFilingStatus = useDebounce(filingStatus, 500);
   const debouncedState = useDebounce(state, 500);
-
-  // --- Fetched & Calculated Income State ---
-  const [basePay, setBasePay] = useState<number | null>(0);
-  const [bah, setBah] = useState<number | null>(0);
-  const [bas, setBas] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
 
   // --- User Input Income/Deduction States ---
   const [isIncomeExpanded, setIncomeExpanded] = useState(false);
@@ -100,54 +80,73 @@ export const usePayCalculatorState = () => {
   });
   const [additionalDeductions, setAdditionalDeductions] = useState([{ name: '', amount: '' }]);
   const [calculatedTaxes, setCalculatedTaxes] = useState({ fedTax: 0, stateTax: 0, ficaTax: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 });
-  const [federalTaxData, setFederalTaxData] = useState([]);
-  const [stateTaxData, setStateTaxData] = useState([]);
-  const [federalTaxYear, setFederalTaxYear] = useState<number | null>(null);
-  const [stateTaxYear, setStateTaxYear] = useState<number | null>(null);
-  const [federalTaxDataError, setFederalTaxDataError] = useState(null);
-  const [stateTaxDataError, setStateTaxDataError] = useState(null);
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      try {
-        const mhaPromise = getMhaData().catch(e => { setMhaError(e.message); return {}; });
-        const taxYearPromise = (async () => {
-            try {
-                const maxFederalYear = await getMaxFederalTaxYear();
-                const maxStateYear = await getMaxStateTaxYear();
-                setFederalTaxYear(maxFederalYear);
-                setStateTaxYear(maxStateYear);
-                return { maxFederalYear, maxStateYear };
-            } catch (e) {
-                setFederalTaxDataError(e.message);
-                setStateTaxDataError(e.message);
-                return { maxFederalYear: null, maxStateYear: null };
-            }
-        })();
-
-        const disabilityPromise = getDisabilityData().catch(e => { setDisabilityError(e.message); return []; });
-        const [mhaResult, { maxFederalYear, maxStateYear }, disabilityResult] = await Promise.all([mhaPromise, taxYearPromise, disabilityPromise]);
-
-        for (const state in mhaResult) {
-            mhaResult[state].unshift({ label: 'ON BASE', value: 'ON_BASE' });
-        }
-        setMhaData(mhaResult);
-        setDisabilityData(disabilityResult);
-
-        if (maxFederalYear) {
-            getFederalTaxData(maxFederalYear).then(setFederalTaxData).catch(e => setFederalTaxDataError(e.message));
-        }
-        if (maxStateYear) {
-            getStateTaxData(maxStateYear).then(setStateTaxData).catch(e => setStateTaxDataError(e.message));
-        }
-
-      } finally {
-        setIsLoading(false);
+  // --- Data Fetching with React Query ---
+  const { data: mhaData, error: mhaError, isLoading: isLoadingMha } = useQuery({
+    queryKey: ['mhaData'],
+    queryFn: async () => {
+      const data = await getMhaData();
+      for (const state in data) {
+        data[state].unshift({ label: 'ON BASE', value: 'ON_BASE' });
       }
-    };
-    fetchInitialData();
-  }, []);
+      return data;
+    },
+    staleTime: Infinity,
+  });
+
+  const { data: federalTaxYear, error: federalTaxYearError } = useQuery({
+    queryKey: ['maxFederalTaxYear'],
+    queryFn: getMaxFederalTaxYear,
+    staleTime: Infinity,
+  });
+
+  const { data: stateTaxYear, error: stateTaxYearError } = useQuery({
+    queryKey: ['maxStateTaxYear'],
+    queryFn: getMaxStateTaxYear,
+    staleTime: Infinity,
+  });
+
+  const { data: federalTaxData, error: federalTaxDataError, isLoading: isLoadingFedTax } = useQuery({
+    queryKey: ['federalTaxData', federalTaxYear],
+    queryFn: () => getFederalTaxData(federalTaxYear),
+    enabled: !!federalTaxYear,
+    staleTime: Infinity,
+  });
+
+  const { data: stateTaxData, error: stateTaxDataError, isLoading: isLoadingStateTax } = useQuery({
+    queryKey: ['stateTaxData', stateTaxYear],
+    queryFn: () => getStateTaxData(stateTaxYear),
+    enabled: !!stateTaxYear,
+    staleTime: Infinity,
+  });
+
+  const { data: disabilityData, error: disabilityError, isLoading: isLoadingDisability } = useQuery({
+    queryKey: ['disabilityData'],
+    queryFn: getDisabilityData,
+    staleTime: Infinity,
+  });
+
+  const { data: basePay, isLoading: isLoadingBasePay } = useQuery({
+    queryKey: ['basePay', debouncedRank, debouncedYears, component],
+    queryFn: () => component === 'Active'
+      ? getBasePay(debouncedRank, Number(debouncedYears))
+      : getReserveDrillPay(debouncedRank, Number(debouncedYears)),
+    enabled: !!debouncedRank && !!debouncedYears,
+  });
+
+  const { data: bah, isLoading: isLoadingBah } = useQuery({
+    queryKey: ['bahRate', debouncedMha, debouncedRank, debouncedBahDependencyStatus],
+    queryFn: () => getBahRate(debouncedMha, debouncedRank, debouncedBahDependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS'),
+    enabled: !!debouncedMha && debouncedMha !== 'initial' && debouncedMha !== 'ON_BASE' && !!debouncedRank && !!debouncedBahDependencyStatus,
+  });
+
+  const { data: bas, isLoading: isLoadingBas } = useQuery({
+    queryKey: ['basRate', debouncedRank],
+    queryFn: () => getBasRate(debouncedRank),
+    enabled: !!debouncedRank,
+  });
+
+  const isLoading = isLoadingMha || isLoadingFedTax || isLoadingStateTax || isLoadingDisability || isLoadingBasePay || isLoadingBah || isLoadingBas;
 
   useEffect(() => {
     if (status === 'Officer') {
@@ -163,66 +162,41 @@ export const usePayCalculatorState = () => {
   useEffect(() => {
     const calculateAll = async () => {
       if (!debouncedRank) {
-        setBasePay(0);
-        setBah(0);
-        setBas(0);
         setCalculatedTaxes({ fedTax: 0, stateTax: 0, ficaTax: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 });
         setVaDisabilityPay(0);
         return;
       }
-      setIsLoading(true);
-      try {
-        const militaryPayPromise =
-          debouncedRank && debouncedYears
-            ? component === 'Active'
-              ? getBasePay(debouncedRank, Number(debouncedYears))
-              : getReserveDrillPay(debouncedRank, Number(debouncedYears))
-            : Promise.resolve(null);
 
-        const basPromise = debouncedRank ? getBasRate(debouncedRank) : Promise.resolve(0);
-        const bahPromise = (debouncedMha && debouncedMha !== 'initial' && debouncedMha !== 'ON_BASE' && debouncedRank && bahDependencyStatus)
-            ? getBahRate(debouncedMha, debouncedRank, bahDependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS')
-            : Promise.resolve(null);
+      const vaDisabilityPayResult = await calculateDisabilityIncome(disabilityPercentage, vaDependencyStatus);
+      setVaDisabilityPay(vaDisabilityPayResult);
 
-        const [newMilitaryPay, newBas, newBah] = await Promise.all([militaryPayPromise, basPromise, bahPromise]);
+      const militaryMonthlyPay = (basePay || 0) + (bas || 0) + (bah || 0);
 
-        const vaDisabilityPayResult = await calculateDisabilityIncome(disabilityPercentage, vaDependencyStatus);
-        setVaDisabilityPay(vaDisabilityPayResult);
-
-        const militaryMonthlyPay = (newMilitaryPay || 0) + (newBas || 0) + (newBah || 0);
-
-        if (vaDisabilityPayResult > militaryMonthlyPay) {
-          setPaySource('VA Disability');
-          setCalculatedTaxes({ fedTax: 0, stateTax: 0, ficaTax: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 });
-        } else {
-          setPaySource('Military');
-          setBasePay(newMilitaryPay);
-          setBas(newBas || 0);
-          setBah(newBah);
-
-          if (federalTaxData.length > 0 && stateTaxData.length > 0 && debouncedMha !== 'initial') {
-            const payInputs = {
-              basePay: newMilitaryPay,
-              bah: newBah,
-              bas: newBas,
-              specialPays,
-              additionalIncomes,
-              deductions,
-              additionalDeductions,
-              filingStatus: debouncedFilingStatus,
-              state: debouncedState,
-            };
-            const { federalTax, stateTax, ficaTax, federalStandardDeduction, stateStandardDeduction } = await calculatePay(payInputs, federalTaxData, stateTaxData);
-            setCalculatedTaxes({ fedTax: federalTax, stateTax: stateTax, ficaTax: ficaTax, federalStandardDeduction, stateStandardDeduction });
-          }
+      if (vaDisabilityPayResult > militaryMonthlyPay) {
+        setPaySource('VA Disability');
+        setCalculatedTaxes({ fedTax: 0, stateTax: 0, ficaTax: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 });
+      } else {
+        setPaySource('Military');
+        if (federalTaxData && stateTaxData && debouncedMha !== 'initial') {
+          const payInputs = {
+            basePay: basePay,
+            bah: bah,
+            bas: bas,
+            specialPays,
+            additionalIncomes,
+            deductions,
+            additionalDeductions,
+            filingStatus: debouncedFilingStatus,
+            state: debouncedState,
+          };
+          const { federalTax, stateTax, ficaTax, federalStandardDeduction, stateStandardDeduction } = await calculatePay(payInputs, federalTaxData, stateTaxData);
+          setCalculatedTaxes({ fedTax: federalTax, stateTax: stateTax, ficaTax: ficaTax, federalStandardDeduction, stateStandardDeduction });
         }
-      } finally {
-        setIsLoading(false);
       }
     };
 
     calculateAll();
-  }, [debouncedRank, debouncedYears, debouncedMha, debouncedBahDependencyStatus, debouncedFilingStatus, debouncedState, component, disabilityPercentage]);
+  }, [basePay, bah, bas, debouncedRank, debouncedMha, debouncedFilingStatus, debouncedState, disabilityPercentage, vaDependencyStatus, federalTaxData, stateTaxData, specialPays, additionalIncomes, deductions, additionalDeductions]);
 
   const totalIncome = useMemo(() => {
     if (paySource === 'VA Disability') {
@@ -393,6 +367,6 @@ export const usePayCalculatorState = () => {
   };
 
   return {
-    status, setStatus, rank, setRank: setRankAndStatus, yearsOfService, setYearsOfService, mha, handleMhaChange, bahDependencyStatus, setBahDependencyStatus, filingStatus, setFilingStatus, state, setState, component, setComponent, disabilityPercentage, disabilityData, disabilityError, reserveDrillPayData, paySource, vaDisabilityPay, mhaData, mhaError, filteredRanks, isTaxOverride, setIsTaxOverride, basePay, bah, bas, isLoading, isIncomeExpanded, setIncomeExpanded, specialPays, setSpecialPays, additionalIncomes, setAdditionalIncomes, isDeductionsExpanded, setDeductionsExpanded, isStandardDeductionsExpanded, setIsStandardDeductionsExpanded, deductions, setDeductions, additionalDeductions, setAdditionalDeductions, calculatedTaxes, federalTaxData, stateTaxData, federalTaxYear, stateTaxYear, federalTaxDataError, stateTaxDataError, totalIncome, totalDeductions, monthlyPay, annualPay, incomeForDisplay, deductionsForDisplay, showAddIncomeButton, showAddDeductionButton, mhaDisplayName, disabilityPercentageItems, disabilityPickerData, disabilityDisplayName, handleDisabilityChange, resetState
+    status, setStatus, rank, setRank: setRankAndStatus, yearsOfService, setYearsOfService, mha, handleMhaChange, bahDependencyStatus, setBahDependencyStatus, filingStatus, setFilingStatus, state, setState, component, setComponent, disabilityPercentage, disabilityData, disabilityError, paySource, vaDisabilityPay, mhaData, mhaError, filteredRanks, isTaxOverride, setIsTaxOverride, basePay, bah, bas, isLoading, isIncomeExpanded, setIncomeExpanded, specialPays, setSpecialPays, additionalIncomes, setAdditionalIncomes, isDeductionsExpanded, setDeductionsExpanded, isStandardDeductionsExpanded, setIsStandardDeductionsExpanded, deductions, setDeductions, additionalDeductions, setAdditionalDeductions, calculatedTaxes, federalTaxData, stateTaxData, federalTaxYear, stateTaxYear, federalTaxDataError, stateTaxDataError, totalIncome, totalDeductions, monthlyPay, annualPay, incomeForDisplay, deductionsForDisplay, showAddIncomeButton, showAddDeductionButton, mhaDisplayName, disabilityPercentageItems, disabilityPickerData, disabilityDisplayName, handleDisabilityChange, resetState
   };
 };

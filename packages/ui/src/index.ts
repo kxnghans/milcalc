@@ -22,3 +22,4 @@ export * from './hooks/usePtCalculatorState';
 export * from './hooks/usePayCalculatorState';
 export * from './hooks/useRetirementCalculatorState';
 export * from './assets';
+export { QueryClient, QueryClientProvider } from '@tanstack/react-query';

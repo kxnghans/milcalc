@@ -41,7 +41,7 @@ interface ProgressBarProps {
  * It dynamically changes color and progress based on the user's input value
  * and the defined thresholds for passing, excellence, and maximum points.
  */
-export const ProgressBar = ({
+const ProgressBarComponent = ({
   value,
   passThreshold,
   maxPointsThreshold,
@@ -271,3 +271,5 @@ export const ProgressBar = ({
     </View>
   );
 };
+
+export const ProgressBar = React.memo(ProgressBarComponent);
