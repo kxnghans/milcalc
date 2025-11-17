@@ -8,7 +8,6 @@ MilCalc is a suite of tools for military personnel, delivered as a monorepo appl
 
 ### 1.1. Monorepo Structure
 
--   `apps/web`: A Next.js web application.
 -   `apps/mobile`: A React Native mobile application using Expo.
 -   `packages/data`: Contains data files for the application.
 -   `packages/ui`: A shared UI component library.
@@ -38,16 +37,10 @@ pnpm install
 
 ### 2.2. Running the Apps
 
--   **Run both web and mobile apps:**
+-   **Run both mobile apps:**
     ```bash
     pnpm dev
     ```
--   **Run web app only:**
-    ```bash
-    pnpm --filter milcalc-web dev
-    ```
-    Access at `http://localhost:3000`.
-
 -   **Run mobile app only:**
     ```bash
     pnpm --filter milcalc-mobile dev
@@ -155,14 +148,8 @@ This automated process is used for all database setup and removes the need for m
 
 The MilCalc project is a suite of military calculators developed as a monorepo application. The current status is as follows:
 
--   **`apps/mobile`**: The React Native mobile application is considered **complete and stable**. No further development or changes should be made to the mobile app to avoid regressions.
-
--   **`apps/web`**: The Next.js web application is the **primary focus of current development**. The goal is to build out the web version to match the functionality of the mobile app, following the plan outlined in `WEB.md`. This will involve using **Next.js** and **Tailwind CSS**.
-
-## 9. Web Development Plan
-
-All web development should follow the strategic plan detailed in the `WEB.md` document. This includes the architecture, component strategy, and phased implementation for each calculator.
+-   **`apps/mobile`**: The React Native mobile application is the **primary focus of current development**. It is considered **complete and stable**, but any new features or enhancements will be implemented here.
 
 ## 10. Core Logic & Shared Packages
 
-**IMPORTANT:** To prevent regressions in the completed mobile app, **do not modify existing components** in `packages/ui` or `packages/utils` in a way that would introduce breaking changes. If web-specific functionality is needed, create new components or utilities in the `apps/web` directory.
+**IMPORTANT:** To prevent regressions in the completed mobile app, **do not modify existing components** in `packages/ui` or `packages/utils` in a way that would introduce breaking changes. New components or utilities should only be created in the `apps/mobile` directory when necessary for optimal tradeoffs and optimizations, rather than for the sole purpose of being mobile-specific.
