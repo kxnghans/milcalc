@@ -1,110 +1,85 @@
-# PT Calculator Testing Requirements
+# MilCalc Testing Plan
 
-This document outlines the testing requirements for the PT score calculator and best score functionality.
+This document outlines the testing strategy for the MilCalc mobile application. The goal is to ensure the reliability, correctness, and performance of all features through a multi-layered testing approach.
 
-## 1. Unit Tests for `pt-calculator.ts`
+## 1. Overview
 
-A comprehensive suite of unit tests should be created for the `packages/utils/src/pt-calculator.ts` file. The tests should cover all functions and all possible scenarios.
+The testing strategy is divided into three main categories:
 
-### 1.1. `getAgeGroup`
+1.  **Unit Testing:** To verify that individual functions and isolated components work correctly.
+2.  **Integration Testing:** To ensure that different parts of the application (hooks, components, and services) work together as expected.
+3.  **End-to-End (E2E) Testing:** To validate complete user flows from the user's perspective.
 
-- Test with various ages and genders to ensure the correct age group is returned.
-- Test edge cases, such as the minimum and maximum age for each group.
-- Test with invalid inputs (e.g., negative age, invalid gender).
+Given the application's dependency on a Supabase backend, all tests should treat the API as an external dependency and use mock data to ensure tests are deterministic, fast, and can run offline.
 
-### 1.2. `getCardioScore`
+## 2. Unit Testing
 
-- Test for both `run` and `shuttles` components.
-- Test with performance values that fall into each scoring bracket.
-- Test with performance values that are on the edge of the brackets.
-- Test with minimum and maximum possible performance values.
-- Test with zero and invalid performance values.
+Unit tests will be written using a framework like **Jest**. The focus is on testing pure functions and isolated UI components.
 
-### 1.3. `getMuscularFitnessScore`
+### 2.1. Calculation Utilities (`packages/utils/`)
 
-- Test for all muscular fitness components: `push_ups_1min`, `hand_release_pushups_2min`, `sit_ups_1min`, `cross_leg_reverse_crunch_2min`.
-- Test with rep counts that fall into each scoring bracket.
-- Test with rep counts that are on the edge of the brackets.
-- Test with minimum and maximum possible rep counts.
-- Test with zero and invalid rep counts.
+All calculation functions are pure and must be tested by passing mock data objects that simulate the data structures returned from the Supabase APIs.
 
-### 1.4. `getPlankScore`
+-   **`pt-calculator.ts`:**
+    -   Test `calculatePtScore` with various complete data sets, including exemptions for the walk component. Verify `isPass` status for passing, failing, and edge-case scores.
+    -   Test `getScoreForExercise` for all exercise types, ensuring correct scores are returned based on mock standards data. Include tests for altitude adjustments.
+    -   Test `checkWalkPass` for pass/fail scenarios, including altitude adjustments.
+-   **`pay-calculator.ts`:**
+    -   Test `calculateMilitaryVsVaDisability` with various inputs to ensure the comparison logic is correct.
+    -   Verify calculations for different pay grades, years of service, and disability ratings.
+-   **`retirement-calculator.ts`:**
+    -   Test retirement pay calculations for different scenarios (e.g., High-3, BRS).
+    -   Verify logic for different years of service and pay grades.
+-   **Other Utilities:**
+    -   Test `color-utils.ts` to ensure `getScoreCategory` returns the correct category (`excellent`, `pass`, `fail`) based on score inputs.
 
-- Test with plank times that fall into each scoring bracket.
-- Test with plank times that are on the edge of the brackets.
-- Test with minimum and maximum possible plank times.
-- Test with zero and invalid plank times.
+### 2.2. UI Components (`packages/ui/`)
 
-### 1.5. `getScoreForExercise`
+-   Shared UI components like `PayDisplay`, `ProgressBar`, and `SegmentedSelector` should be tested in isolation using **React Native Testing Library**.
+-   Tests should verify that components render correctly based on the props they receive.
+-   User interactions (e.g., `onPress` events) should be mocked and verified.
 
-- Test all exercise components.
-- Test with different age, gender, and performance combinations.
-- **Altitude Adjustments:**
-    - Test with each altitude group (`group1`, `group2`, `group3`, `group4`).
-    - For the `run` component, test with various run times to ensure the correct time correction is applied.
-    - For the `shuttles` component, ensure the correct number of shuttles is added.
+## 3. Integration Testing
 
-### 1.6. `checkWalkPass`
+Integration tests will focus on custom hooks and screen-level components to ensure they correctly manage state and integrate with services.
 
-- Test with different age, gender, and walk times.
-- Test with times that are faster than, equal to, and slower than the required time.
-- **Altitude Adjustments:**
-    - Test with each altitude group and ensure the correct maximum time is used for pass/fail evaluation.
+### 3.1. Custom Hooks (`packages/ui/src/hooks/`)
 
-### 1.7. `calculatePtScore`
+-   Test custom state hooks like `usePtCalculatorState`, `usePayCalculatorState`, and `useRetirementCalculatorState`.
+-   Mock the Supabase API modules (`pt-supabase-api.ts`, etc.) to simulate data fetching.
+-   Verify that the hooks manage state correctly in response to user input (e.g., debouncing) and API responses (loading, success, error states).
 
-- Test with a variety of complete data sets (age, gender, all components).
-- Test with different component combinations (e.g., run + push-ups + sit-ups, shuttles + hand-release push-ups + plank).
-- **Exemptions:**
-    - Test the scenario where the cardio component is `walk`.
-    - If `walkPassed` is `pass`, ensure the total score is calculated correctly based on the strength and core components only (i.e., `((pushupScore + coreScore) / 40) * 100`).
-    - If `walkPassed` is `fail`, ensure the `isPass` is `false`.
-- Test for passing and failing scores.
-- Test with minimum scores for each component to ensure `isPass` is `true`.
-- Test with scores below the minimum for one or more components to ensure `isPass` is `false`.
-- Test with invalid and incomplete input data.
+### 3.2. Screen Components (`apps/mobile/app/(tabs)/`)
 
-### 1.8. `calculateBestScore`
+-   Test individual screen components (`pt-calculator.tsx`, `pay-calculator.tsx`, etc.) with their associated hooks.
+-   Mock the navigation and data-fetching hooks to test the UI's response to different states (e.g., displaying a loading indicator, showing results, rendering an error message).
 
-- Test with a set of scores for all exercises.
-- Ensure the function correctly identifies the maximum score from each category (Strength, Core, Cardio) and sums them up.
-- Test with zero and negative scores.
+## 4. End-to-End (E2E) Testing
 
-### 1.9. `getMinMaxValues`, `getCardioMinMaxValues`, `getPerformanceForScore`
+E2E tests will be conducted on the compiled mobile application for both iOS and Android using a framework like **Detox**. This ensures that complete user flows work as expected on a real device or emulator.
 
-- Test these utility functions to ensure they return the correct values based on the `pt-data.json` file.
+### 4.1. PT Calculator Flow
 
-## 2. End-to-End (E2E) Testing
+-   Navigate to the PT Calculator.
+-   Enter user demographics (age, gender).
+-   Select an altitude.
+-   Input performance data for a full set of exercises.
+-   **Verification:** Assert that the individual component scores and the total score are calculated and displayed correctly and that the pass/fail status is accurate.
 
-E2E tests should be created to simulate user interaction with the PT Calculator and Best Score pages in the mobile app.
+### 4.2. Pay Calculator Flow
 
-### 2.1. PT Calculator Page (`apps/mobile/app/(tabs)/pt-calculator.tsx`)
+-   Navigate to the Pay Calculator.
+-   Enter all required data (pay grade, years of service, disability rating, etc.).
+-   **Verification:** Assert that the final pay comparison results are displayed correctly.
 
-- Enter user data (age, gender) and performance data for all components.
-- Verify that the calculated scores (individual and total) are displayed correctly.
-- Verify that the pass/fail status is correct.
-- Test the functionality of the altitude selection and ensure the scores are adjusted accordingly.
-- Test the walk component and verify the pass/fail/n/a display.
+### 4.3. Best Score Flow
 
-### 2.2. Best Score Page (`apps/mobile/app/(tabs)/best-score.tsx`)
+-   Navigate to the Best Score page.
+-   Enter performance data for multiple exercises across different categories (Strength, Core, Cardio).
+-   **Verification:** Assert that the highest score from each category is correctly identified and that the total best score is calculated and displayed accurately.
 
-- Enter performance data for various exercises.
-- Verify that the score for each exercise is calculated and displayed correctly.
-- Verify that the total best score is calculated correctly by summing the highest scores from each category.
-- Test the altitude selection and ensure the scores are adjusted accordingly.
+### 4.4. Retirement Calculator Flow
 
-## 3. Data Validation
-
-- Create a test script to validate the integrity of the `packages/data/pt_data/pt-data.json`, `packages/data/pt_data/walk-standards.json`, and `packages/data/pt_data/altitude-adjustments.json` files.
-- The script should check for:
-    - Correct data types.
-    - Consistent structure.
-    - No missing data.
-    - Logical consistency (e.g., score brackets should not overlap).
-
-## 4. Input Validation
-
-- Scores should only be calculated and updated when all required input arguments for a given component are present.
-- For example, a push-up score requires age, gender, push-up component selection, and the number of push-ups. The score should not be calculated if any of these inputs are missing.
-- An altitude adjustment for the HAMR component only requires the altitude selection.
-- Test cases should be written to verify that scores are not calculated with incomplete data.
+-   Navigate to the Retirement Calculator.
+-   Enter all required data for a retirement calculation.
+-   **Verification:** Assert that the retirement pay summary is calculated and displayed correctly.
