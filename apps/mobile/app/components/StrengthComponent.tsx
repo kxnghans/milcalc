@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, ExemptButton } from '@repo/ui';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
 import NumberInput from './NumberInput';
 
 /**
@@ -52,11 +52,11 @@ export default function StrengthComponent({
 
     const getMascot = (): ImageSourcePropType => {
         if (pushupComponent === "push_ups_1min" || pushupComponent === "hand_release_pushups_2min") {
-            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_pushup.png' };
+            return { uri: MASCOT_URLS.PUSHUP };
         } else if (pushupComponent === "crunches") {
-            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_crunch.png' };
+            return { uri: MASCOT_URLS.CRUNCH };
         }
-        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_pushup.png' }; // Default mascot
+        return { uri: MASCOT_URLS.PUSHUP }; // Default mascot
     };
 
     return (

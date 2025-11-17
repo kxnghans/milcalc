@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
 
@@ -143,11 +143,11 @@ export default function CardioComponent({
 
     const getMascot = (): ImageSourcePropType => {
         if (cardioComponent === "run" || cardioComponent === "shuttles") {
-            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_run.png' };
+            return { uri: MASCOT_URLS.RUN };
         } else if (cardioComponent === "walk") {
-            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_walk.png' };
+            return { uri: MASCOT_URLS.WALK };
         }
-        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_run.png' }; // Default mascot
+        return { uri: MASCOT_URLS.RUN }; // Default mascot
     };
 
     return (

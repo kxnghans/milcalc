@@ -22,8 +22,8 @@ pnpm-debug.log*
 
 # Local Environment Variables
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # Expo
 .expo/
@@ -39,7 +39,3 @@ apps/mobile/assets/*
 
 # ...except for the splash screen
 !apps/mobile/assets/3d_splash.png
-
-# Images
-*.png
-*.jpg

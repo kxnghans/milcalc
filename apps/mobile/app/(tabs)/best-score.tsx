@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Modal, ImageSourcePropType } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Modal, ImageSourcePropType } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import {
 
@@ -27,7 +28,9 @@ import {
 
   useBestScoreState,
 
-  ExemptButton
+  ExemptButton,
+
+  MASCOT_URLS
 
 } from '@repo/ui';
 
@@ -211,19 +214,19 @@ const BestScoreSection = ({ title, exercises, scores, bestValues, maxScore, isEx
 
       case "Strength":
 
-        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_pushup.png' };
+        return { uri: MASCOT_URLS.PUSHUP };
 
       case "Core":
 
-        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_crunch.png' };
+        return { uri: MASCOT_URLS.CRUNCH };
 
       case "Cardio":
 
-        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_run.png' };
+        return { uri: MASCOT_URLS.RUN };
 
       default:
 
-        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_splash.png' }; // Default or generic mascot
+        return { uri: MASCOT_URLS.SPLASH }; // Default or generic mascot
 
     }
 
@@ -392,27 +395,18 @@ export default function BestScoreScreen() {
   const { theme, themeMode, isDarkMode, toggleTheme } = useTheme();
 
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
-
   const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
-
   const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
+  const [detailModalSource, setDetailModalSource] = React.useState<'pt' | 'pay' | 'retirement' | 'best_score'>('best_score');
 
-
-
-  const openDetailModal = (key: string, mascot: ImageSourcePropType) => {
-
+  const openDetailModal = (key: string, mascot: ImageSourcePropType, source: 'pt' | 'pay' | 'retirement' | 'best_score' = 'best_score') => {
     setDetailModalContentKey(key);
-
     setDetailModalMascot(mascot);
-
+    setDetailModalSource(source);
   };
-
   const closeDetailModal = () => {
-
     setDetailModalContentKey(null);
-
     setDetailModalMascot(null);
-
   };
 
   
@@ -547,120 +541,63 @@ export default function BestScoreScreen() {
 
         <DocumentModal category="PT" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
 
-        <DetailModal isVisible={!!detailModalContentKey} onClose={closeDetailModal} contentKey={detailModalContentKey} source="best_score" mascotAsset={detailModalMascot} />
-
+        <DetailModal isVisible={!!detailModalContentKey} onClose={closeDetailModal} contentKey={detailModalContentKey} source={detailModalSource} mascotAsset={detailModalMascot} />
         <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
-
         <IconRow
-
             icons={[
-
             {
-
                 name: themeMode === 'auto' ? ICONS.HOME_FILLED : ICONS.HOME,
-
                 href: '(tabs)/pt-calculator',
-
             },
-
             {
-
                 name: ICONS.DOCUMENT,
-
                 onPress: () => setPdfModalVisible(true),
-
             },
-
             {
-
                 name: getThemeIcon(),
-
                 onPress: toggleTheme,
-
             },
-
             ]}
-
         />
-
         <Card style={styles.card}>
-
-            <ScrollView>
-
+            <KeyboardAwareScrollView>
                 <Demographics age={age} setAge={setAge} gender={gender} setGender={setGender} />
-
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
-
                 <BestScoreSection 
-
                     title="Strength" 
-
                     exercises={strengthExercises} 
-
                     scores={strengthScores} 
-
                     bestValues={strengthBestValues} 
-
                     maxScore={20}
-
                     isExempt={exemptions.isStrengthExempt}
-
                     onToggleExempt={exemptions.toggleStrengthExempt}
-
                     openDetailModal={openDetailModal}
-
                 />
-
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
-
                 <BestScoreSection 
-
                     title="Core" 
-
                     exercises={coreExercises} 
-
                     scores={coreScores} 
-
                     bestValues={coreBestValues} 
-
                     maxScore={20}
-
                     isExempt={exemptions.isCoreExempt}
-
                     onToggleExempt={exemptions.toggleCoreExempt}
-
                     openDetailModal={openDetailModal}
-
                 />
-
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
-
                 <BestScoreSection 
-
                     title="Cardio" 
-
                     exercises={cardioExercises} 
-
                     scores={cardioScores} 
-
                     bestValues={cardioBestValues} 
-
                     maxScore={60}
-
                     isExempt={exemptions.isCardioExempt}
-
                     onToggleExempt={exemptions.toggleCardioExempt}
-
                     openDetailModal={openDetailModal}
-
                 />
-
                 <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
-
-                <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} openDetailModal={(key, mascot) => openDetailModal(key, mascot)} />
-
-            </ScrollView>
-
+                <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} openDetailModal={(key, mascot) => openDetailModal(key, mascot, 'pt')} />
+            </KeyboardAwareScrollView>
         </Card>
 
 

@@ -45,6 +45,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
         if (isVisible && contentKey && source) {
             const fetchContent = async () => {
                 setIsLoading(true);
+                setContent(null);
                 setShowTopChevron(false);
                 setShowBottomChevron(false);
                 const data = await getHelpContentFromSource(source, contentKey);

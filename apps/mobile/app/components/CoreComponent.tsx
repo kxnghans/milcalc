@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS } from '@repo/ui';
+import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
 
@@ -73,11 +73,11 @@ export default function CoreComponent({
 
     const getMascot = (): ImageSourcePropType => {
         if (coreComponent === "sit_ups_1min" || coreComponent === "cross_leg_reverse_crunch_2min") {
-            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_crunch.png' };
+            return { uri: MASCOT_URLS.CRUNCH };
         } else if (coreComponent === "forearm_plank_time") {
-            return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_plank.png' };
+            return { uri: MASCOT_URLS.PLANK };
         }
-        return { uri: 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/assets/mascot/3d_crunch.png' }; // Default mascot
+        return { uri: MASCOT_URLS.CRUNCH }; // Default mascot
     };
 
     return (

@@ -21,3 +21,4 @@ export * from './hooks/useBestScoreState';
 export * from './hooks/usePtCalculatorState';
 export * from './hooks/usePayCalculatorState';
 export * from './hooks/useRetirementCalculatorState';
+export * from './assets';
