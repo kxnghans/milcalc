@@ -135,10 +135,12 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
             color: theme.colors.text,
             marginTop: theme.spacing.m,
             marginBottom: theme.spacing.s,
+            textAlign: 'left',
         },
         sectionContent: {
             ...theme.typography.body,
             color: theme.colors.text,
+            textAlign: 'left',
         },
         footerContainer: {
             width: '100%',
@@ -256,9 +258,16 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
                                         setScrollViewHeight(height);
                                     }}
                                     scrollEventThrottle={16}
-                                    contentContainerStyle={{ alignItems: 'center' }}
+                                    contentContainerStyle={{ }}
                                 >
-                                    {content.map((item, index) => <View key={index}>{renderSections(item)}</View>)}
+                                    {content
+                                        .sort((a, b) => {
+                                            const sectionOrder = ['Performance', 'Resting', 'Scoring', 'Exemption'];
+                                            const aIndex = sectionOrder.indexOf(a.section_header);
+                                            const bIndex = sectionOrder.indexOf(b.section_header);
+                                            return aIndex - bIndex;
+                                        })
+                                        .map((item, index) => <View key={index}>{renderSections(item)}</View>)}
                                 </ScrollView>
                             </View>
 
