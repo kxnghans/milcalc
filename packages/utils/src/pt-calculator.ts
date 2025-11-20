@@ -6,6 +6,7 @@
  */
 
 import { getPtStandards } from './pt-supabase-api';
+import { Tables } from './types';
 
 /**
  * Converts a time string (e.g., "mm:ss") to seconds.
@@ -49,9 +50,8 @@ export const getAgeGroupString = (age: number): string | null => {
  * @returns The calculated score for the cardio component.
  */
 const getCardioScore = (standards: any[], component: string, performance: any): number => {
-    // For 'more is better' exercises like shuttles, standards are sorted best-to-worst.
-    // We need to reverse them to find the first threshold the user meets from worst-to-best.
     const cardioStandards = standards.filter(s => s.exercise === component);
+    let score = 0;
 
     if (component === 'run') {
         const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
@@ -62,12 +62,12 @@ const getCardioScore = (standards: any[], component: string, performance: any): 
             if (measurement.includes('-')) {
                 const [start, end] = measurement.split('-').map(time => timeToSeconds(time.trim()));
                 if (runTimeInSeconds >= start && runTimeInSeconds <= end) {
-                    return standard.points;
+                    score = Math.max(score, standard.points);
                 }
             } else {
                 const time = timeToSeconds(measurement);
                 if (runTimeInSeconds <= time) {
-                    return standard.points;
+                    score = Math.max(score, standard.points);
                 }
             }
         }
@@ -75,45 +75,45 @@ const getCardioScore = (standards: any[], component: string, performance: any): 
         const shuttles = performance.shuttles;
         if (shuttles === 0) return 0;
 
-        // Since standards are reversed (worst to best), we find the first one the user meets.
         for (const standard of cardioStandards) {
             const measurement = String(standard.measurement).trim();
             if (measurement.includes('-')) {
-                // Use regex to safely extract numbers, ignoring characters like '*'.
                 const parts = measurement.split('-');
                 const start = parseInt(parts[0].replace(/[^0-9]/g, ''));
                 const end = parseInt(parts[1].replace(/[^0-9]/g, ''));
 
                 if (!isNaN(start) && !isNaN(end) && shuttles >= start && shuttles <= end) {
-                    return standard.points;
+                    score = Math.max(score, standard.points);
                 }
             } else if (measurement.startsWith('>')) {
                 const value = parseInt(measurement.replace(/[^0-9]/g, ''));
                 if (!isNaN(value) && shuttles > value) {
-                    return standard.points;
+                    score = Math.max(score, standard.points);
                 }
             } else {
                 const value = parseInt(measurement.replace(/[^0-9]/g, ''));
                 if (!isNaN(value) && shuttles >= value) {
-                    return standard.points;
+                    score = Math.max(score, standard.points);
                 }
             }
         }
     }
 
-    return 0;
+    return score;
 };
 
 const getMuscularFitnessScore = (standards: any[], component: string, reps: number): number => {
     if (!reps) return 0;
     const exerciseStandards = standards.filter(s => s.exercise === component);
 
+    let score = 0;
     for (const standard of exerciseStandards) {
-        if (reps >= parseInt(String(standard.measurement).replace(/[^0-9]/g, ''))) {
-            return standard.points;
+        const measurementValue = parseInt(String(standard.measurement).replace(/[^0-9]/g, ''));
+        if (!isNaN(measurementValue) && reps >= measurementValue) {
+            score = Math.max(score, standard.points);
         }
     }
-    return 0;
+    return score;
 };
 
 const getPlankScore = (standards: any[], performance: any): number => {
@@ -121,12 +121,14 @@ const getPlankScore = (standards: any[], performance: any): number => {
     if (plankTimeInSeconds === 0) return 0;
     const plankStandards = standards.filter(s => s.exercise === 'forearm_plank_time');
 
+    let score = 0;
     for (const standard of plankStandards) {
-        if (plankTimeInSeconds >= timeToSeconds(standard.measurement)) {
-            return standard.points;
+        const measurementValue = timeToSeconds(standard.measurement);
+        if (plankTimeInSeconds >= measurementValue) {
+            score = Math.max(score, standard.points);
         }
     }
-    return 0;
+    return score;
 };
 
 /**
@@ -138,7 +140,13 @@ const getPlankScore = (standards: any[], performance: any): number => {
  * @param altitudeGroup - The selected altitude group (e.g., 'group1', 'group2').
  * @returns The final score for the exercise.
  */
-export const getScoreForExercise = (standards: any[], component: string, performance: any, altitudeGroup?: string, altitudeAdjustments?: any): number => {
+type AltitudeAdjustments = {
+    run: Tables<'run_altitude_adjustments'>[];
+    hamr: Tables<'hamr_altitude_adjustments'>[];
+    walk: Tables<'walk_altitude_adjustments'>[];
+};
+
+export const getScoreForExercise = (standards: any[], component: string, performance: any, altitudeGroup?: string, altitudeAdjustments?: AltitudeAdjustments): number => {
 
     let adjustedPerformance = { ...performance };
 
@@ -146,15 +154,15 @@ export const getScoreForExercise = (standards: any[], component: string, perform
     if (altitudeGroup && altitudeGroup !== 'normal' && altitudeAdjustments) {
         if (component === 'run' && altitudeAdjustments.run) {
             const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
-            const correction = altitudeAdjustments.run.find(c => c.altitude_group === altitudeGroup && runTimeInSeconds >= c.time_range_start && runTimeInSeconds <= c.time_range_end);
-            if (correction) {
+            const correction = altitudeAdjustments.run.find((c) => c.altitude_group === altitudeGroup && c.time_range_start != null && c.time_range_end != null && runTimeInSeconds >= c.time_range_start && runTimeInSeconds <= c.time_range_end);
+            if (correction && correction.correction) {
                 const adjustedTimeInSeconds = runTimeInSeconds - correction.correction;
                 adjustedPerformance.minutes = Math.floor(adjustedTimeInSeconds / 60);
                 adjustedPerformance.seconds = adjustedTimeInSeconds % 60;
             }
         } else if (component === 'shuttles' && altitudeAdjustments.hamr) {
-            const adjustment = altitudeAdjustments.hamr.find(a => a.altitude_group === altitudeGroup);
-            if (adjustment) {
+            const adjustment = altitudeAdjustments.hamr.find((a) => a.altitude_group === altitudeGroup);
+            if (adjustment && adjustment.shuttles_to_add) {
                 adjustedPerformance.shuttles = (adjustedPerformance.shuttles || 0) + adjustment.shuttles_to_add;
             }
         }
@@ -167,9 +175,10 @@ export const getScoreForExercise = (standards: any[], component: string, perform
             return getCardioScore(standards, component, adjustedPerformance);
         case 'push_ups_1min':
         case 'hand_release_pushups_2min':
+            return getMuscularFitnessScore(standards, component, performance.pushups);
         case 'sit_ups_1min':
         case 'cross_leg_reverse_crunch_2min':
-            return getMuscularFitnessScore(standards, component, adjustedPerformance.reps);
+            return getMuscularFitnessScore(standards, component, performance.reps);
         case 'forearm_plank_time':
             return getPlankScore(standards, adjustedPerformance);
         default:
@@ -200,41 +209,44 @@ const getAgeGroupIndex = (age: number): number => {
  * @param altitudeGroup - The selected altitude group.
  * @returns 'pass', 'fail', or 'n/a' if data is insufficient.
  */
-export const checkWalkPass = async (age: number, gender: string, minutes: number, seconds: number, walkStandards: any[], altitudeAdjustments: any[], altitudeGroup?: string): Promise<'pass' | 'fail' | 'n/a'> => {
+export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number, walkStandards: any[], altitudeAdjustments: any[], altitudeGroup?: string): 'pass' | 'fail' | 'n/a' => {
     const userTimeInSeconds = minutes * 60 + seconds;
     if (userTimeInSeconds === 0) return 'n/a';
-
-    const ageIndex = getAgeGroupIndex(age);
-    if (ageIndex === -1) return 'n/a';
-
+  
+    const ageGroupString = getAgeGroupString(age);
+    if (!ageGroupString) return 'n/a';
+  
     let maxTimeInSeconds = 0;
-
-    if (altitudeGroup && altitudeGroup !== 'normal') {
-        if (altitudeAdjustments) {
-            const capitalizedGender = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
-            const adjustment = altitudeAdjustments.find(a => 
-                a.altitude_group === altitudeGroup && 
-                a.gender.toLowerCase() === capitalizedGender.toLowerCase() && 
-                age >= a.age_range_start && 
-                age <= a.age_range_end
-            );
-            if (adjustment) {
-                maxTimeInSeconds = adjustment.max_time;
-            }
+  
+    const capitalizedGender = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+  
+    if (altitudeGroup && altitudeGroup !== 'normal' && altitudeAdjustments) {
+      const adjustment = altitudeAdjustments.find(
+        (a: any) =>
+          a.altitude_group === altitudeGroup &&
+          a.gender.toLowerCase() === capitalizedGender.toLowerCase() &&
+          age >= a.age_range_start &&
+          age <= a.age_range_end
+      );
+      if (adjustment) {
+        maxTimeInSeconds = adjustment.max_time;
+      }
+    } else if (walkStandards) {
+      const standard = walkStandards.find(
+        (s: any) => {
+            const [minAge, maxAge] = s.age_range.split('-').map(Number);
+            return age >= minAge && age <= maxAge && s.gender.toLowerCase().startsWith(capitalizedGender.toLowerCase()[0]);
         }
-    } else {
-        if (walkStandards) {
-            const standard = walkStandards.find(s => s.age_range === getAgeGroupString(age));
-            if (standard) {
-                maxTimeInSeconds = timeToSeconds(standard.max_time);
-            }
-        }
+      );
+      if (standard) {
+        maxTimeInSeconds = timeToSeconds(standard.max_time);
+      }
     }
-
+  
     if (maxTimeInSeconds === 0) return 'n/a';
-
+  
     return userTimeInSeconds <= maxTimeInSeconds ? 'pass' : 'fail';
-};
+  };
 
 /**
  * Calculates the total PT score based on all component inputs, including exemptions.
@@ -276,7 +288,8 @@ export const calculatePtScore = async (inputs: any, standards: any[], walkStanda
             coreScore = getMuscularFitnessScore(standards, 'sit_ups_1min', inputs.situps);
         } else if (inputs.coreComponent === 'cross_leg_reverse_crunch_2min') {
             coreScore = getMuscularFitnessScore(standards, 'cross_leg_reverse_crunch_2min', inputs.reverseCrunches);
-        } else if (inputs.coreComponent === 'forearm_plank_time') {
+        }
+        else if (inputs.coreComponent === 'forearm_plank_time') {
             coreScore = getPlankScore(standards, { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds });
         }
         earnedPoints += coreScore;
@@ -289,16 +302,24 @@ export const calculatePtScore = async (inputs: any, standards: any[], walkStanda
         cardioScore = 'Exempt';
         totalPossiblePoints -= 60;
     } else if (inputs.cardioComponent === 'walk') {
-        walkPassed = await checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds, walkStandards, altitudeAdjustments.walk, inputs.altitudeGroup);
+        walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds, walkStandards, altitudeAdjustments.walk, inputs.altitudeGroup);
         totalPossiblePoints -= 60; // Walk test does not contribute points, max score is based on other components.
     } else {
-        cardioScore = getCardioScore(standards, inputs.cardioComponent, {
-            minutes: inputs.runMinutes,
-            seconds: inputs.runSeconds,
-            shuttles: inputs.shuttles,
-        });
+        cardioScore = getScoreForExercise(
+            standards, 
+            inputs.cardioComponent, 
+            {
+                minutes: inputs.runMinutes,
+                seconds: inputs.runSeconds,
+                shuttles: inputs.shuttles,
+            }, 
+            inputs.altitudeGroup, 
+            altitudeAdjustments
+        );
         earnedPoints += cardioScore;
     }
+
+    
 
     // Calculate Composite Score
     let compositeScore = 0;
@@ -490,12 +511,22 @@ export const getPerformanceForScore = (standards: any[], component: string, targ
  * @param performance - An object containing the performance data (reps, minutes, seconds).
  * @returns A string detailing the calculated score, or an empty string if inputs are invalid.
  */
-export const getDynamicHelpText = (componentKey: string, age: number, gender: string, performance: any): string => {
+export const getDynamicHelpText = async (componentKey: string, age: number, gender: string, performance: any): Promise<string> => {
     if (!age || !gender) {
         return "Please enter age and gender to see dynamic scoring details.";
     }
 
-    const score = getScoreForExercise(age, gender, componentKey, performance);
+    const ageGroupString = getAgeGroupString(age);
+    if (!ageGroupString) {
+        return "Invalid age provided.";
+    }
+
+    const standards = await getPtStandards(gender, ageGroupString);
+    if (!standards) {
+        return "Could not load scoring standards.";
+    }
+
+    const score = getScoreForExercise(standards, componentKey, performance);
 
     let performanceText = "";
     if (performance.reps) {

@@ -153,3 +153,7 @@ The MilCalc project is a suite of military calculators developed as a monorepo a
 ## 10. Core Logic & Shared Packages
 
 **IMPORTANT:** To prevent regressions in the completed mobile app, **do not modify existing components** in `packages/ui` or `packages/utils` in a way that would introduce breaking changes. New components or utilities should only be created in the `apps/mobile` directory when necessary for optimal tradeoffs and optimizations, rather than for the sole purpose of being mobile-specific.
+
+## 11. Development Philosophy
+
+As an AI assistant, I will strive to not only complete the tasks you assign but also to provide insights into my process. This is to help you learn and grow as a software developer. As I work, I will concisely explain my thought process, the actions I'm taking, and any tradeoffs or decisions I'm making. My goal is to make the development process transparent and educational. If you ever have questions about why I'm doing something a certain way, please ask!

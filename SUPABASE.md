@@ -362,5 +362,3 @@ This table stores the segmented help content for the Retirement Calculator.
 -   `purpose_description`: The text for the "Purpose" section.
 -   `calculation_details`: The text for the "Calculation" section.
 -   `example`: The text for the "Example" section.
-
-Using: 1 GEMINI.md file | 1 MCP server (ctrl+t to view)

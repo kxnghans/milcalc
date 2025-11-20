@@ -1,85 +1,82 @@
-# MilCalc Testing Plan
+# MilCalc Testing Strategy
 
 This document outlines the testing strategy for the MilCalc mobile application. The goal is to ensure the reliability, correctness, and performance of all features through a multi-layered testing approach.
 
-## 1. Overview
+## 1. Setup and Configuration
 
-The testing strategy is divided into three main categories:
+The project uses **Jest** for unit and integration testing, configured to run in a `pnpm` monorepo environment. The setup is centralized to ensure consistency across all packages.
 
-1.  **Unit Testing:** To verify that individual functions and isolated components work correctly.
-2.  **Integration Testing:** To ensure that different parts of the application (hooks, components, and services) work together as expected.
-3.  **End-to-End (E2E) Testing:** To validate complete user flows from the user's perspective.
+### Key Configuration Learnings
 
-Given the application's dependency on a Supabase backend, all tests should treat the API as an external dependency and use mock data to ensure tests are deterministic, fast, and can run offline.
+1.  **Centralized Dependencies:** All core testing dependencies (`jest`, `ts-jest`, `@types/jest`, `jest-environment-jsdom`) are installed in the root `package.json` to ensure version consistency.
+2.  **Workspace Configuration:** Each workspace that contains tests (e.g., `packages/utils`) must have its own `jest.config.js` file that inherits from the root configuration:
+    ```js
+    // packages/utils/jest.config.js
+    module.exports = require('../../jest.config.js');
+    ```
+3.  **Root Configuration:** The root `jest.config.js` is the source of truth. It must be configured for TypeScript transformation using `ts-jest`:
+    ```js
+    // jest.config.js
+    module.exports = {
+      preset: 'ts-jest',
+      testEnvironment: 'jsdom',
+      // ... other configurations
+    };
+    ```
+4.  **Type Safety:** The test runner will fail if there are TypeScript compilation errors anywhere in the imported module graph. This enforces that all code under test, including utilities and API helpers, is type-safe. This includes:
+    -   **Strict Typing:** Avoid `any` where possible. Functions and variables should be strongly typed.
+    -   **Null Safety:** Data returned from Supabase can be `null`. Code must be robust enough to handle potentially null values to prevent runtime errors during tests.
+
+### Running Tests
+
+To run all tests across the monorepo, use the root `test` script:
+
+```bash
+pnpm test
+```
+
+This command will execute the `test` script in each workspace package.
 
 ## 2. Unit Testing
 
-Unit tests will be written using a framework like **Jest**. The focus is on testing pure functions and isolated UI components.
+Unit tests are the foundation of the testing strategy, focusing on pure functions and isolated logic. All calculation utilities in `packages/utils` are designed as pure functions, making them ideal candidates for unit testing.
 
-### 2.1. Calculation Utilities (`packages/utils/`)
+**Data Mocking:** To ensure tests are fast and deterministic, all external data dependencies (i.e., Supabase API calls) are mocked. Mock data is stored in the `packages/utils/src/test-mocks/` directory and imported directly into test files. This approach avoids actual network requests and isolates the logic being tested.
 
-All calculation functions are pure and must be tested by passing mock data objects that simulate the data structures returned from the Supabase APIs.
+A critical lesson learned during development is that **the structure of the mock data must precisely match the structure of the data returned by the data-fetching functions (e.g., `getPtStandards`), not the raw Supabase database schema.** These fetching functions often transform the data by joining tables or renaming fields. The application's business logic is built to expect this transformed data structure, and tests will fail if the mocks do not accurately represent it. The recent test failures were a direct result of this mismatch, which was resolved by updating the mocks to align with the API function outputs.
 
--   **`pt-calculator.ts`:**
-    -   Test `calculatePtScore` with various complete data sets, including exemptions for the walk component. Verify `isPass` status for passing, failing, and edge-case scores.
-    -   Test `getScoreForExercise` for all exercise types, ensuring correct scores are returned based on mock standards data. Include tests for altitude adjustments.
-    -   Test `checkWalkPass` for pass/fail scenarios, including altitude adjustments.
--   **`pay-calculator.ts`:**
-    -   Test `calculateMilitaryVsVaDisability` with various inputs to ensure the comparison logic is correct.
-    -   Verify calculations for different pay grades, years of service, and disability ratings.
--   **`retirement-calculator.ts`:**
-    -   Test retirement pay calculations for different scenarios (e.g., High-3, BRS).
-    -   Verify logic for different years of service and pay grades.
--   **Other Utilities:**
-    -   Test `color-utils.ts` to ensure `getScoreCategory` returns the correct category (`excellent`, `pass`, `fail`) based on score inputs.
+### 2.1. PT Calculator (`pt-calculator.ts`)
 
-### 2.2. UI Components (`packages/ui/`)
+-   **Status:** Implemented
+-   **Test File:** `packages/utils/src/pt-calculator.test.ts`
+-   **Mocks:** `packages/utils/src/test-mocks/pt-data-mocks.ts`
 
--   Shared UI components like `PayDisplay`, `ProgressBar`, and `SegmentedSelector` should be tested in isolation using **React Native Testing Library**.
--   Tests should verify that components render correctly based on the props they receive.
--   User interactions (e.g., `onPress` events) should be mocked and verified.
+Tests cover the `calculatePtScore` function with a variety of scenarios, including:
+-   Standard passing and failing scores.
+-   Edge cases where one component score is zero.
+-   Calculations involving single and multiple exemptions.
+-   Pass/fail status for the 2km walk component.
 
-## 3. Integration Testing
+### 2.2. Pay Calculator (`pay-calculator.ts`)
 
-Integration tests will focus on custom hooks and screen-level components to ensure they correctly manage state and integrate with services.
+-   **Status:** Implemented
+-   **Test File:** `packages/utils/src/pay-calculator.test.ts`
 
-### 3.1. Custom Hooks (`packages/ui/src/hooks/`)
+Unit tests will be developed to verify:
+-   Correct calculation of military pay vs. VA disability pay.
+-   Accurate calculations for different pay grades, years of service, and disability ratings.
+-   Proper handling of edge cases and invalid inputs.
 
--   Test custom state hooks like `usePtCalculatorState`, `usePayCalculatorState`, and `useRetirementCalculatorState`.
--   Mock the Supabase API modules (`pt-supabase-api.ts`, etc.) to simulate data fetching.
--   Verify that the hooks manage state correctly in response to user input (e.g., debouncing) and API responses (loading, success, error states).
+### 2.3. Retirement Calculator (`retirement-calculator.ts`)
 
-### 3.2. Screen Components (`apps/mobile/app/(tabs)/`)
+-   **Status:** Implemented
+-   **Test File:** `packages/utils/src/retirement-calculator.test.ts`
 
--   Test individual screen components (`pt-calculator.tsx`, `pay-calculator.tsx`, etc.) with their associated hooks.
--   Mock the navigation and data-fetching hooks to test the UI's response to different states (e.g., displaying a loading indicator, showing results, rendering an error message).
+Unit tests will be developed to verify:
+-   Correct calculations for both High-3 and BRS retirement systems.
+-   Accurate disability offsets for the BRS plan.
+-   Proper handling of different years of service and pay grades.
 
-## 4. End-to-End (E2E) Testing
+## 3. Integration and E2E Testing
 
-E2E tests will be conducted on the compiled mobile application for both iOS and Android using a framework like **Detox**. This ensures that complete user flows work as expected on a real device or emulator.
-
-### 4.1. PT Calculator Flow
-
--   Navigate to the PT Calculator.
--   Enter user demographics (age, gender).
--   Select an altitude.
--   Input performance data for a full set of exercises.
--   **Verification:** Assert that the individual component scores and the total score are calculated and displayed correctly and that the pass/fail status is accurate.
-
-### 4.2. Pay Calculator Flow
-
--   Navigate to the Pay Calculator.
--   Enter all required data (pay grade, years of service, disability rating, etc.).
--   **Verification:** Assert that the final pay comparison results are displayed correctly.
-
-### 4.3. Best Score Flow
-
--   Navigate to the Best Score page.
--   Enter performance data for multiple exercises across different categories (Strength, Core, Cardio).
--   **Verification:** Assert that the highest score from each category is correctly identified and that the total best score is calculated and displayed accurately.
-
-### 4.4. Retirement Calculator Flow
-
--   Navigate to the Retirement Calculator.
--   Enter all required data for a retirement calculation.
--   **Verification:** Assert that the retirement pay summary is calculated and displayed correctly.
+(As described in the original plan, to be implemented)
