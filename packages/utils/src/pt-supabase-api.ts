@@ -107,20 +107,18 @@ export const getWalkStandards = async (gender: string) => {
  * @returns An array of all altitude adjustments for that exercise, or null if an error occurs.
  */
 export const getAltitudeAdjustments = async (exercise: string) => {
-    let tableName = '';
+    let query;
     if (exercise === 'run') {
-        tableName = 'run_altitude_adjustments';
+        query = supabase.from('run_altitude_adjustments').select('*');
     } else if (exercise === 'walk') {
-        tableName = 'walk_altitude_adjustments';
+        query = supabase.from('walk_altitude_adjustments').select('*');
     } else if (exercise === 'hamr') {
-        tableName = 'hamr_altitude_adjustments';
+        query = supabase.from('hamr_altitude_adjustments').select('*');
     } else {
         return null;
     }
 
-  const { data, error } = await supabase
-    .from(tableName)
-    .select('*');
+  const { data, error } = await query;
 
   if (error) {
     console.error(`Error fetching altitude adjustments for ${exercise}:`, error);
@@ -138,9 +136,9 @@ export const getAltitudeAdjustments = async (exercise: string) => {
  */
 export const getHelpContent = async (contentKey: string) => {
   const { data, error } = await supabase
-    .from('help_details')
+    .from('pt_help_details')
     .select('title, section_header, section_content')
-    .eq('exercise', contentKey);
+    .eq('content_key', contentKey);
 
   if (error) {
     console.error('Error fetching help content:', error);
@@ -152,10 +150,12 @@ export const getHelpContent = async (contentKey: string) => {
   }
 
   // Combine the sections into a single object with section_header as keys
-  const combinedContent = data.reduce((acc, item) => {
-    // Use a lowercase, snake_case version of the header as the key
-    const key = item.section_header.toLowerCase().replace(/\s+/g, '_');
-    acc[key] = item.section_content;
+  const combinedContent = data.reduce((acc: { [key: string]: string | null }, item) => {
+    if (item.section_header) {
+        // Use a lowercase, snake_case version of the header as the key
+        const key = item.section_header.toLowerCase().replace(/\s+/g, '_');
+        acc[key] = item.section_content;
+    }
     return acc;
   }, { title: data[0].title });
 

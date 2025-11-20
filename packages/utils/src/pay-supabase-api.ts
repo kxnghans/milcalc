@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { Tables } from './types';
 
 /**
  * Fetches the monthly base pay for a given pay grade and years of service.
@@ -11,7 +12,7 @@ export const getBasePay = async (pay_grade: string, years_of_service: number): P
 
   const adjusted_pay_grade = pay_grade.endsWith('E') ? pay_grade.slice(0, -1) : pay_grade;
 
-  let yearsColumn = 'yos_2_or_less';
+  let yearsColumn: keyof Tables<'base_pay_2024'> = 'yos_2_or_less';
   if (years_of_service >= 40) yearsColumn = 'yos_over_40';
   else if (years_of_service >= 38) yearsColumn = 'yos_over_38';
   else if (years_of_service >= 36) yearsColumn = 'yos_over_36';
@@ -45,7 +46,7 @@ export const getBasePay = async (pay_grade: string, years_of_service: number): P
     return null;
   }
 
-  return data ? data[yearsColumn] : null;
+  return data ? (data as Tables<'base_pay_2024'>)[yearsColumn] : null;
 };
 
 /**
@@ -55,7 +56,7 @@ export const getBasePay = async (pay_grade: string, years_of_service: number): P
  */
 export const getBasRate = async (rank: string) => {
     const rankType = rank.charAt(0).toUpperCase();
-    const column = rankType === 'O' ? 'officer_rate' : 'enlisted_rate';
+    const column: keyof Tables<'bas_rates'> = rankType === 'O' ? 'officer_rate' : 'enlisted_rate';
 
     const { data, error } = await supabase
         .from('bas_rates')
@@ -68,7 +69,7 @@ export const getBasRate = async (rank: string) => {
         return 0;
     }
 
-    return data ? data[column] : 0;
+    return data ? (data as Tables<'bas_rates'>)[column] : 0;
 };
 
 /**
@@ -86,12 +87,14 @@ export const getMhaData = async () => {
     }
 
     // Group the flat list of MHAs by state
-    const groupedData = data.reduce((acc, mha) => {
+    const groupedData = data.reduce((acc: { [key: string]: { label: string; value: string }[] }, mha: { state: string | null; mha_name: string | null; mha: string }) => {
         const { state, mha_name, mha: mhaCode } = mha;
-        if (!acc[state]) {
-            acc[state] = [];
+        if (state) {
+            if (!acc[state]) {
+                acc[state] = [];
+            }
+            acc[state].push({ label: mha_name || 'Unknown', value: mhaCode });
         }
-        acc[state].push({ label: mha_name, value: mhaCode });
         return acc;
     }, {});
 
@@ -129,14 +132,14 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
 
     // This is a hardcoded list of columns that exist in the table.
     // A dynamic check against information_schema was attempted but is not supported by the Supabase client.
-    const existingColumns = [
+    const existingColumns: (keyof Tables<'bah_rates_dependents'>)[] = [
         'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09',
         'w01', 'w02', 'w03', 'w04', 'w05',
         'o01e', 'o02e', 'o03e',
         'o01', 'o02', 'o03', 'o04', 'o05', 'o06', 'o07'
     ];
 
-    if (!existingColumns.includes(rankColumn)) {
+    if (!existingColumns.includes(rankColumn as any)) {
         console.warn(`Column ${rankColumn} does not exist in ${tableName}. Returning null.`);
         return null;
     }
@@ -152,7 +155,7 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
         return null;
     }
 
-    return data ? data[rankColumn] : null;
+    return data ? (data as any)[rankColumn] : null;
 };
 
 export const getPayHelpContent = async (contentKey: string) => {
@@ -247,7 +250,7 @@ export const getReserveDrillPay = async (pay_grade: string, years_of_service: nu
 
   const adjusted_pay_grade = pay_grade.endsWith('E') ? pay_grade.slice(0, -1) : pay_grade;
 
-  let yearsColumn = 'yos_le_2';
+  let yearsColumn: keyof Tables<'reserve_drill_pay'> = 'yos_le_2';
   if (years_of_service >= 40) yearsColumn = 'yos_gt_40';
   else if (years_of_service >= 38) yearsColumn = 'yos_gt_38';
   else if (years_of_service >= 36) yearsColumn = 'yos_gt_36';
@@ -281,5 +284,5 @@ export const getReserveDrillPay = async (pay_grade: string, years_of_service: nu
     return 0;
   }
 
-  return data ? data[yearsColumn] : 0;
+  return data ? (data as Tables<'reserve_drill_pay'>)[yearsColumn] : 0;
 };
