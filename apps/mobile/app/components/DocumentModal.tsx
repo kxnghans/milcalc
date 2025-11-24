@@ -3,7 +3,8 @@
  * @description This file defines a dynamic modal component that displays a list of documents fetched from the database.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback, ActivityIndicator, Image, ScrollView, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback, ActivityIndicator, Image, ScrollView, Dimensions } from 'react-native';
+import Animated, { useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
 import { getDocumentsByCategory, openDocument } from '@repo/utils';
@@ -18,26 +19,26 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
     const [isLoading, setIsLoading] = useState(false);
     const [showTopChevron, setShowTopChevron] = useState(false);
     const [showBottomChevron, setShowBottomChevron] = useState(false);
-    const bounceAnim = useRef(new Animated.Value(0)).current;
+    const bounceAnim = useSharedValue(0);
     const scrollViewRef = useRef<ScrollView>(null);
     const [scrollViewHeight, setScrollViewHeight] = useState(0);
 
     useEffect(() => {
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(bounceAnim, {
-                    toValue: 5,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(bounceAnim, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-            ])
-        ).start();
-    }, [bounceAnim]);
+        bounceAnim.value = withRepeat(
+            withSequence(
+                withTiming(5, { duration: 300 }),
+                withTiming(0, { duration: 300 })
+            ),
+            -1,
+            true
+        );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ translateY: bounceAnim.value }],
+        };
+    });
 
     useEffect(() => {
         const fetchDocs = async () => {
@@ -161,7 +162,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                                 <Image source={mascotAsset} style={styles.mascot} resizeMode="contain" />
                                 <View style={styles.chevronContainer}>
                                     {showTopChevron && (
-                                        <Animated.View style={{ transform: [{ translateY: bounceAnim }] }}>
+                                        <Animated.View style={animatedStyle}>
                                             <MaterialCommunityIcons name="chevron-up" size={24} color={theme.colors.primary} />
                                         </Animated.View>
                                     )}
@@ -203,7 +204,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                             <View style={styles.footerContainer}>
                                 <View style={styles.chevronContainer}>
                                     {showBottomChevron && (
-                                        <Animated.View style={{ transform: [{ translateY: bounceAnim }] }}>
+                                        <Animated.View style={animatedStyle}>
                                             <MaterialCommunityIcons name="chevron-down" size={24} color={theme.colors.primary} />
                                         </Animated.View>
                                     )}

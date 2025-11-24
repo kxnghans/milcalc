@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, ActivityIndicator, Image, ImageSourcePropType, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, ActivityIndicator, Image, ImageSourcePropType, Dimensions } from 'react-native';
+import Animated, { useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, PillButton } from '@repo/ui';
 import { BlurView } from 'expo-blur';
@@ -20,26 +21,26 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
     const [isLoading, setIsLoading] = useState(false);
     const [showTopChevron, setShowTopChevron] = useState(false);
     const [showBottomChevron, setShowBottomChevron] = useState(false);
-    const bounceAnim = useRef(new Animated.Value(0)).current;
+    const bounceAnim = useSharedValue(0);
     const scrollViewRef = useRef<ScrollView>(null);
     const [scrollViewHeight, setScrollViewHeight] = useState(0);
 
     useEffect(() => {
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(bounceAnim, {
-                    toValue: 5,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(bounceAnim, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-            ])
-        ).start();
-    }, [bounceAnim]);
+        bounceAnim.value = withRepeat(
+            withSequence(
+                withTiming(5, { duration: 300 }),
+                withTiming(0, { duration: 300 })
+            ),
+            -1,
+            true
+        );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ translateY: bounceAnim.value }],
+        };
+    });
 
     useEffect(() => {
         if (isVisible && contentKey && source) {
@@ -239,7 +240,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
                                 <Text style={styles.title}>{content[0].title}</Text>
                                 <View style={styles.chevronContainer}>
                                     {showTopChevron && (
-                                        <Animated.View style={{ transform: [{ translateY: bounceAnim }] }}>
+                                        <Animated.View style={animatedStyle}>
                                             <MaterialCommunityIcons name="chevron-up" size={24} color={theme.colors.primary} />
                                         </Animated.View>
                                     )}
@@ -275,7 +276,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
                             <View style={styles.footerContainer}>
                                 <View style={styles.chevronContainer}>
                                     {showBottomChevron && (
-                                        <Animated.View style={{ transform: [{ translateY: bounceAnim }] }}>
+                                        <Animated.View style={animatedStyle}>
                                             <MaterialCommunityIcons name="chevron-down" size={24} color={theme.colors.primary} />
                                         </Animated.View>
                                     )}

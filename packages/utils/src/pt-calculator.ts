@@ -55,7 +55,7 @@ const getCardioScore = (standards: any[], component: string, performance: any): 
 
     if (component === 'run') {
         const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
-        if (runTimeInSeconds === 0) return 0;
+        if (runTimeInSeconds <= 0) return 0;
 
         for (const standard of cardioStandards) {
             const measurement = standard.measurement as string;
@@ -73,7 +73,7 @@ const getCardioScore = (standards: any[], component: string, performance: any): 
         }
     } else if (component === 'shuttles') {
         const shuttles = performance.shuttles;
-        if (shuttles === 0) return 0;
+        if (shuttles <= 0) return 0;
 
         for (const standard of cardioStandards) {
             const measurement = String(standard.measurement).trim();
@@ -154,16 +154,20 @@ export const getScoreForExercise = (standards: any[], component: string, perform
     if (altitudeGroup && altitudeGroup !== 'normal' && altitudeAdjustments) {
         if (component === 'run' && altitudeAdjustments.run) {
             const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
-            const correction = altitudeAdjustments.run.find((c) => c.altitude_group === altitudeGroup && c.time_range_start != null && c.time_range_end != null && runTimeInSeconds >= c.time_range_start && runTimeInSeconds <= c.time_range_end);
-            if (correction && correction.correction) {
-                const adjustedTimeInSeconds = runTimeInSeconds - correction.correction;
-                adjustedPerformance.minutes = Math.floor(adjustedTimeInSeconds / 60);
-                adjustedPerformance.seconds = adjustedTimeInSeconds % 60;
+            if (runTimeInSeconds > 0) {
+                const correction = altitudeAdjustments.run.find((c) => c.altitude_group === altitudeGroup && c.time_range_start != null && c.time_range_end != null && runTimeInSeconds >= c.time_range_start && runTimeInSeconds <= c.time_range_end);
+                if (correction && correction.correction) {
+                    const adjustedTimeInSeconds = runTimeInSeconds - correction.correction;
+                    adjustedPerformance.minutes = Math.floor(adjustedTimeInSeconds / 60);
+                    adjustedPerformance.seconds = adjustedTimeInSeconds % 60;
+                }
             }
         } else if (component === 'shuttles' && altitudeAdjustments.hamr) {
-            const adjustment = altitudeAdjustments.hamr.find((a) => a.altitude_group === altitudeGroup);
-            if (adjustment && adjustment.shuttles_to_add) {
-                adjustedPerformance.shuttles = (adjustedPerformance.shuttles || 0) + adjustment.shuttles_to_add;
+            if (performance.shuttles > 0) {
+                const adjustment = altitudeAdjustments.hamr.find((a) => a.altitude_group === altitudeGroup);
+                if (adjustment && adjustment.shuttles_to_add) {
+                    adjustedPerformance.shuttles = (adjustedPerformance.shuttles || 0) + adjustment.shuttles_to_add;
+                }
             }
         }
     }

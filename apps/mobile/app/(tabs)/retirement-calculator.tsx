@@ -15,7 +15,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 const retirementMascot = { uri: MASCOT_URLS.RETIREMENT };
 
 export default function RetirementCalculatorScreen() {
-  const { theme, themeMode, toggleTheme } = useTheme();
+  const { theme, themeMode, toggleTheme, isDarkMode } = useTheme();
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
   const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
   const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
@@ -118,10 +118,10 @@ export default function RetirementCalculatorScreen() {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        isLoading ? <ActivityIndicator style={{ marginRight: 15 }} /> : null
+        isLoading ? <ActivityIndicator size="small" color={isDarkMode ? theme.colors.text : theme.colors.primary} style={{ marginRight: theme.spacing.s }} /> : null
       ),
     });
-  }, [isLoading]);
+  }, [isLoading, navigation, theme, isDarkMode]);
 
   const styles = StyleSheet.create({
     container: {

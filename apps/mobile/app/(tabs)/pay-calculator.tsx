@@ -28,7 +28,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 export default function PayCalculatorScreen() {
-  const { theme, themeMode, toggleTheme } = useTheme();
+  const { theme, themeMode, toggleTheme, isDarkMode } = useTheme();
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
   const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
   const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
@@ -89,10 +89,10 @@ export default function PayCalculatorScreen() {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        isLoading ? <ActivityIndicator style={{ marginRight: 15 }} /> : null
+        isLoading ? <ActivityIndicator size="small" color={isDarkMode ? theme.colors.text : theme.colors.primary} style={{ marginRight: theme.spacing.s }} /> : null
       ),
     });
-  }, [isLoading]);
+  }, [isLoading, navigation, theme, isDarkMode]);
 
   const toggleIncome = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);

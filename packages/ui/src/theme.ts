@@ -4,6 +4,8 @@
  * typography styles, and border radii. It serves as a centralized place for all styling constants.
  */
 
+import { TextStyle } from 'react-native';
+
 /**
  * Defines standard spacing units used throughout the application for layout and components.
  */
@@ -15,6 +17,22 @@ const spacing = {
   xl: 40, // Extra large spacing
 };
 
+interface TypographyStyle {
+  fontSize: number;
+  fontWeight: TextStyle['fontWeight']; // Explicitly type fontWeight
+  fontFamily: string;
+}
+
+interface Typography {
+  header: TypographyStyle;
+  title: TypographyStyle;
+  subtitle: TypographyStyle;
+  body: TypographyStyle;
+  bodybold: TypographyStyle;
+  label: TypographyStyle;
+  caption: TypographyStyle;
+}
+
 /**
  * Color palette for the light theme.
  */
@@ -24,6 +42,7 @@ export const lightColors = {
   background: 'rgba(224, 229, 236, 1)',// App background color.
   surface: 'rgba(224, 229, 236, 1)',   // Color for card surfaces or containers.
   text: 'rgba(0, 0, 0, 1)',             // Primary text color.
+  border: 'rgba(0, 0, 0, 0.1)',         // Border color for light theme.
   error: 'rgba(236, 52, 40, 1)',        // Color for error messages and indicators.
   success: 'rgba(28, 176, 87, 1)',      // Color for success messages and indicators.
   darkenColor: 'rgba(0, 0, 0, 0.1)',    // Used to darken elements on press or hover.

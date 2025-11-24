@@ -435,7 +435,7 @@ export default function BestScoreScreen() {
 
     });
 
-  }, [isLoading, navigation, theme]);
+  }, [isLoading, navigation, theme, isDarkMode]);
 
 
 

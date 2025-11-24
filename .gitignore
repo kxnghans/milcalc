@@ -52,3 +52,6 @@ coverage/
 
 # OS-specific
 Thumbs.db
+
+# Temporary files
+image.png
