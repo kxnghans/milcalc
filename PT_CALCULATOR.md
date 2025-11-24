@@ -4,7 +4,7 @@ This document describes the implementation of the PT Calculator and Best Score f
 
 ## Overview
 
-The PT Calculator allows users to calculate their Physical Fitness Test score based on their age, gender, and performance in various exercises. The Best Score feature allows users to track their personal bests for each component of the PT test. These features are available in both the mobile and web apps.
+The PT Calculator allows users to calculate their Physical Fitness Test score based on their age, gender, and performance in various exercises. The Best Score feature allows users to track their personal bests for each component of the PT test.
 
 ## File Structure
 

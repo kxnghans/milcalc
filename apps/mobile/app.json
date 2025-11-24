@@ -40,10 +40,6 @@
       ],
       "newArchEnabled": true
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static"
-    },
     "plugins": [
       "expo-router",
       "expo-font"

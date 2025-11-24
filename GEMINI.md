@@ -37,13 +37,9 @@ pnpm install
 
 ### 2.2. Running the Apps
 
--   **Run both mobile apps:**
+-   **Run mobile app:**
     ```bash
     pnpm dev
-    ```
--   **Run mobile app only:**
-    ```bash
-    pnpm --filter milcalc-mobile dev
     ```
     Use the Expo Go app to scan the QR code.
 
