@@ -141,13 +141,8 @@ export function usePtCalculatorState() {
         const runCalculations = async () => {
             if (ageNum && debouncedGender && standards && walkStandards && altitudeData) {
                 try {
-                    let adjustedShuttles = parseInt(debouncedShuttles) || 0;
-                    if (debouncedCardioComponent === 'shuttles' && altitudeData && altitudeData.hamr && debouncedAltitudeGroup && debouncedAltitudeGroup !== 'normal') {
-                        const adjustmentRow = altitudeData.hamr.find(row => row.altitude_group === debouncedAltitudeGroup);
-                        if (adjustmentRow) {
-                            adjustedShuttles += adjustmentRow.shuttles_to_add;
-                        }
-                    }
+                    // calculatePtScore handles altitude adjustments internally, so we pass raw input here.
+                    const rawShuttles = parseInt(debouncedShuttles) || 0;
 
                     const result = await calculatePtScore({
                         age: ageNum || 0,
@@ -168,7 +163,7 @@ export function usePtCalculatorState() {
                         cardioComponent: debouncedCardioComponent,
                         runMinutes: parseInt(debouncedRunMinutes) || 0,
                         runSeconds: parseInt(debouncedRunSeconds) || 0,
-                        shuttles: adjustedShuttles,
+                        shuttles: rawShuttles,
                         walkMinutes: parseInt(debouncedWalkMinutes) || 0,
                         walkSeconds: parseInt(debouncedWalkSeconds) || 0,
                         isCardioExempt: debouncedCardioExempt,

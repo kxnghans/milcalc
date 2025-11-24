@@ -1,16 +1,15 @@
 
 import { useRouter } from 'expo-router';
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Image,
   StyleSheet,
   Text,
   View,
-  Animated,
-  useWindowDimensions,
 } from 'react-native';
 import { useTheme, SegmentedSelector, PillButton } from '@repo/ui';
 import { BlurView } from 'expo-blur';
+import SeasonalEffects from './components/_SeasonalEffects';
 
 const splashImage = require('../assets/3d_splash.png');
 
@@ -20,149 +19,6 @@ const getSeason = () => {
   if (month >= 5 && month <= 7) return 'summer';
   if (month >= 8 && month <= 10) return 'fall';
   return 'winter';
-};
-
-const Particle = ({ children, minSize, maxSize }) => {
-  const { height, width } = useWindowDimensions();
-  const fallAnim = useMemo(() => new Animated.Value(0), []);
-  const spinAnim = useMemo(() => new Animated.Value(0), []);
-  const horizontalAnim = useMemo(() => new Animated.Value(0), []);
-
-  useEffect(() => {
-    const fallDuration = Math.random() * 8000 + 5000;
-    const fallDelay = Math.random() * 10000;
-    const spinDuration = Math.random() * 3000 + 2000;
-    const spinDelay = Math.random() * 5000;
-    const horizontalDuration = Math.random() * 3000 + 2000;
-    const horizontalDelay = Math.random() * 5000;
-
-    fallAnim.setValue(0);
-    spinAnim.setValue(0);
-    horizontalAnim.setValue(0);
-
-    Animated.loop(
-      Animated.timing(fallAnim, {
-        toValue: 1,
-        duration: fallDuration,
-        delay: fallDelay,
-        useNativeDriver: true,
-      })
-    ).start();
-
-    Animated.loop(
-      Animated.timing(spinAnim, {
-        toValue: 1,
-        duration: spinDuration,
-        delay: spinDelay,
-        useNativeDriver: true,
-      })
-    ).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(horizontalAnim, {
-          toValue: 1,
-          duration: horizontalDuration,
-          delay: horizontalDelay,
-          useNativeDriver: true,
-        }),
-        Animated.timing(horizontalAnim, {
-          toValue: -1,
-          duration: horizontalDuration,
-          delay: horizontalDelay,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  const top = fallAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-0.1 * height, height * 1.1],
-  });
-  const spin = spinAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['-180deg', '180deg'],
-  });
-  const horizontal = horizontalAnim.interpolate({
-    inputRange: [-1, 1],
-    outputRange: [-20, 20],
-  });
-  const left = useMemo(() => Math.random() * width, []);
-  const fontSize = Math.random() * (maxSize - minSize) + minSize;
-
-  return (
-    <Animated.View
-      style={{
-        position: 'absolute',
-        left,
-        transform: [{ translateY: top }, { rotate: spin }, { translateX: horizontal }],
-      }}
-    >
-      {React.cloneElement(children, { style: { fontSize } })}
-    </Animated.View>
-  );
-};
-
-const SeasonalEffects = ({ season, styles }) => {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 50 }).map((_, i) => {
-        if (season === 'winter') {
-          return (
-            <Particle key={i} minSize={10} maxSize={18}>
-              <Text style={styles.snowflake}>❄️</Text>
-            </Particle>
-          );
-        }
-        if (season === 'fall') {
-          const leafColor = ['#ff8c00', '#d2691e', '#a0522d'][Math.floor(Math.random() * 3)];
-          return (
-            <Particle key={i} minSize={10} maxSize={26}>
-              <Text style={[styles.leaf, { color: leafColor }]}>🍂</Text>
-            </Particle>
-          );
-        }
-        if (season === 'spring') {
-          return (
-            <Particle key={i} minSize={10} maxSize={26}>
-              <Text style={styles.flower}>🌸</Text>
-            </Particle>
-          );
-        }
-        if (season === 'summer') {
-          const shimmerDuration = 1500;
-          const shimmerAnim = new Animated.Value(0);
-          Animated.loop(
-            Animated.sequence([
-              Animated.timing(shimmerAnim, {
-                toValue: 1,
-                duration: shimmerDuration,
-                useNativeDriver: true,
-              }),
-              Animated.timing(shimmerAnim, {
-                toValue: 0,
-                duration: shimmerDuration,
-                useNativeDriver: true,
-              }),
-            ])
-          ).start();
-          const opacity = shimmerAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.5, 1],
-          });
-          return (
-            <Particle key={i} minSize={10} maxSize={18}>
-              <Animated.Text style={[styles.sun, { opacity }]}>☀️</Animated.Text>
-            </Particle>
-          );
-        }
-        return null;
-      }),
-    [season, styles]
-  );
-
-  return <View style={StyleSheet.absoluteFill}>{particles}</View>;
 };
 
 export default function SplashScreen() {
@@ -207,23 +63,13 @@ export default function SplashScreen() {
       fontWeight: 'bold',
       color: theme.colors.text,
     },
-    snowflake: {
-      color: 'white',
-    },
-    leaf: {},
-    flower: {
-      color: '#ffc0cb',
-    },
-    sun: {
-      color: '#ffd700',
-    },
   });
 
   return (
     <View style={styles.container}>
       {/* Background Layer */}
       <View style={[styles.backgroundLayer, { backgroundColor: theme.colors.background }]}>
-        <SeasonalEffects season={season} styles={styles} />
+        <SeasonalEffects season={season as any} />
       </View>
 
       {/* Blur Layer */}

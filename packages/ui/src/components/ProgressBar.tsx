@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { useTheme } from "../contexts/ThemeContext";
 import NeumorphicOutset from './NeumorphicOutset';
 import { getPerformanceCategory, getScoreCategory } from '@repo/utils';
@@ -169,6 +170,22 @@ const ProgressBarComponent = ({
   });
 
   // Ensure the visual progress doesn't exceed 100% of the bar's width.
+  // Animated Value
+  const animatedProgress = useDerivedValue(() => {
+    return withTiming(Math.min(progress, 1), { duration: 500, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
+  }, [progress]);
+
+  const animatedBarStyle = useAnimatedStyle(() => {
+    return {
+      width: `${animatedProgress.value * 100}%`,
+    };
+  });
+  
+  // Use derived value for text color logic (simplified for now as JS thread needs to know for styling text)
+  // Since the marker styles rely on the *value* being past a point, we can use the raw 'progress' for the static text checks
+  // or we would need to make the markers Reanimated components too. 
+  // For this iteration, we will keep the marker logic based on the *target* progress (immediate feedback on text color),
+  // while the bar animates to that position. This is often better UX anyway.
   const visualProgress = Math.min(progress, 1);
 
   /**
@@ -181,7 +198,7 @@ const ProgressBarComponent = ({
         left: 0,
         top: 0,
         height: '100%',
-        width: `${visualProgress * 100}%`,
+        width: '100%', // Container is full width, inner view is animated
         marginTop: 0,
         marginBottom: 0,
         marginLeft: 0,
@@ -190,11 +207,52 @@ const ProgressBarComponent = ({
       contentStyle={{
         borderRadius: theme.borderRadius.m,
         overflow: 'hidden',
+        width: '100%', // Ensure content area is full width
       }}
     >
-      <View style={[styles.progress, { backgroundColor: progressColor }]} />
+      {/* We animate the width of the inner view directly, but NeumorphicOutset is complex. 
+          NeumorphicOutset wraps children. If we set width on NeumorphicOutset containerStyle, it clips.
+          
+          Actually, the original code set `width` on the NeumorphicOutset `containerStyle`.
+          Let's wrap NeumorphicOutset in an Animated.View to animate its width.
+      */}
+      <View style={[styles.progress, { backgroundColor: progressColor, width: '100%' }]} />
     </NeumorphicOutset>
   );
+
+  // Correct approach for NeumorphicOutset animation:
+  // The original code was: width: `${visualProgress * 100}%` on NeumorphicOutset container.
+  // We should wrap NeumorphicOutset in an Animated View that handles the width.
+  const renderAnimatedProgressBar = () => (
+      <Animated.View style={[{
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        height: '100%',
+        marginTop: 0,
+        marginBottom: 0,
+        marginLeft: 0,
+        marginRight: 0,
+      }, animatedBarStyle]}>
+        <NeumorphicOutset
+            containerStyle={{
+                width: '100%',
+                height: '100%',
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+            }}
+            contentStyle={{
+                borderRadius: theme.borderRadius.m,
+                overflow: 'hidden',
+            }}
+        >
+             <View style={[styles.progress, { backgroundColor: progressColor }]} />
+        </NeumorphicOutset>
+      </Animated.View>
+  );
+
 
   // Render logic for pass/fail mode.
   if (isPassFail) {
@@ -204,7 +262,7 @@ const ProgressBarComponent = ({
     ];
     return (
         <View style={styles.bar}>
-            {renderProgressBar()}
+            {renderAnimatedProgressBar()}
             <View style={styles.markersContainer}>
                 <View style={[styles.marker, { right: '0%' }]}>
                     <Text style={passMarkerStyle}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>
@@ -228,7 +286,7 @@ const ProgressBarComponent = ({
 
     return (
       <View style={styles.bar}>
-        {renderProgressBar()}
+        {renderAnimatedProgressBar()}
         <View style={styles.markersContainer}>
             <View style={[styles.marker, { left: `${maxPointsMarkerPosition}%` }]}>
               <Text style={maxMarkerStyle}>{valueIsTime ? formatTime(maxPointsThreshold!) : maxPointsThreshold}</Text>
@@ -259,7 +317,7 @@ const ProgressBarComponent = ({
 
   return (
     <View style={styles.bar}>
-      {renderProgressBar()}
+      {renderAnimatedProgressBar()}
       <View style={styles.markersContainer}>
           <View style={[styles.marker, { left: `${passMarkerPosition}%` }]}>
             <Text style={passMarkerStyle}>{valueIsTime ? formatTime(passThreshold) : passThreshold}</Text>
