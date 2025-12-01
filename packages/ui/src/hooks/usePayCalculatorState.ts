@@ -61,6 +61,12 @@ export const usePayCalculatorState = () => {
   const debouncedFilingStatus = useDebounce(filingStatus, 500);
   const debouncedState = useDebounce(state, 500);
 
+  // Deep debounce for object/array states to prevent excessive re-renders during typing
+  const debouncedSpecialPays = useDebounce(specialPays, 500);
+  const debouncedAdditionalIncomes = useDebounce(additionalIncomes, 500);
+  const debouncedDeductions = useDebounce(deductions, 500);
+  const debouncedAdditionalDeductions = useDebounce(additionalDeductions, 500);
+
   // --- User Input Income/Deduction States ---
   const [isIncomeExpanded, setIncomeExpanded] = useState(false);
   const [specialPays, setSpecialPays] = useState({
@@ -80,6 +86,7 @@ export const usePayCalculatorState = () => {
   });
   const [additionalDeductions, setAdditionalDeductions] = useState([{ name: '', amount: '' }]);
   const [calculatedTaxes, setCalculatedTaxes] = useState({ fedTax: 0, stateTax: 0, ficaTax: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 });
+
 
   // --- Data Fetching with React Query ---
   const { data: mhaData, error: mhaError, isLoading: isLoadingMha } = useQuery({
@@ -160,14 +167,15 @@ export const usePayCalculatorState = () => {
   }, [status]);
 
   useEffect(() => {
-    const calculateAll = async () => {
+    const calculateAll = () => {
       if (!debouncedRank) {
         setCalculatedTaxes({ fedTax: 0, stateTax: 0, ficaTax: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 });
         setVaDisabilityPay(0);
         return;
       }
 
-      const vaDisabilityPayResult = await calculateDisabilityIncome(disabilityPercentage, vaDependencyStatus);
+      // Now synchronous and uses passed data
+      const vaDisabilityPayResult = calculateDisabilityIncome(disabilityPercentage, vaDependencyStatus, disabilityData || []);
       setVaDisabilityPay(vaDisabilityPayResult);
 
       const militaryMonthlyPay = (basePay || 0) + (bas || 0) + (bah || 0);
@@ -182,21 +190,22 @@ export const usePayCalculatorState = () => {
             basePay: basePay,
             bah: bah,
             bas: bas,
-            specialPays,
-            additionalIncomes,
-            deductions,
-            additionalDeductions,
+            specialPays: debouncedSpecialPays,
+            additionalIncomes: debouncedAdditionalIncomes,
+            deductions: debouncedDeductions,
+            additionalDeductions: debouncedAdditionalDeductions,
             filingStatus: debouncedFilingStatus,
             state: debouncedState,
           };
-          const { federalTax, stateTax, ficaTax, federalStandardDeduction, stateStandardDeduction } = await calculatePay(payInputs, federalTaxData, stateTaxData);
+          // Now synchronous
+          const { federalTax, stateTax, ficaTax, federalStandardDeduction, stateStandardDeduction } = calculatePay(payInputs, federalTaxData, stateTaxData);
           setCalculatedTaxes({ fedTax: federalTax, stateTax: stateTax, ficaTax: ficaTax, federalStandardDeduction, stateStandardDeduction });
         }
       }
     };
 
     calculateAll();
-  }, [basePay, bah, bas, debouncedRank, debouncedMha, debouncedFilingStatus, debouncedState, disabilityPercentage, vaDependencyStatus, federalTaxData, stateTaxData, specialPays, additionalIncomes, deductions, additionalDeductions]);
+  }, [basePay, bah, bas, debouncedRank, debouncedMha, debouncedFilingStatus, debouncedState, disabilityPercentage, vaDependencyStatus, federalTaxData, stateTaxData, debouncedSpecialPays, debouncedAdditionalIncomes, debouncedDeductions, debouncedAdditionalDeductions, disabilityData]);
 
   const totalIncome = useMemo(() => {
     if (paySource === 'VA Disability') {

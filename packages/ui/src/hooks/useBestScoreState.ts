@@ -135,7 +135,7 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
             forearm_plank_time: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'forearm_plank_time', { minutes: Number(debouncedPlankMinutes), seconds: Number(debouncedPlankSeconds) }),
             run: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'run', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup, altitudeData),
             shuttles: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'shuttles', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup, altitudeData),
-            walk: isCardioExempt ? 'Exempt' : await checkWalkPass(Number(debouncedAge), debouncedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), walkStandards, altitudeData.walk, debouncedAltitudeGroup),
+            walk: isCardioExempt ? 'Exempt' : checkWalkPass(Number(debouncedAge), debouncedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), walkStandards, altitudeData.walk, debouncedAltitudeGroup),
         };
         setScores(newScores);
         setBestScore(calculateBestScore(newScores));
