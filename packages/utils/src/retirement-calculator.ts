@@ -33,9 +33,11 @@ export const calculatePension = async (
     return 0;
   }
 
-  const pay1 = await getBasePay(high3PayGrade1, yearsOfService - 2);
-  const pay2 = await getBasePay(high3PayGrade2, yearsOfService - 1);
-  const pay3 = await getBasePay(high3PayGrade3, yearsOfService);
+  const [pay1, pay2, pay3] = await Promise.all([
+    getBasePay(high3PayGrade1, yearsOfService - 2),
+    getBasePay(high3PayGrade2, yearsOfService - 1),
+    getBasePay(high3PayGrade3, yearsOfService)
+  ]);
 
   if (pay1 === null || pay2 === null || pay3 === null) {
     return 0;

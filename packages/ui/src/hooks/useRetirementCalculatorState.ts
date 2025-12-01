@@ -160,7 +160,8 @@ export const useRetirementCalculatorState = () => {
         const pensionValue = await calculatePension(component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, goodYears);
         setPension(pensionValue);
 
-        const disabilityIncomeValue = await calculateDisabilityIncome(disabilityPercentage, dependentStatus);
+        // Synchronous calculation
+        const disabilityIncomeValue = calculateDisabilityIncome(disabilityPercentage, dependentStatus, disabilityData || []);
         setDisabilityIncome(disabilityIncomeValue);
 
         const grossIncome = pensionValue + disabilityIncomeValue;
@@ -176,7 +177,7 @@ export const useRetirementCalculatorState = () => {
     };
 
     calculate();
-  }, [component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, disabilityPercentage, dependentStatus, state, filingStatus, federalTaxData, stateTaxData, isLoading]);
+  }, [component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, disabilityPercentage, dependentStatus, state, filingStatus, federalTaxData, stateTaxData, isLoading, disabilityData]);
 
   useEffect(() => {
     if (high3PayGrade1 && high3PayGrade2 && payGrades) {

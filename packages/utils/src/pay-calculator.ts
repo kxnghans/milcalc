@@ -1,7 +1,6 @@
 
 
 import { Tables, Json } from './types';
-import { getDisabilityData } from './disability-supabase-api';
 
 
 
@@ -43,7 +42,7 @@ type DependentStatus = 'veteran alone' | 'veteran with spouse' | 'veteran with s
 type DisabilityPercentage = "10%" | "20%" | "30%" | "40%" | "50%" | "60%" | "70%" | "80%" | "90%" | "100%";
 
 
-export const calculatePay = async (
+export const calculatePay = (
 
   inputs: PayCalculatorInputs,
 
@@ -143,15 +142,15 @@ export const calculatePay = async (
 
 };
 
-export const calculateDisabilityIncome = async (
+export const calculateDisabilityIncome = (
     disabilityPercentage: DisabilityPercentage,
-    dependentStatus: DependentStatus
-  ): Promise<number> => {
-    if (!disabilityPercentage || !dependentStatus || dependentStatus === 'none') {
+    dependentStatus: DependentStatus,
+    disabilityData: Tables<'veterans_disability_compensation'>[]
+  ): number => {
+    if (!disabilityPercentage || !dependentStatus || dependentStatus === 'none' || !disabilityData) {
       return 0;
     }
   
-    const disabilityData = await getDisabilityData();
     const row = disabilityData.find(d => d.dependent_status.trim().toLowerCase() === dependentStatus.trim().toLowerCase());
   
     if (row) {

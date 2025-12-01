@@ -5,7 +5,6 @@
  * handle altitude adjustments, and determine pass/fail status, including exemption logic.
  */
 
-import { getPtStandards } from './pt-supabase-api';
 import { Tables } from './types';
 
 /**
@@ -257,7 +256,7 @@ export const checkWalkPass = (age: number, gender: string, minutes: number, seco
  * @param inputs - An object containing all user inputs (age, gender, performance, and exemption status for each component).
  * @returns An object with the composite score, component scores, pass/fail status, and walk status.
  */
-export const calculatePtScore = async (inputs: any, standards: any[], walkStandards: any[], altitudeAdjustments: any) => {
+export const calculatePtScore = (inputs: any, standards: any[], walkStandards: any[], altitudeAdjustments: any) => {
     // Validate required inputs
     if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) {
         return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
@@ -513,9 +512,10 @@ export const getPerformanceForScore = (standards: any[], component: string, targ
  * @param age - The user's age.
  * @param gender - The user's gender.
  * @param performance - An object containing the performance data (reps, minutes, seconds).
+ * @param standards - The scoring standards for the user's age and gender.
  * @returns A string detailing the calculated score, or an empty string if inputs are invalid.
  */
-export const getDynamicHelpText = async (componentKey: string, age: number, gender: string, performance: any): Promise<string> => {
+export const getDynamicHelpText = (componentKey: string, age: number, gender: string, performance: any, standards: any[]): string => {
     if (!age || !gender) {
         return "Please enter age and gender to see dynamic scoring details.";
     }
@@ -525,7 +525,6 @@ export const getDynamicHelpText = async (componentKey: string, age: number, gend
         return "Invalid age provided.";
     }
 
-    const standards = await getPtStandards(gender, ageGroupString);
     if (!standards) {
         return "Could not load scoring standards.";
     }

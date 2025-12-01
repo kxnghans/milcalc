@@ -138,13 +138,14 @@ export function usePtCalculatorState() {
 
   // The main effect hook that runs all calculations whenever a debounced input changes.
     useEffect(() => {
-        const runCalculations = async () => {
+        const runCalculations = () => {
             if (ageNum && debouncedGender && standards && walkStandards && altitudeData) {
                 try {
                     // calculatePtScore handles altitude adjustments internally, so we pass raw input here.
                     const rawShuttles = parseInt(debouncedShuttles) || 0;
 
-                    const result = await calculatePtScore({
+                    // Now synchronous
+                    const result = calculatePtScore({
                         age: ageNum || 0,
                         gender: debouncedGender,
                         altitudeGroup: debouncedAltitudeGroup,

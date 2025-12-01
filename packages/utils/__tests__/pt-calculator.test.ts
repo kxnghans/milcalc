@@ -11,7 +11,7 @@ describe('PT Calculator', () => {
     describe('calculatePtScore - Male <25', () => {
         const standards = mockStandards["Male"]["<25"];
 
-        it('should calculate a perfect score', async () => {
+        it('should calculate a perfect score', () => {
             const inputs = {
                 age: 24,
                 gender: 'Male',
@@ -26,7 +26,7 @@ describe('PT Calculator', () => {
                 runMinutes: 9,
                 runSeconds: 12,
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             expect(result.totalScore).toBe(100);
             expect(result.pushupScore).toBe(20);
             expect(result.coreScore).toBe(20);
@@ -34,7 +34,7 @@ describe('PT Calculator', () => {
             expect(result.isPass).toBe(true);
         });
 
-        it('should calculate a passing score with medium values', async () => {
+        it('should calculate a passing score with medium values', () => {
             const inputs = {
                 age: 24,
                 gender: 'Male',
@@ -46,12 +46,12 @@ describe('PT Calculator', () => {
                 runMinutes: 12,
                 runSeconds: 34,
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             expect(result.totalScore).toBeCloseTo(83); // (16 + 15 + 52)
             expect(result.isPass).toBe(true);
         });
 
-        it('should fail with one component score at 0', async () => {
+        it('should fail with one component score at 0', () => {
             const inputs = {
                 age: 24,
                 gender: 'Male',
@@ -63,12 +63,12 @@ describe('PT Calculator', () => {
                 runMinutes: 20, // 0 pts
                 runSeconds: 0,
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             expect(result.cardioScore).toBe(0);
             expect(result.isPass).toBe(false);
         });
 
-        it('should apply altitude adjustment for run', async () => {
+        it('should apply altitude adjustment for run', () => {
             const inputs = {
                 age: 24,
                 gender: 'Male',
@@ -77,7 +77,7 @@ describe('PT Calculator', () => {
                 runSeconds: 30,
                 altitudeGroup: 'group1'
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             // Raw time 9:30 (570s). Adj: 570-23=547s (9:07). Score is 60.
             expect(result.cardioScore).toBe(60);
         });
@@ -86,7 +86,7 @@ describe('PT Calculator', () => {
     describe('calculatePtScore - Female 35-39', () => {
         const standards = mockStandards["Female"]["35-39"];
 
-        it('should calculate a score with push_ups and sit_ups', async () => {
+        it('should calculate a score with push_ups and sit_ups', () => {
             const inputs = {
                 age: 36,
                 gender: 'Female',
@@ -98,12 +98,12 @@ describe('PT Calculator', () => {
                 runMinutes: 15,
                 runSeconds: 21,
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             expect(result.totalScore).toBeCloseTo(84); // 15 + 15 + 54
             expect(result.isPass).toBe(true);
         });
 
-        it('should handle walk test (pass)', async () => {
+        it('should handle walk test (pass)', () => {
             const inputs = {
                 age: 38,
                 gender: 'Female',
@@ -115,14 +115,14 @@ describe('PT Calculator', () => {
                 walkMinutes: 17,
                 walkSeconds: 40,
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             // Score is (20 + 20) / 40 * 100 = 100
             expect(result.totalScore).toBe(100);
             expect(result.walkPassed).toBe('pass');
             expect(result.isPass).toBe(true);
         });
 
-        it('should handle walk test with altitude (fail)', async () => {
+        it('should handle walk test with altitude (fail)', () => {
             const inputs = {
                 age: 38,
                 gender: 'Female',
@@ -135,7 +135,7 @@ describe('PT Calculator', () => {
                 walkSeconds: 0,
                 altitudeGroup: 'group1'
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             // Max time at altitude is 18:45 (1125s). User time is 19:00 (1140s).
             expect(result.walkPassed).toBe('fail');
             expect(result.isPass).toBe(false);
@@ -145,7 +145,7 @@ describe('PT Calculator', () => {
     describe('Exemptions', () => {
         const standards = mockStandards["Male"]["<25"];
 
-        it('should calculate correctly with one component exempt', async () => {
+        it('should calculate correctly with one component exempt', () => {
             const inputs = {
                 age: 24,
                 gender: 'Male',
@@ -158,14 +158,14 @@ describe('PT Calculator', () => {
                 runMinutes: 9, // 60 pts
                 runSeconds: 12,
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             // Score = (20 + 60) / 80 * 100 = 100
             expect(result.totalScore).toBe(100);
             expect(result.pushupScore).toBe('Exempt');
             expect(result.isPass).toBe(true);
         });
 
-        it('should calculate correctly with two components exempt', async () => {
+        it('should calculate correctly with two components exempt', () => {
             const inputs = {
                 age: 24,
                 gender: 'Male',
@@ -175,13 +175,13 @@ describe('PT Calculator', () => {
                 runMinutes: 9, // 60 pts
                 runSeconds: 12,
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             // Score = 60 / 60 * 100 = 100
             expect(result.totalScore).toBe(100);
             expect(result.isPass).toBe(true);
         });
 
-        it('should pass with 100 if all components are exempt', async () => {
+        it('should pass with 100 if all components are exempt', () => {
             const inputs = {
                 age: 24,
                 gender: 'Male',
@@ -189,7 +189,7 @@ describe('PT Calculator', () => {
                 isCoreExempt: true,
                 isCardioExempt: true,
             };
-            const result = await calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
+            const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             expect(result.totalScore).toBe(100);
             expect(result.isPass).toBe(true);
         });

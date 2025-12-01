@@ -22,24 +22,27 @@ export const getPtStandards = async (gender: string, age_group: string) => {
 
   const ageSexGroupId = ageGroupData.id;
 
-  // 2. Fetch data from pt_muscular_fitness_standards
-  const { data: muscularData, error: muscularError } = await supabase
-    .from('pt_muscular_fitness_standards')
-    .select('exercise_type, reps, time, points')
-    .eq('age_sex_group_id', ageSexGroupId)
-    .order('points', { ascending: false });
+  // 2. Fetch data from pt_muscular_fitness_standards and pt_cardio_respiratory_standards in parallel
+  const [muscularResult, cardioResult] = await Promise.all([
+    supabase
+      .from('pt_muscular_fitness_standards')
+      .select('exercise_type, reps, time, points')
+      .eq('age_sex_group_id', ageSexGroupId)
+      .order('points', { ascending: false }),
+    supabase
+      .from('pt_cardio_respiratory_standards')
+      .select('run_time, shuttles_range, points')
+      .eq('age_sex_group_id', ageSexGroupId)
+      .order('points', { ascending: false })
+  ]);
+
+  const { data: muscularData, error: muscularError } = muscularResult;
+  const { data: cardioData, error: cardioError } = cardioResult;
 
   if (muscularError) {
     console.error('Error fetching muscular fitness standards:', muscularError);
     return null;
   }
-
-    // 3. Fetch data from pt_cardio_respiratory_standards
-  const { data: cardioData, error: cardioError } = await supabase
-    .from('pt_cardio_respiratory_standards')
-    .select('run_time, shuttles_range, points')
-    .eq('age_sex_group_id', ageSexGroupId)
-    .order('points', { ascending: false });
 
 
   if (cardioError) {
