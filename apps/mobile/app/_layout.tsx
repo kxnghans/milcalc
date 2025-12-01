@@ -9,9 +9,7 @@ export default function Layout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <DismissKeyboardView>
-          <Slot />
-        </DismissKeyboardView>
+        <Slot />
       </ThemeProvider>
     </QueryClientProvider>
   );

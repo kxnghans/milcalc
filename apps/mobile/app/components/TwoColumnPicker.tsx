@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import { useTheme, NeumorphicInset, PillButton } from '@repo/ui';
 
-const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading, error, primaryColumnValue: propPrimaryColumnValue, primaryPlaceholder = '...', secondaryPlaceholder = 'Select an option', primarySort }) => {
+const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading, error, primaryColumnValue: propPrimaryColumnValue, primaryPlaceholder = '...', secondaryPlaceholder = 'Select an option', primarySort, style }) => {
   const { theme } = useTheme();
   const { bottom } = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
@@ -131,7 +131,7 @@ const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading
   };
 
   return (
-    <>
+    <View style={style}>
         <Pressable onPress={() => setModalVisible(true)} disabled={isLoading || !!error}>
             <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
                 <View style={styles.pressableInput}>
@@ -196,7 +196,7 @@ const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading
                 </Pressable>
             </Pressable>
         </Modal>
-    </>
+    </View>
   );
 };
 

@@ -52,6 +52,7 @@ coverage/
 
 # OS-specific
 Thumbs.db
+*.swp
 
 # Temporary files
 image.png

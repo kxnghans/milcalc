@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, Pressable, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Modal, Pressable, StyleProp, ViewStyle } from 'react-native';
 import { NeumorphicInset, useTheme, StyledPicker, PillButton } from '@repo/ui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -8,14 +8,16 @@ interface PickerInputProps {
   selectedValue: any;
   onValueChange: (value: any) => void;
   placeholder?: string;
+  style?: StyleProp<ViewStyle>;
+  disabled?: boolean;
 }
 
-const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValueChange, placeholder }) => {
+const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValueChange, placeholder, style, disabled }) => {
   const { theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
   const selectedLabel = (items || []).find(item => item.value === selectedValue)?.label || placeholder || 'Select...';
-  const textColor = selectedValue ? theme.colors.text : theme.colors.placeholder;
+  const textColor = disabled ? theme.colors.disabled : (selectedValue ? theme.colors.text : theme.colors.placeholder);
 
   const styles = StyleSheet.create({
     wrapper: {
@@ -49,11 +51,11 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
   ];
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, style]}>
         <NeumorphicInset style={{ borderRadius: theme.borderRadius.m, backgroundColor: theme.colors.inputBackground }}>
-            <Pressable onPress={() => setModalVisible(true)} style={styles.pressable}>
+            <Pressable onPress={() => setModalVisible(true)} style={styles.pressable} disabled={disabled}>
                 <Text style={{ color: textColor, flex: 1, textAlign: 'center' }}>{selectedLabel}</Text>
-                <MaterialCommunityIcons name="chevron-down" size={20} color={theme.colors.text} />
+                <MaterialCommunityIcons name="chevron-down" size={20} color={disabled ? theme.colors.disabled : theme.colors.text} />
             </Pressable>
         </NeumorphicInset>
 
