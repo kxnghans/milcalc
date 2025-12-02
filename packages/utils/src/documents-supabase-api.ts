@@ -7,20 +7,27 @@ import * as Haptics from 'expo-haptics';
  * @param category - The category of documents to fetch (e.g., 'PT', 'PAY').
  * @returns An array of document objects.
  */
+let documentsCache = {}; // Simple in-memory cache
+
 export const getDocumentsByCategory = async (category: string) => {
   if (!category) return [];
+
+  if (documentsCache[category]) {
+    return documentsCache[category];
+  }
 
   const { data, error } = await supabase
     .from('documents')
     .select('*')
     .eq('category', category)
-    .order('id');
+    .order('sort_order');
 
   if (error) {
     console.error('Error fetching documents:', error);
     return [];
   }
 
+  documentsCache[category] = data || [];
   return data || [];
 };
 
@@ -66,7 +73,7 @@ export const openDocument = async (doc: any) => {
     }
 
     // Handle private files that need a signed URL.
-    if (doc.type === 'local' && doc.source) {
+    if ((doc.type === 'local' || doc.type === 'audio') && doc.source) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         try {
             const { data, error } = await supabase.functions.invoke('get-signed-url', {

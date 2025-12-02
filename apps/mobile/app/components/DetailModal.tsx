@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, ActivityIndicator, Image, ImageSourcePropType, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, ActivityIndicator, ImageSourcePropType, Dimensions } from 'react-native';
 import Animated, { useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, PillButton } from '@repo/ui';
 import { BlurView } from 'expo-blur';
 import { getHelpContentFromSource } from '@repo/utils';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Image as ExpoImage } from 'expo-image';
 
 interface DetailModalProps {
   isVisible: boolean;
@@ -236,7 +237,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
                         <>
                             {/* Persistent Header */}
                             <View style={styles.headerContainer}>
-                                {mascotAsset && <Image source={mascotAsset} style={styles.mascot} resizeMode="contain" />}
+                                {mascotAsset && <ExpoImage source={mascotAsset} style={styles.mascot} contentFit="contain" />}
                                 <Text style={styles.title}>{content[0].title}</Text>
                                 <View style={styles.chevronContainer}>
                                     {showTopChevron && (

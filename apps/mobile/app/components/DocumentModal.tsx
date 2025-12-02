@@ -3,13 +3,14 @@
  * @description This file defines a dynamic modal component that displays a list of documents fetched from the database.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback, ActivityIndicator, Image, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
 import Animated, { useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
 import { getDocumentsByCategory, openDocument } from '@repo/utils';
 import { BlurView } from 'expo-blur';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Image as ExpoImage } from 'expo-image';
 
 const mascotAsset = { uri: MASCOT_URLS.DOCUMENTS };
 
@@ -159,7 +160,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                         <>
                             {/* Persistent Header */}
                             <View style={styles.headerContainer}>
-                                <Image source={mascotAsset} style={styles.mascot} resizeMode="contain" />
+                                <ExpoImage source={mascotAsset} style={styles.mascot} contentFit="contain" />
                                 <View style={styles.chevronContainer}>
                                     {showTopChevron && (
                                         <Animated.View style={animatedStyle}>
@@ -188,12 +189,22 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                                                 style={styles.button}
                                                 onPress={() => openDocument(doc)}
                                             >
-                                                <Text style={styles.textStyle}>
-                                                    {doc.name}
-                                                    {doc.learn_more_uri && (
-                                                        <Text style={{...theme.typography.body, color: theme.colors.primary}}> - Details</Text>
+                                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                    {doc.type === 'audio' && (
+                                                        <MaterialCommunityIcons 
+                                                            name="music-note" 
+                                                            size={theme.typography.subtitle.fontSize} 
+                                                            color={theme.colors.text} 
+                                                            style={{ marginRight: 5 }} 
+                                                        />
                                                     )}
-                                                </Text>
+                                                    <Text style={styles.textStyle}>
+                                                        {doc.name}
+                                                        {doc.learn_more_uri && (
+                                                            <Text style={{...theme.typography.body, color: theme.colors.primary}}> - Details</Text>
+                                                        )}
+                                                    </Text>
+                                                </View>
                                             </TouchableOpacity>
                                         </View>
                                     ))}
