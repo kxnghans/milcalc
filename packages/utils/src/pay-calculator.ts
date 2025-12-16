@@ -38,7 +38,7 @@ interface PayCalculatorInputs {
 
 }
 
-type DependentStatus = 'veteran alone' | 'veteran with spouse' | 'veteran with spouse and one parent' | 'none' | 'veteran with spouse only';
+type DependentStatus = 'Veteran alone' | 'With spouse only' | 'With spouse and 1 parent' | 'With spouse and 2 parents' | 'With 1 parent only' | 'none';
 type DisabilityPercentage = "10%" | "20%" | "30%" | "40%" | "50%" | "60%" | "70%" | "80%" | "90%" | "100%";
 
 

@@ -178,7 +178,7 @@ export const getScoreForExercise = (standards: any[], component: string, perform
             return getCardioScore(standards, component, adjustedPerformance);
         case 'push_ups_1min':
         case 'hand_release_pushups_2min':
-            return getMuscularFitnessScore(standards, component, performance.pushups);
+            return getMuscularFitnessScore(standards, component, performance.reps);
         case 'sit_ups_1min':
         case 'cross_leg_reverse_crunch_2min':
             return getMuscularFitnessScore(standards, component, performance.reps);

@@ -192,3 +192,27 @@ const calculateStateTax = (
   return tax;
 };
 
+export const getRetirementAge = (
+  component: Component,
+  birthDate: Date | null,
+  serviceEntryDate: Date | null,
+  yearsOfService: number,
+  breakInService: number,
+  qualifyingDeploymentDays: number
+): number | null => {
+  if (component === 'Active') {
+    if (!birthDate || !serviceEntryDate) return null;
+    const retirementDate = new Date(serviceEntryDate);
+    const totalYears = (yearsOfService || 0) + (breakInService || 0);
+    retirementDate.setFullYear(retirementDate.getFullYear() + totalYears);
+    
+    let ageAtRetirement = retirementDate.getFullYear() - birthDate.getFullYear();
+    const m = retirementDate.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && retirementDate.getDate() < birthDate.getDate())) {
+      ageAtRetirement--;
+    }
+    return ageAtRetirement;
+  } else {
+    return 60 - Math.floor(qualifyingDeploymentDays / 90) * 0.25;
+  }
+};
