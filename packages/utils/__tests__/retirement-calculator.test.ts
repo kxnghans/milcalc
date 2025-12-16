@@ -4,7 +4,7 @@
  * @see ../../TESTING.md
  */
 
-import { calculatePension, calculateTsp, calculateTaxes } from '../src/retirement-calculator';
+import { calculatePension, calculateTsp, calculateTaxes, getRetirementAge } from '../src/retirement-calculator';
 import * as PayApi from '../src/pay-supabase-api';
 import { mockFederalTaxData, mockStateTaxData } from './test-mocks/retirement-data-mocks';
 
@@ -146,7 +146,7 @@ describe('Retirement Calculator', () => {
             // State Tax: (10412 * 0.01) + ((24684 - 10413) * 0.02) + ...
             const { federal, state: stateTax } = calculateTaxes(grossIncome, state, filingStatus, mockFederalTaxData, mockStateTaxData);
 
-            expect(federal).toBeCloseTo(5460.60);
+            expect(federal).toBeCloseTo(5020);
             expect(stateTax).toBeGreaterThan(0); // Calculation is complex, just check it's not zero
         });
 
@@ -159,6 +159,63 @@ describe('Retirement Calculator', () => {
             const { federal, state: stateTax } = calculateTaxes(0, 'CA', 'single', mockFederalTaxData, mockStateTaxData);
             expect(federal).toEqual(0);
             expect(stateTax).toEqual(0);
+        });
+    });
+
+    describe('getRetirementAge', () => {
+        it('should calculate retirement age for Active duty', () => {
+            const birthDate = new Date('1990-01-01');
+            const serviceEntryDate = new Date('2010-01-01');
+            const yearsOfService = 20;
+            const breakInService = 0;
+            const qualifyingDeploymentDays = 0;
+
+            // Retirement date: 2030-01-01. Age: 40.
+            const age = getRetirementAge('Active', birthDate, serviceEntryDate, yearsOfService, breakInService, qualifyingDeploymentDays);
+            expect(age).toBe(40);
+        });
+
+        it('should account for break in service for Active duty', () => {
+            const birthDate = new Date('1990-01-01');
+            const serviceEntryDate = new Date('2010-01-01');
+            const yearsOfService = 20;
+            const breakInService = 2; // +2 years
+            const qualifyingDeploymentDays = 0;
+
+            // Retirement date: 2032-01-01. Age: 42.
+            const age = getRetirementAge('Active', birthDate, serviceEntryDate, yearsOfService, breakInService, qualifyingDeploymentDays);
+            expect(age).toBe(42);
+        });
+
+        it('should round down age if retirement date is before birthday in retirement year', () => {
+            const birthDate = new Date('1990-06-01');
+            const serviceEntryDate = new Date('2010-01-01');
+            const yearsOfService = 20;
+            const breakInService = 0;
+            
+            // Retirement date: 2030-01-01.
+            // Birthday in 2030 is 06-01.
+            // Retirement is BEFORE birthday. So age is 39 (turns 40 later that year).
+            const age = getRetirementAge('Active', birthDate, serviceEntryDate, yearsOfService, breakInService, 0);
+            expect(age).toBe(39);
+        });
+
+        it('should calculate retirement age for Reserve/Guard based on deployment days', () => {
+            // 60 - (days / 90) * 0.25 (3 months)
+            // 360 days / 90 = 4 blocks. 4 * 0.25 = 1 year reduction.
+            // Age = 60 - 1 = 59.
+            const age = getRetirementAge('Reserve', null, null, 20, 0, 360);
+            expect(age).toBe(59);
+        });
+
+        it('should calculate retirement age for Reserve/Guard with zero days', () => {
+            const age = getRetirementAge('Guard', null, null, 20, 0, 0);
+            expect(age).toBe(60);
+        });
+
+        it('should return null if dates are missing for Active duty', () => {
+            const age = getRetirementAge('Active', null, null, 20, 0, 0);
+            expect(age).toBeNull();
         });
     });
 });

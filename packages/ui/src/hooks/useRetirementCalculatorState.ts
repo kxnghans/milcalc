@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from './useDebounce';
-import { getDisabilityData, getMhaData, getPayGrades, getFederalTaxData, getStateTaxData, calculatePension, calculateDisabilityIncome, calculateTsp, calculateTaxes } from '@repo/utils';
+import { getDisabilityData, getMhaData, getPayGrades, getFederalTaxData, getStateTaxData, calculatePension, calculateDisabilityIncome, calculateTsp, calculateTaxes, getRetirementAge } from '@repo/utils';
 
 export const useRetirementCalculatorState = () => {
   const [component, setComponent] = useState('Active');
@@ -103,26 +103,15 @@ export const useRetirementCalculatorState = () => {
     const isLoading = isLoadingMha || isLoadingPayGrades || isLoadingFedTax || isLoadingStateTax || isLoadingDisability;
 
   useEffect(() => {
-    const calculateRetirementAge = () => {
-      if (!birthDate || !serviceEntryDate) return;
-  
-      if (component === 'Active') {
-        const retirementDate = new Date(serviceEntryDate);
-        const totalYears = (parseInt(yearsOfService, 10) || 0) + (parseInt(breakInService, 10) || 0);
-        retirementDate.setFullYear(retirementDate.getFullYear() + totalYears);
-        const ageAtRetirement = retirementDate.getFullYear() - birthDate.getFullYear();
-        const m = retirementDate.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && retirementDate.getDate() < birthDate.getDate())) {
-          setRetirementAge(ageAtRetirement - 1);
-        } else {
-          setRetirementAge(ageAtRetirement);
-        }
-      } else {
-        const retirementAgeYears = 60 - Math.floor(qualifyingDeploymentDays / 90) * 0.25;
-        setRetirementAge(retirementAgeYears);
-      }
-    };
-    calculateRetirementAge();
+    const age = getRetirementAge(
+      component as 'Active' | 'Reserve' | 'Guard',
+      birthDate,
+      serviceEntryDate,
+      parseInt(yearsOfService, 10),
+      parseInt(breakInService, 10),
+      parseInt(qualifyingDeploymentDays, 10)
+    );
+    setRetirementAge(age);
   }, [birthDate, serviceEntryDate, yearsOfService, qualifyingDeploymentDays, component, breakInService]);
 
   // This effect handles the TSP calculation logic separately to avoid infinite loops.

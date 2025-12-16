@@ -157,12 +157,14 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
         if (!text) return null;
         const paragraphs = text.split('\n\n');
         return paragraphs.map((paragraph, pIndex) => {
-            const parts = paragraph.match(/[^*]+|(\*\*.*?\*\*|\*.*?\*)/g) || [];
+            const parts = paragraph.match(/[^*_]+|(\*\*.*?\*\*|\*.*?\*|_.*?_)/g) || [];
             const styledText = parts.map((part, index) => {
                 if (part.startsWith('**') && part.endsWith('**')) {
                     return <Text key={index} style={{ fontWeight: 'bold' }}>{part.slice(2, -2)}</Text>;
                 } else if (part.startsWith('*') && part.endsWith('*')) {
                     return <Text key={index} style={{ fontStyle: 'italic' }}>{part.slice(1, -1)}</Text>;
+                } else if (part.startsWith('_') && part.endsWith('_')) {
+                    return <Text key={index} style={{ textDecorationLine: 'underline' }}>{part.slice(1, -1)}</Text>;
                 }
                 return <Text key={index}>{part}</Text>;
             });
