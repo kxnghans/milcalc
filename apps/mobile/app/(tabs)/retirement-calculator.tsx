@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Platform, ActivityIndicator, Pressable, ImageSourcePropType } from 'react-native';
+import { View, Text, StyleSheet, Platform, ActivityIndicator, Pressable, ImageSourcePropType, Keyboard } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useRetirementCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, StyledTextInput, PillButton, MASCOT_URLS } from '@repo/ui';
 import PickerInput from '../components/PickerInput';
@@ -116,6 +116,44 @@ export default function RetirementCalculatorScreen() {
   } = useRetirementCalculatorState();
 
   const navigation = useNavigation();
+
+  const wasExpandedBeforeKeyboard = React.useRef(false);
+  const isExpandedRef = React.useRef(isPayDisplayExpanded);
+
+  // Keep ref in sync with state to avoid stale closures in listeners
+  React.useEffect(() => {
+    isExpandedRef.current = isPayDisplayExpanded;
+  }, [isPayDisplayExpanded]);
+
+  React.useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const onShow = () => {
+      if (isExpandedRef.current) {
+        wasExpandedBeforeKeyboard.current = true;
+        setIsPayDisplayExpanded(false);
+      } else {
+        // If it was already collapsed, we don't want to expand it automatically later
+        wasExpandedBeforeKeyboard.current = false;
+      }
+    };
+
+    const onHide = () => {
+      if (wasExpandedBeforeKeyboard.current) {
+        setIsPayDisplayExpanded(true);
+        wasExpandedBeforeKeyboard.current = false;
+      }
+    };
+
+    const showListener = Keyboard.addListener(showEvent, onShow);
+    const hideListener = Keyboard.addListener(hideEvent, onHide);
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, [setIsPayDisplayExpanded]);
 
   const styles = StyleSheet.create({
     container: {
