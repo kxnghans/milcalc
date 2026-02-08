@@ -19,7 +19,7 @@ export const getHelpContentFromSource = async (source: 'pt' | 'pay' | 'retiremen
 
   const queryColumn = source === 'pay' ? 'title' : 'content_key';
   const { data, error } = await supabase
-    .from(tableName)
+    .from(tableName as any)
     .select('*')
     .eq(queryColumn, contentKey);
 

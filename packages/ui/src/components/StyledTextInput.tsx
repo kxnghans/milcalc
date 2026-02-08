@@ -28,10 +28,13 @@ export const StyledTextInput = React.forwardRef<TextInput, TextInputProps>(({ st
       backgroundColor: theme.colors.surface,
       color: theme.colors.text,
       textAlign: 'center',
+      textAlignVertical: 'center', // Added for Android cursor position fix
     },
   });
 
   // The component applies the default styles and merges any custom styles passed in the `style` prop.
   // It also sets the placeholder text color from the theme.
-  return <TextInput ref={ref} style={[styles.input, style]} placeholderTextColor={theme.colors.placeholder} {...props} />;
+  return <TextInput ref={ref} style={[styles.input, style]} placeholderTextColor={theme.colors.placeholder} selectionColor={theme.colors.primary} {...props} />;
 });
+
+StyledTextInput.displayName = 'StyledTextInput';

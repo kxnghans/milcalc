@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, sanitizeError } from './supabaseClient';
 
 /**
  * Fetches all PT standards for a given gender and age group from multiple tables.
@@ -16,7 +16,7 @@ export const getPtStandards = async (gender: string, age_group: string) => {
     .single();
 
   if (ageGroupError || !ageGroupData) {
-    console.error('Error fetching age group ID:', ageGroupError);
+    console.error('Error fetching age group ID:', sanitizeError(ageGroupError));
     return null;
   }
 
@@ -40,13 +40,13 @@ export const getPtStandards = async (gender: string, age_group: string) => {
   const { data: cardioData, error: cardioError } = cardioResult;
 
   if (muscularError) {
-    console.error('Error fetching muscular fitness standards:', muscularError);
+    console.error('Error fetching muscular fitness standards:', sanitizeError(muscularError));
     return null;
   }
 
 
   if (cardioError) {
-    console.error('Error fetching cardio standards:', cardioError);
+    console.error('Error fetching cardio standards:', sanitizeError(cardioError));
     return null;
   }
 
@@ -97,7 +97,7 @@ export const getWalkStandards = async (gender: string) => {
     .eq('gender', gender);
 
   if (error) {
-    console.error('Error fetching walk standards:', error);
+    console.error('Error fetching walk standards:', sanitizeError(error));
     return null;
   }
 
@@ -124,7 +124,7 @@ export const getAltitudeAdjustments = async (exercise: string) => {
   const { data, error } = await query;
 
   if (error) {
-    console.error(`Error fetching altitude adjustments for ${exercise}:`, error);
+    console.error(`Error fetching altitude adjustments for ${exercise}:`, sanitizeError(error));
     return null;
   }
 
@@ -144,7 +144,7 @@ export const getHelpContent = async (contentKey: string) => {
     .eq('content_key', contentKey);
 
   if (error) {
-    console.error('Error fetching help content:', error);
+    console.error('Error fetching help content:', sanitizeError(error));
     return null;
   }
 

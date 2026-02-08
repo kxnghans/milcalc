@@ -7,19 +7,30 @@
 
 import React from 'react';
 import * as Icons from '@expo/vector-icons';
+import { TextStyle, StyleProp } from 'react-native';
+
+interface IconProps {
+  name: any;
+  size: number;
+  color: string;
+  iconSet?: keyof typeof Icons;
+  style?: StyleProp<TextStyle>;
+}
 
 /**
  * A wrapper component for displaying icons from the `@expo/vector-icons` library.
- * @param {object} props - The component props.
- * @param {string} props.name - The name of the icon to display.
- * @param {number} props.size - The size of the icon.
- * @param {string} props.color - The color of the icon.
- * @param {keyof typeof Icons} [props.iconSet='MaterialCommunityIcons'] - The name of the icon set to use.
+ * @param {IconProps} props - The component props.
  * @returns {JSX.Element | null} The rendered icon component, or null if the icon set is invalid.
  */
-export const Icon = ({ name, size, color, iconSet = 'MaterialCommunityIcons' }) => {
+export const Icon = ({ 
+  name, 
+  size, 
+  color, 
+  iconSet = 'MaterialCommunityIcons',
+  style 
+}: IconProps) => {
   // Dynamically select the icon component from the Icons library based on the iconSet prop.
-  const IconComponent = Icons[iconSet];
+  const IconComponent = (Icons as any)[iconSet];
 
   // If the specified icon set doesn't exist, return null to prevent a crash.
   if (!IconComponent) {
@@ -27,5 +38,5 @@ export const Icon = ({ name, size, color, iconSet = 'MaterialCommunityIcons' }) 
   }
 
   // Render the selected icon component with the provided props.
-  return <IconComponent name={name} size={size} color={color} />;
+  return <IconComponent name={name} size={size} color={color} style={style} />;
 };

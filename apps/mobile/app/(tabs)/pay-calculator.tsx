@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, LayoutAnimation, UIManager, Platform, TouchableOpacity, ActivityIndicator, ImageSourcePropType } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Pressable, LayoutAnimation, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import DocumentModal from '../components/DocumentModal';
 import Divider from '../components/Divider';
 import InsetTextInput from '../components/InsetTextInput';
@@ -25,12 +24,9 @@ const payMascots = [
 ];
 
 // Enable LayoutAnimation for Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 export default function PayCalculatorScreen() {
-  const { theme, themeMode, toggleTheme, isDarkMode } = useTheme();
+  const { theme, themeMode, toggleTheme } = useTheme();
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
   const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
   const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
@@ -56,7 +52,7 @@ export default function PayCalculatorScreen() {
     status, setStatus,
     rank, setRank,
     yearsOfService, setYearsOfService,
-    mha, setMha,
+    mha,
     handleMhaChange,
     mhaDisplayName,
     filingStatus, setFilingStatus,
@@ -64,8 +60,8 @@ export default function PayCalculatorScreen() {
     bahDependencyStatus, setBahDependencyStatus,
     vaDependencyStatus,
     component, setComponent,
-    disabilityPercentage, setDisabilityPercentage,
-    disabilityData, disabilityError,
+    disabilityPercentage,
+    disabilityError,
     handleDisabilityChange, disabilityDisplayName,
     isIncomeExpanded, setIncomeExpanded,
     isDeductionsExpanded, setDeductionsExpanded,
@@ -85,8 +81,6 @@ export default function PayCalculatorScreen() {
     disabilityPickerData,
     disabilityPercentageItems,
   } = usePayCalculatorState();
-
-  const navigation = useNavigation();
 
   const toggleIncome = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -149,7 +143,7 @@ export default function PayCalculatorScreen() {
     return ICONS.THEME_AUTO;
   };
 
-  const LabelWithHelp = ({ label, contentKey }) => (
+  const LabelWithHelp = ({ label, contentKey }: { label: string; contentKey: string }) => (
     <View style={styles.labelRow}>
         <Text style={styles.label}>{label}</Text>
         <Pressable onPress={() => openDetailModal(contentKey)}>
@@ -158,7 +152,7 @@ export default function PayCalculatorScreen() {
     </View>
   );
 
-  const RoundIconButton = ({ onPress, iconName, backgroundColor, size = 24, iconSize = 16, iconColor = '#FFFFFF' }) => (
+  const RoundIconButton = ({ onPress, iconName, backgroundColor, size = 24, iconSize = 16, iconColor = '#FFFFFF' }: { onPress: () => void; iconName: any; backgroundColor: string; size?: number; iconSize?: number; iconColor?: string }) => (
     <TouchableOpacity
         onPress={onPress}
         style={{
@@ -179,7 +173,7 @@ export default function PayCalculatorScreen() {
     </TouchableOpacity>
 );
 
-  const AddButton = ({ onPress }) => (
+  const AddButton = ({ onPress }: { onPress: () => void }) => (
     <View style={styles.addIconContainer}>
         <RoundIconButton
             onPress={onPress}
@@ -191,7 +185,7 @@ export default function PayCalculatorScreen() {
     </View>
   );
 
-  const CancelButton = ({ onPress }) => (
+  const CancelButton = ({ onPress }: { onPress: () => void }) => (
     <RoundIconButton
         onPress={onPress}
         iconName="close"

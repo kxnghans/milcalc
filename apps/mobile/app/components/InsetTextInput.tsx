@@ -1,10 +1,10 @@
 import React from 'react';
-import { TextInput, TextInputProps, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { TextInput, TextInputProps, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { NeumorphicInset, StyledTextInput, useTheme } from '@repo/ui';
 
-interface InsetTextInputProps extends TextInputProps {
+interface InsetTextInputProps extends Omit<TextInputProps, 'style'> {
   style?: StyleProp<ViewStyle>;
-  inputStyle?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<TextStyle>;
 }
 
 const InsetTextInput = React.forwardRef<TextInput, InsetTextInputProps>(({ style, inputStyle, ...props }, ref) => {
@@ -42,5 +42,7 @@ const InsetTextInput = React.forwardRef<TextInput, InsetTextInputProps>(({ style
     </NeumorphicInset>
   );
 });
+
+InsetTextInput.displayName = 'InsetTextInput';
 
 export default InsetTextInput;

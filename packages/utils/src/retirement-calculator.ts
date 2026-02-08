@@ -3,7 +3,7 @@
 
 import { getBasePay } from './pay-supabase-api';
 
-import { Tables, Json } from './types';
+import { Tables } from './types';
 
 type Component = 'Active' | 'Reserve' | 'Guard';
 type RetirementSystem = 'High 3' | 'BRS';

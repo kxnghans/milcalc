@@ -5,7 +5,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { View, StyleSheet, Platform, ViewStyle } from 'react-native';
+import { View, StyleSheet, Platform, ViewStyle, StyleProp } from 'react-native';
 import { useTheme } from "../contexts/ThemeContext";
 
 /**
@@ -15,13 +15,13 @@ interface NeumorphicOutsetProps {
   /** The content to be rendered inside the neumorphic container. */
   children: ReactNode;
   /** @deprecated Use containerStyle or contentStyle instead for better clarity. */
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   /** Style for the outer container that holds both shadows. Use for layout (margins, etc.). */
-  containerStyle?: ViewStyle;
+  containerStyle?: StyleProp<ViewStyle>;
   /** Style for the inner content view. Use for padding, background color, etc. */
-  contentStyle?: ViewStyle;
+  contentStyle?: StyleProp<ViewStyle>;
   /** Style for the highlight shadow view. */
-  highlightStyle?: ViewStyle;
+  highlightStyle?: StyleProp<ViewStyle>;
   /** Color of the main (dark) shadow. */
   shadowColor?: string;
   /** Offset of the main (dark) shadow. */
@@ -64,6 +64,65 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
 }) => {
   const { theme } = useTheme();
 
+  // Safely extract all border radius properties
+  const getBorderRadii = () => {
+    // Flatten styles to reliably get the values
+    const flattenedContainerStyle = StyleSheet.flatten(containerStyle || {}) as ViewStyle;
+    const flattenedContentStyle = StyleSheet.flatten(contentStyle || {}) as ViewStyle;
+    const flattenedStyle = StyleSheet.flatten(style || {}) as ViewStyle;
+
+    // If a general borderRadius is defined, use it as the base, but allow specific corners to override it
+    // if they are explicitly defined in a higher-priority style.
+    // However, if borderRadius is defined in Content, and TopLeft is in Container, Content's borderRadius should probably win for all corners?
+    // Let's stick to the cascade: explicit property wins.
+    
+    // Actually, simple fallback logic:
+    // 1. Start with theme default.
+    // 2. Override with 'style' prop values (borderRadius sets all, specific sets specific).
+    // 3. Override with 'containerStyle'.
+    // 4. Override with 'contentStyle'.
+    // This mimics how we want the outer shadow (Android container) to match the inner content.
+    
+    const baseRadii: {
+        borderRadius: number;
+        borderTopLeftRadius?: number;
+        borderTopRightRadius?: number;
+        borderBottomLeftRadius?: number;
+        borderBottomRightRadius?: number;
+    } = {
+        borderRadius: theme.borderRadius.m,
+        borderTopLeftRadius: undefined,
+        borderTopRightRadius: undefined,
+        borderBottomLeftRadius: undefined,
+        borderBottomRightRadius: undefined,
+    };
+
+    // Merge in order of precedence (lowest to highest) to build the final shape
+    const mergeStyle = (source: ViewStyle) => {
+        if (source.borderRadius !== undefined) {
+            baseRadii.borderRadius = source.borderRadius as number;
+            // When borderRadius is set, it resets specific corners in standard CSS/RN behavior IF they aren't explicitly re-declared.
+            // But here we just update the base.
+            baseRadii.borderTopLeftRadius = undefined;
+            baseRadii.borderTopRightRadius = undefined;
+            baseRadii.borderBottomLeftRadius = undefined;
+            baseRadii.borderBottomRightRadius = undefined;
+        }
+        if (source.borderTopLeftRadius !== undefined) baseRadii.borderTopLeftRadius = source.borderTopLeftRadius as number;
+        if (source.borderTopRightRadius !== undefined) baseRadii.borderTopRightRadius = source.borderTopRightRadius as number;
+        if (source.borderBottomLeftRadius !== undefined) baseRadii.borderBottomLeftRadius = source.borderBottomLeftRadius as number;
+        if (source.borderBottomRightRadius !== undefined) baseRadii.borderBottomRightRadius = source.borderBottomRightRadius as number;
+    };
+
+    mergeStyle(flattenedStyle);
+    mergeStyle(flattenedContainerStyle);
+    mergeStyle(flattenedContentStyle);
+
+    return baseRadii;
+  };
+
+  const { borderRadius, borderTopLeftRadius, borderTopRightRadius, borderBottomLeftRadius, borderBottomRightRadius } = getBorderRadii();
+
   const styles = StyleSheet.create({
     // The outer container applies the main (dark) shadow and handles Android elevation.
     container: {
@@ -80,7 +139,14 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
         },
         android: {
           // On Android, a single elevation value is used to create the shadow.
+          // Elevation REQUIRES a background color to work.
           elevation: elevation || theme.colors.neumorphic.outset.elevation,
+          backgroundColor: theme.colors.background, 
+          borderRadius,
+          borderTopLeftRadius,
+          borderTopRightRadius,
+          borderBottomLeftRadius,
+          borderBottomRightRadius,
         },
       }),
     },

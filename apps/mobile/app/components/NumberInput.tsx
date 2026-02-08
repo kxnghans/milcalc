@@ -5,17 +5,17 @@
  */
 
 import React from 'react';
-import { TextInput, TextInputProps, Text, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { TextInput, TextInputProps, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { NeumorphicInset, StyledTextInput, useTheme, ExemptButton } from '@repo/ui';
 
 /**
  * Props for the NumberInput component.
  */
-interface NumberInputProps extends TextInputProps {
+interface NumberInputProps extends Omit<TextInputProps, 'style'> {
   /** Optional custom styles for the outer container. */
   style?: StyleProp<ViewStyle>;
   /** Optional custom styles for the input field itself. */
-  inputStyle?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<TextStyle>;
   /** An optional string to display an adjustment (e.g., for altitude), shown next to the input. */
   adjustment?: string;
   /** An optional function to call when the exempt button is toggled. If provided, the button will be rendered. */
@@ -65,7 +65,7 @@ const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inpu
       {onToggleExempt && (
         <ExemptButton
           onPress={onToggleExempt}
-          isActive={isExempt}
+          isActive={!!isExempt}
           style={{ marginHorizontal: theme.spacing.s }}
         />
       )}
@@ -82,5 +82,7 @@ const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inpu
     </NeumorphicInset>
   );
 });
+
+NumberInput.displayName = 'NumberInput';
 
 export default NumberInput;

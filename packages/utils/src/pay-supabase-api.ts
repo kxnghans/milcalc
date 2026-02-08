@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, sanitizeError } from './supabaseClient';
 import { Tables } from './types';
 
 /**
@@ -42,7 +42,7 @@ export const getBasePay = async (pay_grade: string, years_of_service: number): P
     .single();
 
   if (error) {
-    console.error('Error fetching base pay:', error);
+    console.error('Error fetching base pay:', sanitizeError(error));
     return null;
   }
 
@@ -65,7 +65,7 @@ export const getBasRate = async (rank: string) => {
         .single();
 
     if (error) {
-        console.error('Error fetching BAS rate:', error);
+        console.error('Error fetching BAS rate:', sanitizeError(error));
         return 0;
     }
 
@@ -82,7 +82,7 @@ export const getMhaData = async () => {
         .select('state, mha_name, mha');
 
     if (error) {
-        console.error('Error fetching MHA data:', error);
+        console.error('Error fetching MHA data:', sanitizeError(error));
         return {};
     }
 
@@ -151,7 +151,7 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
         .single();
 
     if (error) {
-        console.error(`Error fetching BAH rate from ${tableName}:`, error);
+        console.error(`Error fetching BAH rate from ${tableName}:`, sanitizeError(error));
         return null;
     }
 
@@ -167,7 +167,7 @@ export const getPayHelpContent = async (contentKey: string) => {
     .eq('title', contentKey);
 
   if (error) {
-    console.error('Error fetching pay help content:', error);
+    console.error('Error fetching pay help content:', sanitizeError(error));
     return null;
   }
 
@@ -181,7 +181,7 @@ export const getFederalTaxData = async (year: number) => {
     .eq('year', year);
 
   if (error) {
-    console.error('Error fetching federal tax data:', error);
+    console.error('Error fetching federal tax data:', sanitizeError(error));
     return [];
   }
 
@@ -195,7 +195,7 @@ export const getStateTaxData = async (year: number) => {
     .eq('year', year);
 
   if (error) {
-    console.error('Error fetching state tax data:', error);
+    console.error('Error fetching state tax data:', sanitizeError(error));
     return [];
   }
 
@@ -211,7 +211,7 @@ export const getMaxFederalTaxYear = async () => {
     .single();
 
   if (error) {
-    console.error('Error fetching max federal tax year:', error);
+    console.error('Error fetching max federal tax year:', sanitizeError(error));
     return null;
   }
   return data ? data.year : null;
@@ -226,7 +226,7 @@ export const getMaxStateTaxYear = async () => {
     .single();
 
   if (error) {
-    console.error('Error fetching max state tax year:', error);
+    console.error('Error fetching max state tax year:', sanitizeError(error));
     return null;
   }
   return data ? data.year : null;
@@ -238,7 +238,7 @@ export const getPayGrades = async () => {
     .select('pay_grade');
 
   if (error) {
-    console.error('Error fetching pay grades:', error);
+    console.error('Error fetching pay grades:', sanitizeError(error));
     return [];
   }
 
@@ -280,7 +280,7 @@ export const getReserveDrillPay = async (pay_grade: string, years_of_service: nu
     .single();
 
   if (error) {
-    console.error('Error fetching reserve drill pay:', error);
+    console.error('Error fetching reserve drill pay:', sanitizeError(error));
     return 0;
   }
 

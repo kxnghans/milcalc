@@ -81,7 +81,7 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
 
   return (
     <NeumorphicOutset
-      containerStyle={style}
+      containerStyle={[style, { borderRadius: theme.borderRadius.m, backgroundColor: theme.colors.secondary }]}
       contentStyle={{ backgroundColor: theme.colors.secondary, borderRadius: theme.borderRadius.m, overflow: 'hidden' }}
       highlightColor={isDarkMode ? 'rgba(0,0,0,1)' : undefined}
       highlightOpacity={isDarkMode ? 0.05 : theme.colors.neumorphic.outset.highlightOpacity}

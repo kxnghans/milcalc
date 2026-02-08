@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, LayoutAnimation } from 'react-native';
-import { useTheme, PillButton } from '@repo/ui';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useTheme } from '@repo/ui';
 import CurrencyInput from '../CurrencyInput';
 import InsetTextInput from '../InsetTextInput';
 import Divider from '../Divider';

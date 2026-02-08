@@ -1,14 +1,42 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, Modal, Button, Text, Pressable, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Modal, Text, Pressable, ActivityIndicator, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import { useTheme, NeumorphicInset, PillButton } from '@repo/ui';
 
-const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading, error, primaryColumnValue: propPrimaryColumnValue, primaryPlaceholder = '...', secondaryPlaceholder = 'Select an option', primarySort, style }) => {
+interface TwoColumnPickerProps {
+  data: any;
+  onChange: (value: any, primary: string) => void;
+  selectedValue: any;
+  displayName: string;
+  isLoading: boolean;
+  error: any;
+  primaryColumnValue?: string | null;
+  primaryItems?: string[];
+  primaryPlaceholder?: string;
+  secondaryPlaceholder?: string;
+  primarySort?: (a: string, b: string) => number;
+  style?: ViewStyle | ViewStyle[];
+}
+
+const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({ 
+  data, 
+  onChange, 
+  selectedValue, 
+  displayName, 
+  isLoading, 
+  error, 
+  primaryColumnValue: propPrimaryColumnValue, 
+  primaryItems: propPrimaryItems,
+  primaryPlaceholder = '...', 
+  secondaryPlaceholder = 'Select an option', 
+  primarySort, 
+  style 
+}) => {
   const { theme } = useTheme();
   const { bottom } = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
-  const [primaryColumnItems, setPrimaryColumnItems] = useState([]);
+  const [primaryColumnItems, setPrimaryColumnItems] = useState<string[]>([]);
   const [selectedPrimary, setSelectedPrimary] = useState(propPrimaryColumnValue || '');
   const [tempSelectedValue, setTempSelectedValue] = useState(selectedValue);
 
@@ -21,27 +49,29 @@ const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading
 
   useEffect(() => {
     if (modalVisible) {
-        if (data && Object.keys(data).length > 0) {
+        if (propPrimaryItems) {
+            setPrimaryColumnItems([primaryPlaceholder, ...propPrimaryItems]);
+        } else if (data && Object.keys(data).length > 0) {
             const primaryKeys = Object.keys(data).sort(primarySort);
             const primaryList = [primaryPlaceholder, ...primaryKeys];
             setPrimaryColumnItems(primaryList);
-            
-            if (selectedValue === 'initial') {
-                setSelectedPrimary(primaryPlaceholder);
-                setTempSelectedValue('');
-            } else if (selectedValue) {
-                const primary = propPrimaryColumnValue || primaryPlaceholder;
-                setSelectedPrimary(primary);
-                setTempSelectedValue(selectedValue);
-            } else {
-                setSelectedPrimary(primaryPlaceholder);
-                setTempSelectedValue('');
-            }
+        }
+
+        if (selectedValue === 'initial') {
+            setSelectedPrimary(primaryPlaceholder);
+            setTempSelectedValue('');
+        } else if (selectedValue) {
+            const primary = propPrimaryColumnValue || primaryPlaceholder;
+            setSelectedPrimary(primary);
+            setTempSelectedValue(selectedValue);
+        } else {
+            setSelectedPrimary(primaryPlaceholder);
+            setTempSelectedValue('');
         }
     }
-}, [data, modalVisible, selectedValue, propPrimaryColumnValue, primaryPlaceholder]);
+}, [data, modalVisible, selectedValue, propPrimaryColumnValue, primaryPlaceholder, propPrimaryItems, primarySort]);
 
-  const handlePrimaryChange = (primary) => {
+  const handlePrimaryChange = (primary: string) => {
     setSelectedPrimary(primary);
     if (primary === primaryPlaceholder) {
         setTempSelectedValue('');
@@ -177,7 +207,7 @@ const TwoColumnPicker = ({ data, onChange, selectedValue, displayName, isLoading
                                         itemStyle={styles.pickerItem}
                                     >
                                         {secondaryColumnItems.length > 0 ? (
-                                        secondaryColumnItems.map(item => (
+                                        secondaryColumnItems.map((item: any) => (
                                             <Picker.Item key={item.value} label={item.label} value={item.value} />
                                         ))
                                         ) : (

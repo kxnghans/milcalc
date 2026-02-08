@@ -70,32 +70,42 @@ export function usePtCalculatorState() {
 
   const { data: standards, isLoading: isLoadingStandards } = useQuery({
     queryKey: ['ptStandards', capitalizedGender, ageGroup],
-    queryFn: () => getPtStandards(capitalizedGender, ageGroup),
+    queryFn: () => getPtStandards(capitalizedGender, ageGroup as any),
     enabled: !!capitalizedGender && !!ageGroup,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
   });
 
   const { data: walkStandards, isLoading: isLoadingWalkStandards } = useQuery({
     queryKey: ['walkStandards', debouncedGender],
     queryFn: () => getWalkStandards(debouncedGender),
     enabled: !!debouncedGender,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
   });
 
   const { data: walkAltitudeAdjustments, isLoading: isLoadingWalkAltitude } = useQuery({
     queryKey: ['altitudeAdjustments', 'walk'],
     queryFn: () => getAltitudeAdjustments('walk'),
     staleTime: Infinity,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
   });
 
   const { data: runAltitudeAdjustments, isLoading: isLoadingRunAltitude } = useQuery({
     queryKey: ['altitudeAdjustments', 'run'],
     queryFn: () => getAltitudeAdjustments('run'),
     staleTime: Infinity,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
   });
 
   const { data: hamrAltitudeAdjustments, isLoading: isLoadingHamrAltitude } = useQuery({
     queryKey: ['altitudeAdjustments', 'hamr'],
     queryFn: () => getAltitudeAdjustments('hamr'),
     staleTime: Infinity,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
   });
 
   const isLoading = isLoadingStandards || isLoadingWalkStandards || isLoadingWalkAltitude || isLoadingRunAltitude || isLoadingHamrAltitude;
@@ -169,7 +179,7 @@ export function usePtCalculatorState() {
                         walkSeconds: parseInt(debouncedWalkSeconds) || 0,
                         isCardioExempt: debouncedCardioExempt,
                     }, standards, walkStandards, altitudeData);
-                    setScore(result);
+                    setScore(result as any);
                 } catch (e) {
                     // console.error("Error during calculation: ", e);
                 }

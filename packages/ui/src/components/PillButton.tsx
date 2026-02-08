@@ -37,7 +37,10 @@ export const PillButton = ({ title, onPress, backgroundColor, textColor, style, 
   });
 
   return (
-    <NeumorphicOutset containerStyle={[styles.buttonContainer, style]}>
+    <NeumorphicOutset 
+      containerStyle={[styles.buttonContainer, style]}
+      contentStyle={{ borderRadius: 20 }} // Explicitly pass the pill radius
+    >
       <TouchableOpacity
         style={[styles.button, { backgroundColor: buttonColor }]}
         onPress={onPress}

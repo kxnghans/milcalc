@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 
 /**
@@ -16,7 +16,7 @@ interface NeumorphicInsetProps {
   /** The content to be rendered inside the inset container. */
   children: ReactNode;
   /** Optional custom styles to be applied to the container. */
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 /**

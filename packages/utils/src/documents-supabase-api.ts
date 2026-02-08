@@ -7,7 +7,7 @@ import * as Haptics from 'expo-haptics';
  * @param category - The category of documents to fetch (e.g., 'PT', 'PAY').
  * @returns An array of document objects.
  */
-let documentsCache = {}; // Simple in-memory cache
+const documentsCache: Record<string, any> = {}; // Simple in-memory cache
 
 export const getDocumentsByCategory = async (category: string) => {
   if (!category) return [];
@@ -40,7 +40,7 @@ export const getHelpDetailsByExercise = async (exercise: string) => {
   if (!exercise) return [];
 
   const { data, error } = await supabase
-    .from('help_details')
+    .from('help_details' as any)
     .select('*')
     .eq('exercise', exercise)
     .order('id');
@@ -90,7 +90,7 @@ export const openDocument = async (doc: any) => {
                 console.error('No signed URL returned from edge function');
             }
         } catch (error) {
-            console.error('Error getting signed URL:', error.message);
+            console.error('Error getting signed URL:', (error as any).message);
         }
         return;
     }

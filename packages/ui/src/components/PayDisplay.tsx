@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, StyleProp, ViewStyle, Pressable, Modal, Button, Platform } from 'react-native';
+import { View, Text, StyleSheet, StyleProp, ViewStyle, Pressable } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface PayDetail {
@@ -11,7 +10,6 @@ interface PayDetail {
 
 import { DatePickerModal } from './DatePickerModal';
 import { PillButton } from './PillButton';
-import Divider from './Divider';
 import { StyledTextInput } from './StyledTextInput';
 
 import NeumorphicInset from './NeumorphicInset';
@@ -219,7 +217,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                   visible={showBirthDatePicker}
                   onClose={() => setShowBirthDatePicker(false)}
                   onDone={(date) => {
-                    setBirthDate(date);
+                    if (setBirthDate && date) setBirthDate(date);
                     setShowBirthDatePicker(false);
                   }}
                   value={birthDate}
@@ -240,7 +238,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                   visible={showServiceEntryDatePicker}
                   onClose={() => setShowServiceEntryDatePicker(false)}
                   onDone={(date) => {
-                    setServiceEntryDate(date);
+                    if (setServiceEntryDate && date) setServiceEntryDate(date);
                     setShowServiceEntryDatePicker(false);
                   }}
                   value={serviceEntryDate}
@@ -252,7 +250,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                   <View style={styles.pressableInput}>
                     <StyledTextInput
                       keyboardType="number-pad"
-                      value={breakInService}
+                      value={breakInService || ''}
                       onChangeText={setBreakInService}
                       placeholder="Years"
                       style={[

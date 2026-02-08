@@ -14,6 +14,7 @@ module.exports = {
     "react-native/react-native": true,
   },
   rules: {
+    "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
     "react-native/no-unused-styles": "warn",
     "react-native/split-platform-components": "off",

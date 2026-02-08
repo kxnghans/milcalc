@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, sanitizeError } from './supabaseClient';
 
 export const getRetirementHelpContent = async (contentKey: string) => {
   if (!contentKey) return null;
@@ -9,7 +9,7 @@ export const getRetirementHelpContent = async (contentKey: string) => {
     .eq('title', contentKey);
 
   if (error) {
-    console.error('Error fetching retirement help content:', error);
+    console.error('Error fetching retirement help content:', sanitizeError(error));
     return null;
   }
 

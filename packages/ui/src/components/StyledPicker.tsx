@@ -12,11 +12,13 @@ import { Picker, PickerProps } from '@react-native-picker/picker';
 /**
  * Props for the StyledPicker component.
  */
-interface StyledPickerProps extends PickerProps {
+interface StyledPickerProps<T = any> extends PickerProps<T> {
   /** An array of items to be displayed in the picker. Each item must have a label and a value. */
-  items: { label: string; value: string }[];
+  items: { label: string; value: T }[];
   /** An optional placeholder label to show when no value is selected. */
   placeholder?: string;
+  selectedValue?: T;
+  onValueChange?: (itemValue: T, itemIndex: number) => void;
 }
 
 /**
@@ -25,7 +27,7 @@ interface StyledPickerProps extends PickerProps {
  * @param {StyledPickerProps} props - The props for the component.
  * @returns {JSX.Element} The rendered Picker component.
  */
-export const StyledPicker = ({ selectedValue, onValueChange, items, placeholder, style, ...props }: StyledPickerProps) => {
+export const StyledPicker = <T,>({ selectedValue, onValueChange, items, placeholder, style, ...props }: StyledPickerProps<T>) => {
   // Use the useTheme hook to get the current theme, ensuring the component is dynamic.
   const { theme } = useTheme();
 
@@ -51,7 +53,7 @@ export const StyledPicker = ({ selectedValue, onValueChange, items, placeholder,
         {/* Render a disabled placeholder item if one is provided. */}
         {placeholder && <Picker.Item label={placeholder} value={null} enabled={false} />}
         {items.map((item) => (
-            <Picker.Item key={item.value} label={item.label} value={item.value} />
+            <Picker.Item key={item.value as any} label={item.label} value={item.value} />
         ))}
     </Picker>
   );

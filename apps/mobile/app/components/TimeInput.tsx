@@ -5,7 +5,7 @@
  */
 
 import React, { useRef } from 'react';
-import { View, StyleSheet, TextInput, Text } from 'react-native';
+import { StyleSheet, TextInput, Text } from 'react-native';
 import { NeumorphicInset, StyledTextInput, useTheme, ExemptButton } from '@repo/ui';
 
 /**
@@ -116,7 +116,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
         {onToggleExempt && (
             <ExemptButton
                 onPress={onToggleExempt}
-                isActive={isExempt}
+                isActive={!!isExempt}
                 style={{ marginHorizontal: theme.spacing.s }}
             />
         )}
