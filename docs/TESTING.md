@@ -48,8 +48,8 @@ A critical lesson learned during development is that **the structure of the mock
 ### 2.1. PT Calculator (`pt-calculator.ts`)
 
 -   **Status:** Implemented
--   **Test File:** `packages/utils/src/pt-calculator.test.ts`
--   **Mocks:** `packages/utils/src/test-mocks/pt-data-mocks.ts`
+-   **Test File:** `packages/utils/__tests__/pt-calculator.test.ts`
+-   **Mocks:** `packages/utils/__tests__/test-mocks/pt-data-mocks.ts`
 
 Tests cover the `calculatePtScore` function with a variety of scenarios, including:
 -   Standard passing and failing scores.
@@ -60,9 +60,11 @@ Tests cover the `calculatePtScore` function with a variety of scenarios, includi
 ### 2.2. Pay Calculator (`pay-calculator.ts`)
 
 -   **Status:** Implemented
--   **Test File:** `packages/utils/src/pay-calculator.test.ts`
+-   **Test Files:** 
+    -   `packages/utils/__tests__/pay-calculator.test.ts`
+    -   `packages/utils/__tests__/pay-calculator-disability.test.ts`
 
-Unit tests will be developed to verify:
+Tests verify:
 -   Correct calculation of military pay vs. VA disability pay.
 -   Accurate calculations for different pay grades, years of service, and disability ratings.
 -   Proper handling of edge cases and invalid inputs.
@@ -70,9 +72,9 @@ Unit tests will be developed to verify:
 ### 2.3. Retirement Calculator (`retirement-calculator.ts`)
 
 -   **Status:** Implemented
--   **Test File:** `packages/utils/src/retirement-calculator.test.ts`
+-   **Test File:** `packages/utils/__tests__/retirement-calculator.test.ts`
 
-Unit tests will be developed to verify:
+Tests verify:
 -   Correct calculations for both High-3 and BRS retirement systems.
 -   Accurate disability offsets for the BRS plan.
 -   Proper handling of different years of service and pay grades.

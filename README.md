@@ -61,38 +61,32 @@ Here is a brief overview of the project's file structure:
 ├── apps
 │   └── mobile
 │       ├── app
+│       │   ├── _layout.tsx
 │       │   ├── index.tsx
-│       │   ├── itinerary.tsx
-│       │   ├── onboarding.tsx
-│       │   └── packing.tsx
+│       │   └── (tabs)           # Main application screens (PT, Pay, Retirement)
 │       ├── assets
-│       ├── App.tsx
 │       ├── package.json
 │       └── tsconfig.json
+├── docs                      # Project documentation
+│   ├── milcalc.md           # Consolidated implementation details
+│   ├── SUPABASE.md          # Supabase integration and tools
+│   └── TESTING.md           # Testing procedures
 ├── packages
-│   ├── config
+│   ├── ui                    # Shared UI component library
 │   │   ├── src
-│   │   │   └── index.ts
+│   │   │   ├── components
+│   │   │   └── hooks        # Feature-specific state hooks
 │   │   ├── package.json
 │   │   └── tsconfig.json
-│   ├── ui
-│   │   ├── src
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   └── index.ts
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   └── utils
+│   └── utils                 # Shared utility functions and core logic
 │       ├── src
-│       │   ├── api.ts
-│       │   ├── date.ts
-│       │   ├── index.ts
-│       │   └── packing.ts
+│       │   ├── pt-calculator.ts
+│       │   ├── pay-calculator.ts
+│       │   └── retirement-calculator.ts
 │       ├── package.json
 │       └── tsconfig.json
 ├── .gitignore
 ├── package.json
-├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
 ├── README.md
 └── tsconfig.json

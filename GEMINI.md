@@ -45,9 +45,9 @@ pnpm install
 
 ## 3. Documentation
 
-- [PT Calculator and Best Score](./PT_CALCULATOR.md)
-- [Pay Calculator](./PAY_CALCULATOR.md)
-- [Retirement Calculator](./RETIREMENT_CALCULATOR.md)
+- [Feature Implementation (PT, Pay, Retirement)](./docs/milcalc.md)
+- [Supabase Integration](./docs/SUPABASE.md)
+- [Testing](./docs/TESTING.md)
 
 ## 4. Core Logic
 
@@ -82,7 +82,7 @@ This pattern is consistent across the application, promoting code reuse and main
 
 To provide detailed, maintainable help content, a centralized system has been implemented.
 
--   **`getHelpContentFromSource` (`packages/utils/src/help-utils.ts`)**: This function acts as a single entry point for fetching all help-related content. It takes a `source` (`pt`, `pay`, or `retirement`) and a `contentKey` and queries the appropriate Supabase table (`help_details`, `pay_help_details`, or `retirement_help_details`).
+-   **`getHelpContentFromSource` (`packages/utils/src/help-utils.ts`)**: This function acts as a single entry point for fetching all help-related content. It takes a `source` (`pt`, `pay`, `retirement`, or `best_score`) and a `contentKey` and queries the appropriate Supabase table (`pt_help_details`, `pay_help_details`, `retirement_help_details`, or `best_score_help_details`).
 
 -   **`DetailModal.tsx` (`apps/mobile/app/components`)**: This is the sole component responsible for displaying help content. It is a fully self-contained modal that:
     -   Calls `getHelpContentFromSource` to fetch its content based on the `source` and `contentKey` props.
@@ -128,7 +128,7 @@ To provide a scalable and maintainable backend, MilCalc is integrated with Supab
 
 This project has access to a special `supabase` MCP tool suite, which allows for direct, programmatic interaction with the Supabase backend. This is the preferred method for all database schema and data migrations.
 
-For a complete list and description of all available Supabase tools, please refer to the `SUPABASE.md` file in the project root.
+For a complete list and description of all available Supabase tools, please refer to the `docs/SUPABASE.md` file in the project root.
 
 ### 7.2. Database Migration Workflow
 
