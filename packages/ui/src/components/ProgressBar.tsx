@@ -66,7 +66,7 @@ const ProgressBarComponent = ({
    * @param category The performance category ('excellent', 'pass', 'fail').
    * @returns The color set for that category.
    */
-  const getColorForCategory = (category) => {
+  const getColorForCategory = (category: any) => {
       switch(category) {
           case 'excellent': return excellentColors;
           case 'pass': return passColors;
@@ -127,7 +127,7 @@ const ProgressBarComponent = ({
     return { progress: Math.max(0, progress), ...colors };
   };
 
-  const { progress, progressColor, backgroundColor } = calculateProgressAndColor();
+  const { progress, progressColor } = calculateProgressAndColor();
 
   const styles = StyleSheet.create({
     bar: {
@@ -187,38 +187,6 @@ const ProgressBarComponent = ({
   // For this iteration, we will keep the marker logic based on the *target* progress (immediate feedback on text color),
   // while the bar animates to that position. This is often better UX anyway.
   const visualProgress = Math.min(progress, 1);
-
-  /**
-   * Renders the filled portion of the progress bar with a neumorphic effect.
-   */
-  const renderProgressBar = () => (
-    <NeumorphicOutset
-      containerStyle={{
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        height: '100%',
-        width: '100%', // Container is full width, inner view is animated
-        marginTop: 0,
-        marginBottom: 0,
-        marginLeft: 0,
-        marginRight: 0,
-      }}
-      contentStyle={{
-        borderRadius: theme.borderRadius.m,
-        overflow: 'hidden',
-        width: '100%', // Ensure content area is full width
-      }}
-    >
-      {/* We animate the width of the inner view directly, but NeumorphicOutset is complex. 
-          NeumorphicOutset wraps children. If we set width on NeumorphicOutset containerStyle, it clips.
-          
-          Actually, the original code set `width` on the NeumorphicOutset `containerStyle`.
-          Let's wrap NeumorphicOutset in an Animated.View to animate its width.
-      */}
-      <View style={[styles.progress, { backgroundColor: progressColor, width: '100%' }]} />
-    </NeumorphicOutset>
-  );
 
   // Correct approach for NeumorphicOutset animation:
   // The original code was: width: `${visualProgress * 100}%` on NeumorphicOutset container.

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { TextInput, TextInputProps, View, StyleSheet, StyleProp, ViewStyle, Text } from 'react-native';
+import { TextInput, TextInputProps, StyleSheet, StyleProp, ViewStyle, Text, TextStyle } from 'react-native';
 import { NeumorphicInset, StyledTextInput, useTheme } from '@repo/ui';
 
-interface CurrencyInputProps extends TextInputProps {
+interface CurrencyInputProps extends Omit<TextInputProps, 'style'> {
   style?: StyleProp<ViewStyle>;
-  inputStyle?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<TextStyle>;
 }
 
-const CurrencyInput = React.forwardRef<TextInput, CurrencyInputProps>(({ style, inputStyle, value, onChangeText, ...props }, ref) => {
+const CurrencyInput = React.forwardRef<TextInput, CurrencyInputProps>(({ style, inputStyle, value = '', onChangeText, ...props }, ref) => {
   const { theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
@@ -81,5 +81,7 @@ const CurrencyInput = React.forwardRef<TextInput, CurrencyInputProps>(({ style, 
     </NeumorphicInset>
   );
 });
+
+CurrencyInput.displayName = 'CurrencyInput';
 
 export default CurrencyInput;

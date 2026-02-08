@@ -7,9 +7,29 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
+import { NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
+
+interface CoreComponentProps {
+    showProgressBars: boolean;
+    minMax: any;
+    coreComponent: string;
+    setCoreComponent: (val: string) => void;
+    situps: string;
+    setSitups: (val: string) => void;
+    reverseCrunches: string;
+    setReverseCrunches: (val: string) => void;
+    plankMinutes: string;
+    setPlankMinutes: (val: string) => void;
+    plankSeconds: string;
+    setPlankSeconds: (val: string) => void;
+    ninetyPercentileThreshold: number;
+    isExempt: boolean;
+    toggleExempt: () => void;
+    openDetailModal: any;
+    score: any;
+}
 
 /**
  * A component that renders the core section of the PT calculator.
@@ -36,8 +56,8 @@ export default function CoreComponent({
     toggleExempt,
     openDetailModal,
     score,
-}) {
-    const { theme, isDarkMode } = useTheme();
+}: CoreComponentProps) {
+    const { theme } = useTheme();
     const styles = StyleSheet.create({
         cardTitle: {
             ...theme.typography.title,
@@ -144,7 +164,6 @@ export default function CoreComponent({
                         onChangeText={setSitups}
                         placeholder="Enter sit-up count"
                         style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                        disabled={isExempt}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -155,7 +174,6 @@ export default function CoreComponent({
                         onChangeText={setReverseCrunches}
                         placeholder="Enter crunch count"
                         style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                        disabled={isExempt}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -169,7 +187,6 @@ export default function CoreComponent({
                         minutesPlaceholder="Minutes"
                         secondsPlaceholder="Seconds"
                         style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                        disabled={isExempt}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -177,4 +194,4 @@ export default function CoreComponent({
             </View>
         </View>
     );
-};
+}

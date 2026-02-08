@@ -5,7 +5,6 @@ import PickerInput from '../PickerInput';
 import NumberInput from '../NumberInput';
 import VerticalDivider from '../VerticalDivider';
 import TwoColumnPicker from '../TwoColumnPicker';
-import { NewLabelWithHelp } from './PayUiComponents'; // Assuming this will be used for help text
 
 interface PayDemographicsProps {
   component: string;
@@ -35,7 +34,6 @@ interface PayDemographicsProps {
   disabilityError: any; // Define a more specific type if possible
   disabilityPercentage: string | null;
   disabilityPercentageItems: string[];
-  openDetailModal: (contentKey: string) => void; // Passed from parent
 }
 
 export const PayDemographics: React.FC<PayDemographicsProps> = ({
@@ -66,7 +64,6 @@ export const PayDemographics: React.FC<PayDemographicsProps> = ({
   disabilityError,
   disabilityPercentage,
   disabilityPercentageItems,
-  openDetailModal,
 }) => {
   const { theme } = useTheme();
 

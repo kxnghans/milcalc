@@ -7,9 +7,35 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
+import { NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
+
+interface CardioComponentProps {
+    showProgressBars: boolean;
+    cardioComponent: string;
+    setCardioComponent: (val: string) => void;
+    runMinutes: string;
+    setRunMinutes: (val: string) => void;
+    runSeconds: string;
+    setRunSeconds: (val: string) => void;
+    walkMinutes: string;
+    setWalkMinutes: (val: string) => void;
+    walkSeconds: string;
+    setWalkSeconds: (val: string) => void;
+    shuttles: string;
+    setShuttles: (val: string) => void;
+    cardioMinMax: any;
+    altitudeGroup: string;
+    age: string;
+    gender: string;
+    ninetyPercentileThreshold: number;
+    isExempt: boolean;
+    toggleExempt: () => void;
+    openDetailModal: any;
+    score: any;
+    altitudeData: any;
+}
 
 /**
  * A component that renders the cardio section of the PT calculator.
@@ -42,12 +68,12 @@ export default function CardioComponent({
     openDetailModal,
     score,
     altitudeData,
-}) {
-    const { theme, isDarkMode } = useTheme();
+}: CardioComponentProps) {
+    const { theme } = useTheme();
     // State to hold the calculated altitude adjustment text to be displayed to the user.
-    const [adjustment, setAdjustment] = React.useState(null);
+    const [adjustment, setAdjustment] = React.useState<string | null>(null);
     // State to hold the adjusted max time for the walk when at altitude.
-    const [adjustedWalkMaxTime, setAdjustedWalkMaxTime] = React.useState(null);
+    const [adjustedWalkMaxTime, setAdjustedWalkMaxTime] = React.useState<number | null>(null);
 
     // This effect recalculates the altitude adjustment whenever a relevant input changes.
     React.useEffect(() => {
@@ -60,7 +86,7 @@ export default function CardioComponent({
 
             if (cardioComponent === 'run' && (runMinutes || runSeconds)) {
                 const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
-                const adjustmentRow = altitudeData.run.find(row => 
+                const adjustmentRow = altitudeData.run.find((row: any) => 
                     row.altitude_group === altitudeGroup && 
                     runTimeInSeconds >= row.time_range_start && 
                     runTimeInSeconds <= row.time_range_end
@@ -71,7 +97,7 @@ export default function CardioComponent({
 
             } else if (cardioComponent === 'walk' && (walkMinutes || walkSeconds)) {
                 const capitalizedGender = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
-                const adjustmentRow = altitudeData.walk.find(row => 
+                const adjustmentRow = altitudeData.walk.find((row: any) => 
                     row.gender.toLowerCase() === capitalizedGender.toLowerCase() &&
                     row.altitude_group === altitudeGroup &&
                     ageNum >= row.age_range_start &&
@@ -87,27 +113,13 @@ export default function CardioComponent({
                 }
 
             } else if (cardioComponent === 'shuttles') {
-                const adjustmentRow = altitudeData.hamr.find(row => row.altitude_group === altitudeGroup);
+                const adjustmentRow = altitudeData.hamr.find((row: any) => row.altitude_group === altitudeGroup);
                 if (adjustmentRow) {
                     setAdjustment(`+ ${adjustmentRow.shuttles_to_add}`);
                 }
             }
         }
-    }, [runMinutes, runSeconds, walkMinutes, walkSeconds, shuttles, cardioComponent, altitudeGroup, age, gender, altitudeData]);
-
-    /**
-     * Helper function to get the age group index for walk standards.
-     * @param {number} age - The user's age.
-     * @returns {number} The index for the age group. 
-     */
-    const getAgeGroupIndex = (age: number) => {
-        if (age < 30) return 0;
-        if (age >= 30 && age <= 39) return 1;
-        if (age >= 40 && age <= 49) return 2;
-        if (age >= 50 && age <= 59) return 3;
-        if (age >= 60) return 4;
-        return -1;
-    }
+    }, [runMinutes, runSeconds, walkMinutes, walkSeconds, shuttles, cardioComponent, altitudeGroup, age, gender, altitudeData, isExempt]);
 
     const styles = StyleSheet.create({
         cardTitle: {
@@ -199,7 +211,7 @@ export default function CardioComponent({
                                 const baseShuttles = parseInt(shuttles) || 0;
                                 
                                 if (cardioComponent === 'shuttles' && altitudeData && altitudeGroup && altitudeGroup !== 'normal') {
-                                    const adjustmentRow = altitudeData.hamr.find(row => row.altitude_group === altitudeGroup);
+                                    const adjustmentRow = altitudeData.hamr.find((row: any) => row.altitude_group === altitudeGroup);
                                     if (adjustmentRow) {
                                         return baseShuttles + adjustmentRow.shuttles_to_add;
                                     }
@@ -237,11 +249,10 @@ export default function CardioComponent({
                         setMinutes={setRunMinutes}
                         seconds={runSeconds}
                         setSeconds={setRunSeconds}
-                        adjustment={adjustment}
+                        adjustment={adjustment || undefined}
                         minutesPlaceholder="Minutes"
                         secondsPlaceholder="Seconds"
                         style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                        disabled={isExempt}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -251,9 +262,8 @@ export default function CardioComponent({
                         value={shuttles}
                         onChangeText={setShuttles}
                         placeholder="Enter shuttle count"
-                        adjustment={adjustment}
+                        adjustment={adjustment || undefined}
                         style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                        disabled={isExempt}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -264,11 +274,10 @@ export default function CardioComponent({
                         setMinutes={setWalkMinutes}
                         seconds={walkSeconds}
                         setSeconds={setWalkSeconds}
-                        adjustment={adjustment}
+                        adjustment={adjustment || undefined}
                         minutesPlaceholder="Minutes"
                         secondsPlaceholder="Seconds"
                         style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                        disabled={isExempt}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -276,4 +285,4 @@ export default function CardioComponent({
             </View>
         </View>
     );
-};
+}

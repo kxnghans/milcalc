@@ -3,8 +3,8 @@
  * @description This file defines a dynamic modal component that displays a list of documents fetched from the database.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, TouchableWithoutFeedback, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
-import Animated, { useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
+import { View, Text, StyleSheet, Modal, TouchableWithoutFeedback, ActivityIndicator, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import Animated, { useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
 import { getDocumentsByCategory, openDocument } from '@repo/utils';
@@ -14,9 +14,15 @@ import { Image as ExpoImage } from 'expo-image';
 
 const mascotAsset = { uri: MASCOT_URLS.DOCUMENTS };
 
-export default function DocumentModal({ category, isModalVisible, setModalVisible }) {
+interface DocumentModalProps {
+  category: string;
+  isModalVisible: boolean;
+  setModalVisible: (visible: boolean) => void;
+}
+
+export default function DocumentModal({ category, isModalVisible, setModalVisible }: DocumentModalProps) {
     const { theme } = useTheme();
-    const [documents, setDocuments] = useState([]);
+    const [documents, setDocuments] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showTopChevron, setShowTopChevron] = useState(false);
     const [showBottomChevron, setShowBottomChevron] = useState(false);
@@ -33,7 +39,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
             -1,
             true
         );
-    }, []);
+    }, [bounceAnim]);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
@@ -48,14 +54,14 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                 setShowTopChevron(false);
                 setShowBottomChevron(false);
                 const fetchedDocuments = await getDocumentsByCategory(category);
-                setDocuments(fetchedDocuments);
+                setDocuments(fetchedDocuments || []);
                 setIsLoading(false);
             }
         };
         fetchDocs();
     }, [isModalVisible, category]);
 
-    const handleScroll = (event: { nativeEvent: { layoutMeasurement: { height: any; }; contentOffset: { y: any; }; contentSize: { height: any; }; }; }) => {
+    const handleScroll = (event: any) => {
         const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
         const isAtTop = contentOffset.y <= 0;
         const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 1;
@@ -63,7 +69,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
         setShowBottomChevron(!isAtBottom);
     };
 
-    const handleContentSizeChange = (contentWidth: any, contentHeight: number) => {
+    const handleContentSizeChange = (contentWidth: number, contentHeight: number) => {
         const isScrollable = contentHeight > scrollViewHeight;
         setShowBottomChevron(isScrollable);
         if (!isScrollable) {

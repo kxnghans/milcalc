@@ -5,30 +5,17 @@
  */
 
 import React from 'react';
-
-import { View } from 'react-native';
-
 import { Tabs } from 'expo-router';
-
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
 import { useTheme } from '@repo/ui';
 
-
-
 /**
-
  * The layout component for the main tab navigator.
-
  * It uses Expo Router's Tabs component to create the tab bar.
-
  * @returns {JSX.Element} The rendered tab layout.
-
  */
-
 export default function TabLayout() {
-
-  const { theme, isDarkMode } = useTheme();
+  const { theme } = useTheme();
 
 
 

@@ -38,7 +38,7 @@ interface StyledButtonProps extends TouchableOpacityProps {
  * A custom button component that applies neumorphic styling based on the application's theme.
  * It can be configured with different variants, sizes, and an optional leading icon.
  */
-export const StyledButton = ({ title, variant = 'primary', size = 'medium', style, textStyle, icon, iconSet = 'MaterialCommunityIcons', iconSize, highlightOpacity, ...props }: StyledButtonProps) => {
+export const StyledButton = ({ title, variant = 'primary', size = 'medium', style, textStyle, icon, iconSet = 'MaterialCommunityIcons', iconSize, highlightOpacity: _highlightOpacity, ...props }: StyledButtonProps) => {
   const { theme, isDarkMode } = useTheme();
   const Icon = Icons[iconSet];
 
@@ -84,15 +84,35 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
 
   const isPrimary = variant === 'primary';
 
+  // Flatten style to extract border radius overrides
+  const flattenedStyle = StyleSheet.flatten(style || {});
+  const { 
+      borderRadius, 
+      borderTopLeftRadius, 
+      borderTopRightRadius, 
+      borderBottomLeftRadius, 
+      borderBottomRightRadius 
+  } = flattenedStyle;
+
+  const radiusStyles = {
+      borderRadius: borderRadius !== undefined ? borderRadius : theme.borderRadius.m,
+      borderTopLeftRadius,
+      borderTopRightRadius,
+      borderBottomLeftRadius,
+      borderBottomRightRadius,
+  };
+
   return (
     // The button is wrapped in a NeumorphicOutset to give it the raised 3D effect.
     // The shadow and highlight properties are adjusted based on the variant to create the desired look.
     <NeumorphicOutset 
-      containerStyle={[style, { borderRadius: theme.borderRadius.m }]}
+      // Ensure 'style' (overrides) comes AFTER the default, so custom radii take precedence.
+      containerStyle={[{ borderRadius: theme.borderRadius.m }, style]}
       contentStyle={{
         backgroundColor,
-        borderRadius: theme.borderRadius.m,
         overflow: 'hidden',
+        // Apply the extracted or default radius styles to the inner content
+        ...radiusStyles
       }}
       // Shadow and highlight properties are tweaked for primary vs. secondary variants and light vs. dark mode.
       shadowOpacity={isPrimary ? (isDarkMode ? undefined : 0.3) : undefined}

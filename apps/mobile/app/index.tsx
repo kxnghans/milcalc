@@ -10,8 +10,7 @@ import {
 import { useTheme, SegmentedSelector, PillButton } from '@repo/ui';
 import { BlurView } from 'expo-blur';
 import SeasonalEffects from './components/_SeasonalEffects';
-
-const splashImage = require('../assets/3d_splash.png');
+import splashImage from '../assets/3d_splash.png';
 
 const getSeason = () => {
   const month = new Date().getMonth();

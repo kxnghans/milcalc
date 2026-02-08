@@ -1,61 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, TouchableOpacity, Keyboard } from 'react-native';
-import { useTheme, PillButton } from '@repo/ui';
-import { ICONS } from '@repo/ui/icons';
+import { View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
+import { useTheme } from '@repo/ui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import CurrencyInput from '../../components/CurrencyInput';
-import InsetTextInput from '../../components/InsetTextInput';
-
-interface LabelWithHelpProps {
-  label: string;
-  contentKey: string;
-}
-
-export const LabelWithHelp: React.FC<LabelWithHelpProps> = ({ label, contentKey }) => {
-  const { theme } = useTheme();
-  // Assuming openDetailModal is passed down or available via context/global state
-  // For now, it will be handled by the parent component that uses this LabelWithHelp
-  // If openDetailModal needs to be here, it suggests this component should take it as a prop.
-  // Given the current architecture, openDetailModal is in the parent screen.
-  // So, this LabelWithHelp should just render the UI and let the parent handle the interaction.
-  // Re-reading original `LabelWithHelp`: it uses `openDetailModal(contentKey)`
-  // So, `LabelWithHelp` needs to accept `onHelpPress` prop or similar.
-  // Let's modify LabelWithHelpProps to accept `onPress`
-
-  const styles = StyleSheet.create({
-    labelRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: theme.spacing.s,
-    },
-    labelStyle: { // Renamed from boldLabel to avoid conflict and be specific
-        ...theme.typography.subtitle,
-        color: theme.colors.text,
-        marginBottom: theme.spacing.s, // This was `theme.spacing.s` in original `boldLabel`
-    },
-  });
-
-  return (
-    <View style={styles.labelRow}>
-        <Text style={styles.labelStyle}>{label}</Text>
-        <Pressable onPress={() => { /* This will be handled by the parent, or passed as a prop */ }}>
-            <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
-        </Pressable>
-    </View>
-  );
-};
-
-// Original LabelWithHelp implementation:
-// const LabelWithHelp = ({ label, contentKey }) => (
-//     <View style={styles.labelRow}>
-//         <Text style={styles.label}>{label}</Text> // Original used `styles.label` which is `.body`
-//         <Pressable onPress={() => openDetailModal(contentKey)}>
-//             <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
-//         </Pressable>
-//     </View>
-// );
-// The original `LabelWithHelp` uses `styles.boldLabel` for the text.
 
 // Corrected LabelWithHelp for extraction
 interface NewLabelWithHelpProps {
@@ -118,7 +64,7 @@ export const RoundIconButton: React.FC<RoundIconButtonProps> = ({ onPress, iconN
                 shadowRadius: 1,
             }}
         >
-            <MaterialCommunityIcons name={iconName} size={iconSize} color={iconColor} />
+            <MaterialCommunityIcons name={iconName as any} size={iconSize} color={iconColor} />
         </TouchableOpacity>
     );
 };

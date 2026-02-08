@@ -109,11 +109,26 @@ export const darkColors = {
   },
 };
 
+interface Theme {
+  colors: typeof lightColors;
+  spacing: typeof spacing;
+  typography: Typography;
+  borderRadius: {
+    s: number;
+    m: number;
+    l: number;
+  };
+  mascot: {
+    width: number;
+    height: number;
+  };
+}
+
 /**
  * The main theme object that combines colors, spacing, typography, and other styling properties.
  * The light theme is set as the default.
  */
-export const theme = {
+export const theme: Theme = {
   colors: lightColors,
   spacing: spacing,
   typography: {

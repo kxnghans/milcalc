@@ -6,8 +6,22 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import { Card, NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
+import { NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
 import NumberInput from './NumberInput';
+
+interface StrengthComponentProps {
+    showProgressBars: boolean;
+    minMax: any;
+    pushups: string;
+    setPushups: (val: string) => void;
+    pushupComponent: string;
+    setPushupComponent: (val: string) => void;
+    ninetyPercentileThreshold: number;
+    isExempt: boolean;
+    toggleExempt: () => void;
+    openDetailModal: any;
+    score: any;
+}
 
 /**
  * A component that renders the strength section of the PT calculator.
@@ -28,8 +42,8 @@ export default function StrengthComponent({
     toggleExempt,
     openDetailModal,
     score,
-}) {
-    const { theme, isDarkMode } = useTheme();
+}: StrengthComponentProps) {
+    const { theme } = useTheme();
     const styles = StyleSheet.create({
         cardTitle: {
             ...theme.typography.title,
@@ -93,11 +107,10 @@ export default function StrengthComponent({
                     onChangeText={setPushups}
                     placeholder="Enter push-up count"
                     style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
-                    disabled={isExempt}
                     onToggleExempt={toggleExempt}
                     isExempt={isExempt}
                 />
             </View>
         </View>
     );
-};
+}

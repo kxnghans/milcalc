@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import NeumorphicOutset from './NeumorphicOutset';
 
@@ -15,7 +15,7 @@ interface ExemptButtonProps {
   /** Whether the button is currently in the active/exempt state. */
   isActive: boolean;
   /** Optional custom styles for the container. */
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 /**

@@ -9,11 +9,18 @@ import React, { createContext, useState, useContext, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import { theme as defaultTheme, lightColors, darkColors } from '../theme';
 
+interface ThemeContextType {
+  theme: typeof defaultTheme;
+  themeMode: string;
+  isDarkMode: boolean;
+  toggleTheme: () => void;
+}
+
 /**
  * The context that holds the theme information and toggle function.
  * Components can subscribe to this context to receive theme updates.
  */
-export const ThemeContext = createContext({
+export const ThemeContext = createContext<ThemeContextType>({
   theme: defaultTheme,
   themeMode: 'light', // The current theme mode ('light', 'dark', or 'auto').
   isDarkMode: false,  // A boolean flag indicating if the dark mode is currently active.
@@ -30,7 +37,7 @@ export const useTheme = () => useContext(ThemeContext);
  * The provider component that wraps the application and makes the theme context available to all children.
  * It manages the theme state and handles the logic for switching between light, dark, and auto modes.
  */
-export const ThemeProvider = ({ children }) => {
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   // `useColorScheme` from React Native detects the user's system theme preference.
   const systemTheme = useColorScheme();
   // State to manage the current theme mode. Can be 'auto', 'light', or 'dark'.

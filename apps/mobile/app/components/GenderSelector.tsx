@@ -16,7 +16,12 @@ import { ICONS, ICON_SETS } from '@repo/ui/icons';
  * @param {(gender: string) => void} props.setGender - The function to update the selected gender.
  * @returns {JSX.Element} The rendered gender selector component.
  */
-export default function GenderSelector({ gender, setGender }) {
+interface GenderSelectorProps {
+  gender: string;
+  setGender: (gender: string) => void;
+}
+
+export default function GenderSelector({ gender, setGender }: GenderSelectorProps) {
     const { theme, isDarkMode } = useTheme();
     const styles = StyleSheet.create({
         genderSelectorContainer: {
@@ -42,8 +47,8 @@ export default function GenderSelector({ gender, setGender }) {
                 variant={gender === 'male' ? 'primary' : 'secondary'}
                 textStyle={gender !== 'male' ? styles.inactiveText : {}}
                 size="small"
-                style={{ flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-                iconSet={ICON_SETS.FONTISTO}
+                style={{ flex: 1 }}
+                iconSet={ICON_SETS.FONTISTO as any}
                 icon={ICONS.GENDER_MALE}
                 highlightOpacity={isDarkMode ? 0.33 : undefined}
             />
@@ -53,11 +58,11 @@ export default function GenderSelector({ gender, setGender }) {
                 variant={gender === 'female' ? 'primary' : 'secondary'}
                 textStyle={gender !== 'female' ? styles.inactiveText : {}}
                 size="small"
-                style={{ flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-                iconSet={ICON_SETS.FONTISTO}
+                style={{ flex: 1 }}
+                iconSet={ICON_SETS.FONTISTO as any}
                 icon={ICONS.GENDER_FEMALE}
                 highlightOpacity={isDarkMode ? 0.33 : undefined}
             />
         </View>
     );
-};
+}

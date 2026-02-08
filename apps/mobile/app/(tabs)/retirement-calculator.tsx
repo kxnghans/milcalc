@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Platform, ActivityIndicator, Pressable, ImageSourcePropType, Keyboard } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Platform, Pressable, ImageSourcePropType, Keyboard } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { useRetirementCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, StyledTextInput, PillButton, MASCOT_URLS } from '@repo/ui';
+import { useRetirementCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
 import PickerInput from '../components/PickerInput';
 import DocumentModal from '../components/DocumentModal';
-import { useNavigation } from '@react-navigation/native';
 import { ICONS } from '@repo/ui/icons';
 import CurrencyInput from '../components/CurrencyInput';
 import NumberInput from '../components/NumberInput';
@@ -17,7 +16,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 const retirementMascot = { uri: MASCOT_URLS.RETIREMENT };
 
 export default function RetirementCalculatorScreen() {
-  const { theme, themeMode, toggleTheme, isDarkMode } = useTheme();
+  const { theme, themeMode, toggleTheme } = useTheme();
   const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
   const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
   const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
@@ -47,8 +46,6 @@ export default function RetirementCalculatorScreen() {
     setYearsOfService,
     filingStatus,
     setFilingStatus,
-    brsPayGrade,
-    setBrsPayGrade,
     tspAmount,
     setTspAmount,
     servicePoints,
@@ -57,7 +54,6 @@ export default function RetirementCalculatorScreen() {
     setGoodYears,
     resetState,
     mha,
-    setMha,
     state,
     mhaData,
     isLoading,
@@ -65,13 +61,8 @@ export default function RetirementCalculatorScreen() {
     handleMhaChange,
     mhaDisplayName,
     disabilityPercentage,
-    setDisabilityPercentage,
     dependentStatus,
-    setDependentStatus,
-    disabilityData,
     disabilityError,
-    percentageItems,
-    statusItems,
     isTspCalculatorVisible,
     setIsTspCalculatorVisible,
     tspContributionAmount,
@@ -90,7 +81,6 @@ export default function RetirementCalculatorScreen() {
     setTspType,
     tspReturn,
     setTspReturn,
-    payGrades,
     payGradesForYear1,
     payGradesForYear2,
     payGradesForYear3,
@@ -114,8 +104,6 @@ export default function RetirementCalculatorScreen() {
     breakInService,
     setBreakInService,
   } = useRetirementCalculatorState();
-
-  const navigation = useNavigation();
 
   const wasExpandedBeforeKeyboard = React.useRef(false);
   const isExpandedRef = React.useRef(isPayDisplayExpanded);
@@ -213,7 +201,7 @@ export default function RetirementCalculatorScreen() {
     }
   });
 
-  const LabelWithHelp = ({ label, contentKey, mascot }) => (
+  const LabelWithHelp = ({ label, contentKey, mascot }: { label: string; contentKey: string; mascot: ImageSourcePropType }) => (
     <View style={styles.labelRow}>
         <Text style={{ ...theme.typography.subtitle, color: theme.colors.text }}>{label}</Text>
         <Pressable onPress={() => openDetailModal(contentKey, mascot)}>
@@ -229,8 +217,8 @@ export default function RetirementCalculatorScreen() {
       };
     
       const tspWithdrawal = tsp * 0.04;
-      const annualPay = pension * 12 + disabilityIncome * 12 - taxes.federal - taxes.state + tspWithdrawal;
-      const monthlyPay = pension + disabilityIncome - (taxes.federal / 12) - (taxes.state / 12) + (tspWithdrawal / 12);
+      const annualPay = pension * 12 + disabilityIncome * 12 - (taxes?.federal || 0) - (taxes?.state || 0) + tspWithdrawal;
+      const monthlyPay = pension + disabilityIncome - ((taxes?.federal || 0) / 12) - ((taxes?.state || 0) / 12) + (tspWithdrawal / 12);
 
       const payDetails = [
         { label: 'Pension', value: pension },
@@ -239,9 +227,11 @@ export default function RetirementCalculatorScreen() {
       ];
 
       const deductions = [
-        { label: 'Federal Tax', value: taxes.federal },
-        { label: 'State Tax', value: taxes.state },
+        { label: 'Federal Tax', value: taxes?.federal || 0 },
+        { label: 'State Tax', value: taxes?.state || 0 },
       ];
+
+      const yearsOfServiceNum = parseInt(yearsOfService) || 0;
 
       return (
         <View style={styles.container}>
@@ -251,7 +241,7 @@ export default function RetirementCalculatorScreen() {
             onClose={closeDetailModal}
             contentKey={detailModalContentKey}
             source="retirement"
-            mascotAsset={detailModalMascot}
+            mascotAsset={detailModalMascot || undefined}
           />
           <DocumentModal category="RETIREMENT" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
           <View style={styles.content}>
@@ -268,11 +258,11 @@ export default function RetirementCalculatorScreen() {
                     onToggleStandardDeductions={() => setIsPayDisplayExpanded(!isPayDisplayExpanded)}
                     onGetRetirementAge={() => setIsRetirementAgeCalculatorVisible(!isRetirementAgeCalculatorVisible)}
                     isRetirementAgeCalculatorVisible={isRetirementAgeCalculatorVisible}
-                    birthDate={birthDate}
-                    setBirthDate={setBirthDate}
-                    serviceEntryDate={serviceEntryDate}
-                    setServiceEntryDate={setServiceEntryDate}
-                    retirementAge={retirementAge}
+                    birthDate={birthDate || undefined}
+                    setBirthDate={setBirthDate as any}
+                    serviceEntryDate={serviceEntryDate || undefined}
+                    setServiceEntryDate={setServiceEntryDate as any}
+                    retirementAge={retirementAge || undefined}
                     component={component}
                     breakInService={breakInService}
                     setBreakInService={setBreakInService}
@@ -317,15 +307,15 @@ export default function RetirementCalculatorScreen() {
                     <View style={styles.row}>
                     <View style={{flex: 1, marginRight: 8}}>
                         <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Year -2</Text>
-                        <PickerInput items={payGradesForYear1.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade1} onValueChange={setHigh3PayGrade1} placeholder="Select..." disabled={!yearsOfService || yearsOfService < 3} />
+                        <PickerInput items={payGradesForYear1.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade1} onValueChange={setHigh3PayGrade1} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
                     </View>
                     <View style={{flex: 1, marginRight: 8}}>
                         <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Year -1</Text>
-                        <PickerInput items={payGradesForYear2.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade2} onValueChange={setHigh3PayGrade2} placeholder="Select..." disabled={!yearsOfService || yearsOfService < 3} />
+                        <PickerInput items={payGradesForYear2.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade2} onValueChange={setHigh3PayGrade2} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
                     </View>
                     <View style={{flex: 1}}>
                         <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Final Year</Text>
-                        <PickerInput items={payGradesForYear3.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade3} onValueChange={setHigh3PayGrade3} placeholder="Select..." disabled={!yearsOfService || yearsOfService < 3} />
+                        <PickerInput items={payGradesForYear3.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade3} onValueChange={setHigh3PayGrade3} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
                     </View>
                     </View>
 

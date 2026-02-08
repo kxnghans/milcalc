@@ -37,35 +37,17 @@ const enlistedRanks = [
 export const usePayCalculatorState = () => {
   // --- Raw Input State ---
   const [status, setStatus] = useState('Enlisted');
-  const [rank, setRank] = useState(null);
+  const [rank, setRank] = useState<string | null>(null);
   const [yearsOfService, setYearsOfService] = useState('');
   const [mha, setMha] = useState('initial');
   const [bahDependencyStatus, setBahDependencyStatus] = useState('WITHOUT_DEPENDENTS');
-  const [vaDependencyStatus, setVaDependencyStatus] = useState(null);
+  const [vaDependencyStatus, setVaDependencyStatus] = useState<string | null>(null);
   const [filingStatus, setFilingStatus] = useState('single');
   const [state, setState] = useState('');
   const [component, setComponent] = useState('Active');
-  const [disabilityPercentage, setDisabilityPercentage] = useState(null);
+  const [disabilityPercentage, setDisabilityPercentage] = useState<any>(null);
   const [paySource, setPaySource] = useState('Military');
   const [vaDisabilityPay, setVaDisabilityPay] = useState(0);
-
-  // --- Data & UI State ---
-  const [filteredRanks, setFilteredRanks] = useState(enlistedRanks);
-  const [isTaxOverride, setIsTaxOverride] = useState(false);
-
-  // Debounced values for calculations
-  const debouncedRank = useDebounce(rank, 500);
-  const debouncedYears = useDebounce(yearsOfService, 500);
-  const debouncedMha = useDebounce(mha, 500);
-  const debouncedBahDependencyStatus = useDebounce(bahDependencyStatus, 500);
-  const debouncedFilingStatus = useDebounce(filingStatus, 500);
-  const debouncedState = useDebounce(state, 500);
-
-  // Deep debounce for object/array states to prevent excessive re-renders during typing
-  const debouncedSpecialPays = useDebounce(specialPays, 500);
-  const debouncedAdditionalIncomes = useDebounce(additionalIncomes, 500);
-  const debouncedDeductions = useDebounce(deductions, 500);
-  const debouncedAdditionalDeductions = useDebounce(additionalDeductions, 500);
 
   // --- User Input Income/Deduction States ---
   const [isIncomeExpanded, setIncomeExpanded] = useState(false);
@@ -87,6 +69,24 @@ export const usePayCalculatorState = () => {
   const [additionalDeductions, setAdditionalDeductions] = useState([{ name: '', amount: '' }]);
   const [calculatedTaxes, setCalculatedTaxes] = useState({ fedTax: 0, stateTax: 0, ficaTax: 0, federalStandardDeduction: 0, stateStandardDeduction: 0 });
 
+  // --- Data & UI State ---
+  const [filteredRanks, setFilteredRanks] = useState(enlistedRanks);
+  const [isTaxOverride, setIsTaxOverride] = useState(false);
+
+  // Debounced values for calculations
+  const debouncedRank = useDebounce(rank, 500);
+  const debouncedYears = useDebounce(yearsOfService, 500);
+  const debouncedMha = useDebounce(mha, 500);
+  const debouncedBahDependencyStatus = useDebounce(bahDependencyStatus, 500);
+  const debouncedFilingStatus = useDebounce(filingStatus, 500);
+  const debouncedState = useDebounce(state, 500);
+
+  // Deep debounce for object/array states to prevent excessive re-renders during typing
+  const debouncedSpecialPays = useDebounce(specialPays, 500);
+  const debouncedAdditionalIncomes = useDebounce(additionalIncomes, 500);
+  const debouncedDeductions = useDebounce(deductions, 500);
+  const debouncedAdditionalDeductions = useDebounce(additionalDeductions, 500);
+
 
   // --- Data Fetching with React Query ---
   const { data: mhaData, error: mhaError, isLoading: isLoadingMha } = useQuery({
@@ -101,28 +101,28 @@ export const usePayCalculatorState = () => {
     staleTime: Infinity,
   });
 
-  const { data: federalTaxYear, error: federalTaxYearError } = useQuery({
+  const { data: federalTaxYear } = useQuery({
     queryKey: ['maxFederalTaxYear'],
     queryFn: getMaxFederalTaxYear,
     staleTime: Infinity,
   });
 
-  const { data: stateTaxYear, error: stateTaxYearError } = useQuery({
+  const { data: stateTaxYear } = useQuery({
     queryKey: ['maxStateTaxYear'],
     queryFn: getMaxStateTaxYear,
     staleTime: Infinity,
   });
 
-  const { data: federalTaxData, error: federalTaxDataError, isLoading: isLoadingFedTax } = useQuery({
+  const { data: federalTaxData, isLoading: isLoadingFedTax } = useQuery({
     queryKey: ['federalTaxData', federalTaxYear],
-    queryFn: () => getFederalTaxData(federalTaxYear),
+    queryFn: () => getFederalTaxData(federalTaxYear as number),
     enabled: !!federalTaxYear,
     staleTime: Infinity,
   });
 
-  const { data: stateTaxData, error: stateTaxDataError, isLoading: isLoadingStateTax } = useQuery({
+  const { data: stateTaxData, isLoading: isLoadingStateTax } = useQuery({
     queryKey: ['stateTaxData', stateTaxYear],
-    queryFn: () => getStateTaxData(stateTaxYear),
+    queryFn: () => getStateTaxData(stateTaxYear as number),
     enabled: !!stateTaxYear,
     staleTime: Infinity,
   });
@@ -136,20 +136,20 @@ export const usePayCalculatorState = () => {
   const { data: basePay, isLoading: isLoadingBasePay } = useQuery({
     queryKey: ['basePay', debouncedRank, debouncedYears, component],
     queryFn: () => component === 'Active'
-      ? getBasePay(debouncedRank, Number(debouncedYears))
-      : getReserveDrillPay(debouncedRank, Number(debouncedYears)),
+      ? getBasePay(debouncedRank as string, Number(debouncedYears))
+      : getReserveDrillPay(debouncedRank as string, Number(debouncedYears)),
     enabled: !!debouncedRank && !!debouncedYears,
   });
 
   const { data: bah, isLoading: isLoadingBah } = useQuery({
     queryKey: ['bahRate', debouncedMha, debouncedRank, debouncedBahDependencyStatus],
-    queryFn: () => getBahRate(debouncedMha, debouncedRank, debouncedBahDependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS'),
+    queryFn: () => getBahRate(debouncedMha, debouncedRank as string, debouncedBahDependencyStatus as 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS'),
     enabled: !!debouncedMha && debouncedMha !== 'initial' && debouncedMha !== 'ON_BASE' && !!debouncedRank && !!debouncedBahDependencyStatus,
   });
 
   const { data: bas, isLoading: isLoadingBas } = useQuery({
     queryKey: ['basRate', debouncedRank],
-    queryFn: () => getBasRate(debouncedRank),
+    queryFn: () => getBasRate(debouncedRank as string),
     enabled: !!debouncedRank,
   });
 
@@ -175,7 +175,7 @@ export const usePayCalculatorState = () => {
       }
 
       // Now synchronous and uses passed data
-      const vaDisabilityPayResult = calculateDisabilityIncome(disabilityPercentage, vaDependencyStatus, disabilityData || []);
+      const vaDisabilityPayResult = calculateDisabilityIncome(disabilityPercentage, vaDependencyStatus as any, disabilityData || []);
       setVaDisabilityPay(vaDisabilityPayResult);
 
       const militaryMonthlyPay = (basePay || 0) + (bas || 0) + (bah || 0);
@@ -187,14 +187,14 @@ export const usePayCalculatorState = () => {
         setPaySource('Military');
         if (federalTaxData && stateTaxData && debouncedMha !== 'initial') {
           const payInputs = {
-            basePay: basePay,
-            bah: bah,
-            bas: bas,
+            basePay: basePay || 0,
+            bah: bah || 0,
+            bas: bas || 0,
             specialPays: debouncedSpecialPays,
             additionalIncomes: debouncedAdditionalIncomes,
-            deductions: debouncedDeductions,
-            additionalDeductions: debouncedAdditionalDeductions,
             filingStatus: debouncedFilingStatus,
+            mha: debouncedMha,
+            additionalDeductions: debouncedAdditionalDeductions,
             state: debouncedState,
           };
           // Now synchronous
@@ -211,24 +211,24 @@ export const usePayCalculatorState = () => {
     if (paySource === 'VA Disability') {
       return vaDisabilityPay;
     }
-    const specialPayTotal = Object.values(specialPays).reduce((sum, val) => sum + parseCurrency(val), 0);
-    const additionalIncomesTotal = additionalIncomes.reduce((sum, item) => sum + parseCurrency(item.amount), 0);
+    const specialPayTotal = Object.values(debouncedSpecialPays).reduce((sum: number, val: string | number) => sum + parseCurrency(val), 0);
+    const additionalIncomesTotal = debouncedAdditionalIncomes.reduce((sum: number, item: any) => sum + parseCurrency(item.amount), 0);
     return (basePay || 0) + (bah || 0) + (bas || 0) + specialPayTotal + additionalIncomesTotal;
-  }, [basePay, bah, bas, specialPays, additionalIncomes, paySource, vaDisabilityPay]);
+  }, [basePay, bah, bas, debouncedSpecialPays, debouncedAdditionalIncomes, paySource, vaDisabilityPay]);
 
   const totalDeductions = useMemo(() => {
-    const sgliAndTsp = parseCurrency(deductions.sgli) + parseCurrency(deductions.tsp);
-    const additionalDeductionsTotal = additionalDeductions.reduce((sum, item) => sum + parseCurrency(item.amount), 0);
+    const sgliAndTsp = parseCurrency(debouncedDeductions.sgli) + parseCurrency(debouncedDeductions.tsp);
+    const additionalDeductionsTotal = debouncedAdditionalDeductions.reduce((sum: number, item: any) => sum + parseCurrency(item.amount), 0);
   
     let taxesTotal = 0;
     if (isTaxOverride) {
-      taxesTotal = parseCurrency(deductions.overrideFedTax) + parseCurrency(deductions.overrideStateTax) + parseCurrency(deductions.overrideFicaTax);
+      taxesTotal = parseCurrency(debouncedDeductions.overrideFedTax) + parseCurrency(debouncedDeductions.overrideStateTax) + parseCurrency(debouncedDeductions.overrideFicaTax);
     } else {
       taxesTotal = calculatedTaxes.fedTax + calculatedTaxes.stateTax + calculatedTaxes.ficaTax;
     }
   
     return taxesTotal + sgliAndTsp + additionalDeductionsTotal;
-  }, [deductions, calculatedTaxes, isTaxOverride, additionalDeductions]);
+  }, [debouncedDeductions, calculatedTaxes, isTaxOverride, debouncedAdditionalDeductions]);
 
   const monthlyPay = useMemo(() => totalIncome - totalDeductions, [totalIncome, totalDeductions]);
   const annualPay = useMemo(() => monthlyPay * 12, [monthlyPay]);
@@ -240,24 +240,24 @@ export const usePayCalculatorState = () => {
 
     const details = [];
     const primaryPayLabel = component === 'Active' ? 'Base Pay' : 'Drill Pay';
-    details.push({ label: primaryPayLabel, value: basePay });
-    details.push({ label: 'BAH', value: bah });
-    details.push({ label: 'BAS', value: bas });
+    details.push({ label: primaryPayLabel, value: basePay || 0 });
+    details.push({ label: 'BAH', value: bah || 0 });
+    details.push({ label: 'BAS', value: bas || 0 });
 
-    const otherIncomeTotal = Object.values(specialPays).reduce((sum, val) => sum + parseCurrency(val), 0) + 
-                             additionalIncomes.reduce((sum, item) => sum + parseCurrency(item.amount), 0);
+    const otherIncomeTotal = Object.values(debouncedSpecialPays).reduce((sum: number, val: string | number) => sum + parseCurrency(val), 0) + 
+                             debouncedAdditionalIncomes.reduce((sum: number, item: any) => sum + parseCurrency(item.amount), 0);
 
     if (otherIncomeTotal > 0) {
         details.push({ label: 'Other', value: otherIncomeTotal });
     }
 
     return details;
-  }, [basePay, bah, bas, specialPays, additionalIncomes, paySource, vaDisabilityPay, component]);
+  }, [basePay, bah, bas, debouncedSpecialPays, debouncedAdditionalIncomes, paySource, vaDisabilityPay, component]);
 
   const deductionsForDisplay = useMemo(() => {
-    const fedTaxValue = isTaxOverride ? parseCurrency(deductions.overrideFedTax) : calculatedTaxes.fedTax;
-    const stateTaxValue = isTaxOverride ? parseCurrency(deductions.overrideStateTax) : calculatedTaxes.stateTax;
-    const ficaTaxValue = isTaxOverride ? parseCurrency(deductions.overrideFicaTax) : calculatedTaxes.ficaTax;
+    const fedTaxValue = isTaxOverride ? parseCurrency(debouncedDeductions.overrideFedTax) : calculatedTaxes.fedTax;
+    const stateTaxValue = isTaxOverride ? parseCurrency(debouncedDeductions.overrideStateTax) : calculatedTaxes.stateTax;
+    const ficaTaxValue = isTaxOverride ? parseCurrency(debouncedDeductions.overrideFicaTax) : calculatedTaxes.ficaTax;
 
     const details = [
         { label: 'FED TAX', value: fedTaxValue },
@@ -266,16 +266,16 @@ export const usePayCalculatorState = () => {
     ];
 
     const otherDeductionsTotal =
-      parseCurrency(deductions.sgli) +
-      parseCurrency(deductions.tsp) +
-      additionalDeductions.reduce((sum, item) => sum + parseCurrency(item.amount), 0);
+      parseCurrency(debouncedDeductions.sgli) +
+      parseCurrency(debouncedDeductions.tsp) +
+      debouncedAdditionalDeductions.reduce((sum: number, item: any) => sum + parseCurrency(item.amount), 0);
 
     if (otherDeductionsTotal > 0) {
       details.push({ label: 'Other', value: otherDeductionsTotal });
     }
 
     return details;
-  }, [deductions, calculatedTaxes, isTaxOverride, additionalDeductions]);
+  }, [debouncedDeductions, calculatedTaxes, isTaxOverride, debouncedAdditionalDeductions]);
 
   const lastAdditionalIncome = additionalIncomes[additionalIncomes.length - 1];
   const showAddIncomeButton = lastAdditionalIncome && lastAdditionalIncome.name && lastAdditionalIncome.amount;
@@ -289,7 +289,7 @@ export const usePayCalculatorState = () => {
     if (mha === 'ON_BASE') return "ON BASE";
     if (!mha || !mhaData) return "...";
     for (const state in mhaData) {
-        const mhaObject = mhaData[state].find(m => m.value === mha);
+        const mhaObject = mhaData[state].find((m: any) => m.value === mha);
         if (mhaObject) {
             return mhaObject.label;
         }
@@ -297,7 +297,7 @@ export const usePayCalculatorState = () => {
     return "...";
   }, [mha, mhaData]);
 
-  const handleMhaChange = (mha, state) => {
+  const handleMhaChange = (mha: string, state: string) => {
     setMha(mha);
     setState(state);
   };
@@ -315,7 +315,7 @@ export const usePayCalculatorState = () => {
 
   const disabilityPickerData = useMemo(() => {
     if (!disabilityData) return {};
-    const groupedData = {
+    const groupedData: any = {
         '0%': [{ label: 'No Disability', value: 'none' }]
     };
     const allStatuses = disabilityData.map(item => ({ label: item.dependent_status, value: item.dependent_status }));
@@ -335,7 +335,7 @@ export const usePayCalculatorState = () => {
     return `${disabilityPercentage} - ${vaDependencyStatus}`;
   }, [disabilityPercentage, vaDependencyStatus]);
 
-  const handleDisabilityChange = (status, percentage) => {
+  const handleDisabilityChange = (status: string, percentage: string) => {
     setVaDependencyStatus(status);
     setDisabilityPercentage(percentage);
     if (percentage === '0%') {
@@ -344,7 +344,7 @@ export const usePayCalculatorState = () => {
   };
 
 
-  const setRankAndStatus = (selectedRank) => {
+  const setRankAndStatus = (selectedRank: string | null) => {
     setRank(selectedRank);
     if (selectedRank) {
         const rankType = selectedRank.charAt(0).toUpperCase();
@@ -376,6 +376,8 @@ export const usePayCalculatorState = () => {
   };
 
   return {
-    status, setStatus, rank, setRank: setRankAndStatus, yearsOfService, setYearsOfService, mha, handleMhaChange, bahDependencyStatus, setBahDependencyStatus, filingStatus, setFilingStatus, state, setState, component, setComponent, disabilityPercentage, disabilityData, disabilityError, paySource, vaDisabilityPay, mhaData, mhaError, filteredRanks, isTaxOverride, setIsTaxOverride, basePay, bah, bas, isLoading, isIncomeExpanded, setIncomeExpanded, specialPays, setSpecialPays, additionalIncomes, setAdditionalIncomes, isDeductionsExpanded, setDeductionsExpanded, isStandardDeductionsExpanded, setIsStandardDeductionsExpanded, deductions, setDeductions, additionalDeductions, setAdditionalDeductions, calculatedTaxes, federalTaxData, stateTaxData, federalTaxYear, stateTaxYear, federalTaxDataError, stateTaxDataError, totalIncome, totalDeductions, monthlyPay, annualPay, incomeForDisplay, deductionsForDisplay, showAddIncomeButton, showAddDeductionButton, mhaDisplayName, disabilityPercentageItems, disabilityPickerData, disabilityDisplayName, handleDisabilityChange, resetState
+    status, setStatus, rank, setRank: setRankAndStatus, yearsOfService, setYearsOfService, mha, setMha, handleMhaChange, bahDependencyStatus, setBahDependencyStatus, vaDependencyStatus, filingStatus, setFilingStatus, state, setState, component, setComponent, disabilityPercentage, setDisabilityPercentage, disabilityData, disabilityError, paySource, vaDisabilityPay, mhaData, mhaError, filteredRanks, isTaxOverride, setIsTaxOverride, basePay, bah, bas, isLoading, isIncomeExpanded, setIncomeExpanded, specialPays, setSpecialPays, additionalIncomes, setAdditionalIncomes, isDeductionsExpanded, setDeductionsExpanded, isStandardDeductionsExpanded, setIsStandardDeductionsExpanded, deductions, setDeductions, additionalDeductions, setAdditionalDeductions, calculatedTaxes, federalTaxData, stateTaxData, federalTaxYear, stateTaxYear, totalIncome, totalDeductions, monthlyPay, annualPay, incomeForDisplay, deductionsForDisplay, showAddIncomeButton, showAddDeductionButton, mhaDisplayName, disabilityPercentageItems, disabilityPickerData, disabilityDisplayName, handleDisabilityChange, resetState,
+    federalStandardDeduction: calculatedTaxes.federalStandardDeduction,
+    stateStandardDeduction: calculatedTaxes.stateStandardDeduction
   };
 };

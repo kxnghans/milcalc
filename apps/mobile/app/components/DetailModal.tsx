@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, ActivityIndicator, ImageSourcePropType, Dimensions } from 'react-native';
-import Animated, { useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, PillButton } from '@repo/ui';
 import { BlurView } from 'expo-blur';
@@ -13,7 +13,7 @@ interface DetailModalProps {
   onClose: () => void;
   contentKey: string | null;
   source: 'pt' | 'pay' | 'retirement' | 'best_score';
-  mascotAsset?: ImageSourcePropType;
+  mascotAsset?: ImageSourcePropType | null;
 }
 
 export default function DetailModal({ isVisible, onClose, contentKey, source, mascotAsset }: DetailModalProps) {
@@ -35,7 +35,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
             -1,
             true
         );
-    }, []);
+    }, [bounceAnim]);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
@@ -60,7 +60,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
         }
     }, [isVisible, contentKey, source]);
 
-    const handleScroll = (event: { nativeEvent: { layoutMeasurement: { height: any; }; contentOffset: { y: any; }; contentSize: { height: any; }; }; }) => {
+    const handleScroll = (event: any) => {
         const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
         const isAtTop = contentOffset.y <= 0;
         const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 1; 
@@ -68,7 +68,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
         setShowBottomChevron(!isAtBottom);
     };
 
-    const handleContentSizeChange = (contentWidth: any, contentHeight: number) => {
+    const handleContentSizeChange = (contentWidth: number, contentHeight: number) => {
         const isScrollable = contentHeight > scrollViewHeight;
         setShowBottomChevron(isScrollable);
         if (!isScrollable) {
@@ -173,7 +173,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
     };
 
     const renderSections = (item: any) => {
-        const sections = [];
+        const sections: React.ReactElement[] = [];
         const createSection = (header: string, content: string, key: string) => {
             sections.push(
                 <View key={key}> 

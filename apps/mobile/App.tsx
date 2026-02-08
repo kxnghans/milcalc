@@ -12,13 +12,9 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// The imports here are not using the aliased paths from the monorepo config.
-import { Card } from "@repo/ui/src/card";
-import { SegmentedSelector } from "@repo/ui/src/SegmentedSelector";
-import { StyledTextInput } from "@repo/ui/src/StyledTextInput";
-import { StyledButton } from "@repo/ui/src/StyledButton";
+import { Card, SegmentedSelector, StyledTextInput, StyledButton } from "@repo/ui";
 import { useState } from "react";
-import { calculatePtScore } from "@repo/utils/pt-calculator";
+import { calculatePtScore } from "@repo/utils";
 
 /**
  * The original root component for the PT Calculator app.
@@ -67,8 +63,8 @@ export default function App() {
       plankSeconds: parseInt(plankSeconds) || 0,
     };
 
-    const result = calculatePtScore(inputs);
-    setScore(result);
+    const result = calculatePtScore(inputs, [], [], { run: [], walk: [], hamr: [] });
+    setScore(result as any);
   };
 
   return (
@@ -87,14 +83,13 @@ export default function App() {
         <Card style={{ width: '100%' }}>
           <View style={styles.row}>
             <View style={{ flex: 1, marginRight: 8 }}>
-              <StyledTextInput label="Age" value={age} onChangeText={setAge} keyboardType="number-pad" />
+              <StyledTextInput value={age} onChangeText={setAge} keyboardType="number-pad" placeholder="Age" />
             </View>
             <View style={{ flex: 2 }}>
               <SegmentedSelector
-                label="Gender"
-                options={["Male", "Female"]}
-                value={gender}
-                onChange={setGender}
+                options={[{label: "Male", value: "Male"}, {label: "Female", value: "Female"}]}
+                selectedValues={[gender]}
+                onValueChange={setGender}
               />
             </View>
           </View>
@@ -103,32 +98,30 @@ export default function App() {
         {/* Strength Component Card */}
         <Card style={{ width: '100%' }}>
           <SegmentedSelector
-            label="Strength"
-            options={["1-min Push-ups", "2-min Hand-Release Push-ups"]}
-            value={strengthComponent}
-            onChange={setStrengthComponent}
+            options={[{label: "1-min Push-ups", value: "1-min Push-ups"}, {label: "2-min Hand-Release Push-ups", value: "2-min Hand-Release Push-ups"}]}
+            selectedValues={[strengthComponent]}
+            onValueChange={setStrengthComponent}
           />
           {strengthComponent === "1-min Push-ups" ? (
-            <StyledTextInput label="Enter push-up count" value={pushups} onChangeText={setPushups} keyboardType="number-pad" />
+            <StyledTextInput value={pushups} onChangeText={setPushups} keyboardType="number-pad" placeholder="Enter push-up count" />
           ) : (
-            <StyledTextInput label="Enter push-up count" value={handReleasePushups} onChangeText={setHandReleasePushups} keyboardType="number-pad" />
+            <StyledTextInput value={handReleasePushups} onChangeText={setHandReleasePushups} keyboardType="number-pad" placeholder="Enter push-up count" />
           )}
         </Card>
 
         {/* Core Component Card */}
         <Card style={{ width: '100%' }}>
           <SegmentedSelector
-            label="Core"
-            options={["1-min Sit-ups", "2-min Cross-Leg Reverse Crunch", "Forearm Plank"]}
-            value={coreComponent}
-            onChange={setCoreComponent}
+            options={[{label: "1-min Sit-ups", value: "1-min Sit-ups"}, {label: "2-min Cross-Leg Reverse Crunch", value: "2-min Cross-Leg Reverse Crunch"}, {label: "Forearm Plank", value: "Forearm Plank"}]}
+            selectedValues={[coreComponent]}
+            onValueChange={setCoreComponent}
           />
-          {coreComponent === "1-min Sit-ups" && <StyledTextInput label="Enter sit-up count" value={situps} onChangeText={setSitups} keyboardType="number-pad" />}
-          {coreComponent === "2-min Cross-Leg Reverse Crunch" && <StyledTextInput label="Enter crunch count" value={crossLegCrunches} onChangeText={setCrossLegCrunches} keyboardType="number-pad" />}
+          {coreComponent === "1-min Sit-ups" && <StyledTextInput value={situps} onChangeText={setSitups} keyboardType="number-pad" placeholder="Enter sit-up count" />}
+          {coreComponent === "2-min Cross-Leg Reverse Crunch" && <StyledTextInput value={crossLegCrunches} onChangeText={setCrossLegCrunches} keyboardType="number-pad" placeholder="Enter crunch count" />}
           {coreComponent === "Forearm Plank" && (
             <View style={styles.row}>
-              <StyledTextInput containerStyle={{flex:1, marginRight: 8}} label="Minutes" value={plankMinutes} onChangeText={setPlankMinutes} keyboardType="number-pad" />
-              <StyledTextInput containerStyle={{flex:1}} label="Seconds" value={plankSeconds} onChangeText={setPlankSeconds} keyboardType="number-pad" />
+              <StyledTextInput value={plankMinutes} onChangeText={setPlankMinutes} keyboardType="number-pad" placeholder="Minutes" />
+              <StyledTextInput value={plankSeconds} onChangeText={setPlankSeconds} keyboardType="number-pad" placeholder="Seconds" />
             </View>
           )}
         </Card>
@@ -136,18 +129,17 @@ export default function App() {
         {/* Cardio Component Card */}
         <Card style={{ width: '100%' }}>
           <SegmentedSelector
-            label="Cardio"
-            options={["1.5-Mile Run", "20m HAMR Shuttles"]}
-            value={cardioComponent}
-            onChange={setCardioComponent}
+            options={[{label: "1.5-Mile Run", value: "1.5-Mile Run"}, {label: "20m HAMR Shuttles", value: "20m HAMR Shuttles"}]}
+            selectedValues={[cardioComponent]}
+            onValueChange={setCardioComponent}
           />
           {cardioComponent === "1.5-Mile Run" ? (
             <View style={styles.row}>
-              <StyledTextInput containerStyle={{flex:1, marginRight: 8}} label="Minutes" value={runMinutes} onChangeText={setRunMinutes} keyboardType="number-pad" />
-              <StyledTextInput containerStyle={{flex:1}} label="Seconds" value={runSeconds} onChangeText={setRunSeconds} keyboardType="number-pad" />
+              <StyledTextInput value={runMinutes} onChangeText={setRunMinutes} keyboardType="number-pad" placeholder="Minutes" />
+              <StyledTextInput value={runSeconds} onChangeText={setRunSeconds} keyboardType="number-pad" placeholder="Seconds" />
             </View>
           ) : (
-            <StyledTextInput label="Enter shuttle count" value={hamrShuttles} onChangeText={setHamrShuttles} keyboardType="number-pad" />
+            <StyledTextInput value={hamrShuttles} onChangeText={setHamrShuttles} keyboardType="number-pad" placeholder="Enter shuttle count" />
           )}
         </Card>
 

@@ -24,12 +24,12 @@ export const useRetirementCalculatorState = () => {
 
   const [federalStandardDeduction, setFederalStandardDeduction] = useState(0);
   const [stateStandardDeduction, setStateStandardDeduction] = useState(0);
-  const [birthDate, setBirthDate] = useState(null);
-  const [serviceEntryDate, setServiceEntryDate] = useState(null);
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [serviceEntryDate, setServiceEntryDate] = useState<Date | null>(null);
   const [qualifyingDeploymentDays, setQualifyingDeploymentDays] = useState('');
   const [isPayDisplayExpanded, setIsPayDisplayExpanded] = useState(false);
   const [isRetirementAgeCalculatorVisible, setIsRetirementAgeCalculatorVisible] = useState(false);
-  const [retirementAge, setRetirementAge] = useState(null);
+  const [retirementAge, setRetirementAge] = useState<number | null>(null);
   const [breakInService, setBreakInService] = useState('');
 
   // Calculated values
@@ -48,12 +48,12 @@ export const useRetirementCalculatorState = () => {
   const debouncedTspContributionPercentage = useDebounce(tspContributionPercentage, 500);
   const debouncedTspContributionYears = useDebounce(tspContributionYears, 500);
 
-  const [disabilityPercentage, setDisabilityPercentage] = useState(null);
-  const [dependentStatus, setDependentStatus] = useState(null);
+  const [disabilityPercentage, setDisabilityPercentage] = useState<string | null>(null);
+  const [dependentStatus, setDependentStatus] = useState<string | null>(null);
 
   // MHA State
-  const [mha, setMha] = useState('initial');
-  const [state, setState] = useState('');
+  const [mha, setMha] = useState<string>('initial');
+  const [state, setState] = useState<string>('');
 
     // --- Data Fetching with React Query ---
     const { data: mhaData, error: mhaError, isLoading: isLoadingMha } = useQuery({
@@ -66,7 +66,7 @@ export const useRetirementCalculatorState = () => {
       queryKey: ['payGrades'],
       queryFn: async () => {
         const data = await getPayGrades();
-        const getRankOrder = (payGrade) => {
+        const getRankOrder = (payGrade: string) => {
           const rankType = payGrade.charAt(0);
           const rankNum = parseInt(payGrade.substring(2));
           if (rankType === 'E') return rankNum;
@@ -77,7 +77,7 @@ export const useRetirementCalculatorState = () => {
           }
           return 400;
         };
-        return data.sort((a, b) => getRankOrder(a) - getRankOrder(b));
+        return (data || []).sort((a, b) => getRankOrder(a) - getRankOrder(b));
       },
       staleTime: Infinity,
     });
@@ -119,10 +119,10 @@ export const useRetirementCalculatorState = () => {
     const tspValue = calculateTsp(
       tspAmount,
       isTspCalculatorVisible,
-      debouncedTspContributionAmount,
-      debouncedTspContributionPercentage,
-      debouncedTspContributionYears,
-      retirementSystem,
+      Number(debouncedTspContributionAmount),
+      Number(debouncedTspContributionPercentage),
+      Number(debouncedTspContributionYears),
+      retirementSystem as any,
       tspReturn
     );
     setTsp(tspValue);
@@ -146,19 +146,19 @@ export const useRetirementCalculatorState = () => {
     const calculate = async () => {
       if (isLoading) return;
       try {
-        const pensionValue = await calculatePension(component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, goodYears);
+        const pensionValue = await calculatePension(component as any, retirementSystem as any, high3PayGrade1 as any, high3PayGrade2 as any, high3PayGrade3 as any, Number(yearsOfService), Number(servicePoints), Number(goodYears));
         setPension(pensionValue);
 
         // Synchronous calculation
-        const disabilityIncomeValue = calculateDisabilityIncome(disabilityPercentage, dependentStatus, disabilityData || []);
+        const disabilityIncomeValue = calculateDisabilityIncome(disabilityPercentage as any, dependentStatus as any, disabilityData || []);
         setDisabilityIncome(disabilityIncomeValue);
 
         const grossIncome = pensionValue + disabilityIncomeValue;
         if (federalTaxData && stateTaxData) {
-            const { federal, state, federalStandardDeduction, stateStandardDeduction } = calculateTaxes(grossIncome, state, filingStatus, federalTaxData, stateTaxData);
-            setTaxes({ federal, state });
-            setFederalStandardDeduction(federalStandardDeduction);
-            setStateStandardDeduction(stateStandardDeduction);
+            const { federal, state: taxState, federalStandardDeduction: fedStd, stateStandardDeduction: stateStd } = calculateTaxes(grossIncome, state, filingStatus, federalTaxData, stateTaxData);
+            setTaxes({ federal, state: taxState });
+            setFederalStandardDeduction(fedStd);
+            setStateStandardDeduction(stateStd);
         }
       } catch(e) {
         // console.error("Calculation error: ", e)
@@ -225,7 +225,7 @@ export const useRetirementCalculatorState = () => {
 
   const disabilityPickerData = useMemo(() => {
     if (!disabilityData) return {};
-    const groupedData = {
+    const groupedData: { [key: string]: { label: string; value: string }[] } = {
         '0%': [{ label: 'No Disability', value: 'none' }]
     };
     const allStatuses = disabilityData.map(item => ({ label: item.dependent_status, value: item.dependent_status }));
@@ -261,8 +261,8 @@ export const useRetirementCalculatorState = () => {
     if (mha === 'initial') return "Select a state";
     if (mha === 'ON_BASE') return "ON BASE";
     if (!mha || !mhaData) return "...";
-    for (const state in mhaData) {
-      const mhaObject = mhaData[state].find(m => m.value === mha);
+    for (const stateKey in mhaData) {
+      const mhaObject = mhaData[stateKey].find((m: any) => m.value === mha);
       if (mhaObject) {
         return mhaObject.label;
       }
@@ -277,15 +277,15 @@ export const useRetirementCalculatorState = () => {
     return `${disabilityPercentage} - ${dependentStatus}`;
   }, [disabilityPercentage, dependentStatus]);
 
-  const handleMhaChange = (mha, state) => {
-    setMha(mha);
-    setState(state);
+  const handleMhaChange = (mhaValue: string, stateValue: string) => {
+    setMha(mhaValue);
+    setState(stateValue);
   };
 
-  const handleDisabilityChange = (status, percentage) => {
-    setDependentStatus(status);
-    setDisabilityPercentage(percentage);
-    if (percentage === '0%') {
+  const handleDisabilityChange = (statusValue: string, percentageValue: string) => {
+    setDependentStatus(statusValue);
+    setDisabilityPercentage(percentageValue);
+    if (percentageValue === '0%') {
         setDependentStatus('none');
     }
   };

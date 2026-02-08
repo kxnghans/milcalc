@@ -1,6 +1,6 @@
 
 
-import { Tables, Json } from './types';
+import { Tables } from './types';
 
 
 
@@ -52,7 +52,7 @@ export const calculatePay = (
 
 ) => {
 
-  const { basePay, bah, bas, specialPays, additionalIncomes, filingStatus, mha, additionalDeductions, state } = inputs;
+  const { basePay, bah, bas, specialPays, additionalIncomes, filingStatus, additionalDeductions, state } = inputs;
 
 
 

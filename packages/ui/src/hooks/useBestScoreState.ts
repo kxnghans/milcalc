@@ -10,6 +10,17 @@ import { getScoreForExercise, calculateBestScore, checkWalkPass, getPtStandards,
 import { useDebounce } from './useDebounce';
 import { useTimeInput } from './useTimeInput';
 
+export interface BestScores {
+  push_ups_1min?: number | string;
+  hand_release_pushups_2min?: number | string;
+  sit_ups_1min?: number | string;
+  cross_leg_reverse_crunch_2min?: number | string;
+  forearm_plank_time?: number | string;
+  run?: number | string;
+  shuttles?: number | string;
+  walk?: string;
+}
+
 /**
  * A custom hook to manage the state for the Best Score calculator.
  * @param {string} age - The user's age.
@@ -35,7 +46,7 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   const [isCardioExempt, setIsCardioExempt] = useState(false);
 
   // State to store the calculated scores for each component and the final best score.
-  const [scores, setScores] = useState({});
+  const [scores, setScores] = useState<BestScores>({});
   const [bestScore, setBestScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -122,23 +133,23 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
         if (!fetchedStandards) return;
 
         const altitudeData = {
-            walk: walkAltitude,
-            run: runAltitude,
-            hamr: hamrAltitude,
+            walk: walkAltitude || [],
+            run: runAltitude || [],
+            hamr: hamrAltitude || [],
         };
 
-        const newScores = {
+        const newScores: BestScores = {
             push_ups_1min: isStrengthExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'push_ups_1min', { reps: Number(debouncedPushUps) }),
             hand_release_pushups_2min: isStrengthExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'hand_release_pushups_2min', { reps: Number(debouncedHrPushUps) }),
             sit_ups_1min: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'sit_ups_1min', { reps: Number(debouncedSitUps) }),
             cross_leg_reverse_crunch_2min: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'cross_leg_reverse_crunch_2min', { reps: Number(debouncedCrunches) }),
             forearm_plank_time: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'forearm_plank_time', { minutes: Number(debouncedPlankMinutes), seconds: Number(debouncedPlankSeconds) }),
-            run: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'run', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup, altitudeData),
-            shuttles: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'shuttles', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup, altitudeData),
-            walk: isCardioExempt ? 'Exempt' : checkWalkPass(Number(debouncedAge), debouncedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), walkStandards, altitudeData.walk, debouncedAltitudeGroup),
+            run: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'run', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup, altitudeData as any),
+            shuttles: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'shuttles', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup, altitudeData as any),
+            walk: isCardioExempt ? 'Exempt' : checkWalkPass(Number(debouncedAge), debouncedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), walkStandards || [], altitudeData.walk, debouncedAltitudeGroup),
         };
         setScores(newScores);
-        setBestScore(calculateBestScore(newScores));
+        setBestScore(calculateBestScore(newScores as any));
       } finally {
         setIsLoading(false);
       }

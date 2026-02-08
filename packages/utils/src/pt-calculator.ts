@@ -147,7 +147,7 @@ type AltitudeAdjustments = {
 
 export const getScoreForExercise = (standards: any[], component: string, performance: any, altitudeGroup?: string, altitudeAdjustments?: AltitudeAdjustments): number => {
 
-    let adjustedPerformance = { ...performance };
+    const adjustedPerformance = { ...performance };
 
     // Apply altitude adjustments for cardio components
     if (altitudeGroup && altitudeGroup !== 'normal' && altitudeAdjustments) {
@@ -188,20 +188,6 @@ export const getScoreForExercise = (standards: any[], component: string, perform
             return 0;
     }
 };
-
-/**
- * Determines the age group index for the walk test.
- * @param age - The person's age.
- * @returns The index of the age group (0-4), or -1 if not found.
- */
-const getAgeGroupIndex = (age: number): number => {
-    if (age < 30) return 0;
-    if (age >= 30 && age <= 39) return 1;
-    if (age >= 40 && age <= 49) return 2;
-    if (age >= 50 && age <= 59) return 3;
-    if (age >= 60) return 4;
-    return -1;
-}
 
 /**
  * Checks if the 2-kilometer walk meets the passing criteria.

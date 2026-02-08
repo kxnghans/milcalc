@@ -5,7 +5,7 @@
  * NOTE: This file is a duplicate of the ThemeProvider in `@repo/ui`. It's recommended to use the shared provider.
  */
 
-import React, { createContext, useState, useContext, useMemo } from 'react';
+import React, { createContext, useState, useContext, useMemo, ReactNode } from 'react';
 import { Appearance } from 'react-native';
 import { theme as defaultTheme, lightColors, darkColors } from '@repo/ui';
 
@@ -27,7 +27,7 @@ export const useTheme = () => useContext(ThemeContext);
 /**
  * The provider component that wraps the application and makes the theme context available.
  */
-export const ThemeProvider = ({ children }) => {
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   // Get the system's color scheme preference.
   const systemTheme = Appearance.getColorScheme();
   // State to manage the current theme mode: 'auto', 'light', or 'dark'.

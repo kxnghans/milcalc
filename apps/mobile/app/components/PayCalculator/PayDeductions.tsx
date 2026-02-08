@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, LayoutAnimation } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useTheme, PillButton } from '@repo/ui';
 import CurrencyInput from '../CurrencyInput';
 import InsetTextInput from '../InsetTextInput';
@@ -140,4 +140,4 @@ export default function PayDeductions({
       </View>
     </>
   );
-};
+}
