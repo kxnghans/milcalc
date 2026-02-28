@@ -24,7 +24,7 @@ interface IconRowProps {
     /** A function to be called when the icon is pressed. */
     onPress?: () => void;
     /** A URL to navigate to when the icon is pressed. Uses expo-router's Link. */
-    href?: string;
+    href?: any;
     /** The name of the icon set to use (e.g., 'MaterialCommunityIcons'). Defaults to 'MaterialCommunityIcons'. */
     iconSet?: keyof typeof Icons;
     /** The color of the icon and/or text. */

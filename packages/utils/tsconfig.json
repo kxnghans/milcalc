@@ -2,6 +2,7 @@
   "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "types": ["jest", "node"],
     "paths": {
       "@repo/utils": ["./src/index.ts"],
       "@repo/utils/*": ["./src/*"]

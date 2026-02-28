@@ -89,7 +89,7 @@ import { getScoreCategory } from '@repo/utils';
 
 
 
-import ScoreDisplay from '../components/ScoreDisplay';
+import ScoreDisplay from '../../components/ScoreDisplay';
 
 
 
@@ -97,7 +97,7 @@ import ScoreDisplay from '../components/ScoreDisplay';
 
 
 
-import NumberInput from '../components/NumberInput';
+import NumberInput from '../../components/NumberInput';
 
 
 
@@ -105,7 +105,7 @@ import NumberInput from '../components/NumberInput';
 
 
 
-import TimeInput from '../components/TimeInput';
+import TimeInput from '../../components/TimeInput';
 
 
 
@@ -113,7 +113,7 @@ import TimeInput from '../components/TimeInput';
 
 
 
-import Demographics from '../components/Demographics';
+import Demographics from '../../components/Demographics';
 
 
 
@@ -121,7 +121,7 @@ import Demographics from '../components/Demographics';
 
 
 
-import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
+import AltitudeAdjustmentComponent from "../../components/AltitudeAdjustmentComponent";
 
 
 
@@ -129,7 +129,7 @@ import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentCompone
 
 
 
-import Divider from '../components/Divider';
+import Divider from '../../components/Divider';
 
 
 
@@ -137,7 +137,7 @@ import Divider from '../components/Divider';
 
 
 
-import DocumentModal from '../components/DocumentModal';
+import DocumentModal from '../../components/DocumentModal';
 
 
 
@@ -145,7 +145,7 @@ import DocumentModal from '../components/DocumentModal';
 
 
 
-import DetailModal from '../components/DetailModal';
+import DetailModal from '../../components/DetailModal';
 
 
 
@@ -153,11 +153,11 @@ import DetailModal from '../components/DetailModal';
 
 
 
-import DismissKeyboardView from '../components/DismissKeyboardView';
+import DismissKeyboardView from '../../components/DismissKeyboardView';
 
 
 
-import ScreenHeader from '../components/ScreenHeader';
+import ScreenHeader from '../../components/ScreenHeader';
 
 
 

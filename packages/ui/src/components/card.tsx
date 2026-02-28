@@ -4,7 +4,7 @@
  * that applies a consistent neumorphic outset style to its children.
  */
 
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { StyleSheet, ViewStyle, StyleProp } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
 import NeumorphicOutset from "./NeumorphicOutset";
@@ -16,9 +16,9 @@ import NeumorphicOutset from "./NeumorphicOutset";
  * @param {ReactNode} props.children - The content to be rendered inside the card.
  * @param {StyleProp<ViewStyle>} [props.style] - Optional custom styles to be applied to the card's container.
  * @param {StyleProp<ViewStyle>} [props.containerStyle] - Alias for style, for consistency with other components.
- * @returns {JSX.Element} The rendered Card component.
+ * @returns {React.JSX.Element} The rendered Card component.
  */
-export function Card({ children, style, containerStyle }: { children: ReactNode, style?: StyleProp<ViewStyle>, containerStyle?: StyleProp<ViewStyle> }): JSX.Element {
+export function Card({ children, style, containerStyle }: { children: ReactNode, style?: StyleProp<ViewStyle>, containerStyle?: StyleProp<ViewStyle> }): React.JSX.Element {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({

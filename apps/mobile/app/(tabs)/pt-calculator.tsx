@@ -3,19 +3,19 @@ import { View, StyleSheet, ImageSourcePropType } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Card, IconRow, useTheme, usePtCalculatorState } from "@repo/ui";
 import { ICONS } from "@repo/ui/icons";
-import ScoreDisplay from "../components/ScoreDisplay";
-import DocumentModal from "../components/DocumentModal";
-import StrengthComponent from "../components/StrengthComponent";
-import CoreComponent from "../components/CoreComponent";
-import CardioComponent from "../components/CardioComponent";
-import Demographics from "../components/Demographics";
-import AltitudeAdjustmentComponent from "../components/AltitudeAdjustmentComponent";
-import Divider from "../components/Divider";
+import ScoreDisplay from "../../components/ScoreDisplay";
+import DocumentModal from "../../components/DocumentModal";
+import StrengthComponent from "../../components/StrengthComponent";
+import CoreComponent from "../../components/CoreComponent";
+import CardioComponent from "../../components/CardioComponent";
+import Demographics from "../../components/Demographics";
+import AltitudeAdjustmentComponent from "../../components/AltitudeAdjustmentComponent";
+import Divider from "../../components/Divider";
 
-import DetailModal from "../components/DetailModal";
+import DetailModal from "../../components/DetailModal";
 
-import DismissKeyboardView from "../components/DismissKeyboardView";
-import ScreenHeader from "../components/ScreenHeader";
+import DismissKeyboardView from "../../components/DismissKeyboardView";
+import ScreenHeader from "../../components/ScreenHeader";
 
 import { useCallback } from "react";
 

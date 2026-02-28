@@ -9,6 +9,7 @@
   },
   "main": "./src/index.ts",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "test": "jest --passWithNoTests --no-cache"
@@ -21,24 +22,24 @@
     "@turbo/gen": "^1.12.4",
     "@types/eslint": "^8.56.5",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20.11.24",
-    "@types/react": "18.2.0",
+    "@types/node": "^20.19.33",
+    "@types/react": "19.1.10",
     "@types/react-native": "^0.73.0",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
     "eslint": "^8.57.0",
     "jest": "^30.2.0",
     "react": "^18.2.0",
+    "react-native": "*",
     "ts-jest": "^29.4.5",
-    "typescript": "^5.3.3",
-    "react-native": "*"
+    "typescript": "^5.3.3"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-native": ">=0.70.0"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.90.10",
+    "@tanstack/react-query": "^5.90.21",
     "react-native-reanimated": "~4.1.5"
   }
 }

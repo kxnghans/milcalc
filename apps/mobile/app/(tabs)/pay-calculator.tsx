@@ -5,18 +5,18 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import DocumentModal from '../components/DocumentModal';
-import Divider from '../components/Divider';
-import InsetTextInput from '../components/InsetTextInput';
-import PickerInput from '../components/PickerInput';
-import NumberInput from '../components/NumberInput';
-import CurrencyInput from '../components/CurrencyInput';
-import DetailModal from '../components/DetailModal';
-import DismissKeyboardView from '../components/DismissKeyboardView';
-import ScreenHeader from '../components/ScreenHeader';
+import DocumentModal from '../../components/DocumentModal';
+import Divider from '../../components/Divider';
+import InsetTextInput from '../../components/InsetTextInput';
+import PickerInput from '../../components/PickerInput';
+import NumberInput from '../../components/NumberInput';
+import CurrencyInput from '../../components/CurrencyInput';
+import DetailModal from '../../components/DetailModal';
+import DismissKeyboardView from '../../components/DismissKeyboardView';
+import ScreenHeader from '../../components/ScreenHeader';
 
-import VerticalDivider from '../components/VerticalDivider';
-import TwoColumnPicker from '../components/TwoColumnPicker';
+import VerticalDivider from '../../components/VerticalDivider';
+import TwoColumnPicker from '../../components/TwoColumnPicker';
 
 const payMascots = [
   { uri: MASCOT_URLS.PAY },

@@ -4,6 +4,7 @@
   "private": true,
   "main": "./src/index.ts",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "test": "jest --config ../../jest.config.js --no-cache"
@@ -12,13 +13,14 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/jest": "^30.0.0",
+    "@types/node": "^25.3.2",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
     "eslint": "^8.57.0",
     "jest": "^30.2.0",
+    "react-native": "*",
     "ts-jest": "^29.4.5",
-    "typescript": "^5.3.3",
-    "react-native": "*"
+    "typescript": "^5.3.3"
   },
   "peerDependencies": {
     "react-native": ">=0.70.0"

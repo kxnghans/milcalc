@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useTheme, SegmentedSelector, PillButton } from '@repo/ui';
 import { BlurView } from 'expo-blur';
-import SeasonalEffects from './components/_SeasonalEffects';
+import SeasonalEffects from '../components/_SeasonalEffects';
 import splashImage from '../assets/3d_splash.png';
 
 const getSeason = () => {

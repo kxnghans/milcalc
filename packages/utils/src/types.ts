@@ -368,6 +368,7 @@ export type Database = {
           id: number
           learn_more_uri: string | null
           name: string
+          sort_order: number | null
           source: string | null
           type: string
         }
@@ -376,6 +377,7 @@ export type Database = {
           id?: number
           learn_more_uri?: string | null
           name: string
+          sort_order?: number | null
           source?: string | null
           type: string
         }
@@ -384,6 +386,7 @@ export type Database = {
           id?: number
           learn_more_uri?: string | null
           name?: string
+          sort_order?: number | null
           source?: string | null
           type?: string
         }
@@ -852,6 +855,21 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_metadata: {
+        Row: {
+          last_updated_at: string | null
+          table_name: string
+        }
+        Insert: {
+          last_updated_at?: string | null
+          table_name: string
+        }
+        Update: {
+          last_updated_at?: string | null
+          table_name?: string
+        }
+        Relationships: []
+      }
       tax_data_22zpallagi: {
         Row: {
           a00100: number | null
@@ -966,7 +984,7 @@ export type Database = {
           n07100: number | null
           n07180: number | null
           n07225: number | null
-n07230: number | null
+          n07230: number | null
           n07240: number | null
           n07260: number | null
           n07300: number | null
@@ -1240,7 +1258,7 @@ n07230: number | null
           a18300?: number | null
           a18425?: number | null
           a18450?: number | null
-a18460?: number | null
+          a18460?: number | null
           a18500?: number | null
           a18800?: number | null
           a19300?: number | null

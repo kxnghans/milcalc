@@ -9,11 +9,11 @@
     "mobile:dev:clear": "pnpm --filter milcalc-mobile dev:clear --tunnel",
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "check-types": "turbo run check-types",
     "test": "pnpm --stream -r test"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/minimatch": "^6.0.0",
     "@types/node": "^20.19.17",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
