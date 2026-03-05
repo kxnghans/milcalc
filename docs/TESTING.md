@@ -1,61 +1,47 @@
-# MilCalc Testing Strategy
+# MilCalc Testing & Resilience Strategy
 
-This document outlines the testing strategy for the MilCalc mobile application. The goal is to ensure the reliability, correctness, and performance of all features through a multi-layered testing approach.
+This document outlines the multi-layered verification strategy for MilCalc, with a focus on reliability in extreme operational environments.
 
-## 1. Setup and Configuration
+## 1. Unit & Integration Testing (Logic)
 
-The project uses **Jest** for unit and integration testing, configured to run in a `pnpm` monorepo environment. The setup is centralized to ensure consistency across all packages.
+The project uses **Jest** for validating the "Pure Logic" layer in `packages/utils`.
+-   **100% Logic Coverage**: Every calculation engine (PT, Pay, Retirement) must have a corresponding test file.
+-   **Mock Rigor**: All external data dependencies are mocked using the `test-mocks` directory. Mock data must precisely reflect the *transformed* API result structure.
 
-### Key Configuration Learnings
+## 2. Environmental Constraints & Resilience
 
-1.  **Centralized Dependencies:** All core testing dependencies (`jest`, `ts-jest`, `@types/jest`, `jest-environment-jsdom`) are installed in the root `package.json` to ensure version consistency.
-2.  **Workspace Configuration:** Each workspace that contains tests (e.g., `packages/utils`) must have its own `jest.config.js` file that inherits from the root configuration.
-3.  **Root Configuration:** The root `jest.config.js` is the source of truth. It is configured for TypeScript transformation using `ts-jest` and handles path mapping for workspace aliases (`@repo/utils`, `@repo/ui`).
-4.  **Type Safety:** The test runner will fail if there are TypeScript compilation errors anywhere in the imported module graph. This enforces that all code under test, including utilities and API helpers, is strict-mode compliant.
+MilCalc is designed for military environments (flightlines, bunkers, deployed locations) where hardware and connectivity are unpredictable.
 
-### Running Tests
+### 2.1 "Airplane Mode" Validation
+-   **Constraint**: Zero network availability during first-launch or standard use.
+-   **Verification**: Physical device testing in Airplane Mode. 
+-   **Success Metric**: Application must boot within 3 seconds and allow a full PT calculation using local `seed-data.json` without network timeouts or UI "Loading" spinners.
 
-To run all tests across the monorepo, use the root `test` script:
+### 2.2 Low-Bandwidth / Intermittent Sync
+-   **Constraint**: High packet loss or 2G speeds.
+-   **Verification**: Utilize network throttling in Chrome DevTools or iOS Network Link Conditioner.
+-   **Success Metric**: `SyncManager` must fail silently and retry on the next clean boot without blocking the main UI thread.
 
-```bash
-pnpm test
-```
+### 2.3 Limited Memory / Thermal Throttling
+-   **Constraint**: Older hardware (iPhone 8 / Galaxy S9) in high-heat environments.
+-   **Verification**: Memory leak profiling using React Native Debugger and Xcode Instruments.
+-   **Success Metric**: The PT Calculator must maintain 60 FPS during rapid score updates, even under 80% CPU load simulations.
 
-## 2. Unit Testing
+## 3. Offline Data Integrity
 
-Unit tests are the foundation of the testing strategy, focusing on pure functions and isolated logic. All calculation utilities in `packages/utils` are designed as pure functions, making them ideal candidates for unit testing.
+Given our "Smart Cache" architecture, we must verify that the SQLite persistence layer never becomes corrupted.
+-   **Scenario**: App crash during a background re-fetch.
+-   **Verification**: Automated unit tests for `sync-api.ts` that simulate a failed transaction and verify that the "Last Known Good" cache remains intact.
 
-**Data Mocking:** To ensure tests are fast and deterministic, all external data dependencies (i.e., Supabase API calls) are mocked. Mock data is stored in the `packages/utils/__tests__/test-mocks/` directory and imported directly into test files. 
+## 4. E2E Golden Path (Maestro)
 
-**Critical Rule for Mocks:** The structure of the mock data must **precisely match the transformed structure** of the data returned by the data-fetching functions (e.g., `getPtStandards`), not the raw Supabase database schema. 
+We leverage **Maestro** for black-box testing of critical user journeys.
+1.  **The "New Airman" Flow**: Launch app -> Enter age/gender -> Enter Pushups -> Verify score color -> Open Help Modal.
+2.  **The "Retiree" Flow**: Toggle VA Disability comparison -> Change Disability % -> Verify "Optimal Income" summary.
 
-### 2.1. PT Calculator (`pt-calculator.ts`)
--   **Test File:** `packages/utils/__tests__/pt-calculator.test.ts`
--   **Coverage:** 
-    - Standard passing and failing scores.
-    - Component exemptions.
-    - Pass/fail status for the 2km walk.
-    - Altitude adjustments.
+## 5. Build Rigor
 
-### 2.2. Pay Calculator (`pay-calculator.ts`)
--   **Test Files:** `pay-calculator.test.ts`, `pay-calculator-disability.test.ts`
--   **Coverage:** 
-    - Active Duty vs. Guard/Reserve math.
-    - Calculation of military pay vs. VA disability offsets.
-    - FICA, Federal, and State tax bracket processing.
-
-### 2.3. Retirement Calculator (`retirement-calculator.ts`)
--   **Test File:** `retirement-calculator.test.ts`
--   **Coverage:** 
-    - High-3 vs. BRS multiplier rules.
-    - Guard/Reserve point conversion.
-    - TSP growth forecasting and matching rules.
-
-## 3. Offline Data Verification
-
-Given our "Smart Cache" architecture, verification must include "Airplane Mode" testing on physical devices to ensure the local SQLite persistence layer properly hydrates and returns standard data without network timeouts.
-
-## 4. Integration and E2E Testing
-
-*(To be implemented)*
-Future E2E testing will leverage tools like **Maestro** to simulate full user journeys (e.g., opening the app in Airplane mode, entering PT data, verifying the final score color changes, and opening a help modal). Golden path tests will reside in a `.maestro/` directory at the project root.
+Every Pull Request must pass the following automated gates:
+-   `turbo run lint`: Ensure zero linting violations.
+-   `turbo run check-types`: Ensure 100% type safety.
+-   `turbo run test`: Ensure zero regression in calculation math.

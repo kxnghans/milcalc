@@ -2,119 +2,93 @@
 
 MilCalc is a modern, cross-platform suite of tools designed for United States military personnel to track and calculate fitness and finance metrics. Built with a focus on accuracy, offline reliability, and a clean, neumorphic user interface.
 
-## Features
+## 🚀 Tech Stack Summary
 
--   **100% Offline Capable**: "Smart Cache" architecture (SQLite + React Query) ensures all tools work instantly on flightlines and in deployed environments without cell service.
--   **Air Force PT Calculator**: Calculate PT scores with automatic altitude adjustments.
--   **Pay Calculator**: Estimate military pay, including BAH, BAS, and special pays. Includes VA Disability pay comparison.
--   **Retirement Calculator**: Estimate retirement pay based on various retirement plans (High-3, BRS), including TSP and disability estimates.
--   **Contextual In-App Help**: A comprehensive, markdown-enabled help system provides detailed explanations for calculations and UI elements.
--   **Best Score Tracker**: Track personal bests for each PT exercise.
--   **Dynamic Theming**: Switch between light, dark, and system-default themes.
+MilCalc is built as a high-performance monorepo using industry-standard tools:
 
-## Tech Stack
+*   **Monorepo Management**: [Turborepo](https://turbo.build/repo) + [pnpm Workspaces](https://pnpm.io/workspaces).
+*   **Mobile Framework**: [React Native](https://reactnative.dev/) via [Expo](https://expo.dev/) (SDK 52+), utilizing the New Architecture and React 19.
+*   **Backend-as-a-Service**: [Supabase](https://supabase.com/) (PostgreSQL, PostgREST, Auth).
+*   **Data Orchestration**: [TanStack Query v5](https://tanstack.com/query/latest) with `expo-sqlite` persistence for "Zero-Latency" offline-first performance.
+*   **Design System**: Custom Neumorphic library in `@repo/ui`, utilizing `react-native-reanimated` for fluid interactions.
+*   **Language**: Strict [TypeScript](https://www.typescriptlang.org/) across all packages.
+*   **Testing**: [Jest](https://jestjs.io/) for unit/integration logic; [Maestro](https://maestro.mobile.dev/) (planned) for E2E flows.
 
-This project is a monorepo built with [pnpm workspaces](https://pnpm.io/workspaces) and [Turborepo](https://turbo.build/repo).
+## 📦 Project Structure & Logical Domains
 
--   **Backend**: [Supabase](https://supabase.com/) (Postgres Database, Auth, Storage)
--   **Mobile App**: [React Native](https://reactnative.dev/) with [Expo Router](https://docs.expo.dev/router/introduction/)
--   **Offline Persistence**: `expo-sqlite` backing TanStack Query via `@tanstack/react-query-persist-client`.
--   **Shared UI**: A custom component library in `packages/ui` built with React Native.
--   **Shared Logic**: Core calculation utilities and Supabase clients in `packages/utils`.
--   **Configuration**: Shared ESLint and TypeScript configurations for consistent code quality.
-
-## Getting Started
-
-### Prerequisites
-
--   [Node.js](https://nodejs.org/en/) (v18 or higher recommended)
--   [pnpm](https://pnpm.io/)
-
-### Installation & Setup
-
-1.  **Install dependencies** from the root of the monorepo:
-    ```bash
-    pnpm install
-    ```
-
-2.  **Run the development server**
-    This command uses `turbo` to start the mobile app along with any necessary background tasks.
-    ```bash
-    pnpm dev
-    ```
-
-3.  **Code Quality Tools**
-    - Linting: `pnpm lint` or `turbo run lint`
-    - Type-Checking: `pnpm check-types` or `turbo run check-types`
-    - Testing: `pnpm test`
-
-## Viewing the Apps
-
-After running `pnpm dev`, you will see output for the mobile app in your terminal.
-
-### Mobile (Expo)
-
-1.  **Install the Expo Go app** on your iOS or Android device.
-    -   [Android Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
-    -   [iOS App Store](https://apps.apple.com/us/app/expo-go/id982107779)
-2.  **Connect to the same Wi-Fi network** as your computer.
-3.  **Scan the QR code** displayed in your terminal using the Expo Go app.
-
-## Project Structure
-
-Here is a detailed overview of the MilCalc monorepo architecture:
+The codebase is partitioned into distinct logical layers to ensure separation of concerns and maximize code reuse:
 
 ```text
 .
 ├── apps
-│   └── mobile                         # (Layer 2) Main mobile application
-│       ├── app                        # (Layer 3) Expo Router structure
-│       │   ├── _layout.tsx            # (Layer 4) Root navigation layout
-│       │   ├── index.tsx              # (Layer 4) Entry screen
-│       │   ├── (tabs)                 # (Layer 4) Main tab navigation
-│       │   │   ├── _layout.tsx        # (Layer 5) Tab bar configuration
-│       │   │   ├── pt-calculator.tsx  # (Layer 5) PT Calculator screen
-│       │   │   └── pay-calculator.tsx # (Layer 5) Pay Calculator screen
-│       │   └── components             # (Layer 4) App-specific UI components
-│       │       └── PayCalculator      # (Layer 5) Modularized calculator UI
-│       ├── assets                     # (Layer 3) Static assets (images, icons)
-│       └── package.json               # (Layer 3) Mobile app dependencies
-├── docs                               # (Layer 2) Project documentation
-│   ├── architecture.md                # (Layer 3) System map and logic flows
-│   ├── backend.md                     # (Layer 3) Database schema and Supabase rules
-│   ├── checklist.md                   # (Layer 3) Execution tracker and milestones
-│   ├── PRD.md                         # (Layer 3) Product requirements
-│   ├── testing.md                     # (Layer 3) Testing strategies
-│   └── ui-theme.md                    # (Layer 3) Design system and UI standards
+│   └── mobile                         # [UI/DELIVERY DOMAIN] - Primary mobile application
+│       ├── app                        # Expo Router: File-based navigation and screen layouts
+│       │   ├── (tabs)                 # Main application features (PT, Pay, Retirement)
+│       │   └── _layout.tsx            # Global providers (Theme, Query, Persistence)
+│       ├── components                 # App-specific UI components (Composition layer)
+│       └── app.config.ts              # Dynamic Expo configuration and environment injection
+├── docs                               # [KNOWLEDGE DOMAIN] - Technical specifications
+│   ├── architecture.md                # System map and state machine logic
+│   ├── backend.md                     # Supabase schema and sync strategy
+│   └── ui-theme.md                    # Design tokens and neumorphic principles
 ├── packages
-│   ├── eslint-config                  # (Layer 2) Shared linting configuration
-│   │   ├── base.js                    # (Layer 3) Node/TS base rules
-│   │   └── react-native.js            # (Layer 3) RN specific rules
-│   ├── typescript-config              # (Layer 2) Shared TS configuration
-│   ├── ui                             # (Layer 2) Shared UI component library
-│   │   ├── src                        # (Layer 3) Library source
-│   │   │   ├── components             # (Layer 4) Shared primitives (Buttons, Cards)
-│   │   │   ├── contexts               # (Layer 4) Shared contexts (ThemeContext)
-│   │   │   └── hooks                  # (Layer 4) Shared feature state (usePtCalculatorState)
-│   │   └── package.json               # (Layer 3) UI package definitions
-│   └── utils                          # (Layer 2) Shared core logic
-│       ├── src                        # (Layer 3) Calculation and API utilities
-│       │   ├── pt-calculator.ts       # (Layer 4) Pure math for PT scores
-│       │   ├── pay-supabase-api.ts    # (Layer 4) Supabase data fetching
-│       │   └── index.ts               # (Layer 4) Library exports
-│       └── __tests__                  # (Layer 3) Unit tests for utils
-├── .gitignore
-├── GEMINI.md                          # (Layer 1) AI agent instructions
-├── package.json                       # (Layer 1) Root workspace dependencies
-├── pnpm-workspace.yaml                # (Layer 1) Monorepo workspace setup
-└── turbo.json                         # (Layer 1) Turborepo task pipeline
+│   ├── ui                             # [DESIGN DOMAIN] - Shared UI component library
+│   │   └── src
+│   │       ├── components             # Atomic primitives (Buttons, Cards, Inputs)
+│   │       ├── hooks                  # Feature-specific state hooks (usePtCalculatorState)
+│   │       └── theme.ts               # Centralized design tokens (Colors, Spacing)
+│   ├── utils                          # [LOGIC DOMAIN] - Pure business logic and API
+│   │   └── src
+│   │       ├── *-calculator.ts        # Side-effect free mathematical engines
+│   │       ├── *-supabase-api.ts      # Typed data-fetching and transformation
+│   │       └── types.ts               # Global TypeScript definitions
+│   └── typescript-config              # [INFRA DOMAIN] - Shared build configurations
+├── .git                               # Version control
+├── GEMINI.md                          # AI Operating Instructions
+├── package.json                       # Root workspace and script definitions
+└── turbo.json                         # Build pipeline and cache orchestration
 ```
 
-## Architecture
+## 🛠 Getting Started (Localized Setup)
 
-The project enforces a strict three-tier architecture:
-1. **Presentation Layer**: Stateless UI components and Expo routing (`apps/mobile`, `packages/ui/src/components`).
-2. **State & Persistence Layer**: Custom hooks using React Query and SQLite to manage offline data state (`packages/ui/src/hooks`).
-3. **Core Logic Layer**: Pure mathematical functions and database sync APIs (`packages/utils`).
+### 1. Environment Prerequisites
+- **Node.js**: v20.x or higher (LTS recommended).
+- **pnpm**: v10.x (Check via `pnpm -v`).
+- **Expo Go**: Installed on your physical iOS/Android device.
 
-For detailed documentation, please refer to the `/docs` directory.
+### 2. Installation
+From the root directory, install all dependencies and link workspace packages:
+```bash
+pnpm install
+```
+
+### 3. Local Development
+Start the development server:
+```bash
+pnpm dev
+```
+
+For physical device testing over a network (Remote Tunnel):
+```bash
+pnpm dev:remote     # Starts expo server with tunnel enabled
+```
+
+To reset the development environment and clear the cache:
+```bash
+pnpm dev:clear      # Starts expo server with clear and tunnel flags
+```
+*Tip: Scan the QR code in your terminal using the Expo Go app.*
+
+### 4. Quality Rigor
+Run the full validation suite before pushing changes:
+```bash
+pnpm lint           # Check code style
+pnpm check-types    # Validate TypeScript integrity
+pnpm test           # Execute Jest logic tests
+```
+
+## 🧠 Architectural Philosophy
+
+MilCalc enforces a **Logic-Decoupled** architecture. Components in `apps/mobile` or `packages/ui` must never contain business math. All calculations are handled by pure, testable functions in `packages/utils`. This ensures that a change to the Air Force PT scoring standards only needs to be updated in one file to reflect across the entire system.
+
+For deep-dives into specific modules, see the [Documentation Index](./docs/README.md).

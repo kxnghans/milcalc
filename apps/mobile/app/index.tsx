@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from 'react-native';
 import { useTheme, SegmentedSelector, PillButton } from '@repo/ui';
 import { BlurView } from 'expo-blur';
@@ -24,6 +25,7 @@ export default function SplashScreen() {
   const router = useRouter();
   const { theme, isDarkMode } = useTheme();
   const [season, setSeason] = useState(getSeason());
+  const { height: screenHeight } = useWindowDimensions();
 
   const handleContinue = () => {
     router.replace('/(tabs)/pt-calculator');
@@ -38,16 +40,21 @@ export default function SplashScreen() {
     },
     foregroundLayer: {
       ...StyleSheet.absoluteFillObject,
+      paddingBottom: 40,
+    },
+    imageContainer: {
+      flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      width: '100%',
+      paddingTop: 40, // Give some space at the top
     },
     image: {
-      width: '100%',
+      width: '85%',
       height: '100%',
+      maxHeight: screenHeight * 0.4,
     },
     bottomContainer: {
-      position: 'absolute',
-      bottom: 40,
       width: '100%',
       paddingHorizontal: theme.spacing.m,
       alignItems: 'center',
@@ -76,7 +83,10 @@ export default function SplashScreen() {
 
       {/* Foreground Layer */}
       <View style={styles.foregroundLayer}>
-        <Image source={splashImage} style={styles.image} resizeMode="contain" />
+        <View style={styles.imageContainer}>
+          <Image source={splashImage} style={styles.image} resizeMode="contain" />
+        </View>
+        
         <View style={styles.bottomContainer}>
           <View style={{ justifyContent: 'center' }}>
             <View style={styles.disclaimerContainer}>

@@ -13,44 +13,46 @@ Simplify complex military-specific calculations—such as PT scores, monthly pay
 -   **Guard & Reserve Members:** Needing drill pay calculations and points-based retirement projections.
 -   **Military Retirees/Veterans:** Interested in disability pay comparisons and retirement benefit tracking.
 
-## 3. Key Features
+## 3. Feature Categorization by User Intent
 
-### 3.1 Air Force PT Calculator
--   **Score Calculation:** Real-time calculation of PT scores based on official Air Force standards.
--   **Component Support:** Includes Strength, Core, and Cardio (Run, HAMR, Walk).
--   **Altitude Adjustments:** Automatic adjustment of cardio scores based on elevation.
--   **Offline Execution:** Standards are fetched dynamically from a local SQLite cache.
+We distinguish between features based on the user's emotional and operational state during use.
 
-### 3.2 Best Score Tracker
--   **Personal Records:** Allows users to track their personal bests for each exercise component.
--   **Real-time Potential:** Calculates a theoretical "Best Score" based on individual component records.
+### 3.1 Competitive & Critical (High Precision)
+These features are used when the user is "on the clock" or facing official evaluations. UI must be high-contrast, input-efficient, and error-proof.
 
-### 3.3 Pay Calculator
--   **Comprehensive Estimation:** Calculates monthly and annual gross/net pay.
--   **Component Modes:** Supports Active Duty (Monthly) and Guard/Reserve (Drill Pay) modes.
--   **VA Disability Integration:** Compares military pay with tax-free VA disability rates to determine the optimal income source.
--   **Tax Engine:** Calculates FICA, Federal, and State taxes based on user filing status. Includes BAH and BAS allowances.
+*   **Air Force PT Calculator**:
+    *   *Intent*: Competitive. Users are often stressed or physically exhausted while checking scores.
+    *   *Requirement*: Zero-latency calculation. Instant visual feedback (Red/Green) on pass/fail status. Automatic altitude detection.
+*   **Best Score Tracker**:
+    *   *Intent*: Achievement-oriented. Users are tracking personal growth and potential.
+    *   *Requirement*: Persistence across sessions. Clear "Record" indicators.
 
-### 3.4 Retirement Calculator
--   **Plan Support:** Supports High-3 and Blended Retirement System (BRS).
--   **Pension Projections:** Estimates monthly pension based on years of service or reserve points.
--   **TSP Forecasting:** Includes a Thrift Savings Plan calculator with contribution matching (BRS).
+### 3.2 Exploratory & Financial (Low Friction / Planning)
+These features are used for long-term planning and "what-if" scenarios. UI should be detailed, informative, and focused on clarity over speed.
 
-### 3.5 Contextual Help System
--   **In-App Guidance:** Centralized `DetailModal` provides markdown-formatted explanations for every calculation and input field.
--   **Smart Sync CMS:** Content is managed in Supabase and silently synced to the local device in the background when connectivity is available.
+*   **Pay Calculator**:
+    *   *Intent*: Financial planning. Users are comparing career moves or analyzing tax implications.
+    *   *Requirement*: Detailed breakdown of allowances (BAH/BAS) and deductions (FICA/Taxes). VA Disability comparison mode.
+*   **Retirement Calculator**:
+    *   *Intent*: Strategic planning. Users are projecting 20+ years into the future.
+    *   *Requirement*: Multi-plan support (High-3/BRS). Multi-year TSP growth forecasting. Reserve point conversion logic.
+
+### 3.3 Educational & Supportive
+*   **Contextual Help System**:
+    *   *Intent*: Learning. Users are seeking the "Why" behind a number.
+    *   *Requirement*: Markdown support for readability. Deep-linking from specific calculation components.
 
 ## 4. Technical Stack
 
--   **Frontend:** React Native, Expo Router, TypeScript.
+-   **Frontend:** React Native (Expo), TypeScript.
 -   **Design:** Shared UI package featuring a Neumorphic design system.
 -   **Backend:** Supabase (PostgreSQL, Auth).
 -   **Offline Persistence:** `expo-sqlite` and `@tanstack/react-query-persist-client`.
 -   **Architecture:** Turborepo managed pnpm monorepo.
 
-## 5. User Experience (UX)
+## 5. User Experience (UX) Standards
 
 -   **100% Offline Ready:** Functions immediately without requiring a network connection on first launch (via bundled seed data).
--   **Debounced Inputs:** Prevents UI jitter by delaying calculations until user input pauses.
--   **Ergonomics:** `DismissKeyboardView` implemented globally to prevent keyboard entrapment.
--   **Visual Feedback:** Progress bars intelligently color-code themselves (Blue/Green/Red) based on the calculated percentage of maximum possible points.
+-   **Interactive Physics**: Utilize `react-native-reanimated` for "tactile" feedback on neumorphic buttons and sliders.
+-   **Debounced Inputs**: Prevents UI jitter by delaying heavy calculations (like complex tax engines) until user input pauses (500ms).
+-   **Visual Hierarchy**: Progress bars intelligently color-code themselves based on official military scoring categories (Excellent: Blue/Green, Pass: Green, Fail: Red).
