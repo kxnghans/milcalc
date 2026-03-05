@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, Modal, Text, Pressable, ActivityIndicator, ViewStyle } from 'react-native';
+import { View, StyleSheet, Modal, Text, Pressable, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
-import { useTheme, NeumorphicInset, PillButton } from '@repo/ui';
+import { useTheme, NeumorphicInset, PillButton, getAlphaColor } from '@repo/ui';
 
 interface TwoColumnPickerProps {
-  data: any;
-  onChange: (value: any, primary: string) => void;
-  selectedValue: any;
+  data: Record<string, { label: string; value: string | number | null }[]> | null;
+  onChange: (value: string | number | null, primary: string) => void;
+  selectedValue: string | number | null;
   displayName: string;
   isLoading: boolean;
-  error: any;
+  error: unknown;
   primaryColumnValue?: string | null;
   primaryItems?: string[];
   primaryPlaceholder?: string;
@@ -75,7 +75,7 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
     setSelectedPrimary(primary);
     if (primary === primaryPlaceholder) {
         setTempSelectedValue('');
-    } else if (primary) {
+    } else if (primary && data) {
         const newSecondaryItems = data[primary] || [];
         if (newSecondaryItems.length > 0) {
           setTempSelectedValue(newSecondaryItems[0].value);
@@ -97,7 +97,7 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
     setModalVisible(false);
   };
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = StyleSheet.create({
     pressableInput: {
         paddingVertical: theme.spacing.s,
         paddingHorizontal: theme.spacing.s,
@@ -118,7 +118,7 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
     modalOverlay: {
         flex: 1,
         justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: getAlphaColor('#000000', 0.5),
     },
     modalContent: {
         backgroundColor: theme.colors.background,
@@ -151,12 +151,20 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    loadingText: {
+        ...theme.typography.body,
+        color: theme.colors.text,
+        marginTop: theme.spacing.m,
+    },
+    spacer: {
+        width: theme.spacing.s,
     }
-  }), [theme]);
+  });
 
   const getDisplayText = () => {
     if (isLoading) return 'Loading Data...';
-    if (error) return error;
+    if (error) return String(error);
     return displayName;
   };
 
@@ -165,7 +173,7 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
         <Pressable onPress={() => setModalVisible(true)} disabled={isLoading || !!error}>
             <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
                 <View style={styles.pressableInput}>
-                    <Text style={[styles.pressableText, (!selectedValue || selectedValue === 'initial') && styles.placeholderText, error && styles.errorText]}>
+                    <Text style={[styles.pressableText, (!selectedValue || selectedValue === 'initial') && styles.placeholderText, !!error && (styles.errorText as TextStyle)]}>
                         {getDisplayText()}
                     </Text>
                 </View>
@@ -184,7 +192,7 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
                         {isLoading ? (
                             <View style={styles.loadingContainer}>
                                 <ActivityIndicator size="large" color={theme.colors.primary} />
-                                <Text style={{...theme.typography.body, color: theme.colors.text, marginTop: theme.spacing.m}}>Loading...</Text>
+                                <Text style={styles.loadingText}>Loading...</Text>
                             </View>
                         ) : (
                             <>
@@ -207,8 +215,8 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
                                         itemStyle={styles.pickerItem}
                                     >
                                         {secondaryColumnItems.length > 0 ? (
-                                        secondaryColumnItems.map((item: any) => (
-                                            <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                        secondaryColumnItems.map((item: { label: string; value: string | number | null }) => (
+                                            <Picker.Item key={String(item.value)} label={item.label} value={item.value} />
                                         ))
                                         ) : (
                                             <Picker.Item label={secondaryPlaceholder} value="" enabled={false} />
@@ -217,7 +225,7 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
                                 </View>
                                 <View style={styles.buttonContainer}>
                                     <PillButton title="Cancel" onPress={handleCancel} backgroundColor={theme.colors.error} textColor={theme.colors.primaryText} />
-                                    <View style={{ width: theme.spacing.s }} />
+                                    <View style={styles.spacer} />
                                     <PillButton title="Done" onPress={handleConfirm} disabled={!selectedPrimary || selectedPrimary === primaryPlaceholder} backgroundColor={theme.colors.primary} />
                                 </View>
                             </>

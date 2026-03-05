@@ -11,7 +11,7 @@ import NumberInput from './NumberInput';
 
 interface StrengthComponentProps {
     showProgressBars: boolean;
-    minMax: any;
+    minMax: { pushups: { min: number; max: number } };
     pushups: string;
     setPushups: (val: string) => void;
     pushupComponent: string;
@@ -19,8 +19,8 @@ interface StrengthComponentProps {
     ninetyPercentileThreshold: number;
     isExempt: boolean;
     toggleExempt: () => void;
-    openDetailModal: any;
-    score: any;
+    openDetailModal: (key: string, mascot: ImageSourcePropType, performance: Record<string, string | number>) => void;
+    score: { totalScore: number; pushupScore: number | string; isPass: boolean };
 }
 
 /**
@@ -48,20 +48,27 @@ export default function StrengthComponent({
         cardTitle: {
             ...theme.typography.title,
             color: theme.colors.text,
-        },
-        separator: {
-            height: 1,
-            backgroundColor: theme.colors.border,
+            marginLeft: theme.spacing.s,
             marginVertical: theme.spacing.s,
+            marginRight: theme.spacing.m,
         },
         componentHeader: {
             flexDirection: 'row',
             alignItems: 'center',
         },
-
         exerciseBlock: {
             justifyContent: 'center',
         },
+        helpIcon: {
+            margin: theme.spacing.s,
+        },
+        progressBarContainer: {
+            flex: 1,
+        },
+        inputMargin: {
+            marginHorizontal: theme.spacing.s,
+            marginTop: theme.spacing.xs,
+        }
     });
 
     const getMascot = (): ImageSourcePropType => {
@@ -78,19 +85,19 @@ export default function StrengthComponent({
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
                     <TouchableOpacity onPress={() => openDetailModal(pushupComponent, getMascot(), { reps: pushups })}>
-                        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
                     </TouchableOpacity>
-                    <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m}]}>Strength</Text>
+                    <Text style={styles.cardTitle}>Strength</Text>
                     {/* Conditionally render the progress bar based on the showProgressBars prop. */}
                     {showProgressBars && (
-                        <View style={{ flex: 1 }}>
+                        <View style={styles.progressBarContainer}>
                             <NeumorphicOutset>
                                 <ProgressBar
                                     value={parseInt(pushups) || 0}
                                     passThreshold={minMax.pushups.min}
                                     maxPointsThreshold={minMax.pushups.max}
                                     ninetyPercentileThreshold={ninetyPercentileThreshold}
-                                    score={score.pushupScore}
+                                    score={typeof score.pushupScore === 'number' ? score.pushupScore : 0}
                                     maxScore={20}
                                 />
                             </NeumorphicOutset>
@@ -106,7 +113,7 @@ export default function StrengthComponent({
                     value={pushups}
                     onChangeText={setPushups}
                     placeholder="Enter push-up count"
-                    style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                    style={styles.inputMargin}
                     onToggleExempt={toggleExempt}
                     isExempt={isExempt}
                 />

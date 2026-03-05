@@ -41,18 +41,22 @@ export const ExemptButton: React.FC<ExemptButtonProps> = ({ onPress, isActive, s
     activeText: {
       color: theme.colors.primaryText,
     },
+    outsetContainer: {
+      marginTop: 0,
+      marginBottom: 0,
+    },
+    outsetContent: {
+      borderRadius: theme.borderRadius.m,
+      overflow: 'hidden',
+    },
   });
 
   const backgroundColor = isActive ? theme.colors.primary : theme.colors.background;
 
   return (
     <NeumorphicOutset
-      containerStyle={[style, { marginTop: 0, marginBottom: 0 }]}
-      contentStyle={{
-        backgroundColor,
-        borderRadius: theme.borderRadius.m,
-        overflow: 'hidden',
-      }}
+      containerStyle={[style, styles.outsetContainer]}
+      contentStyle={[styles.outsetContent, { backgroundColor }]}
       shadowOpacity={isActive ? (isDarkMode ? 0.5 : 0.3) : (isDarkMode ? 0.5 : 0.2)}
       highlightColor={isActive ? (isDarkMode ? theme.colors.neumorphic.outset.highlight : 'white') : (isDarkMode ? theme.colors.neumorphic.outset.highlight : 'white')}
       highlightOpacity={isActive ? (isDarkMode ? 0.3 : 1) : (isDarkMode ? 0.15 : 0.9)}

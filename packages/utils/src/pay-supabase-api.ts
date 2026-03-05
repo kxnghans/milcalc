@@ -132,14 +132,14 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
 
     // This is a hardcoded list of columns that exist in the table.
     // A dynamic check against information_schema was attempted but is not supported by the Supabase client.
-    const existingColumns: (keyof Tables<'bah_rates_dependents'>)[] = [
+    const existingColumns: string[] = [
         'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09',
         'w01', 'w02', 'w03', 'w04', 'w05',
         'o01e', 'o02e', 'o03e',
         'o01', 'o02', 'o03', 'o04', 'o05', 'o06', 'o07'
     ];
 
-    if (!existingColumns.includes(rankColumn as any)) {
+    if (!existingColumns.includes(rankColumn)) {
         console.warn(`Column ${rankColumn} does not exist in ${tableName}. Returning null.`);
         return null;
     }
@@ -155,7 +155,7 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
         return null;
     }
 
-    return data ? (data as any)[rankColumn] : null;
+    return data ? (data as unknown as Record<string, number | null>)[rankColumn] : null;
 };
 
 export const getPayHelpContent = async (contentKey: string) => {

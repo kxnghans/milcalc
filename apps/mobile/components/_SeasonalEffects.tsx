@@ -31,7 +31,7 @@ interface ParticleConfig {
 
 interface ParticleProps {
   emoji: string;
-  style?: StyleProp<TextStyle> | any; // Allow Reanimated styles
+  style?: StyleProp<TextStyle>;
   config: ParticleConfig;
   containerWidth: number;
   containerHeight: number;
@@ -116,7 +116,7 @@ const Particle = ({
       cancelAnimation(rotate);
       cancelAnimation(translateX);
     };
-  }, [containerHeight, containerWidth, config]);
+  }, [containerHeight, containerWidth, config, rotate, translateX, translateY]);
 
   const animatedContainerStyle = useAnimatedStyle(() => {
     return {
@@ -151,7 +151,7 @@ const SummerParticle = ({ i, config, containerWidth, containerHeight }: { i: num
       -1,
       true
     );
-  }, []);
+  }, [opacity]);
 
   const animatedOpacityStyle = useAnimatedStyle(() => ({
     opacity: opacity.value

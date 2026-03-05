@@ -74,8 +74,8 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
       flexDirection: 'row',
       alignItems: 'baseline',
     },
-    detailsContainer: {
-      width: '100%',
+    monthlyPayRow: {
+      marginTop: theme.spacing.s,
     },
     columnHeader: {
         ...theme.typography.subtitle,
@@ -110,6 +110,67 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
         color: theme.colors.placeholder,
         textAlign: 'left',
     },
+    columnsContainer: {
+      flexDirection: 'row',
+      width: '100%',
+    },
+    leftColumn: {
+      flex: 1,
+      marginRight: theme.spacing.m,
+    },
+    rightColumn: {
+      flex: 1,
+      marginLeft: theme.spacing.m,
+    },
+    marginTopS: {
+      marginTop: theme.spacing.s,
+    },
+    fullWidthCentered: {
+      marginTop: 0,
+      width: '100%',
+      alignItems: 'center',
+    },
+    helpfulInfoContainer: {
+      marginTop: theme.spacing.m,
+      width: '100%',
+    },
+    fullWidth: {
+      marginTop: 0,
+      width: '100%',
+    },
+    retirementCalculatorContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '100%',
+      marginTop: 0,
+    },
+    datePickerContainer: {
+      flex: 1,
+      marginRight: theme.spacing.s,
+    },
+    serviceEntryDatePickerContainer: {
+      flex: 1,
+      marginLeft: theme.spacing.s,
+      marginRight: theme.spacing.s,
+    },
+    serviceBreakContainer: {
+      flex: 1,
+      marginLeft: theme.spacing.s,
+    },
+    dateLabel: {
+      marginBottom: theme.spacing.s,
+      marginTop: theme.spacing.s,
+    },
+    marginBottomS: {
+      marginBottom: theme.spacing.s,
+    },
+    serviceBreakInput: {
+      textAlign: 'center',
+      borderWidth: 0,
+      backgroundColor: 'transparent',
+      padding: 0,
+      borderRadius: 0,
+    }
   });
 
   const renderCurrency = (value: number) => {
@@ -133,7 +194,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
           <Text style={styles.annualLabel}>ANNUAL: </Text>
           <Text style={styles.totalPayValue}>{renderCurrency(annualPay)}</Text>
         </View>
-        <View style={[styles.payRow, { marginTop: theme.spacing.s }]}>
+        <View style={[styles.payRow, styles.monthlyPayRow]}>
           <Text style={styles.totalPayLabel}>MONTHLY: </Text>
           <Text style={styles.detailValue}>{renderCurrency(monthlyPay)}</Text>
         </View>
@@ -143,11 +204,11 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
           </Pressable>
         )}
       </View>
-      <View style={{ flexDirection: 'row', width: '100%' }}>
+      <View style={styles.columnsContainer}>
         {/* Left Column: Income */}
-        <View style={{ flex: 1, marginRight: theme.spacing.m }}>
+        <View style={styles.leftColumn}>
             <Text style={styles.columnHeader}>{paySource === 'Military' ? 'Military Income' : 'Tax-Free Income'}</Text>
-            <View style={{marginTop: theme.spacing.s}}>
+            <View style={styles.marginTopS}>
                 {payDetails.map((detail, index) => (
                 <View key={index} style={styles.detailRow}>
                     <Text style={styles.detailLabel}>{detail.label.toUpperCase()}</Text>
@@ -157,9 +218,9 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
             </View>
         </View>
         {/* Right Column: Deductions */}
-        <View style={{ flex: 1, marginLeft: theme.spacing.m }}>
+        <View style={styles.rightColumn}>
             <Text style={styles.columnHeader}>Deductions</Text>
-            <View style={{marginTop: theme.spacing.s}}>
+            <View style={styles.marginTopS}>
                 {deductions.map((deduction, index) => (
                 <View key={index} style={styles.detailRow}>
                     <Text style={styles.detailLabel}>{deduction.label.toUpperCase()}</Text>
@@ -170,16 +231,16 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
         </View>
       </View>
       {!isStandardDeductionsExpanded && (
-        <View style={{ marginTop: 0, width: '100%', alignItems: 'center' }}>
+        <View style={styles.fullWidthCentered}>
           <Pressable onPress={onToggleStandardDeductions}>
             <MaterialCommunityIcons name='chevron-down' size={24} color={theme.colors.primary} />
           </Pressable>
         </View>
       )}
       {isStandardDeductionsExpanded && (
-        <View style={{ marginTop: theme.spacing.m, width: '100%' }}>
+        <View style={styles.helpfulInfoContainer}>
           <Text style={styles.columnHeader}>Helpful Info</Text>
-          <View style={{marginTop: theme.spacing.s}}>
+          <View style={styles.marginTopS}>
               <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>Federal Std Deduction</Text>
                   <Text style={styles.detailValue}>${renderNumber(federalStandardDeduction)}</Text>
@@ -196,15 +257,15 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
               )}
           </View>
           {onGetRetirementAge && component === 'Active' && (
-            <View style={{ marginTop: 0, width: '100%' }}>
+            <View style={styles.fullWidth}>
               <PillButton title="Get Retirement Age" onPress={onGetRetirementAge} textStyle={theme.typography.bodybold} />
             </View>
           )}
           {isRetirementAgeCalculatorVisible && component === 'Active' && (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 0 }}>
-              <View style={{ flex: 1, marginRight: theme.spacing.s }}>
-                <Text style={[styles.detailLabel, { marginBottom: theme.spacing.s, marginTop: theme.spacing.s }]}>Birth Date</Text>
-                <Pressable style={{ marginBottom: theme.spacing.s }} onPress={() => setShowBirthDatePicker(true)}>
+            <View style={styles.retirementCalculatorContainer}>
+              <View style={styles.datePickerContainer}>
+                <Text style={[styles.detailLabel, styles.dateLabel]}>Birth Date</Text>
+                <Pressable style={styles.marginBottomS} onPress={() => setShowBirthDatePicker(true)}>
                   <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
                     <View style={styles.pressableInput}>
                       <Text style={[styles.pressableText, !birthDate && styles.placeholderText]}>
@@ -223,9 +284,9 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                   value={birthDate}
                 />
               </View>
-              <View style={{ flex: 1, marginLeft: theme.spacing.s, marginRight: theme.spacing.s }}>
-                <Text style={[styles.detailLabel, { marginBottom: theme.spacing.s, marginTop: theme.spacing.s }]}>Service Entry Date</Text>
-                <Pressable style={{ marginBottom: theme.spacing.s }} onPress={() => setShowServiceEntryDatePicker(true)}>
+              <View style={styles.serviceEntryDatePickerContainer}>
+                <Text style={[styles.detailLabel, styles.dateLabel]}>Service Entry Date</Text>
+                <Pressable style={styles.marginBottomS} onPress={() => setShowServiceEntryDatePicker(true)}>
                   <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
                     <View style={styles.pressableInput}>
                       <Text style={[styles.pressableText, !serviceEntryDate && styles.placeholderText]}>
@@ -244,8 +305,8 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                   value={serviceEntryDate}
                 />
               </View>
-              <View style={{ flex: 1, marginLeft: theme.spacing.s }}>
-                <Text style={[styles.detailLabel, { marginBottom: theme.spacing.s, marginTop: theme.spacing.s }]}>Service Break</Text>
+              <View style={styles.serviceBreakContainer}>
+                <Text style={[styles.detailLabel, styles.dateLabel]}>Service Break</Text>
                 <NeumorphicInset style={{ borderRadius: theme.borderRadius.m, marginBottom: theme.spacing.s }}>
                   <View style={styles.pressableInput}>
                     <StyledTextInput
@@ -255,13 +316,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                       placeholder="Years"
                       style={[
                         styles.pressableText,
-                        {
-                            textAlign: 'center',
-                            borderWidth: 0,
-                            backgroundColor: 'transparent',
-                            padding: 0,
-                            borderRadius: 0,
-                        }
+                        styles.serviceBreakInput
                       ]}
                     />
                   </View>
@@ -269,7 +324,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
               </View>
             </View>
           )}
-          <View style={{ marginTop: 0, width: '100%', alignItems: 'center' }}>
+          <View style={styles.fullWidthCentered}>
             <Pressable onPress={onToggleStandardDeductions}>
               <MaterialCommunityIcons name='chevron-up' size={24} color={theme.colors.primary} />
             </Pressable>

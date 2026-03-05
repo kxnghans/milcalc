@@ -38,7 +38,14 @@ export function usePtCalculatorState() {
   const cardio = useCardioState();
 
   // State for the calculated results from the core utility functions.
-  const [score, setScore] = useState({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
+  const [score, setScore] = useState<{
+    totalScore: number;
+    cardioScore: number | string;
+    pushupScore: number | string;
+    coreScore: number | string;
+    isPass: boolean;
+    walkPassed: string;
+  }>({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
   
   // Debounce all state values that are used in calculations.
   const debouncedAge = useDebounce(demographics.age, 500);
@@ -70,7 +77,7 @@ export function usePtCalculatorState() {
 
   const { data: standards, isLoading: isLoadingStandards } = useQuery({
     queryKey: ['ptStandards', capitalizedGender, ageGroup],
-    queryFn: () => getPtStandards(capitalizedGender, ageGroup as any),
+    queryFn: () => getPtStandards(capitalizedGender, ageGroup || ''),
     enabled: !!capitalizedGender && !!ageGroup,
     retry: 3,
     retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
@@ -179,7 +186,7 @@ export function usePtCalculatorState() {
                         walkSeconds: parseInt(debouncedWalkSeconds) || 0,
                         isCardioExempt: debouncedCardioExempt,
                     }, standards, walkStandards, altitudeData);
-                    setScore(result as any);
+                    setScore(result);
                 } catch (e) {
                     // console.error("Error during calculation: ", e);
                 }
@@ -196,7 +203,7 @@ export function usePtCalculatorState() {
     debouncedPushupComponent, debouncedPushups, debouncedStrengthExempt,
     debouncedCoreComponent, debouncedSitups, debouncedReverseCrunches, debouncedPlankMinutes, debouncedPlankSeconds, debouncedCoreExempt,
     debouncedCardioComponent, debouncedRunMinutes, debouncedRunSeconds, debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds, debouncedCardioExempt,
-    standards, walkStandards, altitudeData
+    standards, walkStandards, altitudeData, ageNum
   ]);
 
   // Expose all the state and derived data to the consuming component.

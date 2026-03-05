@@ -13,7 +13,7 @@ import TimeInput from './TimeInput';
 
 interface CoreComponentProps {
     showProgressBars: boolean;
-    minMax: any;
+    minMax: { core: { min: number; max: number } };
     coreComponent: string;
     setCoreComponent: (val: string) => void;
     situps: string;
@@ -27,8 +27,8 @@ interface CoreComponentProps {
     ninetyPercentileThreshold: number;
     isExempt: boolean;
     toggleExempt: () => void;
-    openDetailModal: any;
-    score: any;
+    openDetailModal: (key: string, mascot: ImageSourcePropType, performance: Record<string, string | number>) => void;
+    score: { totalScore: number; coreScore: number | string; isPass: boolean };
 }
 
 /**
@@ -62,23 +62,30 @@ export default function CoreComponent({
         cardTitle: {
             ...theme.typography.title,
             color: theme.colors.text,
-        },
-        separator: {
-            height: 1,
-            backgroundColor: theme.colors.border,
+            marginLeft: theme.spacing.s,
             marginVertical: theme.spacing.s,
+            marginRight: theme.spacing.m,
         },
         componentHeader: {
             flexDirection: 'row',
             alignItems: 'center',
         },
-
         exerciseBlock: {
             justifyContent: 'center',
         },
+        helpIcon: {
+            margin: theme.spacing.s,
+        },
+        progressBarContainer: {
+            flex: 1,
+        },
+        inputMargin: {
+            marginHorizontal: theme.spacing.s,
+            marginTop: theme.spacing.xs,
+        }
     });
 
-    const getPerformance = () => {
+    const getPerformance = (): Record<string, string | number> => {
         switch (coreComponent) {
             case 'sit_ups_1min':
                 return { reps: situps };
@@ -106,9 +113,9 @@ export default function CoreComponent({
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
                     <TouchableOpacity onPress={() => openDetailModal(coreComponent, getMascot(), getPerformance())}>
-                        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
                     </TouchableOpacity>
-                    <Text style={[styles.cardTitle, {marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m}]}>Core</Text>
+                    <Text style={styles.cardTitle}>Core</Text>
                     {/* Conditionally render the progress bar based on the showProgressBars prop. */}
                     {showProgressBars && (() => {
 
@@ -116,7 +123,7 @@ export default function CoreComponent({
                         if (coreComponent === "forearm_plank_time") {
                             const plankTimeInSeconds = (parseInt(plankMinutes) || 0) * 60 + (parseInt(plankSeconds) || 0);
                             return (
-                                <View style={{ flex: 1 }}>
+                                <View style={styles.progressBarContainer}>
                                     <NeumorphicOutset>
                                         <ProgressBar
                                             value={plankTimeInSeconds}
@@ -124,7 +131,7 @@ export default function CoreComponent({
                                             maxPointsThreshold={minMax.core.max}
                                             ninetyPercentileThreshold={ninetyPercentileThreshold}
                                             valueIsTime={true}
-                                            score={score.coreScore}
+                                            score={typeof score.coreScore === 'number' ? score.coreScore : 0}
                                             maxScore={20}
                                         />
                                     </NeumorphicOutset>
@@ -133,14 +140,14 @@ export default function CoreComponent({
                         }
                         // Default progress bar for rep-based exercises.
                         return (
-                            <View style={{ flex: 1 }}>
+                            <View style={styles.progressBarContainer}>
                                 <NeumorphicOutset>
                                     <ProgressBar
                                         value={parseInt(coreComponent === "sit_ups_1min" ? situps : reverseCrunches) || 0}
                                         passThreshold={minMax.core.min}
                                         maxPointsThreshold={minMax.core.max}
                                         ninetyPercentileThreshold={ninetyPercentileThreshold}
-                                        score={score.coreScore}
+                                        score={typeof score.coreScore === 'number' ? score.coreScore : 0}
                                         maxScore={20}
                                     />
                                 </NeumorphicOutset>
@@ -163,7 +170,7 @@ export default function CoreComponent({
                         value={situps}
                         onChangeText={setSitups}
                         placeholder="Enter sit-up count"
-                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                        style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -173,7 +180,7 @@ export default function CoreComponent({
                         value={reverseCrunches}
                         onChangeText={setReverseCrunches}
                         placeholder="Enter crunch count"
-                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                        style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -186,7 +193,7 @@ export default function CoreComponent({
                         setSeconds={setPlankSeconds}
                         minutesPlaceholder="Minutes"
                         secondsPlaceholder="Seconds"
-                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                        style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />

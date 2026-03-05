@@ -64,11 +64,35 @@ export default function PayDeductions({
         overflow: 'hidden',
         marginTop: theme.spacing.s,
     },
+    divider: {
+        marginVertical: theme.spacing.s,
+    },
+    expandableContentNoTopMargin: {
+        marginTop: 0,
+    },
+    centeredItems: {
+        alignItems: 'center',
+    },
+    additionalIncomeRow: {
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+    },
+    flex1: {
+        flex: 1,
+    },
+    marginRightS: {
+        marginRight: theme.spacing.s,
+    },
+    marginHorizontalS: {
+        marginLeft: theme.spacing.s, 
+        marginRight: theme.spacing.s,
+    }
   });
 
   return (
     <>
-      <Divider style={{ marginVertical: theme.spacing.s }} />
+      <Divider style={styles.divider} />
 
       {/* Deductions Section */}
       <View style={styles.fieldRow}>
@@ -82,8 +106,8 @@ export default function PayDeductions({
               />
           </Pressable>
           {isDeductionsExpanded && (
-              <View style={[styles.expandableContent, { marginTop: 0 }]}>
-                  <View style={{alignItems: 'center'}}>
+              <View style={[styles.expandableContent, styles.expandableContentNoTopMargin]}>
+                  <View style={styles.centeredItems}>
                       <PillButton 
                           title={isTaxOverride ? 'Use Calculated Taxes' : 'Override Taxes'} 
                           onPress={() => setIsTaxOverride(!isTaxOverride)} 
@@ -104,15 +128,15 @@ export default function PayDeductions({
 
                   <NewLabelWithHelp label="Additional Deductions" contentKey="Additional Deductions" onHelpPress={openDetailModal} />
                   {additionalDeductions.map((deduction, index) => (
-                      <View key={index} style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-                          <View style={{ flex: 1, marginRight: theme.spacing.s }}>
+                      <View key={index} style={[styles.fieldRow, styles.additionalIncomeRow]}>
+                          <View style={[styles.flex1, styles.marginRightS]}>
                               <InsetTextInput
                                   placeholder="Description"
                                   value={deduction.name}
                                   onChangeText={(text) => { const newDeductions = [...additionalDeductions]; newDeductions[index].name = text; setAdditionalDeductions(newDeductions); }}
                               />
                           </View>
-                          <View style={{ flex: 1, marginLeft: theme.spacing.s, marginRight: theme.spacing.s }}>
+                          <View style={[styles.flex1, styles.marginHorizontalS]}>
                               <CurrencyInput
                                   placeholder="0.00"
                                   value={deduction.amount}

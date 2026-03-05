@@ -1,16 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from './useDebounce';
-import { getDisabilityData, getMhaData, getPayGrades, getFederalTaxData, getStateTaxData, calculatePension, calculateDisabilityIncome, calculateTsp, calculateTaxes, getRetirementAge } from '@repo/utils';
+import { getDisabilityData, getMhaData, getPayGrades, getFederalTaxData, getStateTaxData, calculatePension, calculateDisabilityIncome, calculateTsp, calculateTaxes, getRetirementAge, DisabilityPercentage, DependentStatus } from '@repo/utils';
 
 export const useRetirementCalculatorState = () => {
   const [component, setComponent] = useState('Active');
   const [retirementSystem, setRetirementSystem] = useState('High 3');
 
   // High 3 State
-  const [high3PayGrade1, setHigh3PayGrade1] = useState(null);
-  const [high3PayGrade2, setHigh3PayGrade2] = useState(null);
-  const [high3PayGrade3, setHigh3PayGrade3] = useState(null);
+  const [high3PayGrade1, setHigh3PayGrade1] = useState<string | null>(null);
+  const [high3PayGrade2, setHigh3PayGrade2] = useState<string | null>(null);
+  const [high3PayGrade3, setHigh3PayGrade3] = useState<string | null>(null);
   const [tspAmount, setTspAmount] = useState('');
   const [servicePoints, setServicePoints] = useState('');
   const [goodYears, setGoodYears] = useState('');
@@ -48,8 +48,8 @@ export const useRetirementCalculatorState = () => {
   const debouncedTspContributionPercentage = useDebounce(tspContributionPercentage, 500);
   const debouncedTspContributionYears = useDebounce(tspContributionYears, 500);
 
-  const [disabilityPercentage, setDisabilityPercentage] = useState<string | null>(null);
-  const [dependentStatus, setDependentStatus] = useState<string | null>(null);
+  const [disabilityPercentage, setDisabilityPercentage] = useState<DisabilityPercentage | '0%'>('0%');
+  const [dependentStatus, setDependentStatus] = useState<DependentStatus | 'none'>('none');
 
   // MHA State
   const [mha, setMha] = useState<string>('initial');
@@ -122,7 +122,7 @@ export const useRetirementCalculatorState = () => {
       Number(debouncedTspContributionAmount),
       Number(debouncedTspContributionPercentage),
       Number(debouncedTspContributionYears),
-      retirementSystem as any,
+      retirementSystem as 'High 3' | 'BRS',
       tspReturn
     );
     setTsp(tspValue);
@@ -146,11 +146,20 @@ export const useRetirementCalculatorState = () => {
     const calculate = async () => {
       if (isLoading) return;
       try {
-        const pensionValue = await calculatePension(component as any, retirementSystem as any, high3PayGrade1 as any, high3PayGrade2 as any, high3PayGrade3 as any, Number(yearsOfService), Number(servicePoints), Number(goodYears));
+        const pensionValue = await calculatePension(
+          component as 'Active' | 'Reserve' | 'Guard', 
+          retirementSystem as 'High 3' | 'BRS', 
+          high3PayGrade1 || '', 
+          high3PayGrade2 || '', 
+          high3PayGrade3 || '', 
+          Number(yearsOfService), 
+          Number(servicePoints), 
+          Number(goodYears)
+        );
         setPension(pensionValue);
 
         // Synchronous calculation
-        const disabilityIncomeValue = calculateDisabilityIncome(disabilityPercentage as any, dependentStatus as any, disabilityData || []);
+        const disabilityIncomeValue = calculateDisabilityIncome(disabilityPercentage || '0%', dependentStatus || 'none', disabilityData || []);
         setDisabilityIncome(disabilityIncomeValue);
 
         const grossIncome = pensionValue + disabilityIncomeValue;
@@ -166,7 +175,7 @@ export const useRetirementCalculatorState = () => {
     };
 
     calculate();
-  }, [component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, disabilityPercentage, dependentStatus, state, filingStatus, federalTaxData, stateTaxData, isLoading, disabilityData]);
+  }, [component, retirementSystem, high3PayGrade1, high3PayGrade2, high3PayGrade3, yearsOfService, servicePoints, goodYears, disabilityPercentage, dependentStatus, state, filingStatus, federalTaxData, stateTaxData, isLoading, disabilityData]);
 
   useEffect(() => {
     if (high3PayGrade1 && high3PayGrade2 && payGrades) {
@@ -262,7 +271,7 @@ export const useRetirementCalculatorState = () => {
     if (mha === 'ON_BASE') return "ON BASE";
     if (!mha || !mhaData) return "...";
     for (const stateKey in mhaData) {
-      const mhaObject = mhaData[stateKey].find((m: any) => m.value === mha);
+      const mhaObject = mhaData[stateKey].find((m: { value: string; label: string }) => m.value === mha);
       if (mhaObject) {
         return mhaObject.label;
       }
@@ -283,8 +292,8 @@ export const useRetirementCalculatorState = () => {
   };
 
   const handleDisabilityChange = (statusValue: string, percentageValue: string) => {
-    setDependentStatus(statusValue);
-    setDisabilityPercentage(percentageValue);
+    setDependentStatus(statusValue as DependentStatus);
+    setDisabilityPercentage(percentageValue as DisabilityPercentage);
     if (percentageValue === '0%') {
         setDependentStatus('none');
     }
@@ -301,8 +310,8 @@ export const useRetirementCalculatorState = () => {
     setGoodYears('');
     setMha('initial');
     setState('');
-    setDisabilityPercentage(null);
-    setDependentStatus(null);
+    setDisabilityPercentage('0%');
+    setDependentStatus('none');
     setIsTspCalculatorVisible(false);
     setTspContributionAmount('');
     setTspContributionPercentage('');

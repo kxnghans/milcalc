@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle, LayoutChangeEvent } from 'react-native';
 import NeumorphicOutset from './NeumorphicOutset';
 import { useTheme } from "../contexts/ThemeContext";
+import { getAlphaColor } from '../theme';
 
 /**
  * Props for the SegmentedSelector component.
@@ -24,7 +25,7 @@ interface SegmentedSelectorProps {
   /** Optional custom style for the container. */
   style?: StyleProp<ViewStyle>;
   /** Optional layout event handler. */
-  onLayout?: (event: any) => void;
+  onLayout?: (event: LayoutChangeEvent) => void;
   /** If false, the selector will be non-interactive. Defaults to true. */
   isTouchable?: boolean;
   /** Optional background color for the selected segment. */
@@ -76,14 +77,41 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
         ...theme.typography.caption,
         color: theme.colors.primaryText,
         textAlign: 'center',
-    }
+    },
+    outsetContainer: {
+      borderRadius: theme.borderRadius.m,
+      backgroundColor: theme.colors.secondary,
+    },
+    outsetContent: {
+      backgroundColor: theme.colors.secondary,
+      borderRadius: theme.borderRadius.m,
+      overflow: 'hidden',
+    },
+    selectedOutsetContainer: {
+      borderRadius: theme.borderRadius.m,
+      marginTop: theme.spacing.xs,
+      marginBottom: theme.spacing.xs,
+      marginLeft: theme.spacing.xs,
+      marginRight: theme.spacing.xs,
+      alignSelf: 'stretch',
+    },
+    selectedOutsetContent: {
+      borderRadius: theme.borderRadius.m,
+      overflow: 'hidden',
+      flex: 1,
+    },
+    flex1: {
+      flex: 1,
+    },
   });
+
+  const highlightColor = isDarkMode ? getAlphaColor('#000000', 1) : undefined;
 
   return (
     <NeumorphicOutset
-      containerStyle={[style, { borderRadius: theme.borderRadius.m, backgroundColor: theme.colors.secondary }]}
-      contentStyle={{ backgroundColor: theme.colors.secondary, borderRadius: theme.borderRadius.m, overflow: 'hidden' }}
-      highlightColor={isDarkMode ? 'rgba(0,0,0,1)' : undefined}
+      containerStyle={[style, styles.outsetContainer]}
+      contentStyle={styles.outsetContent}
+      highlightColor={highlightColor}
       highlightOpacity={isDarkMode ? 0.05 : theme.colors.neumorphic.outset.highlightOpacity}
     >
       <View style={styles.container} onLayout={onLayout}>
@@ -100,17 +128,9 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
             return (
               <NeumorphicOutset
                 key={option.value}
-                containerStyle={{
-                  flex: flexRatio,
-                  borderRadius: theme.borderRadius.m,
-                  marginTop: theme.spacing.xs,
-                  marginBottom: theme.spacing.xs,
-                  marginLeft: theme.spacing.xs,
-                  marginRight: theme.spacing.xs,
-                  alignSelf: 'stretch'
-                }}
-                contentStyle={{ backgroundColor: selectedBackgroundColor || theme.colors.primary, borderRadius: theme.borderRadius.m, overflow: 'hidden', flex: 1 }}
-                highlightStyle={{ flex: 1 }}
+                containerStyle={[styles.selectedOutsetContainer, { flex: flexRatio }]}
+                contentStyle={[styles.selectedOutsetContent, { backgroundColor: selectedBackgroundColor || theme.colors.primary }]}
+                highlightStyle={styles.flex1}
                 shadowOpacity={isDarkMode ? undefined : 0.3}
                 highlightOpacity={isDarkMode ? 0.55 : theme.colors.neumorphic.outset.highlightOpacity}
               >

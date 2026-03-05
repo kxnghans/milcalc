@@ -28,7 +28,7 @@ describe('Pay Calculator', () => {
                 additionalDeductions: [{ name: 'TSP', amount: 500 }],
             };
 
-            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as any[]);
+            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as Tables<'state_tax_data'>[]);
 
             expect(result.totalIncome).toBeCloseTo(7700);
             expect(result.ficaTax).toBeCloseTo(405.45);
@@ -53,7 +53,7 @@ describe('Pay Calculator', () => {
             // Federal Taxable for Brackets: 84000 - 32200 = 51800
             // Fed Tax: (24800 * 0.10) + ((51800 - 24800) * 0.12) = 2480 + 3240 = 5720 -> 476.67 monthly
 
-            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as any[]);
+            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as Tables<'state_tax_data'>[]);
             expect(result.federalTax).toBeCloseTo(476.67);
         });
 
@@ -70,7 +70,7 @@ describe('Pay Calculator', () => {
                 additionalDeductions: [],
             };
 
-            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as any[]);
+            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as Tables<'state_tax_data'>[]);
 
             expect(result.totalIncome).toEqual(0);
             expect(result.ficaTax).toEqual(0);
@@ -91,7 +91,7 @@ describe('Pay Calculator', () => {
                 additionalDeductions: [],
             };
 
-            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as any[]);
+            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as Tables<'state_tax_data'>[]);
 
             expect(result.stateTax).toEqual(0);
         });
@@ -116,7 +116,7 @@ describe('Pay Calculator', () => {
             // State Taxable for Brackets (CO): 79200 - 15000 (Single 2025) - 360 = 63840
             // State Tax (CO): 63840 * 0.044 = 2808.96 -> 234.08 monthly
 
-            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as any[]);
+            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as Tables<'state_tax_data'>[]);
 
             expect(result.federalTax).toBeCloseTo(709.57);
             expect(result.stateTax).toBeCloseTo(234.08);
@@ -140,7 +140,7 @@ describe('Pay Calculator', () => {
             // Federal Taxable: 109800 - 32200 - 10200 = 67400
             // Fed Tax: (24800 * 0.10) + ((67400 - 24800) * 0.12) = 2480 + 5112 = 7592 -> 632.67 monthly
 
-            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as any[]);
+            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as Tables<'state_tax_data'>[]);
             expect(result.federalTax).toBeCloseTo(632.67);
         });
 
@@ -160,7 +160,7 @@ describe('Pay Calculator', () => {
             // The buggy data would give a 100% tax rate. The fix makes it 1%.
             // Taxable: 12000 - 5540 = 6460
             // Tax: 6460 * 0.01 = 64.6 -> 5.38 monthly
-            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as any[]);
+            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as Tables<'state_tax_data'>[]);
             expect(result.stateTax).toBeCloseTo(5.38);
         });
 
@@ -176,7 +176,7 @@ describe('Pay Calculator', () => {
                 state: 'TX',
                 additionalDeductions: [],
             };
-            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as any[]);
+            const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as Tables<'state_tax_data'>[]);
             expect(result.totalIncome).toBeGreaterThan(0);
             expect(result.totalIncome).toBe(7400); // 5000 + 2000 + 400
         });
@@ -184,17 +184,17 @@ describe('Pay Calculator', () => {
 
     describe('calculateDisabilityIncome', () => {
         it('should return the correct disability income for a veteran alone', () => {
-            const income = calculateDisabilityIncome('70%', 'Veteran alone', mockDisabilityData as any);
+            const income = calculateDisabilityIncome('70%', 'Veteran alone', mockDisabilityData as Tables<'veterans_disability_compensation'>[]);
             expect(income).toEqual(1759.19);
         });
 
         it('should return the correct disability income for a veteran with spouse', () => {
-            const income = calculateDisabilityIncome('90%', 'With spouse only', mockDisabilityData as any);
+            const income = calculateDisabilityIncome('90%', 'With spouse only', mockDisabilityData as Tables<'veterans_disability_compensation'>[]);
             expect(income).toEqual(2489.96);
         });
 
         it('should return 0 if dependent status is "none"', () => {
-            const income = calculateDisabilityIncome('50%', 'none' as any, mockDisabilityData as any);
+            const income = calculateDisabilityIncome('50%', 'none', mockDisabilityData as Tables<'veterans_disability_compensation'>[]);
             expect(income).toEqual(0);
         });
     });

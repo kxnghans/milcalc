@@ -5,14 +5,14 @@
  * handle altitude adjustments, and determine pass/fail status, including exemption logic.
  */
 
-import { Tables } from './types';
+import { Tables, PtStandard, PtPerformance, PtInputs, AltitudeAdjustments } from './types';
 
 /**
  * Converts a time string (e.g., "mm:ss") to seconds.
  * @param time - The time string to convert.
  * @returns The total number of seconds, or 0 if the format is invalid.
  */
-const timeToSeconds = (time: string): number => {
+const timeToSeconds = (time: string | number | null): number => {
     if (!time) return 0;
     const cleanedTime = String(time).replace(/[^0-9:]/g, '');
     const parts = cleanedTime.split(':').map(Number);
@@ -20,7 +20,7 @@ const timeToSeconds = (time: string): number => {
         // Valid "mm:ss" format
         return parts[0] * 60 + parts[1];
     }
-    return 0;
+    return isNaN(Number(cleanedTime)) ? 0 : Number(cleanedTime);
 };
 
 /**
@@ -48,12 +48,12 @@ export const getAgeGroupString = (age: number): string | null => {
  * @param performance - An object containing the performance metrics (minutes/seconds for run, shuttles count).
  * @returns The calculated score for the cardio component.
  */
-const getCardioScore = (standards: any[], component: string, performance: any): number => {
+const getCardioScore = (standards: PtStandard[], component: string, performance: PtPerformance): number => {
     const cardioStandards = standards.filter(s => s.exercise === component);
     let score = 0;
 
     if (component === 'run') {
-        const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
+        const runTimeInSeconds = (performance.minutes || 0) * 60 + (performance.seconds || 0);
         if (runTimeInSeconds <= 0) return 0;
 
         for (const standard of cardioStandards) {
@@ -71,7 +71,7 @@ const getCardioScore = (standards: any[], component: string, performance: any): 
             }
         }
     } else if (component === 'shuttles') {
-        const shuttles = performance.shuttles;
+        const shuttles = performance.shuttles || 0;
         if (shuttles <= 0) return 0;
 
         for (const standard of cardioStandards) {
@@ -101,7 +101,7 @@ const getCardioScore = (standards: any[], component: string, performance: any): 
     return score;
 };
 
-const getMuscularFitnessScore = (standards: any[], component: string, reps: number): number => {
+const getMuscularFitnessScore = (standards: PtStandard[], component: string, reps: number): number => {
     if (!reps) return 0;
     const exerciseStandards = standards.filter(s => s.exercise === component);
 
@@ -115,8 +115,8 @@ const getMuscularFitnessScore = (standards: any[], component: string, reps: numb
     return score;
 };
 
-const getPlankScore = (standards: any[], performance: any): number => {
-    const plankTimeInSeconds = performance.minutes * 60 + performance.seconds;
+const getPlankScore = (standards: PtStandard[], performance: PtPerformance): number => {
+    const plankTimeInSeconds = (performance.minutes || 0) * 60 + (performance.seconds || 0);
     if (plankTimeInSeconds === 0) return 0;
     const plankStandards = standards.filter(s => s.exercise === 'forearm_plank_time');
 
@@ -139,20 +139,14 @@ const getPlankScore = (standards: any[], performance: any): number => {
  * @param altitudeGroup - The selected altitude group (e.g., 'group1', 'group2').
  * @returns The final score for the exercise.
  */
-type AltitudeAdjustments = {
-    run: Tables<'run_altitude_adjustments'>[];
-    hamr: Tables<'hamr_altitude_adjustments'>[];
-    walk: Tables<'walk_altitude_adjustments'>[];
-};
-
-export const getScoreForExercise = (standards: any[], component: string, performance: any, altitudeGroup?: string, altitudeAdjustments?: AltitudeAdjustments): number => {
+export const getScoreForExercise = (standards: PtStandard[], component: string, performance: PtPerformance, altitudeGroup?: string, altitudeAdjustments?: AltitudeAdjustments): number => {
 
     const adjustedPerformance = { ...performance };
 
     // Apply altitude adjustments for cardio components
     if (altitudeGroup && altitudeGroup !== 'normal' && altitudeAdjustments) {
         if (component === 'run' && altitudeAdjustments.run) {
-            const runTimeInSeconds = performance.minutes * 60 + performance.seconds;
+            const runTimeInSeconds = (performance.minutes || 0) * 60 + (performance.seconds || 0);
             if (runTimeInSeconds > 0) {
                 const correction = altitudeAdjustments.run.find((c) => c.altitude_group === altitudeGroup && c.time_range_start != null && c.time_range_end != null && runTimeInSeconds >= c.time_range_start && runTimeInSeconds <= c.time_range_end);
                 if (correction && correction.correction) {
@@ -162,7 +156,7 @@ export const getScoreForExercise = (standards: any[], component: string, perform
                 }
             }
         } else if (component === 'shuttles' && altitudeAdjustments.hamr) {
-            if (performance.shuttles > 0) {
+            if ((performance.shuttles || 0) > 0) {
                 const adjustment = altitudeAdjustments.hamr.find((a) => a.altitude_group === altitudeGroup);
                 if (adjustment && adjustment.shuttles_to_add) {
                     adjustedPerformance.shuttles = (adjustedPerformance.shuttles || 0) + adjustment.shuttles_to_add;
@@ -178,10 +172,10 @@ export const getScoreForExercise = (standards: any[], component: string, perform
             return getCardioScore(standards, component, adjustedPerformance);
         case 'push_ups_1min':
         case 'hand_release_pushups_2min':
-            return getMuscularFitnessScore(standards, component, performance.reps);
+            return getMuscularFitnessScore(standards, component, performance.reps || 0);
         case 'sit_ups_1min':
         case 'cross_leg_reverse_crunch_2min':
-            return getMuscularFitnessScore(standards, component, performance.reps);
+            return getMuscularFitnessScore(standards, component, performance.reps || 0);
         case 'forearm_plank_time':
             return getPlankScore(standards, adjustedPerformance);
         default:
@@ -198,7 +192,7 @@ export const getScoreForExercise = (standards: any[], component: string, perform
  * @param altitudeGroup - The selected altitude group.
  * @returns 'pass', 'fail', or 'n/a' if data is insufficient.
  */
-export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number, walkStandards: any[], altitudeAdjustments: any[], altitudeGroup?: string): 'pass' | 'fail' | 'n/a' => {
+export const checkWalkPass = (age: number, gender: string, minutes: number, seconds: number, walkStandards: Tables<'walk_standards'>[], altitudeAdjustments: Tables<'walk_altitude_adjustments'>[], altitudeGroup?: string): 'pass' | 'fail' | 'n/a' => {
     const userTimeInSeconds = minutes * 60 + seconds;
     if (userTimeInSeconds === 0) return 'n/a';
   
@@ -211,20 +205,22 @@ export const checkWalkPass = (age: number, gender: string, minutes: number, seco
   
     if (altitudeGroup && altitudeGroup !== 'normal' && altitudeAdjustments) {
       const adjustment = altitudeAdjustments.find(
-        (a: any) =>
+        (a) =>
           a.altitude_group === altitudeGroup &&
-          a.gender.toLowerCase() === capitalizedGender.toLowerCase() &&
+          a.gender?.toLowerCase() === capitalizedGender.toLowerCase() &&
+          a.age_range_start !== null && a.age_range_end !== null &&
           age >= a.age_range_start &&
           age <= a.age_range_end
       );
-      if (adjustment) {
+      if (adjustment && adjustment.max_time) {
         maxTimeInSeconds = adjustment.max_time;
       }
     } else if (walkStandards) {
       const standard = walkStandards.find(
-        (s: any) => {
+        (s) => {
+            if (!s.age_range) return false;
             const [minAge, maxAge] = s.age_range.split('-').map(Number);
-            return age >= minAge && age <= maxAge && s.gender.toLowerCase().startsWith(capitalizedGender.toLowerCase()[0]);
+            return age >= minAge && age <= maxAge && s.gender?.toLowerCase().startsWith(capitalizedGender.toLowerCase()[0]);
         }
       );
       if (standard) {
@@ -242,7 +238,7 @@ export const checkWalkPass = (age: number, gender: string, minutes: number, seco
  * @param inputs - An object containing all user inputs (age, gender, performance, and exemption status for each component).
  * @returns An object with the composite score, component scores, pass/fail status, and walk status.
  */
-export const calculatePtScore = (inputs: any, standards: any[], walkStandards: any[], altitudeAdjustments: any) => {
+export const calculatePtScore = (inputs: PtInputs, standards: PtStandard[], walkStandards: Tables<'walk_standards'>[], altitudeAdjustments: AltitudeAdjustments) => {
     // Validate required inputs
     if (inputs.age == null || isNaN(inputs.age) || !inputs.gender) {
         return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' };
@@ -263,7 +259,7 @@ export const calculatePtScore = (inputs: any, standards: any[], walkStandards: a
         pushupScore = 'Exempt';
         totalPossiblePoints -= 20;
     } else {
-        pushupScore = getMuscularFitnessScore(standards, inputs.pushupComponent, inputs.pushups);
+        pushupScore = getMuscularFitnessScore(standards, inputs.pushupComponent, inputs.pushups || 0);
         earnedPoints += pushupScore;
     }
 
@@ -274,14 +270,14 @@ export const calculatePtScore = (inputs: any, standards: any[], walkStandards: a
         totalPossiblePoints -= 20;
     } else {
         if (inputs.coreComponent === 'sit_ups_1min') {
-            coreScore = getMuscularFitnessScore(standards, 'sit_ups_1min', inputs.situps);
+            coreScore = getMuscularFitnessScore(standards, 'sit_ups_1min', inputs.situps || 0);
         } else if (inputs.coreComponent === 'cross_leg_reverse_crunch_2min') {
-            coreScore = getMuscularFitnessScore(standards, 'cross_leg_reverse_crunch_2min', inputs.reverseCrunches);
+            coreScore = getMuscularFitnessScore(standards, 'cross_leg_reverse_crunch_2min', inputs.reverseCrunches || 0);
         }
         else if (inputs.coreComponent === 'forearm_plank_time') {
             coreScore = getPlankScore(standards, { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds });
         }
-        earnedPoints += coreScore;
+        earnedPoints += typeof coreScore === 'number' ? coreScore : 0;
     }
 
     // Cardio Component
@@ -291,7 +287,7 @@ export const calculatePtScore = (inputs: any, standards: any[], walkStandards: a
         cardioScore = 'Exempt';
         totalPossiblePoints -= 60;
     } else if (inputs.cardioComponent === 'walk') {
-        walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes, inputs.walkSeconds, walkStandards, altitudeAdjustments.walk, inputs.altitudeGroup);
+        walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes || 0, inputs.walkSeconds || 0, walkStandards, altitudeAdjustments.walk, inputs.altitudeGroup);
         totalPossiblePoints -= 60; // Walk test does not contribute points, max score is based on other components.
     } else {
         cardioScore = getScoreForExercise(
@@ -305,7 +301,7 @@ export const calculatePtScore = (inputs: any, standards: any[], walkStandards: a
             inputs.altitudeGroup, 
             altitudeAdjustments
         );
-        earnedPoints += cardioScore;
+        earnedPoints += typeof cardioScore === 'number' ? cardioScore : 0;
     }
 
     
@@ -399,7 +395,7 @@ export const calculateBestScore = (scores: { [key: string]: number | string }): 
  * @param component - The muscular fitness component.
  * @returns An object with the min and max performance values.
  */
-export const getMinMaxValues = (standards: any[], component: string) => {
+export const getMinMaxValues = (standards: PtStandard[], component: string) => {
     if (!standards || standards.length === 0) return { min: 0, max: 0 };
 
     const exerciseStandards = standards.filter(s => s.exercise === component);
@@ -434,7 +430,7 @@ export const getMinMaxValues = (standards: any[], component: string) => {
     };
 };
 
-export const getCardioMinMaxValues = (standards: any[], walkStandards: any[], component: string) => {
+export const getCardioMinMaxValues = (standards: PtStandard[], walkStandards: Tables<'walk_standards'>[], component: string) => {
     if (component === 'walk') {
         if (!walkStandards || walkStandards.length === 0) return { min: 0, max: 0 };
         const maxTime = walkStandards[0].max_time;
@@ -476,7 +472,7 @@ export const getCardioMinMaxValues = (standards: any[], walkStandards: any[], co
     return { min: 0, max: 0 };
 };
 
-export const getPerformanceForScore = (standards: any[], component: string, targetScore: number): number => {
+export const getPerformanceForScore = (standards: PtStandard[], component: string, targetScore: number): number => {
     if (!standards || standards.length === 0) return 0;
 
     const exerciseStandards = standards.filter(s => s.exercise === component);
@@ -487,7 +483,7 @@ export const getPerformanceForScore = (standards: any[], component: string, targ
         const times = candidates.map(c => timeToSeconds(c.measurement));
         return Math.min(...times);
     } else {
-        const reps = candidates.map(c => parseInt(c.measurement));
+        const reps = candidates.map(c => parseInt(String(c.measurement)));
         return Math.min(...reps);
     }
 };
@@ -501,7 +497,7 @@ export const getPerformanceForScore = (standards: any[], component: string, targ
  * @param standards - The scoring standards for the user's age and gender.
  * @returns A string detailing the calculated score, or an empty string if inputs are invalid.
  */
-export const getDynamicHelpText = (componentKey: string, age: number, gender: string, performance: any, standards: any[]): string => {
+export const getDynamicHelpText = (componentKey: string, age: number, gender: string, performance: PtPerformance, standards: PtStandard[]): string => {
     if (!age || !gender) {
         return "Please enter age and gender to see dynamic scoring details.";
     }

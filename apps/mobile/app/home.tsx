@@ -7,13 +7,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useTheme, SegmentedSelector } from '@repo/ui';
+import { useTheme, SegmentedSelector, PillButton, getAlphaColor } from '@repo/ui';
 import { BlurView } from 'expo-blur';
-import { PillButton } from '@repo/ui';
 import SeasonalEffects from '../components/_SeasonalEffects';
 import splashImage from '../assets/3d_splash.png';
 
-const getSeason = () => {
+type Season = 'spring' | 'summer' | 'fall' | 'winter';
+
+const getSeason = (): Season => {
   const month = new Date().getMonth();
   if (month >= 2 && month <= 4) return 'spring';
   if (month >= 5 && month <= 7) return 'summer';
@@ -24,7 +25,7 @@ const getSeason = () => {
 export default function Index() {
   const router = useRouter();
   const { theme } = useTheme();
-  const [season, setSeason] = useState(getSeason());
+  const [season, setSeason] = useState<Season>(getSeason());
 
   const handleContinue = () => {
     router.replace('/pt-calculator');
@@ -61,15 +62,26 @@ export default function Index() {
       textAlign: 'center',
       fontSize: 18,
       fontWeight: 'bold',
+      color: theme.colors.text,
     },
+    notFinancialAdvice: {
+        ...theme.typography.body, 
+        color: theme.colors.text, 
+        textAlign: 'center', 
+        marginTop: 4,
+    }
   });
+
+  const seasonValueChange = (val: string) => {
+    setSeason(val as Season);
+  };
 
   return (
     <View style={styles.container}>
       {/* Background Layer */}
       <View style={[styles.backgroundLayer, { backgroundColor: theme.colors.background }]}>
         <Image source={splashImage} style={styles.image} resizeMode="contain" />
-        <SeasonalEffects season={season as any} />
+        <SeasonalEffects season={season} />
       </View>
 
       {/* Blur Layer */}
@@ -79,22 +91,22 @@ export default function Index() {
       <View style={styles.foregroundLayer}>
         <View style={styles.bottomContainer}>
           <View style={styles.disclaimerContainer}>
-              <Text style={[styles.disclaimer, { color: theme.colors.text }]}>
+              <Text style={styles.disclaimer}>
                   Not an official USAF or US military product.
               </Text>
-              <Text style={[theme.typography.body, { color: theme.colors.text, textAlign: 'center', marginTop: 4 }]}>
+              <Text style={styles.notFinancialAdvice}>
                   Not financial advise.
               </Text>
           </View>
           <SegmentedSelector
             options={[{label: 'Spring', value: 'spring'}, {label: 'Summer', value: 'summer'}, {label: 'Fall', value: 'fall'}, {label: 'Winter', value: 'winter'}]}
             selectedValues={[season]}
-            onValueChange={setSeason}
+            onValueChange={seasonValueChange}
           />
           <PillButton
             title="Continue"
             onPress={handleContinue}
-            backgroundColor="rgba(255, 255, 255, 0.8)"
+            backgroundColor={getAlphaColor('#FFFFFF', 0.8)}
             textColor="black"
           />
         </View>

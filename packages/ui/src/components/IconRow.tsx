@@ -7,7 +7,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text, ViewStyle, TextStyle } from 'react-native';
 import * as Icons from '@expo/vector-icons';
-import { Link } from 'expo-router';
+import { Link, Href } from 'expo-router';
 import { useTheme } from "../contexts/ThemeContext";
 import NeumorphicOutset from './NeumorphicOutset';
 
@@ -24,7 +24,7 @@ interface IconRowProps {
     /** A function to be called when the icon is pressed. */
     onPress?: () => void;
     /** A URL to navigate to when the icon is pressed. Uses expo-router's Link. */
-    href?: any;
+    href?: Href;
     /** The name of the icon set to use (e.g., 'MaterialCommunityIcons'). Defaults to 'MaterialCommunityIcons'. */
     iconSet?: keyof typeof Icons;
     /** The color of the icon and/or text. */
@@ -61,26 +61,27 @@ export const IconRow = ({ icons, style, borderRadius }: IconRowProps) => {
     touchable: {
       flex: 1,
     },
+    outsetContainer: {
+      margin: theme.spacing.s,
+    },
+    outsetContent: {
+      overflow: 'hidden',
+    },
   });
 
   return (
     <View style={[styles.iconContainer, style]}>
       {icons.map((icon, index) => {
         // Dynamically select the icon set, defaulting to MaterialCommunityIcons.
-        const Icon = Icons[icon.iconSet || 'MaterialCommunityIcons'];
+        const Icon = Icons[icon.iconSet || 'MaterialCommunityIcons'] as React.ComponentType<{ name: string; size: number; color: string }>;
         
+        const currentBorderRadius = borderRadius ?? theme.borderRadius.l;
+
         // The common content for each item in the row (the icon/text block).
         const iconContent = (
           <NeumorphicOutset 
-            containerStyle={{
-              borderRadius: borderRadius ?? theme.borderRadius.l,
-              margin: theme.spacing.s,
-            }}
-            contentStyle={{
-              backgroundColor: icon.backgroundColor || theme.colors.background,
-              borderRadius: borderRadius ?? theme.borderRadius.l,
-              overflow: 'hidden',
-            }}
+            containerStyle={[styles.outsetContainer, { borderRadius: currentBorderRadius }]}
+            contentStyle={[styles.outsetContent, { backgroundColor: icon.backgroundColor || theme.colors.background, borderRadius: currentBorderRadius }]}
           >
             <View style={styles.iconBlock}>
                 {icon.name && <Icon name={icon.name} size={25} color={icon.color || theme.colors.text} />}

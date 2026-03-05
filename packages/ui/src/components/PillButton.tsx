@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import NeumorphicOutset from './NeumorphicOutset';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -9,7 +9,7 @@ interface PillButtonProps {
   backgroundColor?: string;
   textColor?: string;
   style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<any>;
+  textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
 }
 
@@ -34,12 +34,15 @@ export const PillButton = ({ title, onPress, backgroundColor, textColor, style, 
       fontWeight: 'bold',
       textAlign: 'center',
     },
+    outsetContent: {
+      borderRadius: 20,
+    },
   });
 
   return (
     <NeumorphicOutset 
       containerStyle={[styles.buttonContainer, style]}
-      contentStyle={{ borderRadius: 20 }} // Explicitly pass the pill radius
+      contentStyle={styles.outsetContent} // Explicitly pass the pill radius
     >
       <TouchableOpacity
         style={[styles.button, { backgroundColor: buttonColor }]}

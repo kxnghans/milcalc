@@ -16,13 +16,13 @@ export const mockFederalTaxData: Tables<'federal_tax_data'>[] = [
   { id: 5, year: 2026, state: 'Federal', filing_status: 'Married Filing Jointly', tax_rate: 0.12, income_bracket_low: 24801, income_bracket_high: '100800', standard_deduction: 32200, personal_exemption: 0, amt_exemption: 140200, eitc_value: 8680, eitc_parameter: 'Income at Max Credit', children: 'No Children' },
 ];
 
-export const mockStateTaxData: any[] = [
+export const mockStateTaxData: Tables<'state_tax_data'>[] = [
   // CA Single 2025
-  { id: 13, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 1.0, income_bracket_low: 0, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149 },
-  { id: 15, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 0.02, income_bracket_low: 10756, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149 },
-  { id: 17, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 0.04, income_bracket_low: 25499, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149 },
-  { id: 19, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 0.06, income_bracket_low: 40245, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149 },
-  { id: 21, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 0.08, income_bracket_low: 55866, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149 },
+  { id: 13, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 1.0, income_bracket_low: 0, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149, amt_exemption: null, "Income at Max Credit_No Children": null, "Income at Max Credit_One Child": null, "Income at Max Credit_Three or More Children": null, "Income at Max Credit_Two Children": null, "Maximum Credit_No Children": null, "Maximum Credit_One Child": null, "Maximum Credit_Three or More Children": null, "Maximum Credit_Two Children": null, "Phaseout Begins_No Children": null, "Phaseout Begins_One Child": null, "Phaseout Begins_Three or More Children": null, "Phaseout Begins_Two Children": null, "Phaseout Ends (Credit Equals Zero)_No Children": null, "Phaseout Ends (Credit Equals Zero)_One Child": null, "Phaseout Ends (Credit Equals Zero)_Three or More Children": null, "Phaseout Ends (Credit Equals Zero)_Two Children": null },
+  { id: 15, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 0.02, income_bracket_low: 10756, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149, amt_exemption: null, "Income at Max Credit_No Children": null, "Income at Max Credit_One Child": null, "Income at Max Credit_Three or More Children": null, "Income at Max Credit_Two Children": null, "Maximum Credit_No Children": null, "Maximum Credit_One Child": null, "Maximum Credit_Three or More Children": null, "Maximum Credit_Two Children": null, "Phaseout Begins_No Children": null, "Phaseout Begins_One Child": null, "Phaseout Begins_Three or More Children": null, "Phaseout Begins_Two Children": null, "Phaseout Ends (Credit Equals Zero)_No Children": null, "Phaseout Ends (Credit Equals Zero)_One Child": null, "Phaseout Ends (Credit Equals Zero)_Three or More Children": null, "Phaseout Ends (Credit Equals Zero)_Two Children": null },
+  { id: 17, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 0.04, income_bracket_low: 25499, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149, amt_exemption: null, "Income at Max Credit_No Children": null, "Income at Max Credit_One Child": null, "Income at Max Credit_Three or More Children": null, "Income at Max Credit_Two Children": null, "Maximum Credit_No Children": null, "Maximum Credit_One Child": null, "Maximum Credit_Three or More Children": null, "Maximum Credit_Two Children": null, "Phaseout Begins_No Children": null, "Phaseout Begins_One Child": null, "Phaseout Begins_Three or More Children": null, "Phaseout Begins_Two Children": null, "Phaseout Ends (Credit Equals Zero)_No Children": null, "Phaseout Ends (Credit Equals Zero)_One Child": null, "Phaseout Ends (Credit Equals Zero)_Three or More Children": null, "Phaseout Ends (Credit Equals Zero)_Two Children": null },
+  { id: 19, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 0.06, income_bracket_low: 40245, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149, amt_exemption: null, "Income at Max Credit_No Children": null, "Income at Max Credit_One Child": null, "Income at Max Credit_Three or More Children": null, "Income at Max Credit_Two Children": null, "Maximum Credit_No Children": null, "Maximum Credit_One Child": null, "Maximum Credit_Three or More Children": null, "Maximum Credit_Two Children": null, "Phaseout Begins_No Children": null, "Phaseout Begins_One Child": null, "Phaseout Begins_Three or More Children": null, "Phaseout Begins_Two Children": null, "Phaseout Ends (Credit Equals Zero)_No Children": null, "Phaseout Ends (Credit Equals Zero)_One Child": null, "Phaseout Ends (Credit Equals Zero)_Three or More Children": null, "Phaseout Ends (Credit Equals Zero)_Two Children": null },
+  { id: 21, year: 2025, state: 'CA', filing_status: 'Single', tax_rate: 0.08, income_bracket_low: 55866, income_bracket_high: 'inf', standard_deduction: 5540, personal_exemption: 149, amt_exemption: null, "Income at Max Credit_No Children": null, "Income at Max Credit_One Child": null, "Income at Max Credit_Three or More Children": null, "Income at Max Credit_Two Children": null, "Maximum Credit_No Children": null, "Maximum Credit_One Child": null, "Maximum Credit_Three or More Children": null, "Maximum Credit_Two Children": null, "Phaseout Begins_No Children": null, "Phaseout Begins_One Child": null, "Phaseout Begins_Three or More Children": null, "Phaseout Begins_Two Children": null, "Phaseout Ends (Credit Equals Zero)_No Children": null, "Phaseout Ends (Credit Equals Zero)_One Child": null, "Phaseout Ends (Credit Equals Zero)_Three or More Children": null, "Phaseout Ends (Credit Equals Zero)_Two Children": null },
 
   // TX (Mock for no tax state)
   {
@@ -35,5 +35,22 @@ export const mockStateTaxData: any[] = [
     income_bracket_high: 'inf',
     standard_deduction: 0,
     personal_exemption: 0,
+    amt_exemption: null,
+    "Income at Max Credit_No Children": null,
+    "Income at Max Credit_One Child": null,
+    "Income at Max Credit_Three or More Children": null,
+    "Income at Max Credit_Two Children": null,
+    "Maximum Credit_No Children": null,
+    "Maximum Credit_One Child": null,
+    "Maximum Credit_Three or More Children": null,
+    "Maximum Credit_Two Children": null,
+    "Phaseout Begins_No Children": null,
+    "Phaseout Begins_One Child": null,
+    "Phaseout Begins_Three or More Children": null,
+    "Phaseout Begins_Two Children": null,
+    "Phaseout Ends (Credit Equals Zero)_No Children": null,
+    "Phaseout Ends (Credit Equals Zero)_One Child": null,
+    "Phaseout Ends (Credit Equals Zero)_Three or More Children": null,
+    "Phaseout Ends (Credit Equals Zero)_Two Children": null,
   },
 ];

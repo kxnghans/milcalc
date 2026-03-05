@@ -72,6 +72,8 @@ describe('PT Calculator', () => {
             const inputs = {
                 age: 24,
                 gender: 'Male',
+                pushupComponent: 'push_ups_1min',
+                coreComponent: 'sit_ups_1min',
                 cardioComponent: 'run',
                 runMinutes: 9, // Raw time 9:14 (554s). Adj: 554-2=552s (9:12). Score is 60.
                 runSeconds: 14,
@@ -170,6 +172,8 @@ describe('PT Calculator', () => {
                 gender: 'Male',
                 isStrengthExempt: true,
                 isCoreExempt: true,
+                pushupComponent: 'push_ups_1min',
+                coreComponent: 'sit_ups_1min',
                 cardioComponent: 'run',
                 runMinutes: 9, // 60 pts
                 runSeconds: 12,
@@ -187,6 +191,9 @@ describe('PT Calculator', () => {
                 isStrengthExempt: true,
                 isCoreExempt: true,
                 isCardioExempt: true,
+                pushupComponent: 'push_ups_1min',
+                coreComponent: 'sit_ups_1min',
+                cardioComponent: 'run',
             };
             const result = calculatePtScore(inputs, standards, mockWalkStandards, mockAltitudeAdjustments);
             expect(result.totalScore).toBe(100);

@@ -83,6 +83,9 @@ const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDis
         textShadowRadius: 0.1,
         textShadowOffset: { width: 0, height: 0 },
     },
+    row: {
+        flexDirection: 'row',
+    }
   });
 
   /**
@@ -127,17 +130,17 @@ const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDis
         {/* Optionally, display the breakdown of component scores */}
         {showBreakdown && (
             <View style={styles.scoreBreakdownContainer}>
-                <View style={{flexDirection: 'row'}}>
+                <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>Strength: </Text>
                     {renderComponentScore(score.pushupScore, 20)}
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
-                <View style={{flexDirection: 'row'}}>
+                <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>Core: </Text>
                     {renderComponentScore(score.coreScore, 20)}
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
-                <View style={{flexDirection: 'row'}}>
+                <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>Cardio: </Text>
                     {renderCardioScore()}
                 </View>

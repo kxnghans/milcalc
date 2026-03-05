@@ -10,7 +10,7 @@ import * as Icons from '@expo/vector-icons';
 import { TextStyle, StyleProp } from 'react-native';
 
 interface IconProps {
-  name: any;
+  name: string;
   size: number;
   color: string;
   iconSet?: keyof typeof Icons;
@@ -30,7 +30,7 @@ export const Icon = ({
   style 
 }: IconProps) => {
   // Dynamically select the icon component from the Icons library based on the iconSet prop.
-  const IconComponent = (Icons as any)[iconSet];
+  const IconComponent = Icons[iconSet] as React.ComponentType<{ name: string; size: number; color: string; style?: StyleProp<TextStyle> }>;
 
   // If the specified icon set doesn't exist, return null to prevent a crash.
   if (!IconComponent) {

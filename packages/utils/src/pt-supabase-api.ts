@@ -1,4 +1,5 @@
 import { supabase, sanitizeError } from './supabaseClient';
+import { PtStandard, Tables } from './types';
 
 /**
  * Fetches all PT standards for a given gender and age group from multiple tables.
@@ -6,7 +7,7 @@ import { supabase, sanitizeError } from './supabaseClient';
  * @param age_group - The user's age group string (e.g., '<25', '25-29').
  * @returns An array of all standards for that group, or null if an error occurs.
  */
-export const getPtStandards = async (gender: string, age_group: string) => {
+export const getPtStandards = async (gender: string, age_group: string): Promise<PtStandard[] | null> => {
   // 1. Get the age_sex_group_id from the pt_age_sex_groups table
   const { data: ageGroupData, error: ageGroupError } = await supabase
     .from('pt_age_sex_groups')
@@ -51,14 +52,14 @@ export const getPtStandards = async (gender: string, age_group: string) => {
   }
 
   // 4. Combine and transform the data into a consistent format
-  const standards = [];
+  const standards: PtStandard[] = [];
 
   if (muscularData) {
     for (const item of muscularData) {
       standards.push({
         exercise: item.exercise_type,
         measurement: item.reps || item.time, // Use reps or time as the measurement
-        points: item.points,
+        points: item.points || 0,
       });
     }
   }
@@ -69,14 +70,14 @@ export const getPtStandards = async (gender: string, age_group: string) => {
         standards.push({
           exercise: 'run',
           measurement: item.run_time,
-          points: item.points,
+          points: item.points || 0,
         });
       }
       if (item.shuttles_range) {
         standards.push({
           exercise: 'shuttles',
           measurement: item.shuttles_range,
-          points: item.points,
+          points: item.points || 0,
         });
       }
     }
@@ -109,7 +110,9 @@ export const getWalkStandards = async (gender: string) => {
  * @param exercise - The exercise ('run', 'walk', or 'hamr').
  * @returns An array of all altitude adjustments for that exercise, or null if an error occurs.
  */
-export const getAltitudeAdjustments = async (exercise: string) => {
+export const getAltitudeAdjustments = async <T extends 'run' | 'walk' | 'hamr'>(
+  exercise: T
+): Promise<Tables<T extends 'run' ? 'run_altitude_adjustments' : T extends 'walk' ? 'walk_altitude_adjustments' : 'hamr_altitude_adjustments'>[] | null> => {
     let query;
     if (exercise === 'run') {
         query = supabase.from('run_altitude_adjustments').select('*');
@@ -128,7 +131,7 @@ export const getAltitudeAdjustments = async (exercise: string) => {
     return null;
   }
 
-  return data;
+  return data as unknown as Tables<T extends 'run' ? 'run_altitude_adjustments' : T extends 'walk' ? 'walk_altitude_adjustments' : 'hamr_altitude_adjustments'>[];
 };
 
 

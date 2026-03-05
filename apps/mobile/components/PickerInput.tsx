@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Modal, Pressable, StyleProp, ViewStyle } from 'react-native';
-import { NeumorphicInset, useTheme, StyledPicker, PillButton } from '@repo/ui';
+import { NeumorphicInset, useTheme, StyledPicker, PillButton, getAlphaColor } from '@repo/ui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface PickerInputProps {
-  items: { label: string; value: any }[];
-  selectedValue: any;
-  onValueChange: (value: any) => void;
+  items: { label: string; value: string | number | null }[];
+  selectedValue: string | number | null;
+  onValueChange: (value: string | number | null) => void;
   placeholder?: string;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
@@ -34,7 +34,7 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
     modalOverlay: {
         flex: 1,
         justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: getAlphaColor('#000000', 0.5),
     },
     modalContent: {
         backgroundColor: theme.colors.surface,
@@ -42,7 +42,17 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
         borderTopRightRadius: theme.borderRadius.l,
         padding: theme.spacing.m,
     },
-
+    inset: {
+        borderRadius: theme.borderRadius.m,
+        backgroundColor: theme.colors.inputBackground,
+    },
+    selectedLabelText: {
+        flex: 1,
+        textAlign: 'center',
+    },
+    doneButton: {
+        alignSelf: 'flex-end',
+    }
   });
 
   const pickerItems = [
@@ -52,9 +62,9 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
 
   return (
     <View style={[styles.wrapper, style]}>
-        <NeumorphicInset style={{ borderRadius: theme.borderRadius.m, backgroundColor: theme.colors.inputBackground }}>
+        <NeumorphicInset style={styles.inset}>
             <Pressable onPress={() => setModalVisible(true)} style={styles.pressable} disabled={disabled}>
-                <Text style={{ color: textColor, flex: 1, textAlign: 'center' }}>{selectedLabel}</Text>
+                <Text style={[styles.selectedLabelText, { color: textColor }]}>{selectedLabel}</Text>
                 <MaterialCommunityIcons name="chevron-down" size={20} color={disabled ? theme.colors.disabled : theme.colors.text} />
             </Pressable>
         </NeumorphicInset>
@@ -68,7 +78,7 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
             <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
                 <Pressable>
                     <View style={styles.modalContent}>
-                        <PillButton title="Done" onPress={() => setModalVisible(false)} style={{ alignSelf: 'flex-end' }} />
+                        <PillButton title="Done" onPress={() => setModalVisible(false)} style={styles.doneButton} />
                         <StyledPicker
                             items={pickerItems}
                             selectedValue={selectedValue}

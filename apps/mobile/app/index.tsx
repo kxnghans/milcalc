@@ -8,12 +8,14 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { useTheme, SegmentedSelector, PillButton } from '@repo/ui';
+import { useTheme, SegmentedSelector, PillButton, getAlphaColor } from '@repo/ui';
 import { BlurView } from 'expo-blur';
 import SeasonalEffects from '../components/_SeasonalEffects';
 import splashImage from '../assets/3d_splash.png';
 
-const getSeason = () => {
+type Season = 'spring' | 'summer' | 'fall' | 'winter';
+
+const getSeason = (): Season => {
   const month = new Date().getMonth();
   if (month >= 2 && month <= 4) return 'spring';
   if (month >= 5 && month <= 7) return 'summer';
@@ -24,7 +26,7 @@ const getSeason = () => {
 export default function SplashScreen() {
   const router = useRouter();
   const { theme, isDarkMode } = useTheme();
-  const [season, setSeason] = useState(getSeason());
+  const [season, setSeason] = useState<Season>(getSeason());
   const { height: screenHeight } = useWindowDimensions();
 
   const handleContinue = () => {
@@ -69,13 +71,23 @@ export default function SplashScreen() {
       fontWeight: 'bold',
       color: theme.colors.text,
     },
+    centeredView: {
+      justifyContent: 'center',
+    },
+    fullWidth: {
+      width: '100%',
+    },
   });
+
+  const seasonValueChange = (val: string) => {
+    setSeason(val as Season);
+  };
 
   return (
     <View style={styles.container}>
       {/* Background Layer */}
       <View style={[styles.backgroundLayer, { backgroundColor: theme.colors.background }]}>
-        <SeasonalEffects season={season as any} />
+        <SeasonalEffects season={season} />
       </View>
 
       {/* Blur Layer */}
@@ -88,27 +100,27 @@ export default function SplashScreen() {
         </View>
         
         <View style={styles.bottomContainer}>
-          <View style={{ justifyContent: 'center' }}>
+          <View style={styles.centeredView}>
             <View style={styles.disclaimerContainer}>
                 <Text style={styles.disclaimer}>
                     Not an official USAF or US military product.
                 </Text>
             </View>
           </View>
-          <View style={{ width: '100%' }}>
+          <View style={styles.fullWidth}>
             <SegmentedSelector
               options={[{label: 'Spring', value: 'spring'}, {label: 'Summer', value: 'summer'}, {label: 'Fall', value: 'fall'}, {label: 'Winter', value: 'winter'}]}
               selectedValues={[season]}
-              onValueChange={setSeason}
+              onValueChange={seasonValueChange}
               selectedBackgroundColor={theme.colors.mascotBlue}
               selectedTextStyle={theme.typography.subtitle}
             />
           </View>
-          <View style={{ justifyContent: 'center' }}>
+          <View style={styles.centeredView}>
             <PillButton
               title="Continue"
               onPress={handleContinue}
-              backgroundColor="rgba(255, 255, 255, 0.8)"
+              backgroundColor={getAlphaColor('#FFFFFF', 0.8)}
               textColor="black"
             />
           </View>

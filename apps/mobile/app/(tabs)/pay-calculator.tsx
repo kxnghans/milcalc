@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable, LayoutAnimation, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
+import { usePayCalculatorState, Card, IconRow, PayDisplay, SegmentedSelector, useTheme, PillButton, MASCOT_URLS, getAlphaColor } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DocumentModal from '../../components/DocumentModal';
@@ -21,9 +21,8 @@ import TwoColumnPicker from '../../components/TwoColumnPicker';
 const payMascots = [
   { uri: MASCOT_URLS.PAY },
   { uri: MASCOT_URLS.PAY1 },
+  { uri: MASCOT_URLS.RETIREMENT },
 ];
-
-// Enable LayoutAnimation for Android
 
 export default function PayCalculatorScreen() {
   const { theme, themeMode, toggleTheme } = useTheme();
@@ -92,6 +91,68 @@ export default function PayCalculatorScreen() {
     setDeductionsExpanded(!isDeductionsExpanded);
   };
 
+  const getThemeIcon = () => {
+    if (themeMode === 'light') return ICONS.THEME_LIGHT;
+    if (themeMode === 'dark') return ICONS.THEME_DARK;
+    return ICONS.THEME_AUTO;
+  };
+
+  const LabelWithHelp = ({ label, contentKey }: { label: string; contentKey: string }) => (
+    <View style={styles.labelRow}>
+        <Text style={styles.label}>{label}</Text>
+        <Pressable onPress={() => openDetailModal(contentKey)}>
+            <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
+        </Pressable>
+    </View>
+  );
+
+  const RoundIconButton = ({ onPress, iconName, backgroundColor, size = 24, iconSize = 16, iconColor = '#FFFFFF' }: { onPress: () => void; iconName: keyof typeof MaterialCommunityIcons.glyphMap; backgroundColor: string; size?: number; iconSize?: number; iconColor?: string }) => (
+    <TouchableOpacity
+        onPress={onPress}
+        style={[styles.roundIconButton, {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            backgroundColor: backgroundColor,
+        }]}
+    >
+        <MaterialCommunityIcons name={iconName} size={iconSize} color={iconColor} />
+    </TouchableOpacity>
+);
+
+  const AddButton = ({ onPress }: { onPress: () => void }) => (
+    <View style={styles.addIconContainer}>
+        <RoundIconButton
+            onPress={onPress}
+            iconName="plus"
+            backgroundColor={theme.colors.primary}
+            size={20}
+            iconSize={14}
+        />
+    </View>
+  );
+
+  const CancelButton = ({ onPress }: { onPress: () => void }) => (
+    <RoundIconButton
+        onPress={onPress}
+        iconName="close"
+        backgroundColor={theme.colors.error}
+        size={20}
+        iconSize={14}
+    />
+  );
+
+  const getNextPayMascot = () => {
+    const mascot = payMascots[payMascotIndex];
+    setPayMascotIndex((prevIndex) => (prevIndex + 1) % payMascots.length);
+    return mascot;
+  };
+
+  const openDetailModal = (key: string) => {
+    setDetailModalContentKey(key);
+    setDetailModalMascot(getNextPayMascot());
+  };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -134,77 +195,82 @@ export default function PayCalculatorScreen() {
     addIconContainer: {
         alignItems: 'center',
         marginBottom: theme.spacing.s,
+    },
+    roundIconButton: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1,
+    },
+    dismissKeyboard: {
+        flex: 0,
+        width: '100%',
+    },
+    summaryCard: {
+        marginBottom: theme.spacing.s,
+    },
+    flex1: {
+        flex: 1,
+    },
+    scrollView: {
+        paddingBottom: 0,
+        flexGrow: 1,
+    },
+    demographicsRow: {
+        flexDirection: 'row',
+    },
+    noMarginHorizontal: {
+        marginLeft: 0,
+        marginRight: 0,
+    },
+    marginBottomS: {
+        marginBottom: theme.spacing.s,
+    },
+    noMarginBottom: {
+        marginBottom: 0,
+    },
+    noMarginTopBottom: {
+        marginTop: 0,
+        marginBottom: 0,
+    },
+    marginTopS: {
+        marginTop: theme.spacing.s,
+    },
+    verticalDivider: {
+        marginHorizontal: theme.spacing.m,
+        backgroundColor: getAlphaColor('#000000', 0.01),
+    },
+    rightColumn: {
+        flex: 1,
+        paddingRight: theme.spacing.s,
+    },
+    dividerMargin: {
+        marginVertical: theme.spacing.s,
+    },
+    additionalIncomeRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    incomeDescription: {
+        flex: 1,
+        marginRight: theme.spacing.s,
+    },
+    incomeAmount: {
+        flex: 1,
+        marginLeft: theme.spacing.s,
+        marginRight: theme.spacing.s,
+    },
+    expandableContentNoTopMargin: {
+        marginTop: 0,
+    },
+    centeredItems: {
+        alignItems: 'center',
     }
   });
-
-  const getThemeIcon = () => {
-    if (themeMode === 'light') return ICONS.THEME_LIGHT;
-    if (themeMode === 'dark') return ICONS.THEME_DARK;
-    return ICONS.THEME_AUTO;
-  };
-
-  const LabelWithHelp = ({ label, contentKey }: { label: string; contentKey: string }) => (
-    <View style={styles.labelRow}>
-        <Text style={styles.label}>{label}</Text>
-        <Pressable onPress={() => openDetailModal(contentKey)}>
-            <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
-        </Pressable>
-    </View>
-  );
-
-  const RoundIconButton = ({ onPress, iconName, backgroundColor, size = 24, iconSize = 16, iconColor = '#FFFFFF' }: { onPress: () => void; iconName: any; backgroundColor: string; size?: number; iconSize?: number; iconColor?: string }) => (
-    <TouchableOpacity
-        onPress={onPress}
-        style={{
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            backgroundColor: backgroundColor,
-            justifyContent: 'center',
-            alignItems: 'center',
-            elevation: 2,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.2,
-            shadowRadius: 1,
-        }}
-    >
-        <MaterialCommunityIcons name={iconName} size={iconSize} color={iconColor} />
-    </TouchableOpacity>
-);
-
-  const AddButton = ({ onPress }: { onPress: () => void }) => (
-    <View style={styles.addIconContainer}>
-        <RoundIconButton
-            onPress={onPress}
-            iconName="plus"
-            backgroundColor={theme.colors.primary}
-            size={20}
-            iconSize={14}
-        />
-    </View>
-  );
-
-  const CancelButton = ({ onPress }: { onPress: () => void }) => (
-    <RoundIconButton
-        onPress={onPress}
-        iconName="close"
-        backgroundColor={theme.colors.error}
-        size={20}
-        iconSize={14}
-    />
-  );
-
-  const getNextPayMascot = () => {
-    const mascot = payMascots[payMascotIndex];
-    setPayMascotIndex((prevIndex) => (prevIndex + 1) % payMascots.length);
-    return mascot;
-  };
-
-  const openDetailModal = (key: string) => {
-    setDetailModalContentKey(key);
-    setDetailModalMascot(getNextPayMascot());
-  };
 
   return (
     <View style={styles.container}>
@@ -218,8 +284,8 @@ export default function PayCalculatorScreen() {
             mascotAsset={detailModalMascot}
         />
         <View style={styles.content}>
-            <DismissKeyboardView style={{ flex: 0, width: '100%' }}>
-                <Card containerStyle={{ marginBottom: theme.spacing.s }}>
+            <DismissKeyboardView style={styles.dismissKeyboard}>
+                <Card containerStyle={styles.summaryCard}>
                                     <PayDisplay
                                         onHelpPress={() => openDetailModal('Pay Display Summary')}
                         annualPay={annualPay}
@@ -248,36 +314,36 @@ export default function PayCalculatorScreen() {
                     },
                 ]} />
             </DismissKeyboardView>
-            <Card style={{ flex: 1 }}>
-                <KeyboardAwareScrollView enableOnAndroid contentContainerStyle={{paddingBottom: 0, flexGrow: 1}} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <Card style={styles.flex1}>
+                <KeyboardAwareScrollView enableOnAndroid contentContainerStyle={styles.scrollView} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                     <DismissKeyboardView>
                         {/* Two-Column Layout for Demographics */}
-                        <View style={{ flexDirection: 'row' }}>
+                        <View style={styles.demographicsRow}>
                             {/* Left Column */}
-                            <View style={{ flex: 1 }}>
-                                <View style={[styles.fieldRow, { marginBottom: theme.spacing.s }]}>
-                                    <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Component</Text>
+                            <View style={styles.flex1}>
+                                <View style={[styles.fieldRow, styles.marginBottomS]}>
+                                    <Text style={[styles.boldLabel, styles.noMarginBottom]}>Component</Text>
                                     <SegmentedSelector
                                         options={[{label: 'Active', value: 'Active'}, {label: 'Guard', value: 'Guard'}, {label: 'Reserve', value: 'Reserve'}]}
                                         ratios={[4, 4, 5]}
                                         selectedValues={[component]}
                                         onValueChange={(value) => setComponent(value)}
-                                        style={{ marginLeft: 0, marginRight: 0 }}
+                                        style={styles.noMarginHorizontal}
                                     />
                                 </View>
-                                <View style={[styles.fieldRow, { marginBottom: theme.spacing.s }]}>
-                                    <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Status</Text>
+                                <View style={[styles.fieldRow, styles.marginBottomS]}>
+                                    <Text style={[styles.boldLabel, styles.noMarginBottom]}>Status</Text>
                                     <SegmentedSelector
                                         options={[{label: 'Enlisted', value: 'Enlisted'}, {label: 'WO', value: 'Warrant Officer'}, {label: 'Officer', value: 'Officer'}]}
                                         ratios={[5, 2.75, 4]}
                                         selectedValues={[status]}
                                         onValueChange={(value) => setStatus(value)}
-                                        style={{ marginLeft: 0, marginRight: 0 }}
+                                        style={styles.noMarginHorizontal}
                                     />
                                 </View>
                                 <View style={styles.fieldRow} collapsable={false}>
                                     <Text style={styles.boldLabel}>Pay Grade</Text>
-                                    <PickerInput items={filteredRanks} selectedValue={rank} onValueChange={setRank} placeholder="Select..." />
+                                    <PickerInput items={filteredRanks} selectedValue={rank} onValueChange={(val) => setRank(val as string | null)} placeholder="Select..." />
                                 </View>
                                 <View style={styles.fieldRow}>
                                     <Text style={styles.boldLabel}>Years of Service</Text>
@@ -285,43 +351,43 @@ export default function PayCalculatorScreen() {
                                 </View>
                             </View>
 
-                            <VerticalDivider style={{ marginHorizontal: theme.spacing.m, backgroundColor: 'rgba(0, 0, 0, 0.01)' }} />
+                            <VerticalDivider style={styles.verticalDivider} />
 
                             {/* Right Column */}
-                            <View style={{ flex: 1, paddingRight: theme.spacing.s }}>
-                                <View style={[styles.fieldRow, { marginBottom: theme.spacing.s }]}>
-                                    <Text style={[styles.boldLabel, { marginBottom: 0 }]}>Tax Filing Status</Text>
+                            <View style={styles.rightColumn}>
+                                <View style={[styles.fieldRow, styles.marginBottomS]}>
+                                    <Text style={[styles.boldLabel, styles.noMarginBottom]}>Tax Filing Status</Text>
                                     <SegmentedSelector
                                         options={[{label: 'Single', value: 'single'}, {label: 'Married', value: 'married'}]}
                                         selectedValues={[filingStatus]}
                                         onValueChange={(value) => setFilingStatus(value)}
-                                        style={{ marginLeft: 0, marginRight: 0 }}
+                                        style={styles.noMarginHorizontal}
                                     />
                                 </View>
-                                <View style={[styles.fieldRow, { marginBottom: 0 }]}>
-                                    <Text style={[styles.boldLabel, { marginTop: 0, marginBottom: 0 }]}>Dependents</Text>
+                                <View style={[styles.fieldRow, styles.noMarginBottom]}>
+                                    <Text style={[styles.boldLabel, styles.noMarginTopBottom]}>Dependents</Text>
                                     <SegmentedSelector
                                         options={[{label: 'No', value: 'WITHOUT_DEPENDENTS'}, {label: 'Yes', value: 'WITH_DEPENDENTS'}]}
                                         selectedValues={[bahDependencyStatus]}
                                         onValueChange={(value) => setBahDependencyStatus(value)}
-                                        style={{ marginLeft: 0, marginRight: 0 }}
+                                        style={styles.noMarginHorizontal}
                                     />
                                 </View>
-                                <View style={[styles.fieldRow, { marginTop: theme.spacing.s }]}>
+                                <View style={[styles.fieldRow, styles.marginTopS]}>
                                     <Text style={styles.boldLabel}>Mil Housing Area</Text>
-                                    <TwoColumnPicker data={mhaData} selectedValue={mha} onChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoading} error={mhaError} primaryColumnValue={state} secondaryPlaceholder="Select a location" />
+                                    <TwoColumnPicker data={mhaData || null} selectedValue={mha} onChange={(val, prim) => handleMhaChange(val as string, prim)} displayName={mhaDisplayName} isLoading={isLoading} error={mhaError} primaryColumnValue={state} secondaryPlaceholder="Select a location" />
                                 </View>
-                                <View style={[styles.fieldRow, { marginTop: theme.spacing.s }]}>
+                                <View style={[styles.fieldRow, styles.marginTopS]}>
                                     <Text style={styles.boldLabel}>VA Disability</Text>
-                                    <TwoColumnPicker data={disabilityPickerData} selectedValue={vaDependencyStatus} onChange={handleDisabilityChange} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select disability rating" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} />
+                                    <TwoColumnPicker data={disabilityPickerData as Record<string, { label: string; value: string | number | null }[]> | null} selectedValue={vaDependencyStatus} onChange={(val, prim) => handleDisabilityChange(val as string, prim)} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select disability rating" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} />
                                 </View>
                             </View>
                         </View>
 
-                        <Divider style={{ marginVertical: theme.spacing.s }} />
+                        <Divider style={styles.dividerMargin} />
 
                         {/* Special Duty Pay Section */}
-                        <View style={[styles.fieldRow, { marginBottom: 0 }]}>
+                        <View style={[styles.fieldRow, styles.noMarginBottom]}>
                             <Pressable onPress={toggleIncome} style={styles.expandableHeader}>
                                 <Text style={styles.boldLabel}>Special Duty Pay</Text>
                                 <RoundIconButton
@@ -347,15 +413,15 @@ export default function PayCalculatorScreen() {
                                     
                                     <LabelWithHelp label="Additional Income" contentKey="Additional Income" />
                                     {additionalIncomes.map((income, index) => (
-                                        <View key={index} style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-                                            <View style={{ flex: 1, marginRight: theme.spacing.s }}>
+                                        <View key={index} style={[styles.fieldRow, styles.additionalIncomeRow]}>
+                                            <View style={styles.incomeDescription}>
                                                 <InsetTextInput
                                                     placeholder="Description"
                                                     value={income.name}
                                                     onChangeText={(text) => { const newIncomes = [...additionalIncomes]; newIncomes[index].name = text; setAdditionalIncomes(newIncomes); }}
                                                 />
                                             </View>
-                                            <View style={{ flex: 1, marginLeft: theme.spacing.s, marginRight: theme.spacing.s }}>
+                                            <View style={styles.incomeAmount}>
                                                 <CurrencyInput
                                                     placeholder="0.00"
                                                     value={income.amount}
@@ -382,7 +448,7 @@ export default function PayCalculatorScreen() {
                             )}
                         </View>
 
-                        <Divider style={{ marginVertical: theme.spacing.s }} />
+                        <Divider style={styles.dividerMargin} />
 
                         {/* Deductions Section */}
                         <View style={styles.fieldRow}>
@@ -396,8 +462,8 @@ export default function PayCalculatorScreen() {
                                 />
                             </Pressable>
                             {isDeductionsExpanded && (
-                                <View style={[styles.expandableContent, { marginTop: 0 }]}>
-                                    <View style={{alignItems: 'center'}}>
+                                <View style={[styles.expandableContent, styles.expandableContentNoTopMargin]}>
+                                    <View style={styles.centeredItems}>
                                         <PillButton 
                                             title={isTaxOverride ? 'Use Calculated Taxes' : 'Override Taxes'} 
                                             onPress={() => setIsTaxOverride(!isTaxOverride)} 
@@ -418,15 +484,15 @@ export default function PayCalculatorScreen() {
 
                                     <LabelWithHelp label="Additional Deductions" contentKey="Additional Deductions" />
                                     {additionalDeductions.map((deduction, index) => (
-                                        <View key={index} style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-                                            <View style={{ flex: 1, marginRight: theme.spacing.s }}>
+                                        <View key={index} style={[styles.fieldRow, styles.additionalIncomeRow]}>
+                                            <View style={styles.incomeDescription}>
                                                 <InsetTextInput
                                                     placeholder="Description"
                                                     value={deduction.name}
                                                     onChangeText={(text) => { const newDeductions = [...additionalDeductions]; newDeductions[index].name = text; setAdditionalDeductions(newDeductions); }}
                                                 />
                                             </View>
-                                            <View style={{ flex: 1, marginLeft: theme.spacing.s, marginRight: theme.spacing.s }}>
+                                            <View style={styles.incomeAmount}>
                                                 <CurrencyInput
                                                     placeholder="0.00"
                                                     value={deduction.amount}

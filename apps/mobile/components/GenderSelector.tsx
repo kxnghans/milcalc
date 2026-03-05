@@ -9,6 +9,8 @@ import { View, StyleSheet } from 'react-native';
 import { StyledButton, useTheme } from '@repo/ui';
 import { ICONS, ICON_SETS } from '@repo/ui/icons';
 
+import * as Icons from '@expo/vector-icons';
+
 /**
  * A component that renders a gender selection control using two styled buttons.
  * @param {object} props - The component props.
@@ -20,6 +22,8 @@ interface GenderSelectorProps {
   gender: string;
   setGender: (gender: string) => void;
 }
+
+type IconSet = keyof typeof Icons;
 
 export default function GenderSelector({ gender, setGender }: GenderSelectorProps) {
     const { theme, isDarkMode } = useTheme();
@@ -35,6 +39,9 @@ export default function GenderSelector({ gender, setGender }: GenderSelectorProp
             textShadowRadius: 1,
             textShadowOffset: { width: 0, height: 0 },
             color: theme.colors.primary,
+        },
+        buttonStyle: {
+            flex: 1,
         }
     });
 
@@ -47,8 +54,8 @@ export default function GenderSelector({ gender, setGender }: GenderSelectorProp
                 variant={gender === 'male' ? 'primary' : 'secondary'}
                 textStyle={gender !== 'male' ? styles.inactiveText : {}}
                 size="small"
-                style={{ flex: 1 }}
-                iconSet={ICON_SETS.FONTISTO as any}
+                style={styles.buttonStyle}
+                iconSet={ICON_SETS.FONTISTO as IconSet}
                 icon={ICONS.GENDER_MALE}
                 highlightOpacity={isDarkMode ? 0.33 : undefined}
             />
@@ -58,8 +65,8 @@ export default function GenderSelector({ gender, setGender }: GenderSelectorProp
                 variant={gender === 'female' ? 'primary' : 'secondary'}
                 textStyle={gender !== 'female' ? styles.inactiveText : {}}
                 size="small"
-                style={{ flex: 1 }}
-                iconSet={ICON_SETS.FONTISTO as any}
+                style={styles.buttonStyle}
+                iconSet={ICON_SETS.FONTISTO as IconSet}
                 icon={ICONS.GENDER_FEMALE}
                 highlightOpacity={isDarkMode ? 0.33 : undefined}
             />

@@ -26,12 +26,13 @@ export type PerformanceCategory = 'excellent' | 'pass' | 'fail' | 'none';
  */
 export const getScoreCategory = (score: number | string, maxScore: number, treatZeroAsFail: boolean = false): ScoreCategory => {
   // Handle special string-based scores first (e.g., from the walk component).
-  if (score === 'pass') return 'pass';
-  if (score === 'fail') return 'fail';
-  if (typeof (score as any) !== 'number' || score === 'n/a') {
+  if (typeof score === 'string') {
+    if (score === 'pass') return 'pass';
+    if (score === 'fail') return 'fail';
     return 'none';
   }
 
+  // Now score is narrowed to number
   if (score === 0 && !treatZeroAsFail) {
     return 'none';
   }
@@ -39,10 +40,10 @@ export const getScoreCategory = (score: number | string, maxScore: number, treat
   // Define thresholds based on percentages of the max score.
   const ninetyPercent = maxScore * 0.9;
 
-  if ((score as number) >= ninetyPercent) {
+  if (score >= ninetyPercent) {
     return 'excellent';
   }
-  if ((score as number) > 0) {
+  if (score > 0) {
     return 'pass';
   }
   return 'fail';

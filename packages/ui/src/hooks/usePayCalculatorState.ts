@@ -1,8 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from './useDebounce';
-import { getBasePay, getBasRate, getBahRate, getMhaData, getFederalTaxData, getStateTaxData, calculatePay, getMaxFederalTaxYear, getMaxStateTaxYear, getDisabilityData, getReserveDrillPay } from '@repo/utils';
-import { calculateDisabilityIncome } from '@repo/utils';
+import { getBasePay, getBasRate, getBahRate, getMhaData, getFederalTaxData, getStateTaxData, calculatePay, getMaxFederalTaxYear, getMaxStateTaxYear, getDisabilityData, getReserveDrillPay, calculateDisabilityIncome, DisabilityPercentage, DependentStatus } from '@repo/utils';
 
 // A simple utility to parse currency strings into numbers
 const parseCurrency = (value: string | number) => {
@@ -41,11 +40,11 @@ export const usePayCalculatorState = () => {
   const [yearsOfService, setYearsOfService] = useState('');
   const [mha, setMha] = useState('initial');
   const [bahDependencyStatus, setBahDependencyStatus] = useState('WITHOUT_DEPENDENTS');
-  const [vaDependencyStatus, setVaDependencyStatus] = useState<string | null>(null);
+  const [vaDependencyStatus, setVaDependencyStatus] = useState<DependentStatus>('none');
   const [filingStatus, setFilingStatus] = useState('single');
   const [state, setState] = useState('');
   const [component, setComponent] = useState('Active');
-  const [disabilityPercentage, setDisabilityPercentage] = useState<any>(null);
+  const [disabilityPercentage, setDisabilityPercentage] = useState<DisabilityPercentage>('0%');
   const [paySource, setPaySource] = useState('Military');
   const [vaDisabilityPay, setVaDisabilityPay] = useState(0);
 
@@ -175,7 +174,7 @@ export const usePayCalculatorState = () => {
       }
 
       // Now synchronous and uses passed data
-      const vaDisabilityPayResult = calculateDisabilityIncome(disabilityPercentage, vaDependencyStatus as any, disabilityData || []);
+      const vaDisabilityPayResult = calculateDisabilityIncome(disabilityPercentage || '0%', vaDependencyStatus || 'none', disabilityData || []);
       setVaDisabilityPay(vaDisabilityPayResult);
 
       const militaryMonthlyPay = (basePay || 0) + (bas || 0) + (bah || 0);
@@ -212,13 +211,13 @@ export const usePayCalculatorState = () => {
       return vaDisabilityPay;
     }
     const specialPayTotal = Object.values(debouncedSpecialPays).reduce((sum: number, val: string | number) => sum + parseCurrency(val), 0);
-    const additionalIncomesTotal = debouncedAdditionalIncomes.reduce((sum: number, item: any) => sum + parseCurrency(item.amount), 0);
+    const additionalIncomesTotal = debouncedAdditionalIncomes.reduce((sum: number, item: { amount: string | number }) => sum + parseCurrency(item.amount), 0);
     return (basePay || 0) + (bah || 0) + (bas || 0) + specialPayTotal + additionalIncomesTotal;
   }, [basePay, bah, bas, debouncedSpecialPays, debouncedAdditionalIncomes, paySource, vaDisabilityPay]);
 
   const totalDeductions = useMemo(() => {
     const sgliAndTsp = parseCurrency(debouncedDeductions.sgli) + parseCurrency(debouncedDeductions.tsp);
-    const additionalDeductionsTotal = debouncedAdditionalDeductions.reduce((sum: number, item: any) => sum + parseCurrency(item.amount), 0);
+    const additionalDeductionsTotal = debouncedAdditionalDeductions.reduce((sum: number, item: { amount: string | number }) => sum + parseCurrency(item.amount), 0);
   
     let taxesTotal = 0;
     if (isTaxOverride) {
@@ -245,7 +244,7 @@ export const usePayCalculatorState = () => {
     details.push({ label: 'BAS', value: bas || 0 });
 
     const otherIncomeTotal = Object.values(debouncedSpecialPays).reduce((sum: number, val: string | number) => sum + parseCurrency(val), 0) + 
-                             debouncedAdditionalIncomes.reduce((sum: number, item: any) => sum + parseCurrency(item.amount), 0);
+                             debouncedAdditionalIncomes.reduce((sum: number, item: { amount: string | number }) => sum + parseCurrency(item.amount), 0);
 
     if (otherIncomeTotal > 0) {
         details.push({ label: 'Other', value: otherIncomeTotal });
@@ -268,7 +267,7 @@ export const usePayCalculatorState = () => {
     const otherDeductionsTotal =
       parseCurrency(debouncedDeductions.sgli) +
       parseCurrency(debouncedDeductions.tsp) +
-      debouncedAdditionalDeductions.reduce((sum: number, item: any) => sum + parseCurrency(item.amount), 0);
+      debouncedAdditionalDeductions.reduce((sum: number, item: { amount: string | number }) => sum + parseCurrency(item.amount), 0);
 
     if (otherDeductionsTotal > 0) {
       details.push({ label: 'Other', value: otherDeductionsTotal });
@@ -289,7 +288,7 @@ export const usePayCalculatorState = () => {
     if (mha === 'ON_BASE') return "ON BASE";
     if (!mha || !mhaData) return "...";
     for (const state in mhaData) {
-        const mhaObject = mhaData[state].find((m: any) => m.value === mha);
+        const mhaObject = mhaData[state].find((m: { label: string; value: string }) => m.value === mha);
         if (mhaObject) {
             return mhaObject.label;
         }
@@ -315,7 +314,7 @@ export const usePayCalculatorState = () => {
 
   const disabilityPickerData = useMemo(() => {
     if (!disabilityData) return {};
-    const groupedData: any = {
+    const groupedData: Record<string, { label: string; value: string }[]> = {
         '0%': [{ label: 'No Disability', value: 'none' }]
     };
     const allStatuses = disabilityData.map(item => ({ label: item.dependent_status, value: item.dependent_status }));
@@ -336,8 +335,8 @@ export const usePayCalculatorState = () => {
   }, [disabilityPercentage, vaDependencyStatus]);
 
   const handleDisabilityChange = (status: string, percentage: string) => {
-    setVaDependencyStatus(status);
-    setDisabilityPercentage(percentage);
+    setVaDependencyStatus(status as DependentStatus);
+    setDisabilityPercentage(percentage as DisabilityPercentage);
     if (percentage === '0%') {
         setVaDependencyStatus('none');
     }
@@ -365,8 +364,8 @@ export const usePayCalculatorState = () => {
     setFilingStatus('single');
     setState('');
     setComponent('Active');
-    setDisabilityPercentage(null);
-    setVaDependencyStatus(null);
+    setDisabilityPercentage('0%');
+    setVaDependencyStatus('none');
     setPaySource('Military');
     setSpecialPays({ clothing: '', hostileFire: '', imminentDanger: '', hazardousDuty: '', hardshipDuty: '', aviation: '', assignment: '', careerSea: '', healthProfessions: '', foreignLanguage: '', specialDuty: '' });
     setAdditionalIncomes([{ name: '', amount: '' }]);

@@ -51,11 +51,14 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({ title, isLoading }) => {
         position: 'absolute',
         right: theme.spacing.m,
         bottom: theme.spacing.s,
+    },
+    dismissKeyboard: {
+        flex: 0,
     }
   });
 
   return (
-    <DismissKeyboardView style={{ flex: 0 }}>
+    <DismissKeyboardView style={styles.dismissKeyboard}>
         <View style={styles.container}>
             <View style={styles.titleContainer}>
                 <Text style={styles.title}>{title}</Text>

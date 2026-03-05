@@ -1,7 +1,9 @@
 import { supabase } from './supabaseClient';
 
+type HelpTableName = 'pt_help_details' | 'pay_help_details' | 'retirement_help_details' | 'best_score_help_details';
+
 export const getHelpContentFromSource = async (source: 'pt' | 'pay' | 'retirement' | 'best_score', contentKey: string) => {
-  let tableName = '';
+  let tableName: HelpTableName;
   switch (source) {
     case 'pt':
       tableName = 'pt_help_details';
@@ -15,11 +17,13 @@ export const getHelpContentFromSource = async (source: 'pt' | 'pay' | 'retiremen
     case 'best_score':
       tableName = 'best_score_help_details';
       break;
+    default:
+      return null;
   }
 
   const queryColumn = source === 'pay' ? 'title' : 'content_key';
   const { data, error } = await supabase
-    .from(tableName as any)
+    .from(tableName)
     .select('*')
     .eq(queryColumn, contentKey);
 

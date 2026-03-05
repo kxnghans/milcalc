@@ -58,14 +58,35 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
         overflow: 'hidden',
         marginTop: theme.spacing.s,
     },
+    divider: {
+        marginVertical: theme.spacing.s,
+    },
+    noMarginBottom: {
+        marginBottom: 0,
+    },
+    additionalIncomeRow: {
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+    },
+    flex1: {
+        flex: 1,
+    },
+    marginRightS: {
+        marginRight: theme.spacing.s,
+    },
+    marginHorizontalS: {
+        marginLeft: theme.spacing.s, 
+        marginRight: theme.spacing.s,
+    }
   });
 
   return (
     <>
-      <Divider style={{ marginVertical: theme.spacing.s }} />
+      <Divider style={styles.divider} />
 
       {/* Special Duty Pay Section */}
-      <View style={[styles.fieldRow, { marginBottom: 0 }]}>
+      <View style={[styles.fieldRow, styles.noMarginBottom]}>
           <Pressable onPress={toggleIncome} style={styles.expandableHeader}>
               <Text style={styles.boldLabel}>Special Duty Pay</Text>
               <RoundIconButton
@@ -91,15 +112,15 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
                   
                   <NewLabelWithHelp label="Additional Income" contentKey="Additional Income" onHelpPress={openDetailModal} />
                   {additionalIncomes.map((income, index) => (
-                      <View key={index} style={[styles.fieldRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-                          <View style={{ flex: 1, marginRight: theme.spacing.s }}>
+                      <View key={index} style={[styles.fieldRow, styles.additionalIncomeRow]}>
+                          <View style={[styles.flex1, styles.marginRightS]}>
                               <InsetTextInput
                                   placeholder="Description"
                                   value={income.name}
                                   onChangeText={(text) => { const newIncomes = [...additionalIncomes]; newIncomes[index].name = text; setAdditionalIncomes(newIncomes); }}
                               />
                           </View>
-                          <View style={{ flex: 1, marginLeft: theme.spacing.s, marginRight: theme.spacing.s }}>
+                          <View style={[styles.flex1, styles.marginHorizontalS]}>
                               <CurrencyInput
                                   placeholder="0.00"
                                   value={income.amount}

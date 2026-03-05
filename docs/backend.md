@@ -1,48 +1,39 @@
-# Backend and Data Architecture
+# Data Architecture & Sync Strategy
 
-This document details the data layer of MilCalc, built on Supabase (PostgreSQL, Auth, Storage), and how it synchronizes with the mobile client.
+This document outlines the architectural principles governing MilCalc's data layer, focusing on the "Offline-First" synchronization between Supabase and the local device.
 
-## 1. Data-Store Rationale: PostgreSQL
+## 1. Architectural Philosophy: Offline-First
 
-MilCalc utilizes PostgreSQL (via Supabase) as its primary relational engine.
-*   **Structured Standards**: Military standards (PT scoring, Pay scales) are inherently relational and hierarchical. PostgreSQL's ACID compliance ensures that a change to a single "Standard" version propagates accurately across all related lookup views.
-*   **Complex Joins**: The calculation logic frequently requires joining user demographics with multiple scoring tables. Offloading this logic to PostgreSQL views or performing them locally in SQLite ensures high performance without complex application-side mapping.
+MilCalc is designed for high-reliability in disconnected environments. The backend (Supabase) acts as the **Global Source of Truth**, while the local device (`expo-sqlite`) acts as the **Operational Source of Truth**.
 
-## 2. Optimization Mandates
+### The "Zero-Latency" Rule
+-   All UI components must read exclusively from the local SQLite cache via TanStack Query.
+-   Direct network calls during a user's calculation flow are strictly prohibited to ensure a consistent 60FPS experience regardless of connectivity.
 
-To ensure cost-efficiency and performance for thousands of concurrent users:
+## 2. Sync Mechanism: The "Metadata Pulse"
 
-### 2.1 Write-Throttling & Metadata Sync
-Instead of clients polling for data, we use a **Metadata Pulse** strategy:
--   Clients only poll the `sync_metadata` table (a single row per domain).
--   **Optimization**: This reduces the read load on heavy lookup tables by 99%, as clients only re-fetch data when the metadata version increments.
+To minimize battery drain and data usage, MilCalc avoids frequent polling of large standards tables. Instead, it uses a lightweight versioning system:
 
-### 2.2 Relational Caching (SQLite)
-The mobile app mirrors the PostgreSQL schema in a local `expo-sqlite` database.
--   **Scalar Counters**: We use triggers in the local database to update "Aggregate" scores, reducing the need for the React UI to recalculate total scores on every minor input change.
+1.  **Metadata Table**: A single-row `sync_metadata` table tracks the version/last-updated timestamp for each logical domain (e.g., `pt_standards`, `pay_scales`).
+2.  **The Pulse**: Upon app launch or foregrounding, the `SyncManager` performs a single, small fetch of the `sync_metadata` table.
+3.  **Invalidation**: If the local metadata version is lower than the backend version, the `SyncManager` initiates a background fetch for only the affected tables.
 
-### 2.3 Ephemeral Storage Tier
--   User-specific session data (e.g., a "current" un-saved PT calculation) is stored in the React state or `AsyncStorage` and never hits the backend, reducing DB writes and costs.
+## 3. Data Tiering
 
-## 3. Security & RBAC (Role-Based Access Control)
+We categorize data into three tiers based on volatility and access patterns:
 
-MilCalc enforces strict access boundaries using PostgreSQL Row Level Security (RLS).
+| Tier | Example | Storage | Sync Frequency |
+| :--- | :--- | :--- | :--- |
+| **Static Standards** | PT Scoring, Pay Scales | SQLite + `seed-data.json` | Monthly / On Change |
+| **Dynamic Metadata** | `sync_metadata` | SQLite / Memory | Every Launch |
+| **User State** | Current Inputs, Best Scores | SQLite / `AsyncStorage` | Never (Local Only) |
 
-### 3.1 Role Definitions
-*   **`anon` (Anonymous)**: Read-only access to "Public Knowledge" domains (Standards, Pay Rates, Help Text).
-*   **`authenticated` (Future)**: Access to Personal Best history and synced preferences.
-*   **`service_role` (Admin)**: Full CRUD for data management via MCP tools.
+## 4. RELATIONAL CACHING (SQLite)
 
-### 3.2 Policy Mandates
-1.  **Public Access**: `CREATE POLICY "Public Read" ON public.pt_muscular_fitness_standards FOR SELECT USING (true);`
-2.  **Zero-Write for Clients**: No `INSERT`, `UPDATE`, or `DELETE` policies exist for the `anon` or `authenticated` roles on standards tables.
-3.  **Metadata Trigger**: Every table update triggers `FUNCTION update_sync_metadata()`, ensuring the "Version Clock" is always accurate.
+The local SQLite database mirrors the relational structure of PostgreSQL. This allows the `@repo/utils` library to perform complex joins (e.g., joining demographics with scoring tables) locally, ensuring that "What-If" scenarios (like changing an age bracket) reflect instantly.
 
-## 4. Database Migration Workflow
+## 5. Security Architecture
 
-To ensure schema consistency across environments, MilCalc relies on the Supabase MCP tools.
-
-1.  **Define Schema**: Write a `CREATE TABLE` or `ALTER TABLE` SQL statement.
-2.  **Apply Migration**: Use the MCP `apply_migration` tool to execute the DDL safely.
-3.  **Seed Data**: Parse local CSV or JSON data files into `INSERT` statements.
-4.  **Types Validation**: Run `generate_typescript_types` to ensure the frontend `types.ts` aligns perfectly.
+-   **Row Level Security (RLS)**: Public tables are strictly `SELECT`-only for the `anon` role.
+-   **No Client Writes**: The mobile application does not possess the credentials to modify standard tables, preventing accidental data corruption or malicious injection.
+-   **Audit Logs**: All modifications to the "Global Source of Truth" are performed via migrations or authenticated MCP tools, maintaining a clear audit trail.

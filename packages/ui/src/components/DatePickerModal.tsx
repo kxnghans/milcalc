@@ -1,8 +1,9 @@
 import React from 'react';
-import { Modal, View, Pressable } from 'react-native';
+import { Modal, View, Pressable, StyleSheet } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../contexts/ThemeContext';
 import { PillButton } from './PillButton';
+import { getAlphaColor } from '../theme';
 
 interface DatePickerModalProps {
   visible: boolean;
@@ -21,6 +22,8 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, onClo
     }
   }, [value, visible]);
 
+  const overlayColor = getAlphaColor('#000000', 0.5);
+
   return (
     <Modal
       transparent={true}
@@ -28,17 +31,17 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, onClo
       visible={visible}
       onRequestClose={onClose}
     >
-      <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={onClose}>
-        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+      <Pressable style={[styles.overlay, { backgroundColor: overlayColor }]} onPress={onClose}>
+        <View style={styles.modalContainer}>
           <Pressable>
-            <View style={{ backgroundColor: theme.colors.background, padding: theme.spacing.m, borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
-              <View style={{ alignItems: 'center' }}>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.background, padding: theme.spacing.m }]}>
+              <View style={styles.pickerContainer}>
                 <DateTimePicker
-                  style={{ width: '100%', transform: [{ scale: 0.95 }] }}
+                  style={styles.picker}
                   value={tempDate || new Date()}
                   mode="date"
                   display="spinner"
-                  onChange={(event, date) => {
+                  onChange={(_event, date) => {
                     if (date) {
                       setTempDate(date);
                     }
@@ -46,7 +49,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, onClo
                   textColor={theme.colors.text}
                 />
               </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+              <View style={styles.buttonContainer}>
                 <PillButton title="Done" onPress={() => onDone(tempDate)} />
               </View>
             </View>
@@ -56,3 +59,28 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, onClo
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  pickerContainer: {
+    alignItems: 'center',
+  },
+  picker: {
+    width: '100%',
+    transform: [{ scale: 0.95 }],
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+});

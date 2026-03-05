@@ -77,6 +77,29 @@ export default function PTCalculator() {
         flex: 1,
         paddingHorizontal: theme.spacing.s,
         paddingVertical: theme.spacing.xs,
+    },
+    dismissKeyboard: {
+        flex: 0,
+        width: '100%',
+    },
+    inputCardContainer: {
+        flex: 1,
+        marginTop: theme.spacing.s,
+    },
+    flex1: {
+        flex: 1,
+    },
+    scrollView: {
+        paddingBottom: 0,
+        flexGrow: 1,
+    },
+    dividerMargin: {
+        marginTop: theme.spacing.s,
+        marginBottom: 0,
+    },
+    lastDividerMargin: {
+        marginTop: theme.spacing.s,
+        marginBottom: theme.spacing.s,
     }
   });
 
@@ -94,7 +117,7 @@ export default function PTCalculator() {
         <View style={styles.content}>
 
             {/* Top section with score display and main action icons. */}
-            <DismissKeyboardView style={{ flex: 0, width: '100%' }}>
+            <DismissKeyboardView style={styles.dismissKeyboard}>
                 <ScoreDisplay score={score} cardioComponent={cardio.cardioComponent} />
                 <IconRow icons={[
                     {
@@ -112,9 +135,9 @@ export default function PTCalculator() {
                 ]} />
             </DismissKeyboardView>
             {/* The main input area, wrapped in a ScrollView. */}
-            <View style={{ flex: 1, marginTop: theme.spacing.s }}>
-                <Card style={{ flex: 1 }}>
-                    <KeyboardAwareScrollView contentContainerStyle={{paddingBottom: 0, flexGrow: 1}} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <View style={styles.inputCardContainer}>
+                <Card style={styles.flex1}>
+                    <KeyboardAwareScrollView contentContainerStyle={styles.scrollView} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                         <DismissKeyboardView>
                         {/* Each section of the calculator is rendered as a separate component. */}
                         <Demographics
@@ -123,7 +146,7 @@ export default function PTCalculator() {
                             gender={demographics.gender}
                             setGender={demographics.setGender}
                         />
-                        <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
+                        <Divider style={styles.dividerMargin} />
                         <StrengthComponent 
                             showProgressBars={showProgressBars}
                             minMax={minMax}
@@ -137,7 +160,7 @@ export default function PTCalculator() {
                             openDetailModal={openDetailModal}
                             score={score}
                         />
-                        <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
+                        <Divider style={styles.dividerMargin} />
                         <CoreComponent
                             showProgressBars={showProgressBars}
                             minMax={minMax}
@@ -157,7 +180,7 @@ export default function PTCalculator() {
                             openDetailModal={openDetailModal}
                             score={score}
                         />
-                        <Divider style={{ marginTop: theme.spacing.s, marginBottom: 0 }} />
+                        <Divider style={styles.dividerMargin} />
                         <CardioComponent
                             showProgressBars={showProgressBars}
                             cardioMinMax={cardioMinMax}
@@ -183,7 +206,7 @@ export default function PTCalculator() {
                             altitudeData={altitudeData}
                             openDetailModal={openDetailModal}
                         />
-                        <Divider style={{ marginTop: theme.spacing.s, marginBottom: theme.spacing.s }} />
+                        <Divider style={styles.lastDividerMargin} />
                         <AltitudeAdjustmentComponent selectedValue={demographics.altitudeGroup} onValueChange={demographics.setAltitudeGroup} openDetailModal={openDetailModal} />
                         </DismissKeyboardView>
                     </KeyboardAwareScrollView>

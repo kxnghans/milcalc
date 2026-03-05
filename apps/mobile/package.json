@@ -10,7 +10,8 @@
     "ios": "expo run:ios",
     "check-types": "tsc --noEmit",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "build": "expo export"
   },
   "dependencies": {
     "@expo/metro-runtime": "6.1.2",

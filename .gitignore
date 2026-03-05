@@ -58,6 +58,7 @@ Thumbs.db
 
 # Temporary files
 image.png
+*~
 
 # Agent configuration
 .gemini/

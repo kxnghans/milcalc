@@ -164,12 +164,6 @@ export default function RetirementCalculatorScreen() {
       marginBottom: 8,
       paddingHorizontal: theme.spacing.s,
     },
-    label: {
-      ...theme.typography.body,
-      color: theme.colors.text,
-      marginBottom: theme.spacing.s,
-      marginHorizontal: theme.spacing.s,
-    },
     centerLabel: {
       textAlign: 'center',
     },
@@ -186,24 +180,75 @@ export default function RetirementCalculatorScreen() {
         marginBottom: theme.spacing.s,
         marginHorizontal: theme.spacing.s,
     },
-    expandableHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+    labelHelpText: {
+        ...theme.typography.subtitle,
+        color: theme.colors.text
     },
-    expandableContent: {
-        overflow: 'hidden',
-        marginTop: theme.spacing.s,
+    dismissKeyboard: {
+        flex: 0,
+        width: '100%',
     },
-    addIconContainer: {
-        alignItems: 'center',
+    summaryCard: {
         marginBottom: theme.spacing.s,
+    },
+    flex1: {
+        flex: 1,
+    },
+    scrollView: {
+        paddingBottom: 0,
+        flexGrow: 1,
+    },
+    segmentedSelectorSpacing: {
+        marginBottom: theme.spacing.m,
+    },
+    marginHorizontalS: {
+        marginHorizontal: theme.spacing.s,
+    },
+    yearColumn: {
+        flex: 1,
+        marginRight: 8,
+    },
+    lastYearColumn: {
+        flex: 1,
+    },
+    boldLabelNoMargin: {
+        marginHorizontal: 0,
+    },
+    tspInputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: theme.spacing.s,
+    },
+    tspAmountInput: {
+        flex: 1,
+    },
+    tspSpacer: {
+        width: theme.spacing.s,
+    },
+    tspPillButton: {
+        marginTop: 0,
+        marginBottom: 0,
+    },
+    avgSalaryColumn: {
+        flex: 4.75,
+        marginRight: 8,
+    },
+    contPercentageColumn: {
+        flex: 2,
+        marginRight: 8,
+    },
+    contYearsColumn: {
+        flex: 2,
+        marginRight: 8,
+    },
+    returnColumn: {
+        flex: 3,
     }
   });
 
   const LabelWithHelp = ({ label, contentKey, mascot }: { label: string; contentKey: string; mascot: ImageSourcePropType }) => (
     <View style={styles.labelRow}>
-        <Text style={{ ...theme.typography.subtitle, color: theme.colors.text }}>{label}</Text>
+        <Text style={styles.labelHelpText}>{label}</Text>
         <Pressable onPress={() => openDetailModal(contentKey, mascot)}>
             <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
         </Pressable>
@@ -245,8 +290,8 @@ export default function RetirementCalculatorScreen() {
           />
           <DocumentModal category="RETIREMENT" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
           <View style={styles.content}>
-            <DismissKeyboardView style={{ flex: 0, width: '100%' }}>
-                <Card containerStyle={{ marginBottom: theme.spacing.s }}>
+            <DismissKeyboardView style={styles.dismissKeyboard}>
+                <Card containerStyle={styles.summaryCard}>
                                 <PayDisplay
                                     onHelpPress={() => openDetailModal('Retirement Display Summary', retirementMascot)}                annualPay={annualPay}
                     monthlyPay={monthlyPay}
@@ -259,9 +304,9 @@ export default function RetirementCalculatorScreen() {
                     onGetRetirementAge={() => setIsRetirementAgeCalculatorVisible(!isRetirementAgeCalculatorVisible)}
                     isRetirementAgeCalculatorVisible={isRetirementAgeCalculatorVisible}
                     birthDate={birthDate || undefined}
-                    setBirthDate={setBirthDate as any}
+                    setBirthDate={setBirthDate}
                     serviceEntryDate={serviceEntryDate || undefined}
-                    setServiceEntryDate={setServiceEntryDate as any}
+                    setServiceEntryDate={setServiceEntryDate}
                     retirementAge={retirementAge || undefined}
                     component={component}
                     breakInService={breakInService}
@@ -283,9 +328,9 @@ export default function RetirementCalculatorScreen() {
                 },
                 ]} />
             </DismissKeyboardView>
-            <View style={{ flex: 1 }}>
-                <Card style={{ flex: 1 }}>
-                <KeyboardAwareScrollView contentContainerStyle={{paddingBottom: 0, flexGrow: 1}} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <View style={styles.flex1}>
+                <Card style={styles.flex1}>
+                <KeyboardAwareScrollView contentContainerStyle={styles.scrollView} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                     <DismissKeyboardView>
                     <SegmentedSelector
                     options={[{label: 'Active', value: 'Active'}, {label: 'Reserves', value: 'Reserves'}, {label: 'Guard', value: 'Guard'}]}
@@ -293,7 +338,7 @@ export default function RetirementCalculatorScreen() {
                     onValueChange={(value) => setComponent(value)}
                     />
                     <SegmentedSelector
-                    style={{ marginBottom: theme.spacing.m }}
+                    style={styles.segmentedSelectorSpacing}
                     options={[{label: 'High 3', value: 'High 3'}, {label: 'BRS', value: 'BRS'}]}
                     selectedValues={[retirementSystem]}
                     onValueChange={(value) => setRetirementSystem(value)}
@@ -301,21 +346,21 @@ export default function RetirementCalculatorScreen() {
 
                     <View style={styles.fieldRow}>
                     <LabelWithHelp label="Years of Service" contentKey="High-3" mascot={retirementMascot} />
-                    <NumberInput placeholder="0" value={yearsOfService} onChangeText={setYearsOfService} style={{ marginHorizontal: theme.spacing.s }} />
+                    <NumberInput placeholder="0" value={yearsOfService} onChangeText={setYearsOfService} style={styles.marginHorizontalS} />
                     </View>
 
                     <View style={styles.row}>
-                    <View style={{flex: 1, marginRight: 8}}>
-                        <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Year -2</Text>
-                        <PickerInput items={payGradesForYear1.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade1} onValueChange={setHigh3PayGrade1} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
+                    <View style={styles.yearColumn}>
+                        <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Year -2</Text>
+                        <PickerInput items={payGradesForYear1.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade1} onValueChange={(val) => setHigh3PayGrade1(val as string | null)} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
                     </View>
-                    <View style={{flex: 1, marginRight: 8}}>
-                        <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Year -1</Text>
-                        <PickerInput items={payGradesForYear2.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade2} onValueChange={setHigh3PayGrade2} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
+                    <View style={styles.yearColumn}>
+                        <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Year -1</Text>
+                        <PickerInput items={payGradesForYear2.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade2} onValueChange={(val) => setHigh3PayGrade2(val as string | null)} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
                     </View>
-                    <View style={{flex: 1}}>
-                        <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Final Year</Text>
-                        <PickerInput items={payGradesForYear3.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade3} onValueChange={setHigh3PayGrade3} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
+                    <View style={styles.lastYearColumn}>
+                        <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Final Year</Text>
+                        <PickerInput items={payGradesForYear3.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade3} onValueChange={(val) => setHigh3PayGrade3(val as string | null)} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
                     </View>
                     </View>
 
@@ -334,58 +379,58 @@ export default function RetirementCalculatorScreen() {
 
                     <View style={styles.fieldRow}>
                         <Text style={styles.boldLabel}>MHA</Text>
-                        <TwoColumnPicker data={mhaData} selectedValue={mha} onChange={handleMhaChange} displayName={mhaDisplayName} isLoading={isLoading} error={mhaError} primaryColumnValue={state} secondaryPlaceholder="Select a location" style={{ marginHorizontal: theme.spacing.s }} />
+                        <TwoColumnPicker data={mhaData || null} selectedValue={mha} onChange={(val, prim) => handleMhaChange(val as string, prim)} displayName={mhaDisplayName} isLoading={isLoading} error={mhaError} primaryColumnValue={state} secondaryPlaceholder="Select a location" style={styles.marginHorizontalS} />
                     </View>
                     <View style={styles.fieldRow}>
                         <Text style={styles.boldLabel}>VA Disability</Text>
-                        <TwoColumnPicker data={disabilityPickerData} selectedValue={dependentStatus} onChange={handleDisabilityChange} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select disability rating" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} style={{ marginHorizontal: theme.spacing.s }} />
+                        <TwoColumnPicker data={disabilityPickerData as Record<string, { label: string; value: string | number | null }[]> | null} selectedValue={dependentStatus} onChange={(val, prim) => handleDisabilityChange(val as string, prim)} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select disability rating" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} style={styles.marginHorizontalS} />
                     </View>
                     <View style={styles.fieldRow}>
                         <LabelWithHelp label="TSP" contentKey="TSP" mascot={retirementMascot} />
                         <SegmentedSelector
-                        style={{ marginBottom: theme.spacing.m }}
+                        style={styles.segmentedSelectorSpacing}
                         options={[{label: 'Roth', value: 'Roth'}, {label: 'Traditional', value: 'Traditional'}]}
                         selectedValues={[tspType]}
                         onValueChange={(value) => setTspType(value)}
                         />
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: theme.spacing.s }}>
-                        <CurrencyInput style={{ flex: 1 }} placeholder="0.00" value={tspAmount} onChangeText={setTspAmount} editable={!isTspCalculatorVisible} />
-                        <View style={{ width: theme.spacing.s }} />
-                        <PillButton title={isTspCalculatorVisible ? "Input TSP" : "Calculate TSP"} onPress={() => setIsTspCalculatorVisible(!isTspCalculatorVisible)} backgroundColor={isTspCalculatorVisible ? theme.colors.disabled : theme.colors.primary} style={{ marginTop: 0, marginBottom: 0 }} textStyle={theme.typography.bodybold} />
+                        <View style={styles.tspInputRow}>
+                        <CurrencyInput style={styles.tspAmountInput} placeholder="0.00" value={tspAmount} onChangeText={setTspAmount} editable={!isTspCalculatorVisible} />
+                        <View style={styles.tspSpacer} />
+                        <PillButton title={isTspCalculatorVisible ? "Input TSP" : "Calculate TSP"} onPress={() => setIsTspCalculatorVisible(!isTspCalculatorVisible)} backgroundColor={isTspCalculatorVisible ? theme.colors.disabled : theme.colors.primary} style={styles.tspPillButton} textStyle={theme.typography.bodybold} />
                         </View>
                     </View>
         
                     {isTspCalculatorVisible && (
                         <View style={styles.row}>
-                            <View style={{flex: 4.75, marginRight: 8}}>
-                                <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Avg Salary</Text>
+                            <View style={styles.avgSalaryColumn}>
+                                <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Avg Salary</Text>
                                 <CurrencyInput placeholder="0.00" value={tspContributionAmount} onChangeText={setTspContributionAmount} />
                             </View>
-                            <View style={{flex: 2, marginRight: 8}}>
-                                <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Cont. %</Text>
+                            <View style={styles.contPercentageColumn}>
+                                <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Cont. %</Text>
                                 <NumberInput placeholder="0" value={tspContributionPercentage} onChangeText={setTspContributionPercentage} />
                             </View>
-                            <View style={{flex: 2, marginRight: 8}}>
-                                <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Years</Text>
+                            <View style={styles.contYearsColumn}>
+                                <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Years</Text>
                                 <NumberInput placeholder="0" value={tspContributionYears} onChangeText={setTspContributionYears} />
                             </View>
-                            <View style={{flex: 3}}>
-                                <Text style={[styles.boldLabel, styles.centerLabel, { marginHorizontal: 0 }]}>Return</Text>
-                                <PickerInput items={Array.from({ length: 51 }, (_, i) => ({ label: `${i}%`, value: i }))} selectedValue={tspReturn} onValueChange={setTspReturn} placeholder="Select..." />
+                            <View style={styles.returnColumn}>
+                                <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Return</Text>
+                                <PickerInput items={Array.from({ length: 51 }, (_, i) => ({ label: `${i}%`, value: i }))} selectedValue={tspReturn} onValueChange={(val) => setTspReturn(val as number)} placeholder="Select..." />
                             </View>
                         </View>
                     )}
                     {showServicePoints && <View style={styles.fieldRow}>
                         <LabelWithHelp label="Service Points" contentKey="Service Points" mascot={retirementMascot} />
-                        <NumberInput placeholder="0" value={servicePoints} onChangeText={setServicePoints} style={{ marginHorizontal: theme.spacing.s }} />
+                        <NumberInput placeholder="0" value={servicePoints} onChangeText={setServicePoints} style={styles.marginHorizontalS} />
                     </View>}
                     {showGoodYears && <View style={styles.fieldRow}>
                         <LabelWithHelp label="Good Years" contentKey="Good Years" mascot={retirementMascot} />
-                        <NumberInput placeholder="0" value={goodYears} onChangeText={setGoodYears} style={{ marginHorizontal: theme.spacing.s }} />
+                        <NumberInput placeholder="0" value={goodYears} onChangeText={setGoodYears} style={styles.marginHorizontalS} />
                     </View>}
                     {component !== 'Active' && <View style={styles.fieldRow}>
                         <LabelWithHelp label="Qualifying Deployment Days" contentKey="Qualifying Deployment Days" mascot={retirementMascot} />
-                        <NumberInput placeholder="0" value={qualifyingDeploymentDays} onChangeText={setQualifyingDeploymentDays} style={{ marginHorizontal: theme.spacing.s }} />
+                        <NumberInput placeholder="0" value={qualifyingDeploymentDays} onChangeText={setQualifyingDeploymentDays} style={styles.marginHorizontalS} />
                     </View>}
                     </View>
                     </DismissKeyboardView>
@@ -396,3 +441,4 @@ export default function RetirementCalculatorScreen() {
         </View>
       );
     }
+

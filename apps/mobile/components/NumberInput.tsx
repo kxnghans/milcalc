@@ -54,6 +54,14 @@ const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inpu
         flex: 1,
         backgroundColor: 'transparent',
     },
+    exemptButton: {
+        marginHorizontal: theme.spacing.s,
+    },
+    adjustment: {
+        color: theme.colors.success, 
+        ...theme.typography.label, 
+        paddingRight: theme.spacing.s,
+    }
   });
 
   // When exempt, show 'xx' as the placeholder. Otherwise, use the placeholder from props.
@@ -66,7 +74,7 @@ const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inpu
         <ExemptButton
           onPress={onToggleExempt}
           isActive={!!isExempt}
-          style={{ marginHorizontal: theme.spacing.s }}
+          style={styles.exemptButton}
         />
       )}
       <StyledTextInput
@@ -78,7 +86,7 @@ const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inpu
         style={[styles.input, inputStyle]}
       />
       {/* Optionally display an adjustment value, like for altitude correction. */}
-      {adjustment && <Text style={{ color: theme.colors.success, ...theme.typography.label, paddingRight: theme.spacing.s }}>{adjustment}</Text>}
+      {adjustment && <Text style={styles.adjustment}>{adjustment}</Text>}
     </NeumorphicInset>
   );
 });

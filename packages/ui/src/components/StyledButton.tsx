@@ -7,6 +7,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { useTheme } from "../contexts/ThemeContext";
+import { getAlphaColor } from '../theme';
 import * as Icons from '@expo/vector-icons';
 import NeumorphicOutset from './NeumorphicOutset';
 
@@ -74,6 +75,12 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
     smallText: {
       fontSize: theme.typography.subtitle.fontSize,
     },
+    outsetContainer: {
+      borderRadius: theme.borderRadius.m,
+    },
+    outsetContent: {
+      overflow: 'hidden',
+    },
   });
 
   // Determine styles based on props
@@ -83,6 +90,7 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
   const backgroundColor = variant === 'primary' ? theme.colors.primary : theme.colors.secondary;
 
   const isPrimary = variant === 'primary';
+  const variantTextStyle = isPrimary ? styles.primaryText : styles.secondaryText;
 
   // Flatten style to extract border radius overrides
   const flattenedStyle = StyleSheet.flatten(style || {});
@@ -102,21 +110,18 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
       borderBottomRightRadius,
   };
 
+  const highlightColor = isPrimary ? undefined : (isDarkMode ? getAlphaColor('#000000', 1) : undefined);
+
   return (
     // The button is wrapped in a NeumorphicOutset to give it the raised 3D effect.
     // The shadow and highlight properties are adjusted based on the variant to create the desired look.
     <NeumorphicOutset 
       // Ensure 'style' (overrides) comes AFTER the default, so custom radii take precedence.
-      containerStyle={[{ borderRadius: theme.borderRadius.m }, style]}
-      contentStyle={{
-        backgroundColor,
-        overflow: 'hidden',
-        // Apply the extracted or default radius styles to the inner content
-        ...radiusStyles
-      }}
+      containerStyle={[styles.outsetContainer, style]}
+      contentStyle={[styles.outsetContent, { backgroundColor }, radiusStyles]}
       // Shadow and highlight properties are tweaked for primary vs. secondary variants and light vs. dark mode.
       shadowOpacity={isPrimary ? (isDarkMode ? undefined : 0.3) : undefined}
-      highlightColor={isPrimary ? undefined : (isDarkMode ? 'rgba(0,0,0,1)' : undefined)}
+      highlightColor={highlightColor}
       highlightOpacity={isPrimary ? (isDarkMode ? 0.3 : 1) : (isDarkMode ? 0.01 : 1)}
     >
         <TouchableOpacity
@@ -124,8 +129,8 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
         {...props}
         >
             {/* Render the icon if one is provided. */}
-            {icon && Icon && <Icon name={icon} size={finalIconSize} color={styles[`${variant}Text`].color} style={styles.icon} />}
-            <Text style={[styles.text, styles[`${variant}Text`], textSizeStyle, textStyle]}>{title}</Text>
+            {icon && Icon && <Icon name={icon} size={finalIconSize} color={variantTextStyle.color} style={styles.icon} />}
+            <Text style={[styles.text, variantTextStyle, textSizeStyle, textStyle]}>{title}</Text>
         </TouchableOpacity>
     </NeumorphicOutset>
   );

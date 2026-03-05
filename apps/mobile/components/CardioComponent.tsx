@@ -10,6 +10,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'r
 import { NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
+import { Tables } from '@repo/utils';
 
 interface CardioComponentProps {
     showProgressBars: boolean;
@@ -25,16 +26,20 @@ interface CardioComponentProps {
     setWalkSeconds: (val: string) => void;
     shuttles: string;
     setShuttles: (val: string) => void;
-    cardioMinMax: any;
+    cardioMinMax: { min: number; max: number };
     altitudeGroup: string;
     age: string;
     gender: string;
     ninetyPercentileThreshold: number;
     isExempt: boolean;
     toggleExempt: () => void;
-    openDetailModal: any;
-    score: any;
-    altitudeData: any;
+    openDetailModal: (key: string, mascot: ImageSourcePropType, performance: Record<string, string | number>) => void;
+    score: { totalScore: number; cardioScore: number | string; isPass: boolean; walkPassed: string };
+    altitudeData: {
+        run: Tables<'run_altitude_adjustments'>[];
+        hamr: Tables<'hamr_altitude_adjustments'>[];
+        walk: Tables<'walk_altitude_adjustments'>[];
+    };
 }
 
 /**
@@ -86,8 +91,9 @@ export default function CardioComponent({
 
             if (cardioComponent === 'run' && (runMinutes || runSeconds)) {
                 const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
-                const adjustmentRow = altitudeData.run.find((row: any) => 
+                const adjustmentRow = altitudeData.run.find((row) => 
                     row.altitude_group === altitudeGroup && 
+                    row.time_range_start != null && row.time_range_end != null &&
                     runTimeInSeconds >= row.time_range_start && 
                     runTimeInSeconds <= row.time_range_end
                 );
@@ -97,15 +103,16 @@ export default function CardioComponent({
 
             } else if (cardioComponent === 'walk' && (walkMinutes || walkSeconds)) {
                 const capitalizedGender = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
-                const adjustmentRow = altitudeData.walk.find((row: any) => 
-                    row.gender.toLowerCase() === capitalizedGender.toLowerCase() &&
+                const adjustmentRow = altitudeData.walk.find((row) => 
+                    row.gender?.toLowerCase() === capitalizedGender.toLowerCase() &&
                     row.altitude_group === altitudeGroup &&
+                    row.age_range_start !== null && row.age_range_end !== null &&
                     ageNum >= row.age_range_start &&
                     ageNum <= row.age_range_end
                 );
 
                 if (adjustmentRow) {
-                    const maxTime = adjustmentRow.max_time;
+                    const maxTime = adjustmentRow.max_time || 0;
                     const minutes = Math.floor(maxTime / 60);
                     const seconds = maxTime % 60;
                     setAdjustment(`Max: ${minutes}:${seconds.toString().padStart(2, '0')}`);
@@ -113,7 +120,7 @@ export default function CardioComponent({
                 }
 
             } else if (cardioComponent === 'shuttles') {
-                const adjustmentRow = altitudeData.hamr.find((row: any) => row.altitude_group === altitudeGroup);
+                const adjustmentRow = altitudeData.hamr.find((row) => row.altitude_group === altitudeGroup);
                 if (adjustmentRow) {
                     setAdjustment(`+ ${adjustmentRow.shuttles_to_add}`);
                 }
@@ -125,11 +132,9 @@ export default function CardioComponent({
         cardTitle: {
             ...theme.typography.title,
             color: theme.colors.text,
-        },
-        separator: {
-            height: 1,
-            backgroundColor: theme.colors.border,
+            marginLeft: theme.spacing.s,
             marginVertical: theme.spacing.s,
+            marginRight: theme.spacing.m,
         },
         componentHeader: {
             flexDirection: 'row',
@@ -138,14 +143,24 @@ export default function CardioComponent({
         exerciseBlock: {
             justifyContent: 'center',
         },
+        helpIcon: {
+            margin: theme.spacing.s,
+        },
+        progressBarContainer: {
+            flex: 1,
+        },
+        inputMargin: {
+            marginHorizontal: theme.spacing.s,
+            marginTop: theme.spacing.xs,
+        }
     });
 
-    const getPerformance = () => {
+    const getPerformance = (): Record<string, string | number> => {
         switch (cardioComponent) {
             case 'run':
                 return { minutes: runMinutes, seconds: runSeconds };
             case 'shuttles':
-                return { reps: shuttles };
+                return { shuttles: parseInt(shuttles) || 0 };
             case 'walk':
                 return { minutes: walkMinutes, seconds: walkSeconds };
             default:
@@ -167,15 +182,15 @@ export default function CardioComponent({
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
                     <TouchableOpacity onPress={() => openDetailModal(cardioComponent, getMascot(), getPerformance())}>
-                        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={{ margin: theme.spacing.s }} />
+                        <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
                     </TouchableOpacity>
-                    <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s, marginVertical: theme.spacing.s, marginRight: theme.spacing.m }]}>Cardio</Text>
+                    <Text style={styles.cardTitle}>Cardio</Text>
                     {/* Conditionally render the correct progress bar for the selected cardio type. */}
                     {showProgressBars && (() => {
                         if (cardioComponent === 'run') {
                             const timeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
                             return (
-                                <View style={{ flex: 1 }}>
+                                <View style={styles.progressBarContainer}>
                                     <NeumorphicOutset>
                                         <ProgressBar
                                             invertScale={true} // Lower time is better.
@@ -184,7 +199,7 @@ export default function CardioComponent({
                                             maxPointsThreshold={cardioMinMax.max}
                                             ninetyPercentileThreshold={ninetyPercentileThreshold}
                                             valueIsTime={true}
-                                            score={score.cardioScore}
+                                            score={typeof score.cardioScore === 'number' ? score.cardioScore : 0}
                                             maxScore={60}
                                         />
                                     </NeumorphicOutset>
@@ -194,7 +209,7 @@ export default function CardioComponent({
                             const timeInSeconds = (parseInt(walkMinutes) || 0) * 60 + (parseInt(walkSeconds) || 0);
                             const passThreshold = adjustedWalkMaxTime !== null ? adjustedWalkMaxTime : cardioMinMax.min;
                             return (
-                                <View style={{ flex: 1 }}>
+                                <View style={styles.progressBarContainer}>
                                     <NeumorphicOutset>
                                         <ProgressBar
                                             invertScale={true} // Lower time is better.
@@ -211,8 +226,8 @@ export default function CardioComponent({
                                 const baseShuttles = parseInt(shuttles) || 0;
                                 
                                 if (cardioComponent === 'shuttles' && altitudeData && altitudeGroup && altitudeGroup !== 'normal') {
-                                    const adjustmentRow = altitudeData.hamr.find((row: any) => row.altitude_group === altitudeGroup);
-                                    if (adjustmentRow) {
+                                    const adjustmentRow = altitudeData.hamr.find((row) => row.altitude_group === altitudeGroup);
+                                    if (adjustmentRow && adjustmentRow.shuttles_to_add) {
                                         return baseShuttles + adjustmentRow.shuttles_to_add;
                                     }
                                 }
@@ -221,14 +236,14 @@ export default function CardioComponent({
                             };
 
                             return (
-                                <View style={{ flex: 1 }}>
+                                <View style={styles.progressBarContainer}>
                                     <NeumorphicOutset>
                                         <ProgressBar
                                             value={getAdjustedShuttleCount()}
                                             passThreshold={cardioMinMax.min}
                                             maxPointsThreshold={cardioMinMax.max}
                                             ninetyPercentileThreshold={ninetyPercentileThreshold}
-                                            score={score.cardioScore}
+                                            score={typeof score.cardioScore === 'number' ? score.cardioScore : 0}
                                             maxScore={60}
                                         />
                                     </NeumorphicOutset>
@@ -252,7 +267,7 @@ export default function CardioComponent({
                         adjustment={adjustment || undefined}
                         minutesPlaceholder="Minutes"
                         secondsPlaceholder="Seconds"
-                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                        style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -263,7 +278,7 @@ export default function CardioComponent({
                         onChangeText={setShuttles}
                         placeholder="Enter shuttle count"
                         adjustment={adjustment || undefined}
-                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                        style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />
@@ -277,7 +292,7 @@ export default function CardioComponent({
                         adjustment={adjustment || undefined}
                         minutesPlaceholder="Minutes"
                         secondsPlaceholder="Seconds"
-                        style={{ marginHorizontal: theme.spacing.s, marginTop: theme.spacing.xs }}
+                        style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
                     />

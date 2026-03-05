@@ -37,34 +37,58 @@ export default function Demographics({ age, setAge, gender, setGender }: Demogra
         ...theme.typography.title,
         color: theme.colors.text,
     },
+    centeredTitle: {
+        textAlign: 'center',
+    },
     inlineInputContainer: {
         flexDirection: "row",
         alignItems: "center",
     },
+    headerRow: {
+        flexDirection: 'row', 
+        alignItems: 'center',
+    },
+    ageHeaderContainer: {
+        width: 96, 
+        marginRight: theme.spacing.m,
+    },
+    genderHeaderContainer: {
+        flex: 1,
+    },
+    ageInputContainer: {
+        width: 96, 
+        marginRight: theme.spacing.m,
+    },
+    genderSelectorContainer: {
+        flex: 1,
+    },
+    numberInput: {
+        paddingVertical: 6,
+    }
   });
 
   return (
     <>
       {/* Section Headers */}
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <View style={{width: 96, marginRight: theme.spacing.m}}>
-              <Text style={[styles.cardTitle]}>Age</Text>
+      <View style={styles.headerRow}>
+          <View style={styles.ageHeaderContainer}>
+              <Text style={styles.cardTitle}>Age</Text>
           </View>
-          <View style={{flex: 1}}>
-              <Text style={[styles.cardTitle, {textAlign: 'center'}]}>Gender</Text>
+          <View style={styles.genderHeaderContainer}>
+              <Text style={[styles.cardTitle, styles.centeredTitle]}>Gender</Text>
           </View>
       </View>
       {/* Input Fields */}
       <View style={styles.inlineInputContainer}>
-          <View style={{width: 96, marginRight: theme.spacing.m}}>
+          <View style={styles.ageInputContainer}>
               <NumberInput
                   value={age}
                   onChangeText={setAge}
                   placeholder="--"
-                  inputStyle={{paddingVertical: 6}}
+                  inputStyle={styles.numberInput}
               />
           </View>
-          <View style={{flex: 1}}>
+          <View style={styles.genderSelectorContainer}>
               <GenderSelector gender={gender} setGender={setGender} />
           </View>
       </View>

@@ -44,7 +44,12 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
     cardTitle: {
       ...theme.typography.title,
       color: theme.colors.text,
+      marginLeft: theme.spacing.s,
     },
+    header: {
+        flexDirection: 'row', 
+        alignItems: 'center',
+    }
   });
 
   // The options for the segmented selector, including labels with line breaks for better readability.
@@ -58,11 +63,11 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
 
   return (
     <View>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => openDetailModal('altitude_adjustment', getNextAltitudeMascot())}>
             <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} />
         </TouchableOpacity>
-        <Text style={[styles.cardTitle, { marginLeft: theme.spacing.s }]}>Altitude Adjustment (ft)</Text>
+        <Text style={styles.cardTitle}>Altitude Adjustment (ft)</Text>
       </View>
       <SegmentedSelector
         options={altitudeOptions}

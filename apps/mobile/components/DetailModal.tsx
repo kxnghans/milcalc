@@ -8,6 +8,10 @@ import { getHelpContentFromSource } from '@repo/utils';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
 
+import { Tables } from '@repo/utils';
+
+type HelpContent = Tables<'pt_help_details'> & Tables<'pay_help_details'> & Tables<'retirement_help_details'> & Tables<'best_score_help_details'>;
+
 interface DetailModalProps {
   isVisible: boolean;
   onClose: () => void;
@@ -18,7 +22,7 @@ interface DetailModalProps {
 
 export default function DetailModal({ isVisible, onClose, contentKey, source, mascotAsset }: DetailModalProps) {
     const { theme } = useTheme();
-    const [content, setContent] = useState<any[] | null>(null);
+    const [content, setContent] = useState<HelpContent[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [showTopChevron, setShowTopChevron] = useState(false);
     const [showBottomChevron, setShowBottomChevron] = useState(false);
@@ -51,7 +55,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
                 setShowTopChevron(false);
                 setShowBottomChevron(false);
                 const data = await getHelpContentFromSource(source, contentKey);
-                setContent(data);
+                setContent(data as HelpContent[]);
                 setIsLoading(false);
             };
             fetchContent();
@@ -60,7 +64,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
         }
     }, [isVisible, contentKey, source]);
 
-    const handleScroll = (event: any) => {
+    const handleScroll = (event: { nativeEvent: { layoutMeasurement: { height: number }; contentOffset: { y: number }; contentSize: { height: number } } }) => {
         const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
         const isAtTop = contentOffset.y <= 0;
         const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 1; 
@@ -68,7 +72,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
         setShowBottomChevron(!isAtBottom);
     };
 
-    const handleContentSizeChange = (contentWidth: number, contentHeight: number) => {
+    const handleContentSizeChange = (_contentWidth: number, contentHeight: number) => {
         const isScrollable = contentHeight > scrollViewHeight;
         setShowBottomChevron(isScrollable);
         if (!isScrollable) {
@@ -151,6 +155,21 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
             paddingHorizontal: theme.spacing.l,
             backgroundColor: theme.colors.surface,
         },
+        boldText: {
+            fontWeight: 'bold',
+        },
+        italicText: {
+            fontStyle: 'italic',
+        },
+        underlineText: {
+            textDecorationLine: 'underline',
+        },
+        markdownParagraph: {
+            marginBottom: theme.spacing.s,
+        },
+        loadingIndicator: {
+            marginVertical: theme.spacing.xl,
+        },
     });
 
     const parseMarkdown = (text: string) => {
@@ -160,19 +179,19 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
             const parts = paragraph.match(/[^*_]+|(\*\*.*?\*\*|\*.*?\*|_.*?_)/g) || [];
             const styledText = parts.map((part, index) => {
                 if (part.startsWith('**') && part.endsWith('**')) {
-                    return <Text key={index} style={{ fontWeight: 'bold' }}>{part.slice(2, -2)}</Text>;
+                    return <Text key={index} style={styles.boldText}>{part.slice(2, -2)}</Text>;
                 } else if (part.startsWith('*') && part.endsWith('*')) {
-                    return <Text key={index} style={{ fontStyle: 'italic' }}>{part.slice(1, -1)}</Text>;
+                    return <Text key={index} style={styles.italicText}>{part.slice(1, -1)}</Text>;
                 } else if (part.startsWith('_') && part.endsWith('_')) {
-                    return <Text key={index} style={{ textDecorationLine: 'underline' }}>{part.slice(1, -1)}</Text>;
+                    return <Text key={index} style={styles.underlineText}>{part.slice(1, -1)}</Text>;
                 }
                 return <Text key={index}>{part}</Text>;
             });
-            return <Text key={pIndex} style={[styles.sectionContent, { marginBottom: theme.spacing.s }]}>{styledText}</Text>;
+            return <Text key={pIndex} style={[styles.sectionContent, styles.markdownParagraph]}>{styledText}</Text>;
         });
     };
 
-    const renderSections = (item: any) => {
+    const renderSections = (item: HelpContent) => {
         const sections: React.ReactElement[] = [];
         const createSection = (header: string, content: string, key: string) => {
             sections.push(
@@ -234,7 +253,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
                 </TouchableWithoutFeedback>
                 <View style={styles.modalView}>
                     {isLoading ? (
-                        <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginVertical: theme.spacing.xl }} />
+                        <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loadingIndicator} />
                     ) : content && content.length > 0 ? (
                         <>
                             {/* Persistent Header */}
@@ -264,11 +283,11 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
                                     scrollEventThrottle={16}
                                     contentContainerStyle={{ }}
                                 >
-                                    {content
+                                    {[...content]
                                         .sort((a, b) => {
                                             const sectionOrder = ['Performance', 'Resting', 'Scoring', 'Exemption'];
-                                            const aIndex = sectionOrder.indexOf(a.section_header);
-                                            const bIndex = sectionOrder.indexOf(b.section_header);
+                                            const aIndex = sectionOrder.indexOf(a.section_header || '');
+                                            const bIndex = sectionOrder.indexOf(b.section_header || '');
                                             return aIndex - bIndex;
                                         })
                                         .map((item, index) => <View key={index}>{renderSections(item)}</View>)}

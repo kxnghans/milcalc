@@ -5,7 +5,7 @@
  */
 
 import React, { useRef } from 'react';
-import { StyleSheet, TextInput, Text } from 'react-native';
+import { StyleSheet, TextInput, Text, StyleProp, ViewStyle } from 'react-native';
 import { NeumorphicInset, StyledTextInput, useTheme, ExemptButton } from '@repo/ui';
 
 /**
@@ -23,7 +23,7 @@ interface TimeInputProps {
   /** An optional string to display an adjustment (e.g., for altitude), shown next to the input. */
   adjustment?: string;
   /** Optional custom styles for the container. */
-  style?: any;
+  style?: StyleProp<ViewStyle>;
   /** Placeholder text for the minutes input. Defaults to "mm". */
   minutesPlaceholder?: string;
   /** Placeholder text for the seconds input. Defaults to "ss". */
@@ -104,6 +104,17 @@ const TimeInput: React.FC<TimeInputProps> = ({
         flex: 1,
         backgroundColor: 'transparent',
     },
+    exemptButton: {
+        marginHorizontal: theme.spacing.s,
+    },
+    adjustment: {
+        color: theme.colors.success,
+        ...theme.typography.label,
+        marginHorizontal: theme.spacing.s,
+        backgroundColor: 'transparent',
+        textShadowRadius: 0.05,
+        textShadowColor: theme.colors.neumorphic.outset.shadow,
+    }
   });
 
   // When exempt, show 'xx' as the placeholder. Otherwise, use the placeholder from props.
@@ -117,7 +128,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
             <ExemptButton
                 onPress={onToggleExempt}
                 isActive={!!isExempt}
-                style={{ marginHorizontal: theme.spacing.s }}
+                style={styles.exemptButton}
             />
         )}
         <StyledTextInput
@@ -142,7 +153,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
             editable={!isExempt}
         />
         {/* Optionally display an adjustment value, like for altitude correction. */}
-        {adjustment && <Text style={{ color: theme.colors.success, ...theme.typography.label, marginHorizontal: theme.spacing.s, backgroundColor: 'transparent', textShadowRadius: 0.05, textShadowColor: theme.colors.neumorphic.outset.shadow }}>{adjustment}</Text>}
+        {adjustment && <Text style={styles.adjustment}>{adjustment}</Text>}
     </NeumorphicInset>
   );
 };

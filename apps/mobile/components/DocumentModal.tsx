@@ -7,12 +7,12 @@ import { View, Text, StyleSheet, Modal, TouchableWithoutFeedback, ActivityIndica
 import Animated, { useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
-import { getDocumentsByCategory, openDocument } from '@repo/utils';
+import { getDocumentsByCategory, openDocument, Tables } from '@repo/utils';
 import { BlurView } from 'expo-blur';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
 
-const mascotAsset = { uri: MASCOT_URLS.DOCUMENTS };
+const DOCUMENTS_MASCOT = { uri: MASCOT_URLS.DOCUMENTS };
 
 interface DocumentModalProps {
   category: string;
@@ -22,7 +22,7 @@ interface DocumentModalProps {
 
 export default function DocumentModal({ category, isModalVisible, setModalVisible }: DocumentModalProps) {
     const { theme } = useTheme();
-    const [documents, setDocuments] = useState<any[]>([]);
+    const [documents, setDocuments] = useState<Tables<'documents'>[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showTopChevron, setShowTopChevron] = useState(false);
     const [showBottomChevron, setShowBottomChevron] = useState(false);
@@ -61,7 +61,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
         fetchDocs();
     }, [isModalVisible, category]);
 
-    const handleScroll = (event: any) => {
+    const handleScroll = (event: { nativeEvent: { layoutMeasurement: { height: number }; contentOffset: { y: number }; contentSize: { height: number } } }) => {
         const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
         const isAtTop = contentOffset.y <= 0;
         const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 1;
@@ -69,7 +69,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
         setShowBottomChevron(!isAtBottom);
     };
 
-    const handleContentSizeChange = (contentWidth: number, contentHeight: number) => {
+    const handleContentSizeChange = (_contentWidth: number, contentHeight: number) => {
         const isScrollable = contentHeight > scrollViewHeight;
         setShowBottomChevron(isScrollable);
         if (!isScrollable) {
@@ -146,6 +146,24 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
             paddingHorizontal: theme.spacing.l,
             backgroundColor: theme.colors.surface,
         },
+        loadingIndicator: {
+            marginVertical: theme.spacing.xl,
+        },
+        documentItemContainer: {
+            alignItems: 'center',
+            marginBottom: 10,
+        },
+        documentRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        audioIcon: {
+            marginRight: 5,
+        },
+        learnMoreText: {
+            ...theme.typography.body,
+            color: theme.colors.primary,
+        }
     });
 
     return (
@@ -161,12 +179,12 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                 </TouchableWithoutFeedback>
                 <View style={styles.modalView}>
                     {isLoading ? (
-                        <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginVertical: theme.spacing.xl }} />
+                        <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loadingIndicator} />
                     ) : (
                         <>
                             {/* Persistent Header */}
                             <View style={styles.headerContainer}>
-                                <ExpoImage source={mascotAsset} style={styles.mascot} contentFit="contain" />
+                                <ExpoImage source={DOCUMENTS_MASCOT} style={styles.mascot} contentFit="contain" />
                                 <View style={styles.chevronContainer}>
                                     {showTopChevron && (
                                         <Animated.View style={animatedStyle}>
@@ -190,24 +208,24 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                                     scrollEventThrottle={16}
                                 >
                                     {documents.map((doc, index) => (
-                                        <View key={index} style={{alignItems: 'center', marginBottom: 10}}>
+                                        <View key={index} style={styles.documentItemContainer}>
                                             <TouchableOpacity
                                                 style={styles.button}
                                                 onPress={() => openDocument(doc)}
                                             >
-                                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                <View style={styles.documentRow}>
                                                     {doc.type === 'audio' && (
                                                         <MaterialCommunityIcons 
                                                             name="music-note" 
                                                             size={theme.typography.subtitle.fontSize} 
                                                             color={theme.colors.text} 
-                                                            style={{ marginRight: 5 }} 
+                                                            style={styles.audioIcon} 
                                                         />
                                                     )}
                                                     <Text style={styles.textStyle}>
                                                         {doc.name}
                                                         {doc.learn_more_uri && (
-                                                            <Text style={{...theme.typography.body, color: theme.colors.primary}}> - Details</Text>
+                                                            <Text style={styles.learnMoreText}> - Details</Text>
                                                         )}
                                                     </Text>
                                                 </View>

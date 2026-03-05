@@ -39,7 +39,7 @@ export const NewLabelWithHelp: React.FC<NewLabelWithHelpProps> = ({ label, conte
 
 interface RoundIconButtonProps {
   onPress: () => void;
-  iconName: string;
+  iconName: keyof typeof MaterialCommunityIcons.glyphMap;
   backgroundColor: string;
   size?: number;
   iconSize?: number;
@@ -47,24 +47,28 @@ interface RoundIconButtonProps {
 }
 
 export const RoundIconButton: React.FC<RoundIconButtonProps> = ({ onPress, iconName, backgroundColor, size = 24, iconSize = 16, iconColor = '#FFFFFF' }) => {
+    const styles = StyleSheet.create({
+        button: {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            backgroundColor: backgroundColor,
+            justifyContent: 'center',
+            alignItems: 'center',
+            elevation: 2,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.2,
+            shadowRadius: 1,
+        }
+    });
+
     return (
         <TouchableOpacity
             onPress={onPress}
-            style={{
-                width: size,
-                height: size,
-                borderRadius: size / 2,
-                backgroundColor: backgroundColor,
-                justifyContent: 'center',
-                alignItems: 'center',
-                elevation: 2,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.2,
-                shadowRadius: 1,
-            }}
+            style={styles.button}
         >
-            <MaterialCommunityIcons name={iconName as any} size={iconSize} color={iconColor} />
+            <MaterialCommunityIcons name={iconName} size={iconSize} color={iconColor} />
         </TouchableOpacity>
     );
 };

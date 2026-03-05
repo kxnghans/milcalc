@@ -6,6 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: 'milcalc-mobile',
   version: '1.0.0',
   orientation: 'portrait',
+  platforms: ['ios', 'android'],
   icon: './assets/3d_splash.png',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
