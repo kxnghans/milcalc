@@ -42,4 +42,5 @@ MilCalc enforces **Row Level Security (RLS)** to protect data integrity:
 
 1.  **Migration**: Schema changes are applied via `pnpm supabase migration up` (or MCP `apply_migration`).
 2.  **Type Safety**: TypeScript types are synchronized using `generate_typescript_types` to `packages/utils/src/types.ts`.
-3.  **Seeding**: Production snapshots are exported to `seed-data.json` for first-launch offline hydration.
+3.  **Seeding**: Production snapshots are planned for export to `seed-data.json` for first-launch offline hydration. Currently, the app hydrates via background sync on first launch.
+4.  **Versioning**: Data tables (e.g., `base_pay_2024`) are versioned. The `SyncManager` is designed to transition to newer scales (e.g., 2025/2026) by updating the `sync_metadata` pointers.

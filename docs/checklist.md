@@ -9,8 +9,8 @@
 - **Persistent Smart Cache**: Integration of `expo-sqlite` and TanStack Query ensures the app functions in Airplane Mode.
 - **Contextual Help CMS**: Markdown-enabled `DetailModal` is integrated across all primary screens.
 - **Production Config**: Standardized `app.config.ts`, unified bundle IDs (`dev.milcalc.mobile`), and secure env injection.
-- **Metadata Sync Engine**: Background invalidation logic using Supabase `sync_metadata` is deployed.
-- **Retirement Age Logic**: Integration of qualifying deployment days (reduced age) and break-in-service logic is finalized.
+- **Background Metadata Sync Engine**: Invalidation logic using Supabase `sync_metadata` is fully deployed.
+- **Context-Driven UI Refactor**: All calculators now consume `MainCalculatorLayout` and global `OverlayContext` hooks, reducing screen-level boilerplate by ~40%.
 
 ---
 

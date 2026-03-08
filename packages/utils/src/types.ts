@@ -338,6 +338,45 @@ export type Database = {
         }
         Relationships: []
       }
+      bug_reports: {
+        Row: {
+          id: number
+          created_at: string
+          app_id: string
+          email: string
+          description: string
+          severity: string
+          first_name: string | null
+          last_name: string | null
+          attachment_url: string | null
+          status: string
+        }
+        Insert: {
+          id?: number
+          created_at?: string
+          app_id: string
+          email: string
+          description: string
+          severity: string
+          first_name?: string | null
+          last_name?: string | null
+          attachment_url?: string | null
+          status?: string
+        }
+        Update: {
+          id?: number
+          created_at?: string
+          app_id?: string
+          email?: string
+          description?: string
+          severity?: string
+          first_name?: string | null
+          last_name?: string | null
+          attachment_url?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       best_score_help_details: {
         Row: {
           content_key: string | null

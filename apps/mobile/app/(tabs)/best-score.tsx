@@ -1,16 +1,6 @@
-/**
- * @file best-score.tsx
- * @description This file defines the "Best Score" screen of the mobile application.
- * It allows users to input their personal bests for each PT exercise component
- * and calculates their best possible overall score based on these individual achievements.
- */
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
-  Card,
-  IconRow,
   useTheme,
   SegmentedSelector,
   Icon,
@@ -18,7 +8,8 @@ import {
   useDemographicsState,
   useBestScoreState,
   ExemptButton,
-  MASCOT_URLS
+  MASCOT_URLS,
+  IconRow
 } from '@repo/ui';
 import { ICONS } from '@repo/ui/icons';
 import { getScoreCategory } from '@repo/utils';
@@ -28,18 +19,9 @@ import TimeInput from '../../components/TimeInput';
 import Demographics from '../../components/Demographics';
 import AltitudeAdjustmentComponent from "../../components/AltitudeAdjustmentComponent";
 import Divider from '../../components/Divider';
-import DocumentModal from '../../components/DocumentModal';
-import DetailModal from '../../components/DetailModal';
-import DismissKeyboardView from '../../components/DismissKeyboardView';
-import ScreenHeader from '../../components/ScreenHeader';
+import MainCalculatorLayout from '../../components/MainCalculatorLayout';
+import { useOverlay } from '../../contexts/OverlayContext';
 
-/**
- * A component that renders a section for a specific PT category (Strength, Core, Cardio).
- * It displays the exercises within that category, inputs for the user's best performance,
- * and the corresponding scores.
- * @param {object} props - The component props.
- * @returns {JSX.Element} The rendered section.
- */
 type BestScoreExercise = 
   | { label: string; value: string; type: 'number'; onValueChange: (val: string) => void }
   | { label: string; value: string; type: 'time'; onValueChange: (val: { minutes: string; seconds: string }) => void };
@@ -52,7 +34,7 @@ interface BestScoreSectionProps {
   maxScore: number;
   isExempt: boolean;
   onToggleExempt: () => void;
-  openDetailModal: (key: string, mascot: ImageSourcePropType) => void;
+  openHelp: (key: string, mascot?: ImageSourcePropType) => void;
 }
 
 const BestScoreSection = ({ 
@@ -63,7 +45,7 @@ const BestScoreSection = ({
   maxScore, 
   isExempt, 
   onToggleExempt, 
-  openDetailModal 
+  openHelp 
 }: BestScoreSectionProps) => {
   const { theme } = useTheme();
 
@@ -81,8 +63,6 @@ const BestScoreSection = ({
   }
 
   const styles = StyleSheet.create({
-    sectionContainer: {
-    },
     sectionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -147,9 +127,9 @@ const BestScoreSection = ({
   };
 
   return (
-    <View style={styles.sectionContainer}>
+    <View>
       <View style={styles.sectionHeader}>
-        <TouchableOpacity onPress={() => openDetailModal(`best_score_${title.toLowerCase()}`, getMascot(title))}>
+        <TouchableOpacity onPress={() => openHelp(`best_score_${title.toLowerCase()}`, getMascot(title))}>
             <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
         </TouchableOpacity>
         <Text style={styles.cardTitle}>{title}</Text>
@@ -228,50 +208,18 @@ const BestScoreSection = ({
 };
 
 export default function BestScoreScreen() {
-  const { theme, themeMode, toggleTheme } = useTheme();
-  const [isPdfModalVisible, setPdfModalVisible] = React.useState(false);
-  const [detailModalContentKey, setDetailModalContentKey] = React.useState<string | null>(null);
-  const [detailModalMascot, setDetailModalMascot] = React.useState<ImageSourcePropType | null>(null);
-  const [detailModalSource, setDetailModalSource] = React.useState<'pt' | 'pay' | 'retirement' | 'best_score'>('best_score');
+  const { theme } = useTheme();
+  const { openHelp, openDocuments } = useOverlay();
 
-  const openDetailModal = (key: string, mascot: ImageSourcePropType, source: 'pt' | 'pay' | 'retirement' | 'best_score' = 'best_score') => {
-    setDetailModalContentKey(key);
-    setDetailModalMascot(mascot);
-    setDetailModalSource(source);
-  };
-
-  const closeDetailModal = () => {
-    setDetailModalContentKey(null);
-    setDetailModalMascot(null);
+  const handleOpenHelp = (key: string, mascot?: ImageSourcePropType) => {
+    openHelp(key, 'best_score', mascot);
   };
 
   const { age, setAge, gender, setGender, altitudeGroup, setAltitudeGroup } = useDemographicsState();
   const { inputs, outputs, exemptions } = useBestScoreState(age, gender, altitudeGroup);
   const { isLoading } = outputs;
 
-  const getThemeIcon = () => {
-    if (themeMode === 'light') return ICONS.THEME_LIGHT;
-    if (themeMode === 'dark') return ICONS.THEME_DARK;
-    return ICONS.THEME_AUTO;
-  };
-
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    content: {
-        flex: 1,
-        paddingHorizontal: theme.spacing.s,
-        paddingVertical: theme.spacing.xs,
-    },
-    card: {
-        flex: 1,
-    },
-    dismissKeyboard: {
-        flex: 0, 
-        width: '100%',
-    },
     divider: {
         marginTop: theme.spacing.s, 
         marginBottom: theme.spacing.s,
@@ -302,73 +250,58 @@ export default function BestScoreScreen() {
   const cardioBestValues = { run: { minutes: inputs.runMinutes, seconds: inputs.runSeconds }, shuttles: inputs.shuttles, walk: { minutes: inputs.walkMinutes, seconds: inputs.walkSeconds } };
 
   return (
-    <View style={styles.container}>
-        <ScreenHeader title="Best PT Score Calculator" isLoading={isLoading} />
-        <DocumentModal category="PT" isModalVisible={isPdfModalVisible} setModalVisible={setPdfModalVisible} />
-        <DetailModal isVisible={!!detailModalContentKey} onClose={closeDetailModal} contentKey={detailModalContentKey} source={detailModalSource} mascotAsset={detailModalMascot} />
-        <View style={styles.content}>
-            <DismissKeyboardView style={styles.dismissKeyboard}>
-            <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
-            <IconRow
-                icons={[
-                {
-                    name: themeMode === 'auto' ? ICONS.HOME_FILLED : ICONS.HOME,
-                    href: "/(tabs)/pt-calculator",
-                },
-                {
-                    name: ICONS.DOCUMENT,
-                    onPress: () => setPdfModalVisible(true),
-                },
-                {
-                    name: getThemeIcon(),
-                    onPress: toggleTheme,
-                },
-                ]}
+    <MainCalculatorLayout
+      title="Best PT Score Calculator"
+      isLoading={isLoading}
+      actions={['home', 'document', 'theme']}
+      onDocument={() => openDocuments('PT')}
+      summaryContent={
+        <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
+      }
+      inputContent={
+        <>
+            <Demographics age={age} setAge={setAge} gender={gender} setGender={setGender} />
+            <Divider style={styles.divider} />
+            <BestScoreSection 
+                title="Strength" 
+                exercises={strengthExercises} 
+                scores={strengthScores} 
+                bestValues={strengthBestValues} 
+                maxScore={20}
+                isExempt={exemptions.isStrengthExempt}
+                onToggleExempt={exemptions.toggleStrengthExempt}
+                openHelp={handleOpenHelp}
             />
-            </DismissKeyboardView>
-            <Card style={styles.card}>
-                <KeyboardAwareScrollView contentContainerStyle={{flexGrow: 1}} keyboardShouldPersistTaps="handled">
-                    <DismissKeyboardView>
-                    <Demographics age={age} setAge={setAge} gender={gender} setGender={setGender} />
-                    <Divider style={styles.divider} />
-                    <BestScoreSection 
-                        title="Strength" 
-                        exercises={strengthExercises} 
-                        scores={strengthScores} 
-                        bestValues={strengthBestValues} 
-                        maxScore={20}
-                        isExempt={exemptions.isStrengthExempt}
-                        onToggleExempt={exemptions.toggleStrengthExempt}
-                        openDetailModal={openDetailModal}
-                    />
-                    <Divider style={styles.divider} />
-                    <BestScoreSection 
-                        title="Core" 
-                        exercises={coreExercises} 
-                        scores={coreScores} 
-                        bestValues={coreBestValues} 
-                        maxScore={20}
-                        isExempt={exemptions.isCoreExempt}
-                        onToggleExempt={exemptions.toggleCoreExempt}
-                        openDetailModal={openDetailModal}
-                    />
-                    <Divider style={styles.divider} />
-                    <BestScoreSection 
-                        title="Cardio" 
-                        exercises={cardioExercises} 
-                        scores={cardioScores} 
-                        bestValues={cardioBestValues} 
-                        maxScore={60}
-                        isExempt={exemptions.isCardioExempt}
-                        onToggleExempt={exemptions.toggleCardioExempt}
-                        openDetailModal={openDetailModal}
-                    />
-                    <Divider style={styles.divider} />
-                    <AltitudeAdjustmentComponent selectedValue={altitudeGroup} onValueChange={setAltitudeGroup} openDetailModal={(key, mascot) => openDetailModal(key, mascot, 'pt')} />
-                    </DismissKeyboardView>
-                </KeyboardAwareScrollView>
-            </Card>
-        </View>
-    </View>
+            <Divider style={styles.divider} />
+            <BestScoreSection 
+                title="Core" 
+                exercises={coreExercises} 
+                scores={coreScores} 
+                bestValues={coreBestValues} 
+                maxScore={20}
+                isExempt={exemptions.isCoreExempt}
+                onToggleExempt={exemptions.toggleCoreExempt}
+                openHelp={handleOpenHelp}
+            />
+            <Divider style={styles.divider} />
+            <BestScoreSection 
+                title="Cardio" 
+                exercises={cardioExercises} 
+                scores={cardioScores} 
+                bestValues={cardioBestValues} 
+                maxScore={60}
+                isExempt={exemptions.isCardioExempt}
+                onToggleExempt={exemptions.toggleCardioExempt}
+                openHelp={handleOpenHelp}
+            />
+            <Divider style={styles.divider} />
+            <AltitudeAdjustmentComponent 
+                selectedValue={altitudeGroup} 
+                onValueChange={setAltitudeGroup} 
+                openDetailModal={handleOpenHelp} 
+            />
+        </>
+      }
+    />
   );
 }

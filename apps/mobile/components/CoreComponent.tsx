@@ -27,7 +27,7 @@ interface CoreComponentProps {
     ninetyPercentileThreshold: number;
     isExempt: boolean;
     toggleExempt: () => void;
-    openDetailModal: (key: string, mascot: ImageSourcePropType, performance: Record<string, string | number>) => void;
+    openDetailModal: (key: string, mascot?: ImageSourcePropType) => void;
     score: { totalScore: number; coreScore: number | string; isPass: boolean };
 }
 
@@ -112,7 +112,7 @@ export default function CoreComponent({
             
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <TouchableOpacity onPress={() => openDetailModal(coreComponent, getMascot(), getPerformance())}>
+                    <TouchableOpacity onPress={() => openDetailModal(coreComponent, getMascot())}>
                         <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
                     </TouchableOpacity>
                     <Text style={styles.cardTitle}>Core</Text>

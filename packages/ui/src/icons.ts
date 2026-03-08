@@ -10,9 +10,9 @@
  * All icons are from the 'MaterialCommunityIcons' set unless specified otherwise.
  */
 export const ICONS = {
-  BEST_SCORE: 'file-chart-outline', // Icon for the Best Score screen.
+  BEST_SCORE: 'weight-lifter',      // Reverted to weight-lifter for the PT screen left icon
   PDF: 'file-pdf-box',              // Icon for opening PDF documents.
-  DOCUMENT: 'file-document',        // Icon for a generic document.
+  DOCUMENT: 'file-document',        // Reverted back to generic document.
   RESET: 'refresh',                 // Icon for resetting form values.
   THEME_LIGHT: 'weather-sunny',     // Icon for the light theme.
   THEME_DARK: 'weather-night',      // Icon for the dark theme.
@@ -25,7 +25,15 @@ export const ICONS = {
   WEIGHT_LIFTER: 'weight-lifter',   // A general-purpose fitness icon.
   PAY: 'cash-multiple',             // Icon for the Pay Calculator.
   RETIREMENT: 'run',                // Icon for the Retirement Calculator.
-};
+  MENU: 'menu',                      // Burger menu icon.
+  CLOSE: 'close',                    // Close icon.
+  ACCOUNT: 'account',                // Profile icon.
+  SETTINGS: 'cog',                   // Settings icon.
+  BUG: 'bug',                        // Bug reporting icon.
+  SEND: 'send',                      // Send icon for bug reports.
+  CHEVRON_UP: 'chevron-up',          // Chevron up icon.
+  CHEVRON_DOWN: 'chevron-down',      // Chevron down icon.
+} as const;
 
 /**
  * Defines the keys for the icon sets available via `@expo/vector-icons`.
@@ -34,4 +42,4 @@ export const ICONS = {
 export const ICON_SETS = {
     MATERIAL_COMMUNITY: 'MaterialCommunityIcons',
     FONTISTO: 'Fontisto',
-};
+} as const;

@@ -6,7 +6,7 @@ This document defines the foundational mandates and operational boundaries for A
 
 *   **Package Manager**: `pnpm` (v10+). Never use `npm` or `yarn`.
 *   **Monorepo**: Turborepo. All cross-package dependencies must use workspace protocols (e.g., `"@repo/utils": "workspace:*"`).
-*   **Mobile Stack**: Expo SDK 52 (React Native), Expo Router, New Architecture (Bridgeless) enabled.
+*   **Mobile Stack**: Expo SDK 54 (React Native 0.81), Expo Router, New Architecture (Bridgeless) enabled.
 *   **State**: React Query (TanStack) v5 with `expo-sqlite` persistence.
 *   **Logic**: Pure TypeScript in `packages/utils`. No side-effects in calculation engines.
 *   **UI Style**: Neumorphism (Soft UI). Use `@repo/ui` primitives. Avoid hardcoded RGBA strings; use `getAlphaColor(hex, alpha)` from `ThemeContext`.
@@ -24,6 +24,10 @@ This document defines the foundational mandates and operational boundaries for A
 1.  **UI Domain (`@repo/ui`)**: Stateless primitives and feature-level state hooks. No direct API calls; hooks must consume `@repo/utils` APIs.
 2.  **Logic Domain (`@repo/utils`)**: Pure math and data-fetching definitions. This package is the "Single Source of Truth" for military standards.
 3.  **Delivery Domain (`apps/mobile`)**: Composition of UI primitives and routing. Screens should be thin wrappers around state hooks.
+
+### 🎨 Interaction & Layout Mandates
+- **Context-Driven UI**: All interactive overlays (Help, Documents, Bug Reports) MUST be triggered via global `OverlayContext` hooks. Never declare local modal state (`isVisible`, `contentKey`) within screen files.
+- **Structural Standardization**: Primary calculator screens MUST use the `MainCalculatorLayout` and `SmartIconRow` components. Inline `IconRow` configurations with manual theme/reset logic are prohibited.
 
 ## 🚦 Operational Constraints
 

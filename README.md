@@ -7,7 +7,7 @@ MilCalc is a modern, cross-platform suite of tools designed for United States mi
 MilCalc is built as a high-performance monorepo using industry-standard tools:
 
 *   **Monorepo Management**: [Turborepo](https://turbo.build/repo) + [pnpm Workspaces](https://pnpm.io/workspaces).
-*   **Mobile Framework**: [React Native](https://reactnative.dev/) via [Expo](https://expo.dev/) (SDK 52+), utilizing the New Architecture and React 19.
+*   **Mobile Framework**: [React Native](https://reactnative.dev/) via [Expo](https://expo.dev/) (SDK 54+), utilizing the New Architecture and React 19.
 *   **Backend-as-a-Service**: [Supabase](https://supabase.com/) (PostgreSQL, PostgREST, Auth).
 *   **Data Orchestration**: [TanStack Query v5](https://tanstack.com/query/latest) with `expo-sqlite` persistence for "Zero-Latency" offline-first performance.
 *   **Design System**: Custom Neumorphic library in `@repo/ui`, utilizing `react-native-reanimated` for fluid interactions.

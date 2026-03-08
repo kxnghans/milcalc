@@ -24,9 +24,11 @@ We categorize data into three tiers based on volatility and access patterns:
 
 | Tier | Example | Storage | Sync Frequency |
 | :--- | :--- | :--- | :--- |
-| **Static Standards** | PT Scoring, Pay Scales | SQLite + `seed-data.json` | Monthly / On Change |
+| **Static Standards** | PT Scoring, Pay Scales | SQLite / `seed-data.json`* | Monthly / On Change |
 | **Dynamic Metadata** | `sync_metadata` | SQLite / Memory | Every Launch |
 | **User State** | Current Inputs, Best Scores | SQLite / `AsyncStorage` | Never (Local Only) |
+
+*\*Planned feature: `seed-data.json` will eventually provide the initial hydration on first-launch to enable zero-network startup.*
 
 ## 4. RELATIONAL CACHING (SQLite)
 

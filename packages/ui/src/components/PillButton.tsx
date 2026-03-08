@@ -1,7 +1,8 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, StyleProp, ViewStyle, TextStyle, View } from 'react-native';
 import NeumorphicOutset from './NeumorphicOutset';
 import { useTheme } from '../contexts/ThemeContext';
+import { Icon } from './Icon';
 
 interface PillButtonProps {
   title: string;
@@ -11,9 +12,10 @@ interface PillButtonProps {
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
+  icon?: string;
 }
 
-export const PillButton = ({ title, onPress, backgroundColor, textColor, style, textStyle, disabled }: PillButtonProps) => {
+export const PillButton = ({ title, onPress, backgroundColor, textColor, style, textStyle, disabled, icon }: PillButtonProps) => {
   const { theme } = useTheme();
 
   const buttonColor = disabled ? theme.colors.disabled : backgroundColor || theme.colors.primary;
@@ -25,6 +27,9 @@ export const PillButton = ({ title, onPress, backgroundColor, textColor, style, 
       paddingVertical: 10,
       paddingHorizontal: 20,
       elevation: 2,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     buttonContainer: {
         alignSelf: 'center',
@@ -36,6 +41,9 @@ export const PillButton = ({ title, onPress, backgroundColor, textColor, style, 
     },
     outsetContent: {
       borderRadius: 20,
+    },
+    icon: {
+      marginRight: 8,
     },
   });
 
@@ -49,6 +57,11 @@ export const PillButton = ({ title, onPress, backgroundColor, textColor, style, 
         onPress={onPress}
         disabled={disabled}
       >
+        {icon && (
+          <View style={styles.icon}>
+            <Icon name={icon} size={18} color={buttonTextColor} />
+          </View>
+        )}
         <Text style={[styles.text, textStyle]}>{title}</Text>
       </TouchableOpacity>
     </NeumorphicOutset>

@@ -19,7 +19,7 @@ interface StrengthComponentProps {
     ninetyPercentileThreshold: number;
     isExempt: boolean;
     toggleExempt: () => void;
-    openDetailModal: (key: string, mascot: ImageSourcePropType, performance: Record<string, string | number>) => void;
+    openDetailModal: (key: string, mascot?: ImageSourcePropType) => void;
     score: { totalScore: number; pushupScore: number | string; isPass: boolean };
 }
 
@@ -84,7 +84,7 @@ export default function StrengthComponent({
         <View>
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <TouchableOpacity onPress={() => openDetailModal(pushupComponent, getMascot(), { reps: pushups })}>
+                    <TouchableOpacity onPress={() => openDetailModal(pushupComponent, getMascot())}>
                         <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
                     </TouchableOpacity>
                     <Text style={styles.cardTitle}>Strength</Text>

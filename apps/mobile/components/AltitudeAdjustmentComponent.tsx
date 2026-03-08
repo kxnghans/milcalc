@@ -22,7 +22,7 @@ interface AltitudeAdjustmentComponentProps {
   /** A function to be called when the selected value changes. */
   onValueChange: (value: string) => void;
   /** A function to open the detail modal. */
-  openDetailModal: (key: string, mascot: ImageSourcePropType) => void;
+  openDetailModal: (key: string, mascot?: ImageSourcePropType) => void;
 }
 
 /**

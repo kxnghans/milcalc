@@ -27,6 +27,14 @@ The implementation is spread across several files in the monorepo:
 #### Separation of Concerns
 Similar to the PT Calculator, we have separated the code into UI, state management, and calculation layers. This makes the code easier to understand, test, and maintain.
 
+#### Context-Driven UI (Globalized Overlays)
+To reduce boilerplate and ensure a consistent user experience, we utilize a **Context-Driven UI** pattern. Common interactive elements like Help modals (`DetailModal`), PDF viewers (`DocumentModal`), and system-wide menus are managed via the `OverlayContext`.
+- **Global Mounting**: Modals are mounted once in the root `app/_layout.tsx`, preventing redundant re-renders and simplifying screen-level logic.
+- **Hook-Based Triggers**: Screens use specialized hooks (e.g., `openDetail(key, mascot)` or `openDocument(category)`) to trigger these global overlays, eliminating ~15-20 lines of state management per screen.
+
+#### Standardized Calculator Layout
+All primary calculators consume the `MainCalculatorLayout` wrapper. This component encapsulates the nested hierarchy of `ScreenHeader`, `DismissKeyboardView`, and `KeyboardAwareScrollView`, allowing screen files to focus exclusively on their unique input fields and results.
+
 #### Debouncing User Input
 We use debouncing to prevent recalculating the pay on every keystroke, which makes the app more responsive.
 

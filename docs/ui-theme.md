@@ -51,7 +51,22 @@ To maintain visual parity and avoid artifacts:
 -   **Banned**: Inline `rgba()` strings. **Use**: `getAlphaColor(hex, alpha)`.
 -   **Banned**: Hardcoded margin/padding values. **Use**: `theme.spacing` tokens.
 -   **Banned**: Direct `Elevation` props on Android. **Use**: Wrapped primitives from `@repo/ui`.
+-   **Banned**: Redundant theme icon logic or manual modal state (`isVisible`, `contentKey`) in screen files. **Use**: `MainCalculatorLayout`, `SmartIconRow`, and global overlay hooks.
 
-## 5. Keyboard & Ergonomics
+## 5. Composition Primitives
+
+To maintain structural consistency across the "Delivery Domain," we use high-level composition components.
+
+### 5.1 MainCalculatorLayout
+A root-level wrapper for all calculator screens.
+-   **Structure**: `View` > `ScreenHeader` > `DismissKeyboardView` > `Card` (Summary) > `IconRow` > `Card` (Inputs) > `KeyboardAwareScrollView`.
+-   **Props**: `title`, `isLoading`, `summaryContent`, `inputContent`, `actions`.
+
+### 5.2 SmartIconRow
+An intelligent version of `IconRow` that internally consumes `ThemeContext` and `OverlayContext`.
+-   **Automatic Actions**: Handles 'reset', 'help' (triggers `DetailModal`), 'document' (triggers `DocumentModal`), and 'theme' (toggles system theme and updates icons automatically).
+-   **Usage**: `<SmartIconRow actions={['reset', 'document', 'theme']} />`.
+
+## 6. Keyboard & Ergonomics
 
 Mobile ergonomic standards are enforced via the `DismissKeyboardView` component. All scrollable forms must be wrapped in this view, ensuring that tapping anywhere outside an input field dismisses the on-screen keyboard cleanly. Avoid "keyboard entrapment" by ensuring all inputs are accessible within the scroll viewport.

@@ -33,7 +33,7 @@ interface CardioComponentProps {
     ninetyPercentileThreshold: number;
     isExempt: boolean;
     toggleExempt: () => void;
-    openDetailModal: (key: string, mascot: ImageSourcePropType, performance: Record<string, string | number>) => void;
+    openDetailModal: (key: string, mascot?: ImageSourcePropType) => void;
     score: { totalScore: number; cardioScore: number | string; isPass: boolean; walkPassed: string };
     altitudeData: {
         run: Tables<'run_altitude_adjustments'>[];
@@ -181,7 +181,7 @@ export default function CardioComponent({
         <View>
             <View style={styles.exerciseBlock}>
                 <View style={styles.componentHeader}>
-                    <TouchableOpacity onPress={() => openDetailModal(cardioComponent, getMascot(), getPerformance())}>
+                    <TouchableOpacity onPress={() => openDetailModal(cardioComponent, getMascot())}>
                         <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
                     </TouchableOpacity>
                     <Text style={styles.cardTitle}>Cardio</Text>

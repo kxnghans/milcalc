@@ -9,6 +9,7 @@ export * from './disability-supabase-api';
 export * from './documents-supabase-api';
 export * from './sync-api';
 export * from './sync-metadata-keys';
+export * from './bug-supabase-api';
 export * from './help-utils';
 export * from './pay-calculator';
 export * from './pay-supabase-api';
