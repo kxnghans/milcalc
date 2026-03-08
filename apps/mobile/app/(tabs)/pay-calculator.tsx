@@ -222,6 +222,9 @@ export default function PayCalculatorScreen() {
     demographicsRow: {
         flexDirection: 'row',
     },
+    leftColumn: {
+        flex: 1.1,
+    },
     noMarginHorizontal: {
         marginLeft: 0,
         marginRight: 0,
@@ -244,7 +247,7 @@ export default function PayCalculatorScreen() {
         backgroundColor: getAlphaColor('#000000', 0.01),
     },
     rightColumn: {
-        flex: 1,
+        flex: 0.9,
         paddingRight: theme.spacing.s,
     },
     dividerMargin: {

@@ -49,18 +49,18 @@ export default function Demographics({ age, setAge, gender, setGender }: Demogra
         alignItems: 'center',
     },
     ageHeaderContainer: {
-        width: 96, 
+        flex: 1, 
         marginRight: theme.spacing.m,
     },
     genderHeaderContainer: {
-        flex: 1,
+        flex: 3,
     },
     ageInputContainer: {
-        width: 96, 
+        flex: 1, 
         marginRight: theme.spacing.m,
     },
     genderSelectorContainer: {
-        flex: 1,
+        flex: 3,
     },
     numberInput: {
         paddingVertical: 6,

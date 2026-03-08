@@ -49,34 +49,38 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
     },
     segment: {
       flex: 1,
-      paddingVertical: theme.spacing.s,
+      paddingVertical: theme.spacing.s + theme.spacing.xs, // Increased to match selected segment's total height (padding + margin)
       paddingHorizontal: theme.spacing.xs,
       justifyContent: 'center',
       alignItems: 'center',
     },
     selectedSegment: {
-      paddingVertical: theme.spacing.s,
+      paddingVertical: theme.spacing.s, // Reduced because it has container margins
       paddingHorizontal: theme.spacing.xs,
     },
     text: {
       ...theme.typography.body,
       color: theme.colors.text,
       textAlign: 'center',
+      includeFontPadding: false,
     },
     selectedText: {
       ...theme.typography.bodybold,
       color: theme.colors.primaryText,
       textAlign: 'center',
+      includeFontPadding: false,
     },
     captionText: {
         ...theme.typography.caption,
         color: theme.colors.text,
         textAlign: 'center',
+        includeFontPadding: false,
     },
     selectedCaptionText: {
         ...theme.typography.caption,
         color: theme.colors.primaryText,
         textAlign: 'center',
+        includeFontPadding: false,
     },
     outsetContainer: {
       borderRadius: theme.borderRadius.m,

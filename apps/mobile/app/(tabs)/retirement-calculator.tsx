@@ -334,6 +334,7 @@ export default function RetirementCalculatorScreen() {
                     <DismissKeyboardView>
                     <SegmentedSelector
                     options={[{label: 'Active', value: 'Active'}, {label: 'Reserves', value: 'Reserves'}, {label: 'Guard', value: 'Guard'}]}
+                    ratios={[4, 5, 4]}
                     selectedValues={[component]}
                     onValueChange={(value) => setComponent(value)}
                     />

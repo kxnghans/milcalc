@@ -74,10 +74,10 @@ export const PayDemographics: React.FC<PayDemographicsProps> = ({
         flexDirection: 'row',
     },
     leftColumn: {
-        flex: 1,
+        flex: 1.1,
     },
     rightColumn: {
-        flex: 1,
+        flex: 0.9,
         paddingRight: theme.spacing.s,
     },
     fieldRow: {
