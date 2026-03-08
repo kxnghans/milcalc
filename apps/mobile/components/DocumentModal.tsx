@@ -132,7 +132,6 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
         button: {
             borderRadius: 20,
             padding: 10,
-            elevation: 2,
             marginBottom: 10,
         },
         textStyle: {
@@ -212,6 +211,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
                                             <TouchableOpacity
                                                 style={styles.button}
                                                 onPress={() => openDocument(doc)}
+                                                activeOpacity={1}
                                             >
                                                 <View style={styles.documentRow}>
                                                     {doc.type === 'audio' && (

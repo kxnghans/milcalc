@@ -38,6 +38,18 @@ export const getDocumentsByCategory = async (category: string): Promise<Tables<'
  * @param doc - The document object from the database.
  */
 export const openDocument = async (doc: Tables<'documents'>) => {
+    // Override for DAFMAN 36-2905 to use a specific static link
+    if (doc.name.toLowerCase().replace(/\s+/g, '') === 'dafman36-2905') {
+        const staticLink = 'https://static.e-publishing.af.mil/production/1/af_a1/publication/dafman36-2905/dafman36-2905.pdf';
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        try {
+            await Linking.openURL(staticLink);
+        } catch (error) {
+            console.error('Error opening static DAFMAN 36-2905 URL:', error);
+        }
+        return;
+    }
+
     // Use learn_more_uri if it exists, otherwise use the source based on type.
     const urlToOpen = doc.learn_more_uri || (doc.type === 'web' ? doc.source : null);
 

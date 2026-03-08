@@ -10,6 +10,7 @@
 - **Contextual Help CMS**: Markdown-enabled `DetailModal` is integrated across all primary screens.
 - **Production Config**: Standardized `app.config.ts`, unified bundle IDs (`dev.milcalc.mobile`), and secure env injection.
 - **Metadata Sync Engine**: Background invalidation logic using Supabase `sync_metadata` is deployed.
+- **Retirement Age Logic**: Integration of qualifying deployment days (reduced age) and break-in-service logic is finalized.
 
 ---
 

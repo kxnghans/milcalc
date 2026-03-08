@@ -15,7 +15,7 @@ MilCalc utilizes the `@supabase/supabase-js` client (v2.74+) for all data orches
 -   **`pt_muscular_fitness_standards`**: Lookup table for push-ups, sit-ups, and alternative strength events.
 -   **`pt_cardio_respiratory_standards`**: Lookup table for 1.5-mile run and HAMR events.
 -   **`walk_standards`**: Passing thresholds for the 2km walk assessment.
--   **`run_altitude_adjustments` / `walk_altitude_adjustments`**: Performance offsets for high-elevation environments.
+- **`run_altitude_adjustments` / `walk_altitude_adjustments` / `hamr_altitude_adjustments`**: Performance offsets for high-elevation environments.
 
 ### 2. Financial Logic (Pay & Retirement)
 -   **`base_pay_2024`**: Standard basic pay tables (relational by rank/YOS).

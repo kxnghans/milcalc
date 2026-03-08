@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Text, ViewStyle, TextStyle } from 'react-native';
+import { View, StyleSheet, Text, ViewStyle, TextStyle, Platform, Pressable } from 'react-native';
 import * as Icons from '@expo/vector-icons';
 import { Link, Href } from 'expo-router';
 import { useTheme } from "../contexts/ThemeContext";
@@ -44,7 +44,7 @@ interface IconRowProps {
  * A component that renders a horizontal row of icons, each with optional text and interaction.
  * The icons are styled with a neumorphic outset effect.
  */
-export const IconRow = ({ icons, style, borderRadius }: IconRowProps) => {
+export const IconRow = ({ icons, borderRadius }: IconRowProps) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -67,26 +67,35 @@ export const IconRow = ({ icons, style, borderRadius }: IconRowProps) => {
     outsetContent: {
       overflow: 'hidden',
     },
-  });
+    pressedIconBlock: {
+      opacity: 0.3,
+    },
+    });
 
-  return (
-    <View style={[styles.iconContainer, style]}>
+    return (
+    <View style={styles.iconContainer}>
       {icons.map((icon, index) => {
         // Dynamically select the icon set, defaulting to MaterialCommunityIcons.
         const Icon = Icons[icon.iconSet || 'MaterialCommunityIcons'] as React.ComponentType<{ name: string; size: number; color: string }>;
-        
+
         const currentBorderRadius = borderRadius ?? theme.borderRadius.l;
 
-        // The common content for each item in the row (the icon/text block).
-        const iconContent = (
-          <NeumorphicOutset 
-            containerStyle={[styles.outsetContainer, { borderRadius: currentBorderRadius }]}
-            contentStyle={[styles.outsetContent, { backgroundColor: icon.backgroundColor || theme.colors.background, borderRadius: currentBorderRadius }]}
-          >
-            <View style={styles.iconBlock}>
+        // A function to render the inner content, reacting to the pressed state.
+        const renderIconContent = (pressed: boolean) => (
+            <View style={[styles.iconBlock, pressed && styles.pressedIconBlock]}>
                 {icon.name && <Icon name={icon.name} size={25} color={icon.color || theme.colors.text} />}
                 {icon.text && <Text style={[{color: icon.color || theme.colors.text}, icon.textStyle]}>{icon.text}</Text>}
             </View>
+        );
+
+        // The common container wrapping the content block.
+        const wrapInNeumorphic = (children: React.ReactNode) => (
+          <NeumorphicOutset 
+            containerStyle={[styles.outsetContainer, { borderRadius: currentBorderRadius }]}
+            contentStyle={[styles.outsetContent, { backgroundColor: icon.backgroundColor || theme.colors.background, borderRadius: currentBorderRadius }]}
+            elevation={Platform.OS === 'android' ? 0 : undefined}
+          >
+            {children}
           </NeumorphicOutset>
         );
 
@@ -94,24 +103,26 @@ export const IconRow = ({ icons, style, borderRadius }: IconRowProps) => {
         if (icon.href) {
           return (
             <Link href={icon.href} asChild key={index}>
-              <TouchableOpacity style={styles.touchable}>{iconContent}</TouchableOpacity>
+              <Pressable style={styles.touchable}>
+                 {({ pressed }) => wrapInNeumorphic(renderIconContent(pressed))}
+              </Pressable>
             </Link>
           );
         }
 
-        // If an onPress handler is provided, wrap the icon in a TouchableOpacity to make it a button.
+        // If an onPress handler is provided, wrap the icon in a Pressable to make it a button.
         if (icon.onPress) {
             return (
-                <TouchableOpacity onPress={icon.onPress} key={index} style={styles.touchable}>
-                    {iconContent}
-                </TouchableOpacity>
+                <Pressable onPress={icon.onPress} key={index} style={styles.touchable}>
+                    {({ pressed }) => wrapInNeumorphic(renderIconContent(pressed))}
+                </Pressable>
             );
         }
 
         // If neither href nor onPress is provided, render a static, non-interactive view.
         return (
             <View key={index} style={styles.touchable}>
-                {iconContent}
+                {wrapInNeumorphic(renderIconContent(false))}
             </View>
         );
       })}

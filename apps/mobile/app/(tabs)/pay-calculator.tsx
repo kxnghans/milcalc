@@ -222,9 +222,6 @@ export default function PayCalculatorScreen() {
     demographicsRow: {
         flexDirection: 'row',
     },
-    leftColumn: {
-        flex: 1.1,
-    },
     noMarginHorizontal: {
         marginLeft: 0,
         marginRight: 0,

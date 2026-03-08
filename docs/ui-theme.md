@@ -35,7 +35,16 @@ We assume a light source at the top-left (10:30 position).
 -   **Top-Left Shadow**: Light highlight (White at 50% opacity).
 -   **Bottom-Right Shadow**: Dark depth (Black at 15% opacity).
 
-*Note: React Native's default shadow styling is limited on Android. The UI library carefully manages `elevation` and background colors to emulate these effects cross-platform.*
+### 3.2 Android Rendering Quirks & Solutions
+React Native's native shadow properties (`shadowColor`, `shadowOffset`, etc.) do not render on Android. Instead, Android uses a hardware-accelerated `elevation` property, which behaves unpredictably with transparent backgrounds and complex nested layouts typical of Neumorphism.
+
+To maintain visual parity and avoid artifacts:
+1.  **Avoid Blurry Press Bleed**: Do not use `TouchableOpacity` on small elevated elements (like Icon buttons). The default fade applies to the entire container, causing the underlying Android `elevation` shadow to "bleed" through as an ugly gray halo.
+    *   **Solution**: Use `<Pressable>` and apply the opacity change *only* to the foreground content (the icon or text) via the `({ pressed })` render function, leaving the container fully opaque. Or, explicitly pass `activeOpacity={1}` if using `TouchableOpacity` and no visual feedback is desired.
+2.  **Eliminate "Pill Borders"**: High `elevation` values on small, deeply rounded containers can cause hard gray artifact lines resembling borders.
+    *   **Solution**: For small action buttons or list items on Android, consider neutralizing the elevation entirely (`elevation={0}`) if the aesthetic suffers, relying instead on background contrast.
+3.  **Prevent Text Clipping**: When rendering text inside custom layout containers (especially in rows like segmented selectors), Android's default font padding can cause clipping if margins and paddings are tightly matched to emulate a box-model layout.
+    *   **Solution**: Apply `includeFontPadding: false` to text styles rendered inside strict neumorphic boundaries.
 
 ## 4. Banned Practices
 

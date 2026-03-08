@@ -33,7 +33,9 @@ MilCalc is a professional-grade calculation suite designed specifically for US m
 ### 4.3 Strategy: Retirement & TSP Growth
 -   **Plan Modeling**: High-3 vs. BRS pension comparisons.
 -   **TSP Forecasting**: Investment growth projections based on contributions and historical yields.
--   **VA Offset Integration**: Calculation of concurrent receipt eligibility and disability compensation.
+-   **VA Integration**: 
+    - **Active/Drill Pay**: Implements the "Offset" logic where the user receives the higher of the two values (waiving military pay for tax-free VA compensation if preferred).
+    - **Retirement**: Models "Concurrent Receipt" (CRDP/CRSC) where VA disability pay is added to the pension for eligible retirees (typically 20+ years of service).
 
 ## 5. Non-Functional Requirements (UX Standards)
 
