@@ -155,19 +155,6 @@ export default function CardioComponent({
         }
     });
 
-    const getPerformance = (): Record<string, string | number> => {
-        switch (cardioComponent) {
-            case 'run':
-                return { minutes: runMinutes, seconds: runSeconds };
-            case 'shuttles':
-                return { shuttles: parseInt(shuttles) || 0 };
-            case 'walk':
-                return { minutes: walkMinutes, seconds: walkSeconds };
-            default:
-                return {};
-        }
-    };
-
     const getMascot = (): ImageSourcePropType => {
         if (cardioComponent === "run" || cardioComponent === "shuttles") {
             return { uri: MASCOT_URLS.RUN };

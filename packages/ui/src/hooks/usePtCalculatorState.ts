@@ -30,9 +30,13 @@ import { useCardioState } from './useCardioState';
  * debounces the inputs, and calculates the final score and associated data.
  * @returns An object containing all the state and derived data needed by the calculator screen.
  */
-export function usePtCalculatorState() {
+export function usePtCalculatorState(
+  initialAge: string = '', 
+  initialGender: string = 'male', 
+  initialAltitudeGroup: string = 'normal'
+) {
   // Compose smaller hooks to manage specific sections of the calculator.
-  const demographics = useDemographicsState();
+  const demographics = useDemographicsState(initialAge, initialGender, initialAltitudeGroup);
   const strength = useStrengthState();
   const core = useCoreState();
   const cardio = useCardioState();

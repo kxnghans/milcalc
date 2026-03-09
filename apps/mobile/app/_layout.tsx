@@ -6,6 +6,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import * as SQLite from "expo-sqlite";
 import { SyncManager } from "../components/SyncManager";
 import { OverlayProvider, useOverlay } from "../contexts/OverlayContext";
+import { ProfileProvider } from "../contexts/ProfileContext";
 import { MainOverlay } from "../components/MainOverlay";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DetailModal from "../components/DetailModal";
@@ -90,7 +91,7 @@ function LayoutContent() {
         snapToIndex={snapToIndex}
         onSnap={setSnapToIndex}
         onClose={closeOverlay}
-        title={overlayType === 'MENU' ? 'MILCALC MENU' : undefined}
+        title={overlayType === 'MENU' ? 'MILCALC MENU' : overlayType === 'ACCOUNT' ? 'MY ACCOUNT' : overlayType === 'BUG_REPORT' ? 'REPORT A BUG' : undefined}
         mode="standard"
       >
         <MainOverlay />
@@ -123,9 +124,11 @@ export default function Layout() {
         persistOptions={{ persister: sqlitePersister }}
       >
         <ThemeProvider>
-          <OverlayProvider>
-            <LayoutContent />
-          </OverlayProvider>
+          <ProfileProvider>
+            <OverlayProvider>
+              <LayoutContent />
+            </OverlayProvider>
+          </ProfileProvider>
         </ThemeProvider>
       </PersistQueryClientProvider>
     </GestureHandlerRootView>

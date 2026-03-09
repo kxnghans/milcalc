@@ -13,7 +13,11 @@ import { useState } from 'react';
  * @param {string} [initialAltitudeGroup='normal'] - The initial selected altitude group.
  * @returns An object containing the state variables (`age`, `gender`, `altitudeGroup`) and their respective setters.
  */
-export function useDemographicsState(initialAge: string = '', initialGender: string = 'male', initialAltitudeGroup: string = 'normal') {
+export function useDemographicsState(
+  initialAge: string = '', 
+  initialGender: string = 'male', 
+  initialAltitudeGroup: string = 'normal'
+) {
   // State for the user's age.
   const [age, setAge] = useState(initialAge);
   // State for the user's gender.

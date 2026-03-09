@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Platform } from 'react-native';
-import { useTheme, Icon, ICONS, ICON_SETS, NeumorphicOutset, NeumorphicInset, PillButton, Divider, useDemographicsState } from '@repo/ui';
+import { useTheme, Icon, ICONS, ICON_SETS, NeumorphicOutset, NeumorphicInset, PillButton, Divider, SegmentedSelector } from '@repo/ui';
 import { useOverlay } from '../contexts/OverlayContext';
+import { useProfile } from '../contexts/ProfileContext';
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import { submitBugReport } from '@repo/utils';
@@ -13,10 +14,10 @@ export const MainOverlay: React.FC = () => {
     switch (overlayType) {
       case 'MENU':
         return <MenuView />;
+      case 'ACCOUNT':
       case 'PROFILE':
-        return <ProfileView />;
       case 'SETTINGS':
-        return <SettingsView />;
+        return <AccountView />;
       case 'BUG_REPORT':
         return <BugReportView />;
       default:
@@ -36,77 +37,164 @@ const MenuView: React.FC = () => {
       <NeumorphicOutset containerStyle={styles.menuIconContainer} contentStyle={styles.menuIconContent}>
         <Icon name={icon} size={24} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
       </NeumorphicOutset>
-      <Text style={[theme.typography.title, { color: theme.colors.text }]}>{title}</Text>
+      <Text style={[theme.typography.label, { color: theme.colors.text }]}>{title}</Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.viewContainer}>
-      <MenuItem title="My Profile" icon={ICONS.ACCOUNT} onPress={() => openOverlay('PROFILE')} />
-      <MenuItem title="Settings" icon={ICONS.SETTINGS} onPress={() => openOverlay('SETTINGS')} />
+      <MenuItem title="My Account" icon={ICONS.ACCOUNT} onPress={() => openOverlay('ACCOUNT')} />
       <MenuItem title="Report a Bug" icon={ICONS.BUG} onPress={() => openOverlay('BUG_REPORT')} />
     </View>
   );
 };
 
-const ProfileView: React.FC = () => {
-  const { theme } = useTheme();
-  const { age, gender } = useDemographicsState();
+const AccountView: React.FC = () => {
+  const { theme, setThemeMode, themeMode, isDarkMode } = useTheme();
+  const { firstName, lastName, email, phone, age, gender, setProfileData } = useProfile();
 
-  return (
-    <View style={styles.viewContainer}>
-      <Text style={[theme.typography.header, { color: theme.colors.text, marginBottom: theme.spacing.m }]}>My Profile</Text>
-      <Text style={[theme.typography.body, { color: theme.colors.text, marginBottom: theme.spacing.m }]}>
-        These settings are used across all calculators for accurate calculations.
-      </Text>
-      
-      <View style={styles.profileDetail}>
-        <Text style={[theme.typography.subtitle, { color: theme.colors.text, opacity: 0.7 }]}>Age</Text>
-        <Text style={[theme.typography.title, { color: theme.colors.text }]}>{age || 'Not set'}</Text>
-      </View>
+  const themeOptions = [
+    { label: 'Auto', value: 'auto', icon: ICONS.THEME_AUTO },
+    { label: 'Light', value: 'light', icon: ICONS.THEME_LIGHT },
+    { label: 'Dark', value: 'dark', icon: ICONS.THEME_DARK },
+  ];
 
-      <View style={styles.profileDetail}>
-        <Text style={[theme.typography.subtitle, { color: theme.colors.text, opacity: 0.7 }]}>Gender</Text>
-        <Text style={[theme.typography.title, { color: theme.colors.text }]}>{gender || 'Not set'}</Text>
-      </View>
-      
-      <Text style={[theme.typography.caption, { color: theme.colors.text, marginTop: theme.spacing.m, opacity: 0.5, textAlign: 'center' }]}>
-        Edit these details in any of the calculator tabs.
-      </Text>
+  const genderOptions = [
+    { label: 'Male', value: 'male', icon: ICONS.GENDER_MALE, iconSet: ICON_SETS.FONTISTO },
+    { label: 'Female', value: 'female', icon: ICONS.GENDER_FEMALE, iconSet: ICON_SETS.FONTISTO },
+  ];
+
+  interface ProfileInputProps {
+    label: string;
+    value: string;
+    onChangeText: (text: string) => void;
+    icon?: string;
+    placeholder: string;
+    keyboardType?: 'default' | 'email-address' | 'phone-pad' | 'number-pad';
+    labelCentered?: boolean;
+    reducedHeight?: boolean;
+  }
+
+  const ProfileInput = ({ 
+    label, 
+    value, 
+    onChangeText, 
+    icon, 
+    placeholder, 
+    keyboardType = 'default', 
+    labelCentered = false,
+  }: ProfileInputProps) => (
+    <View style={styles.inputSection}>
+      <Text style={[theme.typography.label, { color: theme.colors.text, marginBottom: 8, textAlign: labelCentered ? 'center' : 'left' }]}>{label}</Text>
+      <NeumorphicInset style={styles.inputWrapper}>
+        <View style={styles.inputContent}>
+          {icon && (
+            <View style={{ position: 'absolute', left: 0, height: '100%', justifyContent: 'center', zIndex: 1 }}>
+              <Icon name={icon} size={20} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
+            </View>
+          )}
+          <TextInput
+            style={[styles.input, { color: theme.colors.text, textAlign: 'center', paddingVertical: 0 }]}
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor={isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}
+            keyboardType={keyboardType}
+          />
+        </View>
+      </NeumorphicInset>
     </View>
   );
-};
-
-const SettingsView: React.FC = () => {
-  const { theme, toggleTheme, themeMode } = useTheme();
 
   return (
     <View style={styles.viewContainer}>
-      <Text style={[theme.typography.header, { color: theme.colors.text, marginBottom: theme.spacing.m }]}>Settings</Text>
-      
-      <TouchableOpacity onPress={toggleTheme} style={styles.settingsRow}>
-        <View style={styles.settingsLabel}>
-          <Icon 
-            name={themeMode === 'light' ? ICONS.THEME_LIGHT : themeMode === 'dark' ? ICONS.THEME_DARK : ICONS.THEME_AUTO} 
-            size={24} 
-            color={theme.colors.text} 
-            iconSet={ICON_SETS.MATERIAL_COMMUNITY} 
-          />
-          <Text style={[theme.typography.title, { color: theme.colors.text, marginLeft: theme.spacing.m }]}>Theme Mode</Text>
+      {/* Profile Section */}
+      <View style={styles.section}>
+        <Text style={[theme.typography.subtitle, { color: theme.colors.primary, marginBottom: 20, textAlign: 'center' }]}>Profile Details</Text>
+        
+        <View style={styles.row}>
+          <View style={{ flex: 1, marginRight: 12 }}>
+            <ProfileInput 
+              label="First Name" 
+              value={firstName} 
+              onChangeText={(val: string) => setProfileData({ firstName: val })}
+              icon={ICONS.ACCOUNT_OUTLINE}
+              placeholder="First Name"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <ProfileInput 
+              label="Last Name" 
+              value={lastName} 
+              onChangeText={(val: string) => setProfileData({ lastName: val })}
+              icon={ICONS.ACCOUNT_OUTLINE}
+              placeholder="Last Name"
+            />
+          </View>
         </View>
-        <Text style={[theme.typography.subtitle, { color: theme.colors.primary }]}>{themeMode.toUpperCase()}</Text>
-      </TouchableOpacity>
-      
-      <Divider />
-      
-      <View style={styles.settingsRow}>
-        <Text style={[theme.typography.body, { color: theme.colors.text }]}>App Version</Text>
-        <Text style={[theme.typography.bodybold, { color: theme.colors.text }]}>{Constants.expoConfig?.version || '1.0.0'}</Text>
+
+        <ProfileInput 
+          label="Email Address" 
+          value={email} 
+          onChangeText={(val: string) => setProfileData({ email: val })}
+          icon={ICONS.EMAIL}
+          placeholder="Email Address"
+          keyboardType="email-address"
+        />
+
+        <ProfileInput 
+          label="Phone Number" 
+          value={phone} 
+          onChangeText={(val: string) => setProfileData({ phone: val })}
+          icon={ICONS.PHONE}
+          placeholder="Phone Number"
+          keyboardType="phone-pad"
+        />
+
+        <View style={styles.row}>
+          <View style={{ flex: 1, marginRight: 12 }}>
+            <ProfileInput 
+              label="Age" 
+              value={age} 
+              onChangeText={(val: string) => setProfileData({ age: val })}
+              placeholder="--"
+              keyboardType="number-pad"
+              labelCentered
+            />
+          </View>
+          <View style={{ flex: 3 }}>
+            <Text style={[theme.typography.label, { color: theme.colors.text, marginBottom: 8, textAlign: 'center' }]}>Gender</Text>
+            <SegmentedSelector
+              options={genderOptions}
+              selectedValues={[gender]}
+              onValueChange={(val) => setProfileData({ gender: val as 'male' | 'female' })}
+              style={{ marginVertical: 0, marginHorizontal: 0, height: 48 }}
+            />
+          </View>
+        </View>
       </View>
-      
-      <View style={styles.settingsRow}>
-        <Text style={[theme.typography.body, { color: theme.colors.text }]}>Device</Text>
-        <Text style={[theme.typography.bodybold, { color: theme.colors.text }]}>{Device.modelName || 'Unknown Device'}</Text>
+
+      <Divider style={{ marginVertical: 24 }} />
+
+      {/* Settings Section */}
+      <View style={styles.section}>
+        <Text style={[theme.typography.subtitle, { color: theme.colors.primary, marginBottom: 20, textAlign: 'center' }]}>Theme Preferences</Text>
+        <SegmentedSelector
+          options={themeOptions}
+          selectedValues={[themeMode]}
+          onValueChange={(val) => setThemeMode(val as 'auto' | 'light' | 'dark')}
+          style={{ marginVertical: 0, marginHorizontal: 0, marginBottom: 8 }}
+        />
+      </View>
+
+      <Divider style={{ marginVertical: 24 }} />
+
+      {/* App Info */}
+      <View style={[styles.section, { marginBottom: 40 }]}>
+        <View style={styles.settingsRow}>
+          <Text style={[theme.typography.body, { color: theme.colors.text }]}>App Version</Text>
+          <Text style={[theme.typography.bodybold, { color: theme.colors.text }]}>{Constants.expoConfig?.version || '1.0.0'}</Text>
+        </View>
       </View>
     </View>
   );
@@ -115,7 +203,7 @@ const SettingsView: React.FC = () => {
 const BugReportView: React.FC = () => {
   const { theme, isDarkMode } = useTheme();
   const { closeOverlay } = useOverlay();
-  const { age, gender } = useDemographicsState();
+  const { firstName, lastName, email, phone } = useProfile();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -130,6 +218,11 @@ const BugReportView: React.FC = () => {
     
     try {
       const metadata = `
+--- User Profile ---
+Name: ${firstName} ${lastName}
+Email: ${email}
+Phone: ${phone}
+
 --- Divine Metadata ---
 OS: ${Platform.OS} ${Platform.Version}
 Model: ${Device.modelName}
@@ -142,7 +235,7 @@ Timestamp: ${new Date().toISOString()}
 
       await submitBugReport({
         app_id: 'milcalc',
-        email: 'anonymous@milcalc.app',
+        email: email || 'anonymous@milcalc.app',
         severity: 'medium',
         description: `${title}\n\n${description}\n\n${metadata}`,
         status: 'new',
@@ -206,6 +299,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
   },
+  section: {
+    marginBottom: 16,
+  },
+  inputSection: {
+    marginBottom: 12,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginBottom: 4,
+  },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -224,27 +328,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  profileDetail: {
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
-    paddingBottom: 5,
-  },
   settingsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 15,
-  },
-  settingsLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    paddingVertical: 10,
   },
   inputWrapper: {
     height: 48,
     borderRadius: 8,
     paddingHorizontal: 12,
     justifyContent: 'center',
+  },
+  inputContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   input: {
     fontSize: 16,

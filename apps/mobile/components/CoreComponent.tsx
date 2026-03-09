@@ -85,19 +85,6 @@ export default function CoreComponent({
         }
     });
 
-    const getPerformance = (): Record<string, string | number> => {
-        switch (coreComponent) {
-            case 'sit_ups_1min':
-                return { reps: situps };
-            case 'cross_leg_reverse_crunch_2min':
-                return { reps: reverseCrunches };
-            case 'forearm_plank_time':
-                return { minutes: plankMinutes, seconds: plankSeconds };
-            default:
-                return {};
-        }
-    };
-
     const getMascot = (): ImageSourcePropType => {
         if (coreComponent === "sit_ups_1min" || coreComponent === "cross_leg_reverse_crunch_2min") {
             return { uri: MASCOT_URLS.CRUNCH };

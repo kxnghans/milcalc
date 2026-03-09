@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { ImageSourcePropType } from 'react-native';
 
-export type OverlayType = 'MENU' | 'PROFILE' | 'SETTINGS' | 'BUG_REPORT' | null;
+export type OverlayType = 'MENU' | 'PROFILE' | 'SETTINGS' | 'BUG_REPORT' | 'ACCOUNT' | null;
 export type DocumentCategory = 'PAY' | 'PT' | 'RETIREMENT' | null;
 export type HelpSource = 'pt' | 'pay' | 'retirement' | 'best_score' | null;
 

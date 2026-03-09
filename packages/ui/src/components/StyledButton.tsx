@@ -67,7 +67,7 @@ export const StyledButton = ({ title, variant = 'primary', size = 'medium', styl
       paddingVertical: theme.spacing.m,
     },
     smallButton: {
-      paddingVertical: theme.spacing.s + 4,
+      paddingVertical: theme.spacing.s + theme.spacing.xs,
     },
     mediumText: {
       fontSize: theme.typography.body.fontSize,

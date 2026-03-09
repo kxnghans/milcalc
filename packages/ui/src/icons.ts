@@ -28,6 +28,9 @@ export const ICONS = {
   MENU: 'menu',                      // Burger menu icon.
   CLOSE: 'close',                    // Close icon.
   ACCOUNT: 'account',                // Profile icon.
+  ACCOUNT_OUTLINE: 'account-outline',
+  EMAIL: 'email-outline',
+  PHONE: 'phone-outline',
   SETTINGS: 'cog',                   // Settings icon.
   BUG: 'bug',                        // Bug reporting icon.
   SEND: 'send',                      // Send icon for bug reports.

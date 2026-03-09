@@ -1,33 +1,24 @@
-# Node.js
-node_modules
+# OS-specific
+Thumbs.db
+*.swp
 .DS_Store
+
+# Node.js
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+.vercel/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Dependency directories
-/node_modules
-
-# Build output
-/dist
-/build
-.next/
-
-# Turbo
-.turbo
-
-# Vercel
-.vercel
-
-# Local Environment Variables
-.env
-.env.*
-!.env.example
-
-# Expo
+# Expo / React Native
 .expo/
 .expo-shared/
+.expo-internal/
 web-build/
 *.jks
 *.p8
@@ -35,6 +26,15 @@ web-build/
 *.key
 *.mobileprovision
 *.orig.*
+*.apk
+*.ipa
+*.aab
+secrets.local.json
+
+# Local Environment Variables
+.env
+.env.*
+!.env.example
 
 # Ignore all assets in the mobile assets folder...
 apps/mobile/assets/*
@@ -52,12 +52,8 @@ apps/mobile/assets/*
 # Test coverage
 coverage/
 
-# OS-specific
-Thumbs.db
-*.swp
-
 # Temporary files
-image.png
+# image.png
 *~
 
 # Agent configuration

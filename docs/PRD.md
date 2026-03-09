@@ -28,14 +28,14 @@ MilCalc is a professional-grade calculation suite designed specifically for US m
 ### 4.2 Finance: Active & Reserve Pay
 -   **Consolidated Pay Engine**: Breakdown of Basic Pay, BAH (Housing), and BAS (Subsistence).
 -   **Drill Pay Projections**: Prorated calculations for Guard and Reserve drills.
--   **Tax Simulation**: Accurate FICA and withholding estimates based on filing status and state.
+-   **Tax Simulation & Overrides**: Accurate FICA and withholding estimates with the ability for users to manually override calculated taxes for precise modeling.
+-   **VA Disability Integration**: Real-time "Offset" logic comparing military pay vs. tax-free VA compensation.
 
 ### 4.3 Strategy: Retirement & TSP Growth
 -   **Plan Modeling**: High-3 vs. BRS pension comparisons.
--   **TSP Forecasting**: Investment growth projections based on contributions and historical yields.
--   **VA Integration**: 
-    - **Active/Drill Pay**: Implements the "Offset" logic where the user receives the higher of the two values (waiving military pay for tax-free VA compensation if preferred).
-    - **Retirement**: Models "Concurrent Receipt" (CRDP/CRSC) where VA disability pay is added to the pension for eligible retirees (typically 20+ years of service).
+-   **TSP Forecasting**: Investment growth projections based on contributions, BRS matching, and user-defined rates of return.
+-   **Retirement Age Calculator**: Projects eligibility dates for Active (including Break in Service) and "Reduced Age" for Guard/Reserve (based on qualifying deployments).
+-   **VA Integration**: Models "Concurrent Receipt" (CRDP/CRSC) where VA disability pay is added to the pension for eligible retirees.
 
 ## 5. Non-Functional Requirements (UX Standards)
 

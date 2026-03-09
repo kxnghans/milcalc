@@ -10,10 +10,12 @@ import AltitudeAdjustmentComponent from "../../components/AltitudeAdjustmentComp
 import Divider from "../../components/Divider";
 import MainCalculatorLayout from "../../components/MainCalculatorLayout";
 import { useOverlay } from "../../contexts/OverlayContext";
+import { useProfile } from "../../contexts/ProfileContext";
 
 export default function PTCalculator() {
   const { theme } = useTheme();
   const { openHelp, openDocuments } = useOverlay();
+  const { age, gender } = useProfile();
 
     const {
       demographics,
@@ -26,7 +28,7 @@ export default function PTCalculator() {
       cardioMinMax,
       ninetyPercentileThresholds,
       altitudeData,
-    } = usePtCalculatorState();
+    } = usePtCalculatorState(age, gender, 'normal');
 
     const handleOpenHelp = (key: string, mascot?: ImageSourcePropType) => {
       openHelp(key, 'pt', mascot);

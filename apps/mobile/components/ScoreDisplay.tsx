@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme, NeumorphicOutset, useScoreColors } from '@repo/ui';
+import { useTheme, useScoreColors } from '@repo/ui';
 import { getScoreCategory } from '@repo/utils';
 
 interface ScoreDisplayProps {
@@ -53,12 +53,12 @@ const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDis
 
   const styles = StyleSheet.create({
     scoreContainer: {
-        margin: theme.spacing.s,
         borderRadius: theme.borderRadius.m,
         backgroundColor: theme.colors.background,
     },
     scoreContent: {
-        padding: theme.spacing.m,
+        paddingVertical: 0,
+        paddingHorizontal: 0,
         alignItems: "center",
         borderRadius: theme.borderRadius.m,
         backgroundColor: theme.colors.background,
@@ -124,7 +124,7 @@ const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDis
   };
 
   return (
-    <NeumorphicOutset containerStyle={styles.scoreContainer} contentStyle={styles.scoreContent}>
+    <View style={[styles.scoreContainer, styles.scoreContent]}>
         {/* Display the total score */}
         <Text style={[styles.scoreText, { color: scoreColor }, showBreakdown && { marginBottom: theme.spacing.s }]}>{score.totalScore.toFixed(2)}</Text>
         {/* Optionally, display the breakdown of component scores */}
@@ -146,7 +146,7 @@ const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDis
                 </View>
             </View>
         )}
-    </NeumorphicOutset>
+    </View>
   );
 };
 

@@ -67,6 +67,7 @@ The function works as follows:
 -   **Taxable vs. Non-Taxable Income**: The calculator correctly distinguishes between taxable and non-taxable income. Base pay and most special pays are taxable, while allowances like BAH and BAS are not.
 -   **FICA Taxes**: The Federal Insurance Contributions Act (FICA) tax is calculated at a fixed rate of 7.65% (6.2% Social Security + 1.45% Medicare).
 -   **Federal and State Income Taxes**: The calculator utilizes tax brackets and standard deductions (Single vs. Married) cached locally from Supabase. It calculates tax by applying tiered rates to the taxable income after standard and additional deductions.
+-   **Tax Overrides**: For users who prefer to use their actual paycheck values, the calculator provides an "Override Taxes" mode. This allows manual entry of Federal, State, and FICA taxes, bypassing the automated simulation for 100% precision against historical records.
 
 ### 1.6 Pay Summary Display
 

@@ -14,6 +14,7 @@ interface ThemeContextType {
   themeMode: string;
   isDarkMode: boolean;
   toggleTheme: () => void;
+  setThemeMode: (mode: string) => void;
 }
 
 /**
@@ -25,6 +26,7 @@ export const ThemeContext = createContext<ThemeContextType>({
   themeMode: 'light', // The current theme mode ('light', 'dark', or 'auto').
   isDarkMode: false,  // A boolean flag indicating if the dark mode is currently active.
   toggleTheme: () => {}, // A function to cycle through the theme modes.
+  setThemeMode: () => {}, // A function to explicitly set the theme mode.
 });
 
 /**
@@ -72,7 +74,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, themeMode, isDarkMode, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, themeMode, isDarkMode, toggleTheme, setThemeMode }}>
       {children}
     </ThemeContext.Provider>
   );
