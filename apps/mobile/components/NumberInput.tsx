@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { TextInput, TextInputProps, Text, StyleSheet, StyleProp, ViewStyle, TextStyle, View } from 'react-native';
+import { TextInput, TextInputProps, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { useTheme, ExemptButton } from '@repo/ui';
 import InsetTextInput from './InsetTextInput';
 

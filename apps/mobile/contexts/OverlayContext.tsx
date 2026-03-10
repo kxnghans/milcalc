@@ -110,28 +110,46 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setTimeout(() => setDocumentCategory(null), 300);
   }, []);
 
+  const value = React.useMemo(() => ({
+    overlayType,
+    isVisible,
+    openOverlay,
+    closeOverlay,
+    snapToIndex,
+    setSnapToIndex,
+    overlayFooter,
+    setOverlayFooter,
+    helpContentKey,
+    helpMascot,
+    helpSource,
+    openHelp,
+    closeHelp,
+    documentCategory,
+    isDocumentVisible,
+    openDocuments,
+    closeDocuments,
+  }), [
+    overlayType,
+    isVisible,
+    openOverlay,
+    closeOverlay,
+    snapToIndex,
+    setSnapToIndex,
+    overlayFooter,
+    setOverlayFooter,
+    helpContentKey,
+    helpMascot,
+    helpSource,
+    openHelp,
+    closeHelp,
+    documentCategory,
+    isDocumentVisible,
+    openDocuments,
+    closeDocuments,
+  ]);
+
   return (
-    <OverlayContext.Provider
-      value={{
-        overlayType,
-        isVisible,
-        openOverlay,
-        closeOverlay,
-        snapToIndex,
-        setSnapToIndex,
-        overlayFooter,
-        setOverlayFooter,
-        helpContentKey,
-        helpMascot,
-        helpSource,
-        openHelp,
-        closeHelp,
-        documentCategory,
-        isDocumentVisible,
-        openDocuments,
-        closeDocuments,
-      }}
-    >
+    <OverlayContext.Provider value={value}>
       {children}
     </OverlayContext.Provider>
   );

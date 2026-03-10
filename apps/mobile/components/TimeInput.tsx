@@ -5,7 +5,7 @@
  */
 
 import React, { useRef, useMemo } from 'react';
-import { StyleSheet, TextInput, Text, StyleProp, ViewStyle, View } from 'react-native';
+import { TextInput, Text, StyleProp, ViewStyle, View } from 'react-native';
 import { NeumorphicInset, StyledTextInput, useTheme, ExemptButton } from '@repo/ui';
 
 /**
@@ -78,10 +78,10 @@ const TimeInput: React.FC<TimeInputProps> = ({
     }
   };
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = useMemo(() => ({
     container: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
       paddingLeft: theme.spacing.s,
       paddingRight: theme.spacing.s,
       paddingVertical: theme.spacing.s,
@@ -96,7 +96,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
       borderWidth: 0,
       padding: 0,
       margin: 0,
-      textAlign: 'center',
+      textAlign: 'center' as const,
       flex: 1,
       ...theme.typography.label,
       color: theme.colors.text,
@@ -104,24 +104,24 @@ const TimeInput: React.FC<TimeInputProps> = ({
     },
     leftContainer: {
       flex: onToggleExempt ? 1 : 0,
-      alignItems: 'flex-start',
-      justifyContent: 'center',
+      alignItems: 'flex-start' as const,
+      justifyContent: 'center' as const,
     },
     rightGroup: {
       flex: onToggleExempt ? 2 : 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
     },
     inputGroup: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
       flex: 1,
-      left: onToggleExempt ? '-15%' : '0%',
+      left: onToggleExempt ? ('-15%' as const) : ('0%' as const),
     },
     adjustment: {
-      position: 'absolute',
+      position: 'absolute' as const,
       right: 0,
       color: theme.colors.success,
       ...theme.typography.label,

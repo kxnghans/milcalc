@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Alert, Platform } from 'react-native';
 import { 
   useTheme, 
@@ -30,7 +30,7 @@ export const BugReportView: React.FC = () => {
   const [category, setCategory] = useState<BugCategory>('UI/UX');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     viewContainer: {
       paddingHorizontal: 12, // Match MainCalculatorLayout content padding
       paddingTop: theme.spacing.s,
@@ -74,6 +74,8 @@ export const BugReportView: React.FC = () => {
     textArea: {
       height: '100%',
       textAlignVertical: 'top',
+      textAlign: 'left',
+      left: 0,
       paddingTop: theme.spacing.xs,
     },
     selector: {
@@ -92,14 +94,14 @@ export const BugReportView: React.FC = () => {
     submitButton: {
       width: '100%',
     },
-  });
+  }), [theme]);
 
-  const categories: { label: string; value: BugCategory; icon: string }[] = [
+  const categories: { label: string; value: BugCategory; icon: string }[] = useMemo(() => [
     { label: 'UI/UX', value: 'UI/UX', icon: 'palette-outline' },
     { label: 'Math', value: 'Calculation', icon: 'calculator' },
     { label: 'Sync', value: 'Sync', icon: 'sync' },
     { label: 'Other', value: 'Other', icon: 'dots-horizontal' },
-  ];
+  ], []);
 
   const handleSubmit = useCallback(async () => {
     if (!title.trim() || !description.trim()) {
@@ -147,21 +149,29 @@ Timestamp: ${new Date().toISOString()}
     }
   }, [title, description, firstName, lastName, email, phone, category, closeOverlay]);
 
+  // Memoize the footer content to ensure object identity stability
+  const footerContent = useMemo(() => (
+    <View style={styles.stickyFooter}>
+      <PillButton
+        title={isSubmitting ? "TRANSMITTING..." : "SUBMIT REPORT"}
+        onPress={handleSubmit}
+        disabled={isSubmitting}
+        icon={ICONS.SEND}
+        colorKey="primary"
+        style={styles.submitButton}
+      />
+    </View>
+  ), [isSubmitting, handleSubmit, styles.stickyFooter, styles.submitButton]);
+
+  // Use a targeted effect to update the footer only when content changes
   useEffect(() => {
-    setOverlayFooter(
-      <View style={styles.stickyFooter}>
-        <PillButton
-          title={isSubmitting ? "TRANSMITTING..." : "SUBMIT REPORT"}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-          icon={ICONS.SEND}
-          colorKey="primary"
-          style={styles.submitButton}
-        />
-      </View>
-    );
+    setOverlayFooter(footerContent);
+  }, [footerContent, setOverlayFooter]);
+
+  // Cleanup effect: Ensure footer is cleared ONLY when component unmounts
+  useEffect(() => {
     return () => setOverlayFooter(null);
-  }, [isSubmitting, handleSubmit, setOverlayFooter, styles.stickyFooter, styles.submitButton]);
+  }, [setOverlayFooter]);
 
   return (
     <View style={styles.viewContainer}>

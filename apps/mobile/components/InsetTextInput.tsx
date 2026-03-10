@@ -49,7 +49,7 @@ const InsetTextInput = React.forwardRef<TextInput, InsetTextInputProps>(({ style
       alignItems: 'center',
       justifyContent: 'center',
     },
-  }), [theme]);
+  }), [theme, leftContent]);
 
   return (
     <NeumorphicInset

@@ -12,6 +12,7 @@ interface LaunchAdProps {
 export const LaunchAd: React.FC<LaunchAdProps> = ({ onSkip }) => {
   const { theme, isDarkMode } = useTheme();
   const [canSkip, setCanSkip] = useState(false);
+  const [secondsRemaining, setSecondsRemaining] = useState(5);
   
   // Animation Refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -153,6 +154,19 @@ export const LaunchAd: React.FC<LaunchAdProps> = ({ onSkip }) => {
     }).start(({ finished }) => {
       if (finished) setCanSkip(true);
     });
+
+    // Countdown logic
+    const timer = setInterval(() => {
+      setSecondsRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, [contentFadeAnim, contentTranslateY, fadeAnim, progressAnim, scaleAnim]);
 
 
@@ -223,7 +237,7 @@ export const LaunchAd: React.FC<LaunchAdProps> = ({ onSkip }) => {
                     opacity: canSkip ? 1 : 0.6 
                   }
                 ]}>
-                  {canSkip ? 'CONTINUE TO APP' : 'READY IN 5S...'}
+                  {canSkip ? 'CONTINUE TO APP' : `READY IN ${secondsRemaining}S...`}
                 </Text>
                 
                 {canSkip && (
