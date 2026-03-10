@@ -36,6 +36,8 @@ export const ICONS = {
   SEND: 'send',                      // Send icon for bug reports.
   CHEVRON_UP: 'chevron-up',          // Chevron up icon.
   CHEVRON_DOWN: 'chevron-down',      // Chevron down icon.
+  CROWN: 'crown',                    // Premium account icon.
+  STAR_OUTLINE: 'star-outline',      // Free account icon.
 } as const;
 
 /**

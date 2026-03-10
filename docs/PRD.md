@@ -49,3 +49,5 @@ MilCalc is a professional-grade calculation suite designed specifically for US m
 -   **Architecture**: Turborepo / pnpm Monorepo.
 -   **Stack**: Expo (React Native), TypeScript, TanStack Query, `expo-sqlite`.
 -   **Backend**: Supabase (Metadata Sync Tier).
+-   **UX Pattern**: Context-Driven UI (Global Overlays via `OverlayContext`).
+-   **UI Core**: Standardized `MainCalculatorLayout` and `SmartIconRow` for all calculator screens.

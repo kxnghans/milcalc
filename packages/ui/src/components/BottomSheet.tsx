@@ -118,20 +118,22 @@ export function BottomSheet({
   }, [midpointRatio, keyboardMidpointRatio]);
 
   const snapPoints = useMemo(() => {
-    const effectiveHeaderHeight = Math.max(headerHeight, insets.top + 40);
-    const maxSnap =
-      SCREEN_HEIGHT -
-      (mode === "standard" ? effectiveHeaderHeight : insets.top);
+    // Respect the ScreenHeader height (44 minHeight + 8 spacing.s)
+    const HEADER_CONTENT_HEIGHT = 44;
+    const effectiveHeaderHeight = headerHeight > 0 ? headerHeight : insets.top + HEADER_CONTENT_HEIGHT;
+
+    const maxSnap = SCREEN_HEIGHT - effectiveHeaderHeight;
     const peekSnap = peekHeight > 0 ? peekHeight : 0;
 
     if (mode === "standard") {
       return [peekSnap, SCREEN_HEIGHT * activeMidpointRatio, maxSnap];
     }
+
     return (
       providedSnapPoints ?? [
         40 + insets.bottom,
         SCREEN_HEIGHT * 0.4,
-        SCREEN_HEIGHT * 0.8,
+        maxSnap,
       ]
     );
   }, [
@@ -185,6 +187,11 @@ export function BottomSheet({
       const minHeight = snapPoints[0] ?? 0;
       const maxHeight = snapPoints[snapPoints.length - 1] ?? SCREEN_HEIGHT;
 
+      // Add a small buffer for smoother transition from ScrollView to Sheet drag
+      if (isScrollable && scrollOffset > 0 && height.value >= maxHeight - 1) {
+        return;
+      }
+
       if (newHeight < minHeight) {
         const overflow = minHeight - newHeight;
         height.value = minHeight - Math.log(overflow + 1) * 10;
@@ -206,7 +213,7 @@ export function BottomSheet({
       });
     })
     .onEnd((event) => {
-      const projectedHeight = height.value - event.velocityY * 0.12;
+      const projectedHeight = height.value - event.velocityY * 0.15; // Increased projection
 
       let closestIndex = 0;
       let minDistance = Math.abs(projectedHeight - (snapPoints[0] ?? 0));
@@ -220,7 +227,8 @@ export function BottomSheet({
         }
       }
 
-      if (Math.abs(event.velocityY) > 800) {
+      // Handle flick gestures more aggressively
+      if (Math.abs(event.velocityY) > 500) {
         if (event.velocityY > 0) {
           closestIndex = Math.max(0, lastHapticIndex.value - 1);
         } else {
@@ -246,6 +254,7 @@ export function BottomSheet({
         runOnJS(onSnap)(closestIndex);
       }
     });
+
 
   const animatedStyle = useAnimatedStyle(() => ({
     height: height.value,
@@ -385,11 +394,11 @@ export function BottomSheet({
             </View>
           )}
 
-          <View style={styles.scrollIndicatorWrapper}>
-            {isActuallyScrollable && !isAtTop && (
+          {isActuallyScrollable && !isAtTop && (
+            <View style={styles.scrollIndicatorWrapper}>
               <BouncingChevron direction="up" />
-            )}
-          </View>
+            </View>
+          )}
 
           <View style={styles.body}>
             {isScrollable ? (
@@ -407,7 +416,7 @@ export function BottomSheet({
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
                   paddingBottom: footer
-                    ? theme.spacing.xl * 3
+                    ? theme.spacing.xl
                     : insets.bottom + theme.spacing.xl,
                 }}
               >
@@ -415,7 +424,7 @@ export function BottomSheet({
               </ScrollView>
             ) : (
               <View
-                style={{ flex: 1 }}
+                style={styles.body}
                 onLayout={(e) => {
                   setLayoutHeight(e.nativeEvent.layout.height);
                 }}
@@ -425,16 +434,13 @@ export function BottomSheet({
             )}
           </View>
 
-          <View
-            style={[
-              styles.scrollIndicatorWrapper,
-              !footer && { marginBottom: insets.bottom },
-            ]}
-          >
-            {isActuallyScrollable && !isAtBottom && (
+          {isActuallyScrollable && !isAtBottom && (
+            <View style={styles.scrollIndicatorWrapper}>
               <BouncingChevron direction="down" />
-            )}
-          </View>
+            </View>
+          )}
+
+          {!footer && insets.bottom > 0 && <View style={{ height: insets.bottom }} />}
 
           {footer && (
             <View

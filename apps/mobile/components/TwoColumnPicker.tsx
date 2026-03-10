@@ -101,7 +101,6 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
     pressableInput: {
         paddingVertical: theme.spacing.s,
         paddingHorizontal: theme.spacing.s,
-        backgroundColor: theme.colors.inputBackground,
     },
     pressableText: {
         ...theme.typography.body,
@@ -171,7 +170,9 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
   return (
     <View style={style}>
         <Pressable onPress={() => setModalVisible(true)} disabled={isLoading || !!error}>
-            <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
+            <NeumorphicInset 
+                containerStyle={{ borderRadius: theme.borderRadius.m }}
+            >
                 <View style={styles.pressableInput}>
                     <Text style={[styles.pressableText, (!selectedValue || selectedValue === 'initial') && styles.placeholderText, !!error && (styles.errorText as TextStyle)]}>
                         {getDisplayText()}

@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { bugSupabase } from './supabaseClient';
 
 export interface BugReport {
   app_id: string;
@@ -12,12 +12,16 @@ export interface BugReport {
 }
 
 /**
- * Submits a bug report to the Supabase database.
+ * Submits a bug report to the dedicated bug tracking Supabase database.
  * @param {BugReport} report - The bug report data.
  * @returns {Promise<any>} The response data from Supabase.
  */
 export const submitBugReport = async (report: BugReport) => {
-  const { data, error } = await supabase
+  if (!bugSupabase) {
+    throw new Error('Bug reporting is currently unavailable (Client not configured).');
+  }
+
+  const { data, error } = await bugSupabase
     .from('bug_reports')
     .insert([
       {

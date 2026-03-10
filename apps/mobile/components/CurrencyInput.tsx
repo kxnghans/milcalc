@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { TextInput, TextInputProps, StyleSheet, StyleProp, ViewStyle, Text, TextStyle } from 'react-native';
-import { NeumorphicInset, StyledTextInput, useTheme } from '@repo/ui';
+import { useTheme } from '@repo/ui';
+import InsetTextInput from './InsetTextInput';
 
 interface CurrencyInputProps extends Omit<TextInputProps, 'style'> {
   style?: StyleProp<ViewStyle>;
@@ -37,48 +38,30 @@ const CurrencyInput = React.forwardRef<TextInput, CurrencyInputProps>(({ style, 
 
   const displayValue = isFocused ? value : formatValue(value);
 
-  const styles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: theme.spacing.m,
-      paddingVertical: theme.spacing.s,
-      backgroundColor: theme.colors.inputBackground,
-      borderRadius: theme.borderRadius.m,
-      overflow: 'hidden',
-    },
+  const styles = useMemo(() => StyleSheet.create({
     currencySymbol: {
       ...theme.typography.label,
       color: theme.colors.text,
-      marginRight: theme.spacing.xs,
+      opacity: 0.6,
     },
     input: {
-      borderWidth: 0,
-      padding: 0,
-      margin: 0,
-      textAlign: 'left',
-      ...theme.typography.label,
-      color: theme.colors.text,
-      backgroundColor: 'transparent',
-      flex: 1,
+      textAlign: 'center',
     },
-  });
+  }), [theme]);
 
   return (
-    <NeumorphicInset style={[styles.container, style]}>
-      <Text style={styles.currencySymbol}>$</Text>
-      <StyledTextInput
-        ref={ref}
-        {...props}
-        value={displayValue}
-        onChangeText={onChangeText}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        keyboardType="numeric"
-        style={[styles.input, inputStyle]}
-      />
-    </NeumorphicInset>
+    <InsetTextInput
+      ref={ref}
+      style={style}
+      inputStyle={[styles.input, inputStyle]}
+      leftContent={<Text style={styles.currencySymbol}>$</Text>}
+      value={displayValue}
+      onChangeText={onChangeText}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      keyboardType="numeric"
+      {...props}
+    />
   );
 });
 

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { ImageSourcePropType } from 'react-native';
 
-export type OverlayType = 'MENU' | 'PROFILE' | 'SETTINGS' | 'BUG_REPORT' | 'ACCOUNT' | null;
+export type OverlayType = 'MENU' | 'PROFILE' | 'SETTINGS' | 'BUG_REPORT' | 'ACCOUNT' | 'PAYWALL' | null;
 export type DocumentCategory = 'PAY' | 'PT' | 'RETIREMENT' | null;
 export type HelpSource = 'pt' | 'pay' | 'retirement' | 'best_score' | null;
 
@@ -13,6 +13,8 @@ interface OverlayContextType {
   closeOverlay: () => void;
   snapToIndex: number;
   setSnapToIndex: (index: number) => void;
+  overlayFooter: React.ReactNode;
+  setOverlayFooter: (footer: React.ReactNode) => void;
 
   // Global Help (DetailModal)
   helpContentKey: string | null;
@@ -35,6 +37,8 @@ const OverlayContext = createContext<OverlayContextType>({
   closeOverlay: () => {},
   snapToIndex: 0,
   setSnapToIndex: () => {},
+  overlayFooter: null,
+  setOverlayFooter: () => {},
 
   helpContentKey: null,
   helpMascot: null,
@@ -55,6 +59,7 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [overlayType, setOverlayType] = useState<OverlayType>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [snapToIndex, setSnapToIndex] = useState(0);
+  const [overlayFooter, setOverlayFooter] = useState<React.ReactNode>(null);
 
   // Global Help State
   const [helpContentKey, setHelpContentKey] = useState<string | null>(null);
@@ -69,6 +74,7 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setOverlayType(type);
     setIsVisible(true);
     setSnapToIndex(2); // Default to open
+    setOverlayFooter(null); // Reset footer when opening new overlay
   }, []);
 
   const closeOverlay = useCallback(() => {
@@ -77,6 +83,7 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // Delay setting type to null to allow for close animation
     setTimeout(() => {
       setOverlayType(null);
+      setOverlayFooter(null);
     }, 300);
   }, []);
 
@@ -112,6 +119,8 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
         closeOverlay,
         snapToIndex,
         setSnapToIndex,
+        overlayFooter,
+        setOverlayFooter,
         helpContentKey,
         helpMascot,
         helpSource,

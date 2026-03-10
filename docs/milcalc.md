@@ -30,7 +30,7 @@ Similar to the PT Calculator, we have separated the code into UI, state manageme
 #### Context-Driven UI (Globalized Overlays)
 To reduce boilerplate and ensure a consistent user experience, we utilize a **Context-Driven UI** pattern. Common interactive elements like Help modals (`DetailModal`), PDF viewers (`DocumentModal`), and system-wide menus are managed via the `OverlayContext`.
 - **Global Mounting**: Modals are mounted once in the root `app/_layout.tsx`, preventing redundant re-renders and simplifying screen-level logic.
-- **Hook-Based Triggers**: Screens use specialized hooks (e.g., `openDetail(key, mascot)` or `openDocument(category)`) to trigger these global overlays, eliminating ~15-20 lines of state management per screen.
+- **Hook-Based Triggers**: Screens use specialized hooks (e.g., `openHelp(key, source, mascot)` or `openDocuments(category)`) to trigger these global overlays, eliminating ~15-20 lines of state management per screen.
 
 #### Standardized Calculator Layout
 All primary calculators consume the `MainCalculatorLayout` wrapper. This component encapsulates the nested hierarchy of `ScreenHeader`, `DismissKeyboardView`, and `KeyboardAwareScrollView`, allowing screen files to focus exclusively on their unique input fields and results.
@@ -80,8 +80,8 @@ The pay summary is displayed using the `PayDisplay.tsx` component. This componen
 Several new features have been added to improve the accuracy and user experience of the Pay Calculator.
 
 #### 1. Component Selector (Active vs. Reserve)
-A **Component** selector has been added, allowing users to specify whether they are *Active Duty*, *Guard*, or *Reserve*.
--   **Active Duty**: Calculates standard monthly base pay and allowances.
+A **Component** selector has been added, allowing users to specify whether they are *Active*, *Guard*, or *Reserve*.
+-   **Active**: Calculates standard monthly base pay and allowances.
 -   **Guard/Reserve**: Calculates estimated **Drill Pay** based on the `reserve_drill_pay` standards, typically representing a standard drill weekend (4 drill periods).
 
 #### 2. VA Disability Pay Integration (The "Offset" Logic)

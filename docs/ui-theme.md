@@ -14,7 +14,40 @@ Neumorphism is not just a static style; it is a tactile philosophy. The "physics
 -   **Primary (Elevated)**: Actionable cards and primary buttons. They "float" above the surface.
 -   **Secondary (Sunken)**: Inputs, progress tracks, and inactive toggles. They are "etched" into the surface.
 
-## 2. Token Marriage Rules
+## 2. Design Tokens (Single Source of Truth)
+
+To eliminate "magic numbers" and ensure accessibility, we enforce strict adherence to the tokens defined in `packages/ui/src/theme.ts`.
+
+### 2.1 Color Palette
+| Token | Light Value | Dark Value | Intent |
+| :--- | :--- | :--- | :--- |
+| `primary` | `rgba(0, 122, 255, 1)` | `rgba(0, 122, 255, 1)` | Brand / Action |
+| `background` | `rgba(224, 229, 236, 1)` | `rgba(44, 44, 46, 1)` | Main Surface |
+| `text` | `rgba(0, 0, 0, 1)` | `rgba(255, 255, 255, 1)` | Primary Content |
+| `success` | `rgba(28, 176, 87, 1)` | `rgba(52, 199, 89, 1)` | Pass / Positive |
+| `error` | `rgba(236, 52, 40, 1)` | `rgba(255, 59, 48, 1)` | Fail / Critical |
+
+### 2.2 Typography
+| Type | Size | Weight |
+| :--- | :--- | :--- |
+| **Hero** | 40 | 700 |
+| **Header** | 20 | 700 |
+| **Title** | 16.5 | 700 |
+| **Subtitle** | 14 | 600 |
+| **Label** | 15 | 400 |
+| **Body** | 13 | 400 |
+| **BodyBold** | 13 | 500 |
+| **Caption** | 11 | 400 |
+
+### 2.3 Neumorphic Properties (Outset)
+| Property | Light Mode | Dark Mode |
+| :--- | :--- | :--- |
+| `shadowOpacity` | 0.2 | 0.5 |
+| `highlightOpacity` | 0.9 | 0.15 |
+| `shadowRadius` | 3.5 | 3 |
+| `elevation` | 10 | 10 |
+
+## 3. Token Marriage Rules
 
 To eliminate "magic numbers" and ensure accessibility, we enforce strict pairings between tokens.
 
@@ -51,21 +84,26 @@ To maintain visual parity and avoid artifacts:
 -   **Banned**: Inline `rgba()` strings. **Use**: `getAlphaColor(hex, alpha)`.
 -   **Banned**: Hardcoded margin/padding values. **Use**: `theme.spacing` tokens.
 -   **Banned**: Direct `Elevation` props on Android. **Use**: Wrapped primitives from `@repo/ui`.
--   **Banned**: Redundant theme icon logic or manual modal state (`isVisible`, `contentKey`) in screen files. **Use**: `MainCalculatorLayout`, `SmartIconRow`, and global overlay hooks.
+-   **Banned**: Redundant theme icon logic or manual modal state (`isVisible`, `contentKey`) in screen files. **Use**: `MainCalculatorLayout`, `SmartIconRow`, and global overlay hooks (`useOverlay`).
 
 ## 5. Composition Primitives
 
 To maintain structural consistency across the "Delivery Domain," we use high-level composition components.
 
 ### 5.1 MainCalculatorLayout
-A root-level wrapper for all calculator screens.
--   **Structure**: `View` > `ScreenHeader` > `DismissKeyboardView` > `Card` (Summary) > `IconRow` > `Card` (Inputs) > `KeyboardAwareScrollView`.
--   **Props**: `title`, `isLoading`, `summaryContent`, `inputContent`, `actions`.
+A root-level wrapper for all calculator screens located in `apps/mobile/components/MainCalculatorLayout.tsx`.
+-   **Structure**: `View` > `ScreenHeader` > `DismissKeyboardView` > `Card` (Summary) > `SmartIconRow` > `Card` (Inputs) > `KeyboardAwareScrollView`.
+-   **Props**: `title`, `isLoading`, `summaryContent`, `inputContent`, `actions`, `onReset`, `onHelp`, `onDocument`.
 
 ### 5.2 SmartIconRow
 An intelligent version of `IconRow` that internally consumes `ThemeContext` and `OverlayContext`.
--   **Automatic Actions**: Handles 'reset', 'help' (triggers `DetailModal`), 'document' (triggers `DocumentModal`), and 'theme' (toggles system theme and updates icons automatically).
--   **Usage**: `<SmartIconRow actions={['reset', 'document', 'theme']} />`.
+-   **Automatic Actions**: Handles 'reset', 'help' (triggers `openHelp`), 'document' (triggers `openDocuments`), 'theme' (toggles system theme), and navigation to 'best_score' or 'home'.
+-   **Usage**: `<SmartIconRow actions={['reset', 'help', 'document', 'theme']} onReset={...} />`.
+
+### 5.3 Composite Inputs
+Composite inputs (inputs with left/right prefix elements like an `ExemptButton` or `$`) use a flexible container model to prevent early text wrapping while maintaining a specific visual center:
+-   **Structure**: Container split relies on `flex: 1` (left prefix box) and `flex: 2` (right flexible box). 
+-   **Alignment Offset**: To center text naturally at the 35% mark of the overall parent container instead of the 50% mark of the right container, the `TextInput` applies `textAlign: 'center'` combined with a relative translation `left: '-15%'` when a left-side prefix exists. Do not use an artificial trailing spacer (`flex: 30`) or `textAlign: 'left'`, as both clip long text values.
 
 ## 6. Keyboard & Ergonomics
 

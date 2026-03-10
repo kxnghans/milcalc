@@ -99,7 +99,6 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
     pressableInput: {
         paddingVertical: theme.spacing.s,
         paddingHorizontal: theme.spacing.s,
-        backgroundColor: theme.colors.inputBackground,
     },
     pressableText: {
         ...theme.typography.body,
@@ -266,12 +265,13 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
               <View style={styles.datePickerContainer}>
                 <Text style={[styles.detailLabel, styles.dateLabel]}>Birth Date</Text>
                 <Pressable style={styles.marginBottomS} onPress={() => setShowBirthDatePicker(true)}>
-                  <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
-                    <View style={styles.pressableInput}>
-                      <Text style={[styles.pressableText, !birthDate && styles.placeholderText]}>
-                        {birthDate ? birthDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Select Date'}
-                      </Text>
-                    </View>
+                  <NeumorphicInset 
+                    containerStyle={{ borderRadius: theme.borderRadius.m }}
+                    contentStyle={styles.pressableInput}
+                  >
+                    <Text style={[styles.pressableText, !birthDate && styles.placeholderText]}>
+                      {birthDate ? birthDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Select Date'}
+                    </Text>
                   </NeumorphicInset>
                 </Pressable>
                 <DatePickerModal
@@ -287,12 +287,13 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
               <View style={styles.serviceEntryDatePickerContainer}>
                 <Text style={[styles.detailLabel, styles.dateLabel]}>Service Entry Date</Text>
                 <Pressable style={styles.marginBottomS} onPress={() => setShowServiceEntryDatePicker(true)}>
-                  <NeumorphicInset style={{ borderRadius: theme.borderRadius.m }}>
-                    <View style={styles.pressableInput}>
-                      <Text style={[styles.pressableText, !serviceEntryDate && styles.placeholderText]}>
-                        {serviceEntryDate ? serviceEntryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Select Date'}
-                      </Text>
-                    </View>
+                  <NeumorphicInset 
+                    containerStyle={{ borderRadius: theme.borderRadius.m }}
+                    contentStyle={styles.pressableInput}
+                  >
+                    <Text style={[styles.pressableText, !serviceEntryDate && styles.placeholderText]}>
+                      {serviceEntryDate ? serviceEntryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Select Date'}
+                    </Text>
                   </NeumorphicInset>
                 </Pressable>
                 <DatePickerModal
@@ -307,8 +308,10 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
               </View>
               <View style={styles.serviceBreakContainer}>
                 <Text style={[styles.detailLabel, styles.dateLabel]}>Service Break</Text>
-                <NeumorphicInset style={{ borderRadius: theme.borderRadius.m, marginBottom: theme.spacing.s }}>
-                  <View style={styles.pressableInput}>
+                <NeumorphicInset 
+                    containerStyle={{ borderRadius: theme.borderRadius.m, marginBottom: theme.spacing.s }}
+                    contentStyle={styles.pressableInput}
+                >
                     <StyledTextInput
                       keyboardType="number-pad"
                       value={breakInService || ''}
@@ -319,7 +322,6 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                         styles.serviceBreakInput
                       ]}
                     />
-                  </View>
                 </NeumorphicInset>
               </View>
             </View>

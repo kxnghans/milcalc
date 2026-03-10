@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform, Pressable, Keyboard, ImageSourcePropType } from 'react-native';
-import { useRetirementCalculatorState, PayDisplay, SegmentedSelector, useTheme, PillButton, MASCOT_URLS } from '@repo/ui';
-import PickerInput from '../../components/PickerInput';
+import { useRetirementCalculatorState, PayDisplay, SegmentedSelector, PillButton, MASCOT_URLS, useTheme } from '@repo/ui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import PickerInput from '../../components/PickerInput';
 import CurrencyInput from '../../components/CurrencyInput';
 import NumberInput from '../../components/NumberInput';
 import TwoColumnPicker from '../../components/TwoColumnPicker';

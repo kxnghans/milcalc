@@ -38,12 +38,20 @@ export const getDocumentsByCategory = async (category: string): Promise<Tables<'
  * @param doc - The document object from the database.
  */
 export const openDocument = async (doc: Tables<'documents'>) => {
+    const buildUrlWithPage = (url: string, page?: number | null) => {
+        if (!page) return url;
+        // Append #page=N if it's a PDF or we have a page number
+        const separator = url.includes('#') ? '&' : '#';
+        return `${url}${separator}page=${page}`;
+    };
+
     // Override for DAFMAN 36-2905 to use a specific static link
     if (doc.name.toLowerCase().replace(/\s+/g, '') === 'dafman36-2905') {
         const staticLink = 'https://static.e-publishing.af.mil/production/1/af_a1/publication/dafman36-2905/dafman36-2905.pdf';
+        const finalLink = buildUrlWithPage(staticLink, doc.page_number);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         try {
-            await Linking.openURL(staticLink);
+            await Linking.openURL(finalLink);
         } catch (error) {
             console.error('Error opening static DAFMAN 36-2905 URL:', error);
         }
@@ -51,9 +59,10 @@ export const openDocument = async (doc: Tables<'documents'>) => {
     }
 
     // Use learn_more_uri if it exists, otherwise use the source based on type.
-    const urlToOpen = doc.learn_more_uri || (doc.type === 'web' ? doc.source : null);
+    let urlToOpen = doc.learn_more_uri || (doc.type === 'web' ? doc.source : null);
 
     if (urlToOpen) {
+        urlToOpen = buildUrlWithPage(urlToOpen, doc.page_number);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         try {
             await Linking.openURL(urlToOpen);
@@ -76,7 +85,8 @@ export const openDocument = async (doc: Tables<'documents'>) => {
             }
     
             if (data && data.signedURL) {
-                await Linking.openURL(data.signedURL);
+                const finalUrl = buildUrlWithPage(data.signedURL, doc.page_number);
+                await Linking.openURL(finalUrl);
             } else {
                 console.error('No signed URL returned from edge function');
             }

@@ -21,7 +21,7 @@ MilCalc utilizes the `@supabase/supabase-js` client (v2.74+) for all data orches
 -   **`base_pay_2024`**: Standard basic pay tables (relational by rank/YOS).
 -   **`reserve_drill_pay`**: Prorated pay tables for Guard and Reserve drills.
 -   **`bah_rates_dependents` / `bah_rates_no_dependents`**: Housing allowance lookup by MHA/Zip.
--   **`bas_rates`**: Subsistence allowance lookup (versioned by year).
+-   **bas_rates**: Subsistence allowance lookup (versioned by year, e.g., 2025).
 -   **`federal_tax_data` / `state_tax_data`**: Tax brackets and standard deductions (versioned by year).
 -   **`veterans_disability_compensation`**: Monthly VA rates for service-connected disabilities.
 

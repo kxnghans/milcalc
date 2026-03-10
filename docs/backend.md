@@ -14,10 +14,10 @@ MilCalc is designed for high-reliability in disconnected environments. The backe
 
 To minimize battery drain and data usage, MilCalc avoids frequent polling of large standards tables. Instead, it uses a lightweight versioning system:
 
-1.  **Metadata Table**: A single-row `sync_metadata` table tracks the version/last-updated timestamp for each logical domain (e.g., `pt_standards`, `pay_scales`).
+1.  **Metadata Table**: A `sync_metadata` table tracks the `last_updated_at` timestamp for each logical table (e.g., `pt_standards`, `pay_scales`).
 2.  **The Pulse**: Upon app launch or foregrounding, the `SyncManager` performs a single, small fetch of the `sync_metadata` table.
-3.  **Invalidation**: If the local metadata version is lower than the backend version, the `SyncManager` initiates a background fetch for only the affected tables.
-4.  **Operational Status**: The `SyncManager` is currently active and manages hydration for all fitness, pay, and tax standards.
+3.  **Invalidation**: If the local metadata timestamp is older than the backend timestamp, the `SyncManager` initiates a background fetch for only the affected tables.
+4.  **Operational Status**: The `SyncManager` is fully active and manages hydration for all fitness, pay, and tax standards.
 
 ## 3. Data Tiering
 
@@ -27,9 +27,9 @@ We categorize data into three tiers based on volatility and access patterns:
 | :--- | :--- | :--- | :--- |
 | **Static Standards** | PT Scoring, Pay Scales | SQLite / `seed-data.json`* | Monthly / On Change |
 | **Dynamic Metadata** | `sync_metadata` | SQLite / Memory | Every Launch |
-| **User State** | Current Inputs, Best Scores | SQLite / `AsyncStorage` | Never (Local Only) |
+| **User State** | Current Inputs, Best Scores | SQLite (Smart Cache) | Never (Local Only) |
 
-*\*Planned feature: `seed-data.json` will eventually provide the initial hydration on first-launch to enable zero-network startup. Currently, initial hydration occurs on the first connected launch.*
+*\*Planned feature: `seed-data.json` will provide the initial hydration on first-launch to enable zero-network startup. Currently, initial hydration occurs on the first connected launch via background sync.*
 
 ## 4. RELATIONAL CACHING (Smart Cache)
 

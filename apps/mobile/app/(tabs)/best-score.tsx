@@ -22,7 +22,7 @@ import Divider from '../../components/Divider';
 import MainCalculatorLayout from '../../components/MainCalculatorLayout';
 import { useOverlay } from '../../contexts/OverlayContext';
 
-type BestScoreExercise = 
+type BestScoreExercise =
   | { label: string; value: string; type: 'number'; onValueChange: (val: string) => void }
   | { label: string; value: string; type: 'time'; onValueChange: (val: { minutes: string; seconds: string }) => void };
 
@@ -37,15 +37,15 @@ interface BestScoreSectionProps {
   openHelp: (key: string, mascot?: ImageSourcePropType) => void;
 }
 
-const BestScoreSection = ({ 
-  title, 
-  exercises, 
-  scores, 
-  bestValues, 
-  maxScore, 
-  isExempt, 
-  onToggleExempt, 
-  openHelp 
+const BestScoreSection = ({
+  title,
+  exercises,
+  scores,
+  bestValues,
+  maxScore,
+  isExempt,
+  onToggleExempt,
+  openHelp
 }: BestScoreSectionProps) => {
   const { theme } = useTheme();
 
@@ -68,36 +68,36 @@ const BestScoreSection = ({
       alignItems: 'center',
     },
     cardTitle: {
-        ...theme.typography.title,
-        color: theme.colors.text,
-        marginLeft: theme.spacing.s,
-        marginRight: 'auto',
+      ...theme.typography.title,
+      color: theme.colors.text,
+      marginLeft: theme.spacing.s,
+      marginRight: 'auto',
     },
     gridContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
+      flexDirection: 'row',
+      justifyContent: 'space-around',
     },
     gridColumn: {
-        flex: 1,
-        alignItems: 'center',
-        gap: theme.spacing.s,
-        marginHorizontal: theme.spacing.s,
-        marginVertical: theme.spacing.xs,
+      flex: 1,
+      alignItems: 'center',
+      gap: theme.spacing.s,
+      marginHorizontal: theme.spacing.s,
+      marginVertical: theme.spacing.xs,
     },
     scoreRow: {
-        width: '100%',
+      width: '100%',
     },
     scoreBreakdownText: {
-        ...theme.typography.subtitle,
-        textShadowColor: theme.colors.neumorphic.outset.shadow,
-        textShadowRadius: 0.1,
-        textShadowOffset: { width: 0, height: 0 },
+      ...theme.typography.subtitle,
+      textShadowColor: theme.colors.neumorphic.outset.shadow,
+      textShadowRadius: 0.1,
+      textShadowOffset: { width: 0, height: 0 },
     },
     helpIcon: {
-        margin: theme.spacing.s,
+      margin: theme.spacing.s,
     },
     fullWidth: {
-        width: '100%',
+      width: '100%',
     },
   });
 
@@ -105,12 +105,12 @@ const BestScoreSection = ({
   let selectedExerciseValues: string[] = [];
 
   if (maxNumericScore > 0 && !isExempt) {
-      selectedExerciseValues = scores.reduce((acc: string[], score, index) => {
-          if (score === maxNumericScore) {
-              acc.push(exercises[index].value);
-          }
-          return acc;
-      }, []);
+    selectedExerciseValues = scores.reduce((acc: string[], score, index) => {
+      if (score === maxNumericScore) {
+        acc.push(exercises[index].value);
+      }
+      return acc;
+    }, []);
   }
 
   const getMascot = (sectionTitle: string): ImageSourcePropType => {
@@ -130,77 +130,77 @@ const BestScoreSection = ({
     <View>
       <View style={styles.sectionHeader}>
         <TouchableOpacity onPress={() => openHelp(`best_score_${title.toLowerCase()}`, getMascot(title))}>
-            <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
+          <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
         </TouchableOpacity>
         <Text style={styles.cardTitle}>{title}</Text>
         <ExemptButton onPress={onToggleExempt} isActive={isExempt} />
       </View>
-        <SegmentedSelector
-            options={exercises.map(e => ({ label: e.label, value: e.value }))}
-            selectedValues={selectedExerciseValues}
-            onValueChange={() => {}}
-            isTouchable={false}
-        />
+      <SegmentedSelector
+        options={exercises.map(e => ({ label: e.label, value: e.value }))}
+        selectedValues={selectedExerciseValues}
+        onValueChange={() => { }}
+        isTouchable={false}
+      />
       <View style={styles.gridContainer}>
         {exercises.map((exercise, index) => {
-            const exerciseValue = bestValues[exercise.value];
-            const isTimeType = exercise.type === 'time' && typeof exerciseValue === 'object';
-            return (
-                <View key={index} style={styles.gridColumn}>
-                    {exercise.type === 'number' ? 
-                        <NumberInput value={exerciseValue as string} onChangeText={exercise.onValueChange as (text: string) => void} placeholder='--' style={styles.fullWidth} isExempt={isExempt} /> : 
-                        <TimeInput 
-                            minutes={isTimeType ? exerciseValue.minutes : ''} 
-                            seconds={isTimeType ? exerciseValue.seconds : ''} 
-                            setMinutes={(minutes) => exercise.onValueChange({ minutes, seconds: isTimeType ? exerciseValue.seconds : '' })} 
-                            setSeconds={(seconds) => exercise.onValueChange({ minutes: isTimeType ? exerciseValue.minutes : '', seconds })} 
-                            style={styles.fullWidth} 
-                            isExempt={isExempt} 
-                        />
-                    }
-                </View>
-            );
+          const exerciseValue = bestValues[exercise.value];
+          const isTimeType = exercise.type === 'time' && typeof exerciseValue === 'object';
+          return (
+            <View key={index} style={styles.gridColumn}>
+              {exercise.type === 'number' ?
+                <NumberInput value={exerciseValue as string} onChangeText={exercise.onValueChange as (text: string) => void} placeholder='--' style={styles.fullWidth} isExempt={isExempt} /> :
+                <TimeInput
+                  minutes={isTimeType ? exerciseValue.minutes : ''}
+                  seconds={isTimeType ? exerciseValue.seconds : ''}
+                  setMinutes={(minutes) => exercise.onValueChange({ minutes, seconds: isTimeType ? exerciseValue.seconds : '' })}
+                  setSeconds={(seconds) => exercise.onValueChange({ minutes: isTimeType ? exerciseValue.minutes : '', seconds })}
+                  style={styles.fullWidth}
+                  isExempt={isExempt}
+                />
+              }
+            </View>
+          );
         })}
       </View>
       <View style={styles.scoreRow}>
-        <IconRow 
-            icons={scores.map((s, index) => {
-                const isWalk = exercises[index]?.value === 'walk';
-                let text = s ? String(s) : '0';
-                let color = theme.colors.text;
+        <IconRow
+          icons={scores.map((s, index) => {
+            const isWalk = exercises[index]?.value === 'walk';
+            let text = s ? String(s) : '--';
+            let color = theme.colors.text;
 
-                if (isExempt) {
-                    text = 'Exempt';
-                    color = theme.colors.disabled;
-                } else if (isWalk) {
-                    if (s === 'pass') {
-                        color = passColors.progressColor;
-                        text = 'Pass';
-                    } else if (s === 'fail') {
-                        color = failColors.progressColor;
-                        text = 'Fail';
-                    } else {
-                        text = 'N/A';
-                        color = theme.colors.disabled;
-                    }
+            if (isExempt) {
+              text = 'Exempt';
+              color = theme.colors.disabled;
+            } else if (isWalk) {
+              if (s === 'pass') {
+                color = passColors.progressColor;
+                text = 'Pass';
+              } else if (s === 'fail') {
+                color = failColors.progressColor;
+                text = 'Fail';
+              } else {
+                text = 'N/A';
+                color = theme.colors.disabled;
+              }
+            } else {
+              const isBestNumeric = typeof s === 'number' && s === maxNumericScore;
+              if (isBestNumeric) {
+                if (s === 0) {
+                  color = failColors.progressColor;
                 } else {
-                    const isBestNumeric = typeof s === 'number' && s === maxNumericScore;
-                    if (isBestNumeric) {
-                        if (s === 0) {
-                            color = failColors.progressColor;
-                        } else {
-                            color = getScoreColor(s, maxScore);
-                        }
-                    }
+                  color = getScoreColor(s, maxScore);
                 }
+              }
+            }
 
-                return {
-                    text,
-                    textStyle: styles.scoreBreakdownText,
-                    color,
-                };
-            })} 
-            borderRadius={theme.borderRadius.m} 
+            return {
+              text,
+              textStyle: styles.scoreBreakdownText,
+              color,
+            };
+          })}
+          borderRadius={theme.borderRadius.m}
         />
       </View>
     </View>
@@ -221,8 +221,8 @@ export default function BestScoreScreen() {
 
   const styles = StyleSheet.create({
     divider: {
-        marginTop: theme.spacing.s, 
-        marginBottom: theme.spacing.s,
+      marginTop: theme.spacing.s,
+      marginBottom: theme.spacing.s,
     }
   });
 
@@ -260,46 +260,46 @@ export default function BestScoreScreen() {
       }
       inputContent={
         <>
-            <Demographics age={age} setAge={setAge} gender={gender} setGender={setGender} />
-            <Divider style={styles.divider} />
-            <BestScoreSection 
-                title="Strength" 
-                exercises={strengthExercises} 
-                scores={strengthScores} 
-                bestValues={strengthBestValues} 
-                maxScore={20}
-                isExempt={exemptions.isStrengthExempt}
-                onToggleExempt={exemptions.toggleStrengthExempt}
-                openHelp={handleOpenHelp}
-            />
-            <Divider style={styles.divider} />
-            <BestScoreSection 
-                title="Core" 
-                exercises={coreExercises} 
-                scores={coreScores} 
-                bestValues={coreBestValues} 
-                maxScore={20}
-                isExempt={exemptions.isCoreExempt}
-                onToggleExempt={exemptions.toggleCoreExempt}
-                openHelp={handleOpenHelp}
-            />
-            <Divider style={styles.divider} />
-            <BestScoreSection 
-                title="Cardio" 
-                exercises={cardioExercises} 
-                scores={cardioScores} 
-                bestValues={cardioBestValues} 
-                maxScore={60}
-                isExempt={exemptions.isCardioExempt}
-                onToggleExempt={exemptions.toggleCardioExempt}
-                openHelp={handleOpenHelp}
-            />
-            <Divider style={styles.divider} />
-            <AltitudeAdjustmentComponent 
-                selectedValue={altitudeGroup} 
-                onValueChange={setAltitudeGroup} 
-                openDetailModal={handleOpenHelp} 
-            />
+          <Demographics age={age} setAge={setAge} gender={gender} setGender={setGender} />
+          <Divider style={styles.divider} />
+          <BestScoreSection
+            title="Strength"
+            exercises={strengthExercises}
+            scores={strengthScores}
+            bestValues={strengthBestValues}
+            maxScore={20}
+            isExempt={exemptions.isStrengthExempt}
+            onToggleExempt={exemptions.toggleStrengthExempt}
+            openHelp={handleOpenHelp}
+          />
+          <Divider style={styles.divider} />
+          <BestScoreSection
+            title="Core"
+            exercises={coreExercises}
+            scores={coreScores}
+            bestValues={coreBestValues}
+            maxScore={20}
+            isExempt={exemptions.isCoreExempt}
+            onToggleExempt={exemptions.toggleCoreExempt}
+            openHelp={handleOpenHelp}
+          />
+          <Divider style={styles.divider} />
+          <BestScoreSection
+            title="Cardio"
+            exercises={cardioExercises}
+            scores={cardioScores}
+            bestValues={cardioBestValues}
+            maxScore={60}
+            isExempt={exemptions.isCardioExempt}
+            onToggleExempt={exemptions.toggleCardioExempt}
+            openHelp={handleOpenHelp}
+          />
+          <Divider style={styles.divider} />
+          <AltitudeAdjustmentComponent
+            selectedValue={altitudeGroup}
+            onValueChange={setAltitudeGroup}
+            openDetailModal={handleOpenHelp}
+          />
         </>
       }
     />

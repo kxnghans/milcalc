@@ -54,7 +54,7 @@ coverage/
 
 # Temporary files
 # image.png
-*~
+docs/sources/
 
 # Agent configuration
 .gemini/

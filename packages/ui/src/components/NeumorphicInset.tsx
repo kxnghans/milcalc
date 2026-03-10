@@ -15,19 +15,25 @@ import { useTheme } from '../contexts/ThemeContext';
 interface NeumorphicInsetProps {
   /** The content to be rendered inside the inset container. */
   children: ReactNode;
-  /** Optional custom styles to be applied to the container. */
+  /** @deprecated Use containerStyle or contentStyle instead for better clarity. */
   style?: StyleProp<ViewStyle>;
+  /** Style for the outer container that holds the inset borders. */
+  containerStyle?: StyleProp<ViewStyle>;
+  /** Style for the inner content view. */
+  contentStyle?: StyleProp<ViewStyle>;
 }
 
 /**
  * A component that wraps its children in a container with a "pressed-in" or "inset"
  * neumorphic visual effect.
  */
-const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style }) => {
+const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style, containerStyle, contentStyle }) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
     container: {
+      backgroundColor: theme.colors.inputBackground,
+      borderRadius: theme.borderRadius.m,
       // The top and left borders are given a darker color to simulate an inner shadow.
       borderTopWidth: theme.colors.neumorphic.inset.borderWidth,
       borderLeftWidth: theme.colors.neumorphic.inset.borderWidth,
@@ -43,8 +49,10 @@ const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style }) =>
   });
 
   return (
-    <View style={[styles.container, style]}>
-      {children}
+    <View style={[styles.container, containerStyle]}>
+      <View style={[style, contentStyle]}>
+        {children}
+      </View>
     </View>
   );
 };

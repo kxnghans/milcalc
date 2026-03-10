@@ -42,10 +42,6 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
         borderTopRightRadius: theme.borderRadius.l,
         padding: theme.spacing.m,
     },
-    inset: {
-        borderRadius: theme.borderRadius.m,
-        backgroundColor: theme.colors.inputBackground,
-    },
     selectedLabelText: {
         flex: 1,
         textAlign: 'center',
@@ -62,8 +58,8 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
 
   return (
     <View style={[styles.wrapper, style]}>
-        <NeumorphicInset style={styles.inset}>
-            <Pressable onPress={() => setModalVisible(true)} style={styles.pressable} disabled={disabled}>
+        <NeumorphicInset containerStyle={{ borderRadius: theme.borderRadius.m }} contentStyle={styles.pressable}>
+            <Pressable onPress={() => setModalVisible(true)} style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} disabled={disabled}>
                 <Text style={[styles.selectedLabelText, { color: textColor }]}>{selectedLabel}</Text>
                 <MaterialCommunityIcons name="chevron-down" size={20} color={disabled ? theme.colors.disabled : theme.colors.text} />
             </Pressable>

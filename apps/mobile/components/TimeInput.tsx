@@ -4,8 +4,8 @@
  * It uses neumorphic styling and provides a seamless user experience by auto-focusing the next field.
  */
 
-import React, { useRef } from 'react';
-import { StyleSheet, TextInput, Text, StyleProp, ViewStyle } from 'react-native';
+import React, { useRef, useMemo } from 'react';
+import { StyleSheet, TextInput, Text, StyleProp, ViewStyle, View } from 'react-native';
 import { NeumorphicInset, StyledTextInput, useTheme, ExemptButton } from '@repo/ui';
 
 /**
@@ -78,60 +78,77 @@ const TimeInput: React.FC<TimeInputProps> = ({
     }
   };
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center', // this will center the items in the row
-      paddingVertical: theme.spacing.s, // Keep padding for the inset effect
-      backgroundColor: theme.colors.inputBackground,
-      borderRadius: theme.borderRadius.m,
-      overflow: 'hidden',
+      paddingLeft: theme.spacing.s,
+      paddingRight: theme.spacing.s,
+      paddingVertical: theme.spacing.s,
+      backgroundColor: 'transparent',
     },
     separator: {
       ...theme.typography.label,
       color: theme.colors.text,
-      marginHorizontal: theme.spacing.s,
+      marginHorizontal: 2,
     },
     input: {
-        // remove flex: 1
-        borderWidth: 0,
-        padding: 0,
-        margin: 0,
-        textAlign: 'center',
-        ...theme.typography.label,
-        color: theme.colors.text,
-        flex: 1,
-        backgroundColor: 'transparent',
+      borderWidth: 0,
+      padding: 0,
+      margin: 0,
+      textAlign: 'center',
+      flex: 1,
+      ...theme.typography.label,
+      color: theme.colors.text,
+      backgroundColor: 'transparent',
     },
-    exemptButton: {
-        marginHorizontal: theme.spacing.s,
+    leftContainer: {
+      flex: onToggleExempt ? 1 : 0,
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+    },
+    rightGroup: {
+      flex: onToggleExempt ? 2 : 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    inputGroup: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flex: 1,
+      left: onToggleExempt ? '-15%' : '0%',
     },
     adjustment: {
-        color: theme.colors.success,
-        ...theme.typography.label,
-        marginHorizontal: theme.spacing.s,
-        backgroundColor: 'transparent',
-        textShadowRadius: 0.05,
-        textShadowColor: theme.colors.neumorphic.outset.shadow,
+      position: 'absolute',
+      right: 0,
+      color: theme.colors.success,
+      ...theme.typography.label,
+      backgroundColor: 'transparent',
+      textShadowRadius: 0.05,
+      textShadowColor: theme.colors.neumorphic.outset.shadow,
     }
-  });
+  }), [theme, onToggleExempt]);
 
   // When exempt, show 'xx' as the placeholder. Otherwise, use the placeholder from props.
   const currentMinutesPlaceholder = isExempt ? 'xx' : minutesPlaceholder;
   const currentSecondsPlaceholder = isExempt ? 'xx' : secondsPlaceholder;
 
   return (
-    // The component is wrapped in a NeumorphicInset to give it the "pressed-in" look.
-    <NeumorphicInset style={[styles.container, style]}>
-        {onToggleExempt && (
-            <ExemptButton
-                onPress={onToggleExempt}
-                isActive={!!isExempt}
-                style={styles.exemptButton}
-            />
-        )}
-        <StyledTextInput
+    <NeumorphicInset containerStyle={style} contentStyle={styles.container}>
+      {onToggleExempt ? (
+        <View style={styles.leftContainer}>
+          <ExemptButton
+            onPress={onToggleExempt}
+            isActive={!!isExempt}
+          />
+        </View>
+      ) : <View style={styles.leftContainer} />}
+
+      <View style={styles.rightGroup}>
+        <View style={styles.inputGroup}>
+          <StyledTextInput
             value={minutes}
             onChangeText={handleMinutesChange}
             placeholder={currentMinutesPlaceholder}
@@ -139,9 +156,9 @@ const TimeInput: React.FC<TimeInputProps> = ({
             keyboardType="numeric"
             style={styles.input}
             editable={!isExempt}
-        />
-        <Text style={styles.separator}>:</Text>
-        <StyledTextInput
+          />
+          <Text style={styles.separator}>:</Text>
+          <StyledTextInput
             ref={secondsInput}
             value={seconds}
             onChangeText={handleSecondsChange}
@@ -151,9 +168,12 @@ const TimeInput: React.FC<TimeInputProps> = ({
             keyboardType="numeric"
             style={styles.input}
             editable={!isExempt}
-        />
-        {/* Optionally display an adjustment value, like for altitude correction. */}
-        {adjustment && <Text style={styles.adjustment}>{adjustment}</Text>}
+          />
+        </View>
+        {adjustment && (
+          <Text style={styles.adjustment}>{adjustment}</Text>
+        )}
+      </View>
     </NeumorphicInset>
   );
 };

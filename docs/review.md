@@ -8,7 +8,7 @@ MilCalc is designed with a "Zero-Trust" approach to user data.
 
 -   **Client-Side Processing**: All sensitive calculations (Pay, Retirement, PT Scores) are performed entirely on the user's device. No user-inputted values (e.g., specific pay grade, years of service, or PT performance) are transmitted to Supabase or any external server.
 -   **No PII Collection**: The application does not collect Names, Social Security Numbers, or Unit information. Users remain 100% anonymous in the current implementation.
--   **Local Persistence**: User settings are stored in `AsyncStorage` and `expo-sqlite` on the local device. These are protected by the operating system's standard application sandboxing.
+-   **Local Persistence**: User settings and profile data are stored exclusively in `expo-sqlite` on the local device. These are protected by the operating system's standard application sandboxing. No AsyncStorage is used.
 
 ## 2. Anti-Abuse & Anti-Cheat Mitigations
 

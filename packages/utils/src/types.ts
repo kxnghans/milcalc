@@ -407,6 +407,7 @@ export type Database = {
           id: number
           learn_more_uri: string | null
           name: string
+          page_number: number | null
           sort_order: number | null
           source: string | null
           type: string
@@ -416,6 +417,7 @@ export type Database = {
           id?: number
           learn_more_uri?: string | null
           name: string
+          page_number?: number | null
           sort_order?: number | null
           source?: string | null
           type: string
@@ -425,6 +427,7 @@ export type Database = {
           id?: number
           learn_more_uri?: string | null
           name?: string
+          page_number?: number | null
           sort_order?: number | null
           source?: string | null
           type?: string

@@ -4,9 +4,10 @@
  * "pressed-in" neumorphic effect. It's a specialized wrapper around the StyledTextInput.
  */
 
-import React from 'react';
-import { TextInput, TextInputProps, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
-import { NeumorphicInset, StyledTextInput, useTheme, ExemptButton } from '@repo/ui';
+import React, { useMemo } from 'react';
+import { TextInput, TextInputProps, Text, StyleSheet, StyleProp, ViewStyle, TextStyle, View } from 'react-native';
+import { useTheme, ExemptButton } from '@repo/ui';
+import InsetTextInput from './InsetTextInput';
 
 /**
  * Props for the NumberInput component.
@@ -34,60 +35,39 @@ interface NumberInputProps extends Omit<TextInputProps, 'style'> {
 const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inputStyle, adjustment, onToggleExempt, isExempt, ...props }, ref) => {
   const { theme } = useTheme();
 
-  const styles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: theme.spacing.s,
-      backgroundColor: theme.colors.inputBackground,
-      borderRadius: theme.borderRadius.m,
-      overflow: 'hidden',
-    },
+  const styles = useMemo(() => StyleSheet.create({
     input: {
-        borderWidth: 0,
-        padding: 0,
-        margin: 0,
-        textAlign: 'center',
-        ...theme.typography.label,
-        color: theme.colors.text,
-        flex: 1,
-        backgroundColor: 'transparent',
-    },
-    exemptButton: {
-        marginHorizontal: theme.spacing.s,
+      textAlign: 'center',
     },
     adjustment: {
-        color: theme.colors.success, 
-        ...theme.typography.label, 
-        paddingRight: theme.spacing.s,
-    }
-  });
+      color: theme.colors.success,
+      ...theme.typography.label,
+      paddingRight: theme.spacing.s,
+    },
+  }), [theme]);
 
   // When exempt, show 'xx' as the placeholder. Otherwise, use the placeholder from props.
   const placeholder = isExempt ? 'xx' : props.placeholder;
 
   return (
-    // The component is wrapped in a NeumorphicInset to give it the "pressed-in" look.
-    <NeumorphicInset style={[styles.container, style]}>
-      {onToggleExempt && (
+    <InsetTextInput
+      ref={ref}
+      style={style}
+      inputStyle={[styles.input, inputStyle]}
+      leftContent={onToggleExempt ? (
         <ExemptButton
           onPress={onToggleExempt}
           isActive={!!isExempt}
-          style={styles.exemptButton}
         />
-      )}
-      <StyledTextInput
-        ref={ref}
-        {...props}
-        placeholder={placeholder}
-        editable={!isExempt} // Input is not editable when exempt.
-        keyboardType="numeric" // Set the keyboard type to numeric for a better user experience.
-        style={[styles.input, inputStyle]}
-      />
-      {/* Optionally display an adjustment value, like for altitude correction. */}
-      {adjustment && <Text style={styles.adjustment}>{adjustment}</Text>}
-    </NeumorphicInset>
+      ) : undefined}
+      rightContent={adjustment ? (
+        <Text style={styles.adjustment}>{adjustment}</Text>
+      ) : undefined}
+      {...props}
+      placeholder={placeholder}
+      editable={!isExempt}
+      keyboardType="numeric"
+    />
   );
 });
 

@@ -1,16 +1,20 @@
+import React, { useState, useEffect } from "react";
 import { Slot } from "expo-router";
-import { ThemeProvider, BottomSheet } from "@repo/ui";
+import { ThemeProvider, BottomSheet, useTheme } from "@repo/ui";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import * as SQLite from "expo-sqlite";
 import { SyncManager } from "../components/SyncManager";
 import { OverlayProvider, useOverlay } from "../contexts/OverlayContext";
-import { ProfileProvider } from "../contexts/ProfileContext";
+import { ProfileProvider, useProfile } from "../contexts/ProfileContext";
 import { MainOverlay } from "../components/MainOverlay";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DetailModal from "../components/DetailModal";
 import DocumentModal from "../components/DocumentModal";
+import { LaunchAd } from "../components/LaunchAd";
+import { FullScreenPaywall } from "../components/FullScreenPaywall";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -72,6 +76,7 @@ function LayoutContent() {
     snapToIndex, 
     setSnapToIndex, 
     overlayType,
+    overlayFooter,
     helpContentKey,
     helpMascot,
     helpSource,
@@ -80,6 +85,40 @@ function LayoutContent() {
     isDocumentVisible,
     closeDocuments
   } = useOverlay();
+
+  const { theme } = useTheme();
+  const { isLoading, hasSeenOnboarding, setProfileData } = useProfile();
+  
+  const [appState, setAppState] = useState<'LOADING' | 'PAYWALL' | 'AD' | 'READY'>('LOADING');
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && !isInitialized) {
+      if (!hasSeenOnboarding) {
+        setAppState('PAYWALL');
+      } else {
+        setAppState('AD');
+      }
+      setIsInitialized(true);
+    }
+  }, [isLoading, isInitialized, hasSeenOnboarding]);
+
+  const handlePaywallComplete = () => {
+    setProfileData({ hasSeenOnboarding: true });
+    setAppState('AD');
+  };
+
+  const handleAdSkip = () => {
+    setAppState('READY');
+  };
+
+  if (appState === 'LOADING') {
+    return (
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <SyncManager>
@@ -91,8 +130,14 @@ function LayoutContent() {
         snapToIndex={snapToIndex}
         onSnap={setSnapToIndex}
         onClose={closeOverlay}
-        title={overlayType === 'MENU' ? 'MILCALC MENU' : overlayType === 'ACCOUNT' ? 'MY ACCOUNT' : overlayType === 'BUG_REPORT' ? 'REPORT A BUG' : undefined}
+        title={overlayType === 'MENU' ? 'MILCALC MENU' : overlayType === 'ACCOUNT' ? 'MY ACCOUNT' : overlayType === 'BUG_REPORT' ? 'REPORT A BUG' : overlayType === 'PAYWALL' ? 'PREMIUM UPGRADE' : undefined}
+        titleStyle={{
+          textShadowColor: theme.colors.neumorphic.outset.shadow,
+          textShadowRadius: 0.25,
+          textShadowOffset: { width: 0, height: 0 },
+        }}
         mode="standard"
+        footer={overlayFooter}
       >
         <MainOverlay />
       </BottomSheet>
@@ -112,6 +157,10 @@ function LayoutContent() {
         isModalVisible={isDocumentVisible} 
         setModalVisible={closeDocuments} 
       />
+
+      {/* Onboarding / Ad Overlays */}
+      {appState === 'PAYWALL' && <FullScreenPaywall onComplete={handlePaywallComplete} />}
+      {appState === 'AD' && <LaunchAd onSkip={handleAdSkip} />}
     </SyncManager>
   );
 }

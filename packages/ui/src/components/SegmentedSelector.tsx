@@ -6,16 +6,19 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle, LayoutChangeEvent } from 'react-native';
+import * as Icons from '@expo/vector-icons';
 import NeumorphicOutset from './NeumorphicOutset';
 import { useTheme } from "../contexts/ThemeContext";
 import { getAlphaColor } from '../theme';
+import { Icon } from './Icon';
+import { ICON_SETS } from '../icons';
 
 /**
  * Props for the SegmentedSelector component.
  */
 interface SegmentedSelectorProps {
   /** An array of options to display, where each option has a label and a value. */
-  options: { label: string; value: string }[];
+  options: { label: string; value: string; icon?: string; iconSet?: keyof typeof Icons }[];
   /** An array of values corresponding to the currently selected options. */
   selectedValues: string[];
   /** A function to be called when an option is selected. */
@@ -57,6 +60,11 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
     selectedSegment: {
       paddingVertical: theme.spacing.s, // Reduced because it has container margins
       paddingHorizontal: theme.spacing.xs,
+    },
+    contentRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     text: {
       ...theme.typography.body,
@@ -107,6 +115,9 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
     flex1: {
       flex: 1,
     },
+    icon: {
+      marginRight: theme.spacing.xs,
+    },
   });
 
   const highlightColor = isDarkMode ? getAlphaColor('#000000', 1) : undefined;
@@ -142,12 +153,25 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
                   style={[styles.segment, styles.selectedSegment]}
                   onPress={() => onValueChange(option.value)}
                 >
-                  {/* Support for multi-line labels */}
-                  {lines.map((line, index) => (
-                    <Text key={index} style={[index === 0 ? styles.selectedText : styles.selectedCaptionText, selectedTextStyle]}>
-                      {line}
-                    </Text>
-                  ))}
+                  <View style={styles.contentRow}>
+                    {option.icon && (
+                      <Icon
+                        name={option.icon}
+                        size={18}
+                        color={theme.colors.primaryText}
+                        style={styles.icon}
+                        iconSet={option.iconSet || ICON_SETS.MATERIAL_COMMUNITY}
+                      />
+                    )}
+                    {/* Support for multi-line labels */}
+                    <View>
+                      {lines.map((line, index) => (
+                        <Text key={index} style={[index === 0 ? styles.selectedText : styles.selectedCaptionText, selectedTextStyle]}>
+                          {line}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
                 </Wrapper>
               </NeumorphicOutset>
             )
@@ -159,11 +183,24 @@ export const SegmentedSelector = ({ options, selectedValues, onValueChange, styl
               style={[styles.segment, { flex: flexRatio }]}
               onPress={() => onValueChange(option.value)}
             >
-              {lines.map((line, index) => (
-                <Text key={index} style={index === 0 ? styles.text : styles.captionText}>
-                  {line}
-                </Text>
-              ))}
+              <View style={styles.contentRow}>
+                {option.icon && (
+                  <Icon
+                    name={option.icon}
+                    size={18}
+                    color={theme.colors.text}
+                    style={styles.icon}
+                    iconSet={option.iconSet || ICON_SETS.MATERIAL_COMMUNITY}
+                  />
+                )}
+                <View>
+                  {lines.map((line, index) => (
+                    <Text key={index} style={index === 0 ? styles.text : styles.captionText}>
+                      {line}
+                    </Text>
+                  ))}
+                </View>
+              </View>
             </Wrapper>
           )
         })}

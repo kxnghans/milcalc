@@ -24,6 +24,7 @@ interface TypographyStyle {
 }
 
 interface Typography {
+  hero: TypographyStyle;
   header: TypographyStyle;
   title: TypographyStyle;
   subtitle: TypographyStyle;
@@ -45,6 +46,7 @@ export const lightColors = {
   border: 'rgba(0, 0, 0, 0.1)',         // Border color for light theme.
   error: 'rgba(236, 52, 40, 1)',        // Color for error messages and indicators.
   success: 'rgba(28, 176, 87, 1)',      // Color for success messages and indicators.
+  warning: '#FFD600',                   // Warning color
   darkenColor: 'rgba(0, 0, 0, 0.1)',    // Used to darken elements on press or hover.
   inputBackground: 'rgba(0, 0, 0, 0.04)',// Background color for text inputs.
   ninetyPlus: 'rgba(0, 122, 255, 1)',   // Color for scores of 90 and above (excellent).
@@ -83,6 +85,7 @@ export const darkColors = {
   border: 'rgba(44, 44, 46, 1)',        // Border color, same as background for seamless look.
   error: 'rgba(255, 59, 48, 1)',        // Color for error messages.
   success: 'rgba(52, 199, 89, 1)',      // Color for success messages.
+  warning: '#FFD600',                   // Warning color
   darkenColor: 'rgba(0, 0, 0, 0.15)',   // Used to darken elements on press or hover.
   inputBackground: 'rgba(0, 0, 0, 0.085)',// Background color for text inputs.
   ninetyPlus: 'rgba(0, 122, 255, 1)',   // Color for scores of 90 and above.
@@ -132,6 +135,11 @@ export const theme: Theme = {
   colors: lightColors,
   spacing: spacing,
   typography: {
+    hero: {
+      fontSize: 40,
+      fontWeight: '700',
+      fontFamily: 'System',
+    },
     header: {
       fontSize: 20,
       fontWeight: '700',
@@ -180,13 +188,26 @@ export const theme: Theme = {
 };
 
 /**
- * Utility function to convert a hex color code to an RGBA string with a specified alpha value.
- * @param hex - The 3 or 6-digit hex color code (e.g., '#FFF' or '#FFFFFF').
+ * Utility function to convert a hex color code or rgba string to an RGBA string with a specified alpha value.
+ * @param color - The color code (hex or rgba).
  * @param alpha - The alpha (opacity) value between 0 and 1.
  * @returns An RGBA color string (e.g., 'rgba(255, 255, 255, 0.5)').
  */
-export const getAlphaColor = (hex: string, alpha: number): string => {
+export const getAlphaColor = (color: string | undefined, alpha: number): string => {
+  if (!color) return `rgba(0, 0, 0, ${alpha})`;
+
+  // Handle existing rgba strings
+  if (color.startsWith('rgba')) {
+    return color.replace(/,?\s*[\d.]+\)$/, `, ${alpha})`);
+  }
+
+  // Handle rgb strings
+  if (color.startsWith('rgb')) {
+    return color.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+  }
+
   let r = 0, g = 0, b = 0;
+  const hex = color.startsWith('#') ? color : `#${color}`;
 
   // Handle 3-digit hex (e.g., #FFF)
   if (hex.length === 4) {

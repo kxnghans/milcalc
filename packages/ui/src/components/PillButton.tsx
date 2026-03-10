@@ -2,23 +2,27 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, StyleProp, ViewStyle, TextStyle, View } from 'react-native';
 import NeumorphicOutset from './NeumorphicOutset';
 import { useTheme } from '../contexts/ThemeContext';
+import { lightColors } from '../theme';
 import { Icon } from './Icon';
 
 interface PillButtonProps {
   title: string;
   onPress: () => void;
   backgroundColor?: string;
+  colorKey?: keyof typeof lightColors;
   textColor?: string;
   style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
   icon?: string;
 }
 
-export const PillButton = ({ title, onPress, backgroundColor, textColor, style, textStyle, disabled, icon }: PillButtonProps) => {
+export const PillButton = ({ title, onPress, backgroundColor, colorKey, textColor, style, containerStyle, textStyle, disabled, icon }: PillButtonProps) => {
   const { theme } = useTheme();
 
-  const buttonColor = disabled ? theme.colors.disabled : backgroundColor || theme.colors.primary;
+  const resolvedBackgroundColor = colorKey ? (theme.colors[colorKey] as string) : backgroundColor;
+  const buttonColor = disabled ? theme.colors.disabled : resolvedBackgroundColor || theme.colors.primary;
   const buttonTextColor = textColor || theme.colors.primaryText;
 
   const styles = StyleSheet.create({
@@ -49,7 +53,7 @@ export const PillButton = ({ title, onPress, backgroundColor, textColor, style, 
 
   return (
     <NeumorphicOutset 
-      containerStyle={[styles.buttonContainer, style]}
+      containerStyle={[styles.buttonContainer, containerStyle || style]}
       contentStyle={styles.outsetContent} // Explicitly pass the pill radius
     >
       <TouchableOpacity

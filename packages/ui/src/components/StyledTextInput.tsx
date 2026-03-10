@@ -4,7 +4,7 @@
  * It serves as a reusable and consistently styled input field across the app.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TextInput, StyleSheet, TextInputProps } from 'react-native';
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -18,7 +18,7 @@ import { useTheme } from "../contexts/ThemeContext";
 export const StyledTextInput = React.forwardRef<TextInput, TextInputProps>(({ style, ...props }, ref) => {
   const { theme } = useTheme();
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     input: {
       borderWidth: 1,
       borderColor: theme.colors.border,
@@ -30,7 +30,7 @@ export const StyledTextInput = React.forwardRef<TextInput, TextInputProps>(({ st
       textAlign: 'center',
       textAlignVertical: 'center', // Added for Android cursor position fix
     },
-  });
+  }), [theme]);
 
   // The component applies the default styles and merges any custom styles passed in the `style` prop.
   // It also sets the placeholder text color from the theme.

@@ -33,7 +33,7 @@ This document defines the foundational mandates and operational boundaries for A
 
 *   **Linting**: ESLint Zero-Tolerance. Run `pnpm lint` before finishing any task.
 *   **Build Pipeline**: Use `turbo run build` to verify that cross-package dependencies are correctly resolved.
-*   **Documentation**: If a change alters the "Core Loop" or data schema, update `architecture.md` and `backend.md` immediately.
+*   **Documentation**: If a change alters the "Core Loop" or data schema, update `PRD.md`, `milcalc.md`, and `backend.md` immediately.
 
 ---
 
@@ -45,6 +45,7 @@ This document defines the foundational mandates and operational boundaries for A
 - [x] Persistent "Smart Cache" (SQLite) implemented for offline reliability.
 - [x] Background Metadata Sync engine deployed.
 - [x] iOS/Android standardization to `dev.milcalc.mobile`.
+- [x] Context-Driven UI pattern (Global Overlays) established.
 
 ## 🚀 Active To-Do
 

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Platform, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Platform, TouchableOpacity, Modal, TouchableWithoutFeedback, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, Icon, ICONS, ICON_SETS, NeumorphicOutset, Divider } from '@repo/ui';
 import DismissKeyboardView from './DismissKeyboardView';
 import { useOverlay } from '../contexts/OverlayContext';
+import { useProfile } from '../contexts/ProfileContext';
 import { BlurView } from 'expo-blur';
 
 interface ScreenHeaderProps {
@@ -17,6 +18,7 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({ title, isLoading, onMenuPre
   const { theme, isDarkMode } = useTheme();
   const insets = useSafeAreaInsets();
   const { openOverlay } = useOverlay();
+  const { isProfileComplete } = useProfile();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   const togglePopup = () => setIsPopupVisible(!isPopupVisible);
@@ -24,6 +26,22 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({ title, isLoading, onMenuPre
 
   const handleOptionPress = (type: 'ACCOUNT' | 'BUG_REPORT') => {
     setIsPopupVisible(false);
+    
+    if (type === 'BUG_REPORT' && !isProfileComplete) {
+      Alert.alert(
+        'Profile Incomplete',
+        'Please complete your profile details (First Name, Last Name, and Email) before reporting a bug so we can follow up with you.',
+        [
+          { text: 'Later', style: 'cancel' },
+          {
+            text: 'Update Profile',
+            onPress: () => openOverlay('PROFILE')
+          }
+        ]
+      );
+      return;
+    }
+    
     openOverlay(type);
   };
 
