@@ -149,8 +149,9 @@ This function determines the composite score and pass/fail status:
 ### 2.6 Data Fetching
 
 Data is fetched from Supabase via `packages/utils/src/pt-supabase-api.ts` and cached locally:
-- **Standards Lookup**: Joins demographics (`pt_age_sex_groups`) with performance tables.
-- **Altitude Data**: Dynamically loads run, walk, or HAMR adjustments based on the user's exercise selection.
+- **Unified Standards Lookup**: Consumes the `pt_scoring_standards` and `pt_pass_fail_standards` tables. Demographics are mapped via `pt_age_sex_groups`.
+- **Text-Based Performance**: The API layer now returns raw performance strings (e.g., `"13:25"`) which are parsed into seconds or integers by the `pt-calculator.ts` engine.
+- **Altitude Data**: Dynamically loads Run/HAMR corrections from `pt_altitude_corrections` and demographic-specific Walk thresholds from `pt_altitude_walk_thresholds`.
 
 ---
 

@@ -25,13 +25,18 @@ We categorize data into three tiers based on volatility and access patterns:
 
 | Tier | Example | Storage | Sync Frequency |
 | :--- | :--- | :--- | :--- |
-| **Static Standards** | PT Scoring, Pay Scales | SQLite / `seed-data.json`* | Monthly / On Change |
+| **Static Standards** | PT Scoring, Pay Scales | SQLite / `seed-data.json` | First Launch / On Change |
 | **Dynamic Metadata** | `sync_metadata` | SQLite / Memory | Every Launch |
 | **User State** | Current Inputs, Best Scores | SQLite (Smart Cache) | Never (Local Only) |
 
-*\*Planned feature: `seed-data.json` will provide the initial hydration on first-launch to enable zero-network startup. Currently, initial hydration occurs on the first connected launch via background sync.*
+## 4. HUMAN-READABLE DATA (2025 Architecture)
 
-## 4. RELATIONAL CACHING (Smart Cache)
+The 2025 PT Architecture prioritizes **human auditaiblity**. Performance values (e.g., `"13:25"`, `"<= 0.49"`, `"45-48"`) are stored as **Text** in the database to precisely match source DAFMAN 36-2905 PDFs.
+
+- **Parser Intelligence**: The `@repo/utils` logic engine is responsible for parsing these strings into numeric values (seconds, floats, or integers) at runtime for comparison.
+- **Unified Schema**: 7 fragmented fitness tables have been consolidated into 4 modular, exercise-centric tables (`pt_scoring_standards`, `pt_pass_fail_standards`, `pt_altitude_corrections`, `pt_altitude_walk_thresholds`).
+
+## 5. RELATIONAL CACHING (Smart Cache)
 
 The local SQLite database (the "Smart Cache") mirrors the relational structure of PostgreSQL. This allows the `@repo/utils` library to perform complex joins (e.g., joining demographics with scoring tables) locally, ensuring that "What-If" scenarios (like changing an age bracket) reflect instantly.
 
