@@ -30,7 +30,7 @@ export const BugReportView: React.FC = () => {
   const [category, setCategory] = useState<BugCategory>('UI/UX');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = StyleSheet.create({
     viewContainer: {
       paddingHorizontal: 12, // Match MainCalculatorLayout content padding
       paddingTop: theme.spacing.s,
@@ -94,7 +94,7 @@ export const BugReportView: React.FC = () => {
     submitButton: {
       width: '100%',
     },
-  }), [theme]);
+  });
 
   const categories: { label: string; value: BugCategory; icon: string }[] = useMemo(() => [
     { label: 'UI/UX', value: 'UI/UX', icon: 'palette-outline' },

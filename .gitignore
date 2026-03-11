@@ -52,9 +52,10 @@ apps/mobile/assets/*
 # Test coverage
 coverage/
 
-# Temporary files
-# image.png
+# Temporary and Source files
 docs/sources/
+docs/*.csv
+image.png
 
 # Agent configuration
 .gemini/

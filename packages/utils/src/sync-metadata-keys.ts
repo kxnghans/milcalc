@@ -2,9 +2,10 @@
  * Maps Supabase table names to TanStack Query keys for cache invalidation.
  */
 export const SYNC_METADATA_QUERY_KEYS: Record<string, string[]> = {
-  'pt_muscular_fitness_standards': ['ptStandards'],
-  'pt_cardio_respiratory_standards': ['ptStandards'],
-  'walk_standards': ['walkStandards'],
+  'pt_scoring_standards': ['ptStandards'],
+  'pt_pass_fail_standards': ['passFailStandards'],
+  'pt_altitude_corrections': ['altitudeCorrections'],
+  'pt_altitude_walk_thresholds': ['walkAltitudeThresholds'],
   'base_pay_2024': ['basePay'],
   'reserve_drill_pay': ['basePay'],
   'bah_rates_dependents': ['bahRate', 'mhaData'],

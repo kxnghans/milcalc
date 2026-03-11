@@ -1,100 +1,68 @@
 /**
  * @file pt-data-mocks.ts
  * @description Provides mock data for PT calculation unit tests.
- * This data simulates the structures returned from Supabase API calls.
  */
 
-// Simulates data from `run_altitude_adjustments`, `walk_altitude_adjustments`, etc.
-export const mockStandards = {
+import { PtStandard, Tables } from '../../src/types';
+
+export const mockStandards: { [key: string]: { [key: string]: PtStandard[] } } = {
     "Male": {
         "<25": [
-            // Strength - Hand Release Pushups
-            { exercise: 'hand_release_pushups_2min', measurement: '> 40', points: 20 },
-            { exercise: 'hand_release_pushups_2min', measurement: '40', points: 20.0 },
-            { exercise: 'hand_release_pushups_2min', measurement: '30', points: 16.0 },
-            { exercise: 'hand_release_pushups_2min', measurement: '15', points: 10.0 },
-            { exercise: 'hand_release_pushups_2min', measurement: '10', points: 0 },
-            
-            // Strength - Pushups 1 min
-            { exercise: 'push_ups_1min', measurement: '≥ 67', points: 20.0 },
-            { exercise: 'push_ups_1min', measurement: '40', points: 13.6 },
-            { exercise: 'push_ups_1min', measurement: '30', points: 10.0 },
-            { exercise: 'push_ups_1min', measurement: '0', points: 0 },
-            
-            // Core - Cross Leg Reverse Crunch
-            { exercise: 'cross_leg_reverse_crunch_2min', measurement: '> 49', points: 20.0 },
-            { exercise: 'cross_leg_reverse_crunch_2min', measurement: '49', points: 20.0 }, 
-            { exercise: 'cross_leg_reverse_crunch_2min', measurement: '35', points: 15.0 },
-            { exercise: 'cross_leg_reverse_crunch_2min', measurement: '21', points: 10.0 },
-            { exercise: 'cross_leg_reverse_crunch_2min', measurement: '10', points: 0 },
-            
-            // Core - Situps 1 min
-            { exercise: 'sit_ups_1min', measurement: '> 58', points: 20.0 },
-            { exercise: 'sit_ups_1min', measurement: '58', points: 20.0 },
-            { exercise: 'sit_ups_1min', measurement: '42', points: 12.0 },
-            { exercise: 'sit_ups_1min', measurement: '30', points: 5.0 },
-            { exercise: 'sit_ups_1min', measurement: '0', points: 0 },
-            
-             // Core - Forearm Plank
-            { exercise: 'forearm_plank_time', measurement: '> 3:35', points: 20.0 },
-            { exercise: 'forearm_plank_time', measurement: '3:35', points: 20.0 },
-            { exercise: 'forearm_plank_time', measurement: '2:25', points: 15.3 },
-            { exercise: 'forearm_plank_time', measurement: '1:00', points: 5.0 },
-            { exercise: 'forearm_plank_time', measurement: '0:00', points: 0 },
-
-            // Cardio - Run
-            { exercise: 'run', measurement: '≤ 9:12', points: 60.0 },
-            { exercise: 'run', measurement: '9:13 - 9:34', points: 59.5 },
-            { exercise: 'run', measurement: '11:57 - 12:14', points: 54.0 }, 
-            { exercise: 'run', measurement: '12:34 - 12:53', points: 52.0 },
-            { exercise: 'run', measurement: '20:00', points: 0 },
-
-            // Cardio - Shuttles (HAMR)
-            { exercise: 'shuttles', measurement: '> 100', points: 60.0 },
-            { exercise: 'shuttles', measurement: '48 - 50', points: 46.5 },
-            { exercise: 'shuttles', measurement: '45 - 47', points: 44.0 },
-            { exercise: 'shuttles', measurement: '39 - 41', points: 38.0 },
-            { exercise: 'shuttles', measurement: '0', points: 0 },
+            // Strength (15 pts max)
+            { exercise: 'hand_release_pushups_2min', measurement: '40', points: 15.0 },
+            { exercise: 'hand_release_pushups_2min', measurement: '30', points: 12.0 },
+            { exercise: 'hand_release_pushups_2min', measurement: '15', points: 7.5 },
+            { exercise: 'push_ups_1min', measurement: '67', points: 15.0 },
+            { exercise: 'push_ups_1min', measurement: '40', points: 10.2 },
+            // Core (15 pts max)
+            { exercise: 'cross_leg_reverse_crunch_2min', measurement: '49', points: 15.0 }, 
+            { exercise: 'cross_leg_reverse_crunch_2min', measurement: '35', points: 11.2 },
+            { exercise: 'sit_ups_1min', measurement: '58', points: 15.0 },
+            { exercise: 'sit_ups_1min', measurement: '42', points: 9.0 },
+            { exercise: 'forearm_plank_time', measurement: '3:35', points: 15.0 },
+            { exercise: 'forearm_plank_time', measurement: '2:30', points: 11.5 },
+            // Cardio (50 pts max)
+            { exercise: 'run', measurement: '9:12', points: 50.0 },
+            { exercise: 'run', measurement: '12:14', points: 45.0 }, 
+            { exercise: 'run_2mile', measurement: '9:12', points: 50.0 },
+            { exercise: 'run_2mile', measurement: '12:14', points: 45.0 }, 
+            { exercise: 'shuttles', measurement: '100', points: 50.0 },
+            { exercise: 'shuttles', measurement: '50', points: 38.7 },
+            { exercise: 'shuttles_20m', measurement: '100', points: 50.0 },
+            { exercise: 'shuttles_20m', measurement: '50', points: 38.7 },
+            // WHtR (20 pts max)
+            { exercise: 'whtr', measurement: '0.49', points: 20.0 },
         ]
     },
     "Female": {
         "35-39": [
-            // Strength
-            { exercise: 'push_ups_1min', measurement: '42', points: 20.0 },
-            { exercise: 'push_ups_1min', measurement: '25', points: 15.0 },
-            { exercise: 'push_ups_1min', measurement: '10', points: 10.0 },
-            { exercise: 'push_ups_1min', measurement: '5', points: 0 },
-            // Core
-            { exercise: 'sit_ups_1min', measurement: '43', points: 20.0 },
-            { exercise: 'sit_ups_1min', measurement: '30', points: 15.0 },
-            { exercise: 'sit_ups_1min', measurement: '24', points: 3.0 },
-            { exercise: 'sit_ups_1min', measurement: '20', points: 0 },
-            // Cardio
-            { exercise: 'run', measurement: '11:06', points: 60.0 },
-            { exercise: 'run', measurement: '15:21', points: 54.0 },
-            { exercise: 'run', measurement: '20:34', points: 38.5 },
-            { exercise: 'run', measurement: '25:00', points: 0 },
+            { exercise: 'push_ups_1min', measurement: '42', points: 15.0 },
+            { exercise: 'push_ups_1min', measurement: '25', points: 11.2 },
+            { exercise: 'sit_ups_1min', measurement: '43', points: 15.0 },
+            { exercise: 'sit_ups_1min', measurement: '30', points: 11.2 },
+            { exercise: 'run', measurement: '11:06', points: 50.0 },
+            { exercise: 'run', measurement: '15:21', points: 45.0 },
+            { exercise: 'run_2mile', measurement: '11:06', points: 50.0 },
+            { exercise: 'run_2mile', measurement: '15:21', points: 45.0 },
+            { exercise: 'whtr', measurement: '0.49', points: 20.0 },
         ]
     }
 };
 
-// Simulates data from `walk_standards`
-export const mockWalkStandards = [
-    { id: 1, gender: "male", age_range: "<30", max_time: "16:16" },
-    { id: 6, gender: "female", age_range: "<30", max_time: "17:22" },
-    { id: 7, gender: "female", age_range: "30-39", max_time: "17:28" },
+export const mockPassFailStandards: Partial<Tables<'pt_pass_fail_standards'>>[] = [
+    { exercise_type: 'push_ups_1min', min_performance: '30' },
+    { exercise_type: 'hand_release_pushups_2min', min_performance: '15' },
+    { exercise_type: 'sit_ups_1min', min_performance: '39' },
+    { exercise_type: 'cross_leg_reverse_crunch_2min', min_performance: '21' },
+    { exercise_type: 'run_2mile', min_performance: '19:45' },
+    { exercise_type: 'walk_2km', min_performance: '17:28' },
 ];
 
-// Simulates data from `run_altitude_adjustments`, `walk_altitude_adjustments`, etc.
-export const mockAltitudeAdjustments = {
-    run: [
-        { id: 2, altitude_group: 'group1', altitude_range: '5250 ft - 5499 ft', time_range_start: 553, time_range_end: 562, correction: 2 },
-    ],
-    walk: [
-        { id: 1, gender: 'male', altitude_group: 'group1', altitude_range: '5250 ft - 5500 ft', age_range_start: 0, age_range_end: 29, max_time: 978 },
-        { id: 2, gender: 'female', altitude_group: 'group1', altitude_range: '5250 ft - 5500 ft', age_range_start: 30, age_range_end: 39, max_time: 1125 }, 
-    ],
-    hamr: [
-        { id: 1, altitude_group: 'group1', altitude_range: '5250 ft - 5500 ft', shuttles_to_add: 1 },
-    ]
-};
+export const mockAltitudeCorrections: Partial<Tables<'pt_altitude_corrections'>>[] = [
+    { exercise_type: 'run_2mile', altitude_group: 'group1', perf_start: '9:13', perf_end: '9:22', correction: 2 },
+    { exercise_type: 'shuttles_20m', altitude_group: 'group1', correction: 1 },
+];
+
+export const mockWalkAltThresholds: Partial<Tables<'pt_altitude_walk_thresholds'>>[] = [
+    { sex: 'Female', age_range: '30-39', altitude_group: 'group1', max_time: '18:45' },
+];

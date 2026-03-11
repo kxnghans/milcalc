@@ -578,99 +578,279 @@ export type Database = {
         }
         Relationships: []
       }
-      pt_cardio_respiratory_standards: {
+      pt_scoring_standards: {
         Row: {
-          age_sex_group_id: number | null
-          health_risk_category: string | null
           id: number
-          points: number | null
-          run_time: string | null
-          shuttles_range: string | null
+          age_sex_group_id: number | null
+          exercise_type: string
+          performance: string
+          points: number
+          health_risk_category: string | null
+          created_at: string
         }
         Insert: {
-          age_sex_group_id?: number | null
-          health_risk_category?: string | null
           id?: number
-          points?: number | null
-          run_time?: string | null
-          shuttles_range?: string | null
+          age_sex_group_id?: number | null
+          exercise_type: string
+          performance: string
+          points: number
+          health_risk_category?: string | null
+          created_at?: string
         }
         Update: {
-          age_sex_group_id?: number | null
-          health_risk_category?: string | null
           id?: number
-          points?: number | null
-          run_time?: string | null
-          shuttles_range?: string | null
+          age_sex_group_id?: number | null
+          exercise_type?: string
+          performance?: string
+          points?: number
+          health_risk_category?: string | null
+          created_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "pt_cardio_respiratory_standards_age_sex_group_id_fkey"
+            foreignKeyName: "pt_scoring_standards_age_sex_group_id_fkey"
             columns: ["age_sex_group_id"]
             isOneToOne: false
             referencedRelation: "pt_age_sex_groups"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
-      pt_help_details: {
+      pt_pass_fail_standards: {
         Row: {
-          content_key: string | null
           id: number
-          section_content: string | null
-          section_header: string | null
-          title: string | null
+          exercise_type: string
+          sex: string | null
+          age_range: string | null
+          age_sex_group_id: number | null
+          min_performance: string | null
+          created_at: string
         }
         Insert: {
-          content_key?: string | null
-          id: number
-          section_content?: string | null
-          section_header?: string | null
-          title?: string | null
+          id?: number
+          exercise_type: string
+          sex?: string | null
+          age_range?: string | null
+          age_sex_group_id?: number | null
+          min_performance?: string | null
+          created_at?: string
         }
         Update: {
-          content_key?: string | null
           id?: number
-          section_content?: string | null
-          section_header?: string | null
-          title?: string | null
+          exercise_type?: string
+          sex?: string | null
+          age_range?: string | null
+          age_sex_group_id?: number | null
+          min_performance?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pt_pass_fail_standards_age_sex_group_id_fkey"
+            columns: ["age_sex_group_id"]
+            isOneToOne: false
+            referencedRelation: "pt_age_sex_groups"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      pt_altitude_corrections: {
+        Row: {
+          id: number
+          exercise_type: string
+          altitude_group: string
+          perf_start: string | null
+          perf_end: string | null
+          correction: number
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          exercise_type: string
+          altitude_group: string
+          perf_start?: string | null
+          perf_end?: string | null
+          correction: number
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          exercise_type?: string
+          altitude_group?: string
+          perf_start?: string | null
+          perf_end?: string | null
+          correction?: number
+          created_at?: string
         }
         Relationships: []
       }
-      pt_muscular_fitness_standards: {
+      pt_altitude_walk_thresholds: {
         Row: {
-          age_sex_group_id: number | null
-          exercise_type: string | null
           id: number
-          points: number | null
-          reps: string | null
-          time: string | null
+          sex: string
+          age_range: string
+          altitude_group: string
+          max_time: string
+          created_at: string
         }
         Insert: {
-          age_sex_group_id?: number | null
-          exercise_type?: string | null
           id?: number
-          points?: number | null
-          reps?: string | null
-          time?: string | null
+          sex: string
+          age_range: string
+          altitude_group: string
+          max_time: string
+          created_at?: string
         }
         Update: {
-          age_sex_group_id?: number | null
-          exercise_type?: string | null
           id?: number
-          points?: number | null
-          reps?: string | null
-          time?: string | null
+          sex?: string
+          age_range?: string
+          altitude_group?: string
+          max_time?: string
+          created_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "pt_muscular_fitness_standards_age_sex_group_id_fkey"
-            columns: ["age_sex_group_id"]
-            isOneToOne: false
-            referencedRelation: "pt_age_sex_groups"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      pt_help_details: {
+        Row: {
+          id: number
+          title: string | null
+          section_header: string | null
+          section_content: string | null
+          content_key: string | null
+        }
+        Insert: {
+          id?: number
+          title?: string | null
+          section_header?: string | null
+          section_content?: string | null
+          content_key?: string | null
+        }
+        Update: {
+          id?: number
+          title?: string | null
+          section_header?: string | null
+          section_content?: string | null
+          content_key?: string | null
+        }
+        Relationships: []
+      }
+      zip_mha_lookup: {
+        Row: {
+          zip_code: string
+          mha_code: string
+        }
+        Insert: {
+          zip_code: string
+          mha_code: string
+        }
+        Update: {
+          zip_code?: string
+          mha_code?: string
+        }
+        Relationships: []
+      }
+      bah_rates_2026: {
+        Row: {
+          mha: string
+          mha_name: string | null
+          state: string | null
+          has_dependents: boolean
+          e01: number | null
+          e02: number | null
+          e03: number | null
+          e04: number | null
+          e05: number | null
+          e06: number | null
+          e07: number | null
+          e08: number | null
+          e09: number | null
+          w01: number | null
+          w02: number | null
+          w03: number | null
+          w04: number | null
+          w05: number | null
+          o01e: number | null
+          o02e: number | null
+          o03e: number | null
+          o01: number | null
+          o02: number | null
+          o03: number | null
+          o04: number | null
+          o05: number | null
+          o06: number | null
+          o07: number | null
+          o08: number | null
+          o09: number | null
+          o10: number | null
+        }
+        Insert: {
+          mha: string
+          mha_name?: string | null
+          state?: string | null
+          has_dependents: boolean
+          e01?: number | null
+          e02?: number | null
+          e03?: number | null
+          e04?: number | null
+          e05?: number | null
+          e06?: number | null
+          e07?: number | null
+          e08?: number | null
+          e09?: number | null
+          w01?: number | null
+          w02?: number | null
+          w03?: number | null
+          w04?: number | null
+          w05?: number | null
+          o01e?: number | null
+          o02e?: number | null
+          o03e?: number | null
+          o01?: number | null
+          o02?: number | null
+          o03?: number | null
+          o04?: number | null
+          o05?: number | null
+          o06?: number | null
+          o07?: number | null
+          o08?: number | null
+          o09?: number | null
+          o10?: number | null
+        }
+        Update: {
+          mha?: string
+          mha_name?: string | null
+          state?: string | null
+          has_dependents?: boolean
+          e01?: number | null
+          e02?: number | null
+          e03?: number | null
+          e04?: number | null
+          e05?: number | null
+          e06?: number | null
+          e07?: number | null
+          e08?: number | null
+          e09?: number | null
+          w01?: number | null
+          w02?: number | null
+          w03?: number | null
+          w04?: number | null
+          w05?: number | null
+          o01e?: number | null
+          o02e?: number | null
+          o03e?: number | null
+          o01?: number | null
+          o02?: number | null
+          o03?: number | null
+          o04?: number | null
+          o05?: number | null
+          o06?: number | null
+          o07?: number | null
+          o08?: number | null
+          o09?: number | null
+          o10?: number | null
+        }
+        Relationships: []
       }
       reserve_drill_pay: {
         Row: {
@@ -1652,6 +1832,7 @@ export interface PtStandard {
   exercise: string | null;
   measurement: string | number | null;
   points: number;
+  healthRiskCategory?: string | null;
 }
 
 export interface PtPerformance {
@@ -1674,9 +1855,11 @@ export interface PtInputs {
   shuttles?: number;
   walkMinutes?: number;
   walkSeconds?: number;
+  whtr?: number;
   isStrengthExempt?: boolean;
   isCoreExempt?: boolean;
   isCardioExempt?: boolean;
+  isWhtrExempt?: boolean;
   pushupComponent: string;
   coreComponent: string;
   cardioComponent: string;

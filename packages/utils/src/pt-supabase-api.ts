@@ -2,13 +2,13 @@ import { supabase, sanitizeError } from './supabaseClient';
 import { PtStandard, Tables } from './types';
 
 /**
- * Fetches all PT standards for a given gender and age group from multiple tables.
+ * Fetches all PT scoring standards for a given gender and age group.
  * @param gender - The user's gender ('Male' or 'Female').
  * @param age_group - The user's age group string (e.g., '<25', '25-29').
  * @returns An array of all standards for that group, or null if an error occurs.
  */
 export const getPtStandards = async (gender: string, age_group: string): Promise<PtStandard[] | null> => {
-  // 1. Get the age_sex_group_id from the pt_age_sex_groups table
+  // 1. Get the age_sex_group_id
   const { data: ageGroupData, error: ageGroupError } = await supabase
     .from('pt_age_sex_groups')
     .select('id')
@@ -23,82 +23,67 @@ export const getPtStandards = async (gender: string, age_group: string): Promise
 
   const ageSexGroupId = ageGroupData.id;
 
-  // 2. Fetch data from pt_muscular_fitness_standards and pt_cardio_respiratory_standards in parallel
-  const [muscularResult, cardioResult] = await Promise.all([
-    supabase
-      .from('pt_muscular_fitness_standards')
-      .select('exercise_type, reps, time, points')
-      .eq('age_sex_group_id', ageSexGroupId)
-      .order('points', { ascending: false }),
-    supabase
-      .from('pt_cardio_respiratory_standards')
-      .select('run_time, shuttles_range, points')
-      .eq('age_sex_group_id', ageSexGroupId)
-      .order('points', { ascending: false })
-  ]);
+  // 2. Fetch from unified scoring table
+  const { data, error } = await supabase
+    .from('pt_scoring_standards')
+    .select('exercise_type, performance, points, health_risk_category')
+    .eq('age_sex_group_id', ageSexGroupId)
+    .order('points', { ascending: false });
 
-  const { data: muscularData, error: muscularError } = muscularResult;
-  const { data: cardioData, error: cardioError } = cardioResult;
-
-  if (muscularError) {
-    console.error('Error fetching muscular fitness standards:', sanitizeError(muscularError));
+  if (error) {
+    console.error('Error fetching scoring standards:', sanitizeError(error));
     return null;
   }
 
+  // 3. Add WHtR (age-independent)
+  const { data: whtrData, error: whtrError } = await supabase
+    .from('pt_scoring_standards')
+    .select('exercise_type, performance, points, health_risk_category')
+    .eq('exercise_type', 'whtr')
+    .order('points', { ascending: false });
 
-  if (cardioError) {
-    console.error('Error fetching cardio standards:', sanitizeError(cardioError));
-    return null;
+  if (whtrError) {
+    console.error('Error fetching WHtR standards:', sanitizeError(whtrError));
   }
 
-  // 4. Combine and transform the data into a consistent format
-  const standards: PtStandard[] = [];
+  const combinedData = [...(data || []), ...(whtrData || [])];
 
-  if (muscularData) {
-    for (const item of muscularData) {
-      standards.push({
-        exercise: item.exercise_type,
-        measurement: item.reps || item.time, // Use reps or time as the measurement
-        points: item.points || 0,
-      });
-    }
-  }
-
-  if (cardioData) {
-    for (const item of cardioData) {
-      if (item.run_time) {
-        standards.push({
-          exercise: 'run',
-          measurement: item.run_time,
-          points: item.points || 0,
-        });
-      }
-      if (item.shuttles_range) {
-        standards.push({
-          exercise: 'shuttles',
-          measurement: item.shuttles_range,
-          points: item.points || 0,
-        });
-      }
-    }
-  }
-
-  return standards;
+  // 4. Transform to consistent format
+  return combinedData.map(item => ({
+    exercise: item.exercise_type,
+    measurement: item.performance,
+    points: item.points,
+    healthRiskCategory: item.health_risk_category
+  }));
 };
 
 /**
- * Fetches all walk standards for a given gender.
- * @param gender - The user's gender ('Male' or 'Female').
- * @returns An array of all walk standards for that group, or null if an error occurs.
+ * Fetches passing thresholds (minimums) for all exercises.
+ * @param gender - The user's gender.
+ * @param age_group - The user's age group.
+ * @returns An array of pass/fail standards.
  */
-export const getWalkStandards = async (gender: string) => {
-  const { data, error } = await supabase
-    .from('walk_standards')
-    .select('*')
-    .eq('gender', gender);
+export const getPassFailStandards = async (gender: string, age_group: string): Promise<Tables<'pt_pass_fail_standards'>[] | null> => {
+  // Try to find by age group ID first
+  const { data: ageGroupData } = await supabase
+    .from('pt_age_sex_groups')
+    .select('id')
+    .eq('sex', gender)
+    .eq('age_range', age_group)
+    .single();
+
+  const query = supabase.from('pt_pass_fail_standards').select('*');
+  
+  if (ageGroupData) {
+    query.or(`age_sex_group_id.eq.${ageGroupData.id},and(sex.eq.${gender},age_range.eq.${age_group})`);
+  } else {
+    query.eq('sex', gender).eq('age_range', age_group);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
-    console.error('Error fetching walk standards:', sanitizeError(error));
+    console.error('Error fetching pass/fail standards:', sanitizeError(error));
     return null;
   }
 
@@ -106,39 +91,56 @@ export const getWalkStandards = async (gender: string) => {
 };
 
 /**
- * Fetches all altitude adjustments for a given exercise.
- * @param exercise - The exercise ('run', 'walk', or 'hamr').
- * @returns An array of all altitude adjustments for that exercise, or null if an error occurs.
+ * Fetches all altitude corrections for Run and HAMR.
  */
-export const getAltitudeAdjustments = async <T extends 'run' | 'walk' | 'hamr'>(
-  exercise: T
-): Promise<Tables<T extends 'run' ? 'run_altitude_adjustments' : T extends 'walk' ? 'walk_altitude_adjustments' : 'hamr_altitude_adjustments'>[] | null> => {
-    let query;
-    if (exercise === 'run') {
-        query = supabase.from('run_altitude_adjustments').select('*');
-    } else if (exercise === 'walk') {
-        query = supabase.from('walk_altitude_adjustments').select('*');
-    } else if (exercise === 'hamr') {
-        query = supabase.from('hamr_altitude_adjustments').select('*');
-    } else {
-        return null;
-    }
-
-  const { data, error } = await query;
+export const getPtAltitudeCorrections = async (): Promise<Tables<'pt_altitude_corrections'>[] | null> => {
+  const { data, error } = await supabase
+    .from('pt_altitude_corrections')
+    .select('*');
 
   if (error) {
-    console.error(`Error fetching altitude adjustments for ${exercise}:`, sanitizeError(error));
+    console.error('Error fetching altitude corrections:', sanitizeError(error));
     return null;
   }
 
-  return data as unknown as Tables<T extends 'run' ? 'run_altitude_adjustments' : T extends 'walk' ? 'walk_altitude_adjustments' : 'hamr_altitude_adjustments'>[];
+  return data;
 };
 
+/**
+ * Fetches altitude walk thresholds.
+ */
+export const getPtAltitudeWalkThresholds = async (gender: string, age_group: string): Promise<Tables<'pt_altitude_walk_thresholds'>[] | null> => {
+  const { data, error } = await supabase
+    .from('pt_altitude_walk_thresholds')
+    .select('*')
+    .eq('sex', gender)
+    .eq('age_range', age_group);
+
+  if (error) {
+    console.error('Error fetching altitude walk thresholds:', sanitizeError(error));
+    return null;
+  }
+
+  return data;
+};
 
 /**
- * Fetches the help content for a specific topic from the Supabase database.
- * @param contentKey - The unique key for the help topic (e.g., 'push_ups_1min').
- * @returns The help content object, or null if not found.
+ * Legacy wrapper for altitude adjustments to minimize breaking changes in hooks.
+ */
+export const getAltitudeAdjustments = async (exercise: 'run' | 'walk' | 'hamr'): Promise<Tables<'pt_altitude_corrections'>[] | null> => {
+    if (exercise === 'run' || exercise === 'hamr') {
+        const type = exercise === 'run' ? 'run_2mile' : 'shuttles_20m';
+        const data = await getPtAltitudeCorrections();
+        return data ? data.filter(d => d.exercise_type === type) : null;
+    } else {
+        // Walk thresholds are handled differently now, but we return empty for legacy compatibility
+        // The calculator will need to call getPtAltitudeWalkThresholds specifically.
+        return [];
+    }
+};
+
+/**
+ * Fetches the help content for a specific topic.
  */
 export const getHelpContent = async (contentKey: string) => {
   const { data, error } = await supabase
@@ -155,10 +157,8 @@ export const getHelpContent = async (contentKey: string) => {
     return null;
   }
 
-  // Combine the sections into a single object with section_header as keys
   const combinedContent = data.reduce((acc: { [key: string]: string | null }, item) => {
     if (item.section_header) {
-        // Use a lowercase, snake_case version of the header as the key
         const key = item.section_header.toLowerCase().replace(/\s+/g, '_');
         acc[key] = item.section_content;
     }

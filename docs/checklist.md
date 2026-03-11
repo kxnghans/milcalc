@@ -1,38 +1,41 @@
-# MilCalc Execution Checklist
+# MilCalc Execution Checklist (Refined)
 
 ## ✅ Completed Milestones
-*Historical context and stabilized features.*
-
-- **Monorepo Architecture**: Turborepo, pnpm workspaces, and shared config packages (ESLint, TS) are fully operational.
-- **Pure Logic Engines**: PT, Pay, and Retirement calculators in `@repo/utils` have 100% unit test coverage.
-- **Neumorphic Design System**: Core primitives (`Card`, `ProgressBar`, `StyledInputs`) are stabilized in `@repo/ui`.
-- **Persistent Smart Cache**: Integration of `expo-sqlite` and TanStack Query ensures the app functions in Airplane Mode.
-- **Contextual Help CMS**: Markdown-enabled `DetailModal` is integrated across all primary screens.
-- **Production Config**: Standardized `app.config.ts`, unified bundle IDs (`dev.milcalc.mobile`), and secure env injection.
-- **Background Metadata Sync Engine**: Invalidation logic using Supabase `sync_metadata` is fully deployed.
-- **Context-Driven UI Refactor**: All calculators now consume `MainCalculatorLayout` and global `OverlayContext` hooks, reducing screen-level boilerplate by ~40%.
+- **Monorepo Architecture**: Fully operational.
+- **Pure Logic Engines**: PT (50-20-15-15 refactor complete), Pay, and Retirement.
+- **Neumorphic Design System**: Primitives stabilized.
+- **Persistent Smart Cache**: `expo-sqlite` + TanStack Query.
+- **Universal WHtR Logic**: Unified SQL-based lookup established.
+- **DAFMAN 36-2905 Walk/Altitude**: Unified SQL-based scoring and thresholding established.
+- **Unified PT Database Refactor**: Consolidated 7 fragmented tables into 4 modular, exercise-centric tables.
+- **2025 PT Standards Ingestion**: 100% of muscular, cardio, walk, and altitude data transcribed from PDF to SQL.
+- **PT Parser Engine**: Robust string-to-numeric calculation engine in `packages/utils`.
 
 ---
 
-## 🚀 Active To-Do
-*Granular tasks for the current implementation phase.*
+## 🚀 Active To-Do: System Hardening & Seeding
 
-### 1. Hybrid Seeding (Offline First-Launch)
-- [ ] Generate a comprehensive `seed-data.json` from the current Supabase production snapshot.
-- [ ] Implement the `seed-data` hydration logic in `_layout.tsx` for empty-cache scenarios.
-- [ ] Verify hydration speed on a physical low-end Android device.
+### 1. Offline & Hydration
+- [ ] **Implement Hybrid Seeding**: Integrate `seed-data.json` into the initial launch logic to ensure immediate functionality without first-sync delay.
+- [ ] **Data Export**: Generate a fresh `seed-data.json` containing the new unified PT standards.
 
-### 2. Security & Integrity Audit
-- [ ] Conduct a final review of Supabase RLS policies for `anon` role access.
-- [ ] Verify that the `sync_metadata` PostgreSQL triggers are firing on all financial tables.
-- [ ] Draft the Privacy Policy for the "About" screen (emphasizing local calculation).
+### 2. UI & Architecture Validation
+- [ ] **Architecture Toggle ("New")**: Add a neumorphic slide toggle (default to ON) in the `ScoreDisplay` component (PT Calculator and Best Score screens).
+- [ ] **Dual-Logic Bridge**: Implement state logic to switch between Legacy (old data) and Unified (2025 schema) calculation models based on the toggle state.
+- [ ] **Health Risk Categories**: Integrate `health_risk_category` column back into `pt_scoring_standards` to support cardio-specific stratification.
 
-### 3. Store Readiness & E2E
-- [ ] Run `expo-optimize` on `3d_splash.png` to generate all adaptive icons.
-- [ ] Script the Maestro "Golden Path" E2E tests for the PT and Pay calculators.
-- [ ] Configure GitHub Actions to run the validation suite (`lint`, `check-types`, `test`) on every PR.
+### 3. Performance & Quality Assurance
+- [ ] **Maestro E2E Suite**: Configure Maestro for "Golden Path" validation (Pay -> PT -> Retirement flow).
+- [ ] **Physical Device Audit**: Profile memory and render performance on iOS/Android (React 19 / New Arch).
 
-### 4. Polish & Interactive Physics
-- [ ] Implement `react-native-haptic-feedback` on neumorphic button presses.
-- [ ] Fine-tune the bezier easing for the `NeumorphicOutset` -> `NeumorphicInset` transition.
-- [ ] Resolve minor layout overflow on small-screen devices (iPhone SE).
+### 4. Security & Infrastructure
+- [ ] **Finalize RLS Policies**: Audit all Supabase tables for strict Row Level Security (RLS) before production push.
+- [ ] **Metadata Optimization**: Refine `SyncManager` logic to handle large-scale schema migrations more gracefully.
+
+---
+
+## 🧠 Strategic Context
+- **Human Readability**: Performance values are stored as Text (e.g., `"13:25"`) to match source PDFs.
+- **Parser Intelligence**: The logic engine is responsible for parsing these strings into numeric values for comparison.
+- **Idempotency**: Seed files are self-contained; running `push_ups_1min.sql` updates ONLY push-up data.
+- **Offline First**: All new tables are added to the `SyncManager` tracking.

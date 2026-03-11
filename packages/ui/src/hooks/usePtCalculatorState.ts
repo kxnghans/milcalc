@@ -1,9 +1,7 @@
 /**
  * @file usePtCalculatorState.ts
  * @description This file defines the primary custom hook for the main PT Calculator screen.
- * It acts as a central state aggregator, composing several smaller state management hooks
- * (for demographics, strength, core, and cardio). It debounces all inputs and triggers
- * score calculations and updates when the inputs have stabilized.
+ * It acts as a central state aggregator, composing several smaller state management hooks.
  */
 
 import { useState, useEffect, useMemo } from 'react';
@@ -15,8 +13,9 @@ import {
   getPerformanceForScore,
   getAgeGroupString,
   getPtStandards,
-  getWalkStandards,
-  getAltitudeAdjustments,
+  getPassFailStandards,
+  getPtAltitudeCorrections,
+  getPtAltitudeWalkThresholds,
 } from '@repo/utils';
 import { useDebounce } from './useDebounce';
 import { useDemographicsState } from './useDemographicsState';
@@ -24,34 +23,26 @@ import { useStrengthState } from './useStrengthState';
 import { useCoreState } from './useCoreState';
 import { useCardioState } from './useCardioState';
 
-/**
- * A comprehensive custom hook that manages the entire state for the PT Calculator screen.
- * It integrates state from demographics, strength, core, and cardio components,
- * debounces the inputs, and calculates the final score and associated data.
- * @returns An object containing all the state and derived data needed by the calculator screen.
- */
 export function usePtCalculatorState(
   initialAge: string = '', 
   initialGender: string = 'male', 
   initialAltitudeGroup: string = 'normal'
 ) {
-  // Compose smaller hooks to manage specific sections of the calculator.
   const demographics = useDemographicsState(initialAge, initialGender, initialAltitudeGroup);
   const strength = useStrengthState();
   const core = useCoreState();
   const cardio = useCardioState();
 
-  // State for the calculated results from the core utility functions.
   const [score, setScore] = useState<{
     totalScore: number;
     cardioScore: number | string;
     pushupScore: number | string;
     coreScore: number | string;
+    whtrScore: number | string;
     isPass: boolean;
     walkPassed: string;
-  }>({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
+  }>({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, whtrScore: 0, isPass: false, walkPassed: 'n/a' });
   
-  // Debounce all state values that are used in calculations.
   const debouncedAge = useDebounce(demographics.age, 500);
   const debouncedGender = useDebounce(demographics.gender, 500);
   const debouncedAltitudeGroup = useDebounce(demographics.altitudeGroup, 500);
@@ -79,56 +70,37 @@ export function usePtCalculatorState(
   const ageGroup = getAgeGroupString(ageNum);
   const capitalizedGender = debouncedGender.charAt(0).toUpperCase() + debouncedGender.slice(1);
 
+  // 1. Fetch Scoring Standards (Includes WHtR)
   const { data: standards, isLoading: isLoadingStandards } = useQuery({
     queryKey: ['ptStandards', capitalizedGender, ageGroup],
     queryFn: () => getPtStandards(capitalizedGender, ageGroup || ''),
     enabled: !!capitalizedGender && !!ageGroup,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
   });
 
-  const { data: walkStandards, isLoading: isLoadingWalkStandards } = useQuery({
-    queryKey: ['walkStandards', debouncedGender],
-    queryFn: () => getWalkStandards(debouncedGender),
-    enabled: !!debouncedGender,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
+  // 2. Fetch Pass/Fail Standards
+  const { data: passFailStandards, isLoading: isLoadingPassFail } = useQuery({
+    queryKey: ['passFailStandards', capitalizedGender, ageGroup],
+    queryFn: () => getPassFailStandards(capitalizedGender, ageGroup || ''),
+    enabled: !!capitalizedGender && !!ageGroup,
   });
 
-  const { data: walkAltitudeAdjustments, isLoading: isLoadingWalkAltitude } = useQuery({
-    queryKey: ['altitudeAdjustments', 'walk'],
-    queryFn: () => getAltitudeAdjustments('walk'),
-    staleTime: Infinity,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
+  // 3. Fetch Altitude Corrections (Run/HAMR)
+  const { data: altitudeCorrections, isLoading: isLoadingCorrections } = useQuery({
+    queryKey: ['altitudeCorrections'],
+    queryFn: () => getPtAltitudeCorrections(),
   });
 
-  const { data: runAltitudeAdjustments, isLoading: isLoadingRunAltitude } = useQuery({
-    queryKey: ['altitudeAdjustments', 'run'],
-    queryFn: () => getAltitudeAdjustments('run'),
-    staleTime: Infinity,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
+  // 4. Fetch Walk Altitude Thresholds
+  const { data: walkAltThresholds, isLoading: isLoadingWalkAlt } = useQuery({
+    queryKey: ['walkAltThresholds', capitalizedGender, ageGroup],
+    queryFn: () => getPtAltitudeWalkThresholds(capitalizedGender, ageGroup || ''),
+    enabled: !!capitalizedGender && !!ageGroup,
   });
 
-  const { data: hamrAltitudeAdjustments, isLoading: isLoadingHamrAltitude } = useQuery({
-    queryKey: ['altitudeAdjustments', 'hamr'],
-    queryFn: () => getAltitudeAdjustments('hamr'),
-    staleTime: Infinity,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 2000, 30000),
-  });
-
-  const isLoading = isLoadingStandards || isLoadingWalkStandards || isLoadingWalkAltitude || isLoadingRunAltitude || isLoadingHamrAltitude;
-
-  const altitudeData = useMemo(() => ({
-    walk: walkAltitudeAdjustments || [],
-    run: runAltitudeAdjustments || [],
-    hamr: hamrAltitudeAdjustments || [],
-  }), [walkAltitudeAdjustments, runAltitudeAdjustments, hamrAltitudeAdjustments]);
+  const isLoading = isLoadingStandards || isLoadingPassFail || isLoadingCorrections || isLoadingWalkAlt;
 
   const { minMax, cardioMinMax } = useMemo(() => {
-    if (!standards || !walkStandards) {
+    if (!standards || !passFailStandards) {
         return { 
             minMax: { pushups: {min: 0, max: 0}, core: {min: 0, max: 0}}, 
             cardioMinMax: { min: 0, max: 0 } 
@@ -136,20 +108,20 @@ export function usePtCalculatorState(
     }
     const pushupValues = getMinMaxValues(standards, debouncedPushupComponent);
     const coreValues = getMinMaxValues(standards, debouncedCoreComponent);
-    const cardioValues = getCardioMinMaxValues(standards, walkStandards, debouncedCardioComponent);
+    const cardioValues = getCardioMinMaxValues(standards, passFailStandards, debouncedCardioComponent);
     return { 
         minMax: {pushups: pushupValues, core: coreValues}, 
         cardioMinMax: cardioValues 
     };
-  }, [standards, walkStandards, debouncedPushupComponent, debouncedCoreComponent, debouncedCardioComponent]);
+  }, [standards, passFailStandards, debouncedPushupComponent, debouncedCoreComponent, debouncedCardioComponent]);
 
   const ninetyPercentileThresholds = useMemo(() => {
       if (!standards) {
           return { pushups: 0, core: 0, cardio: 0 };
       }
-      const pushupThreshold = getPerformanceForScore(standards, debouncedPushupComponent, 18); // 90% of 20
-      const coreThreshold = getPerformanceForScore(standards, debouncedCoreComponent, 18); // 90% of 20
-      const cardioThreshold = getPerformanceForScore(standards, debouncedCardioComponent, 54); // 90% of 60
+      const pushupThreshold = getPerformanceForScore(standards, debouncedPushupComponent, 13.5); // 90% of 15
+      const coreThreshold = getPerformanceForScore(standards, debouncedCoreComponent, 13.5); // 90% of 15
+      const cardioThreshold = getPerformanceForScore(standards, debouncedCardioComponent, 45); // 90% of 50
       return {
           pushups: pushupThreshold,
           core: coreThreshold,
@@ -157,60 +129,50 @@ export function usePtCalculatorState(
       };
   }, [standards, debouncedPushupComponent, debouncedCoreComponent, debouncedCardioComponent]);
 
-  // The main effect hook that runs all calculations whenever a debounced input changes.
     useEffect(() => {
         const runCalculations = () => {
-            if (ageNum && debouncedGender && standards && walkStandards && altitudeData) {
+            if (ageNum && debouncedGender && standards && passFailStandards && altitudeCorrections && walkAltThresholds) {
                 try {
-                    // calculatePtScore handles altitude adjustments internally, so we pass raw input here.
-                    const rawShuttles = parseInt(debouncedShuttles) || 0;
-
-                    // Now synchronous
                     const result = calculatePtScore({
                         age: ageNum || 0,
                         gender: debouncedGender,
                         altitudeGroup: debouncedAltitudeGroup,
-                        // Strength
                         pushupComponent: debouncedPushupComponent,
                         pushups: parseInt(debouncedPushups) || 0,
                         isStrengthExempt: debouncedStrengthExempt,
-                        // Core
                         coreComponent: debouncedCoreComponent,
                         situps: parseInt(debouncedSitups) || 0,
                         reverseCrunches: parseInt(debouncedReverseCrunches) || 0,
                         plankMinutes: parseInt(debouncedPlankMinutes) || 0,
                         plankSeconds: parseInt(debouncedPlankSeconds) || 0,
                         isCoreExempt: debouncedCoreExempt,
-                        // Cardio
                         cardioComponent: debouncedCardioComponent,
                         runMinutes: parseInt(debouncedRunMinutes) || 0,
                         runSeconds: parseInt(debouncedRunSeconds) || 0,
-                        shuttles: rawShuttles,
+                        shuttles: parseInt(debouncedShuttles) || 0,
                         walkMinutes: parseInt(debouncedWalkMinutes) || 0,
                         walkSeconds: parseInt(debouncedWalkSeconds) || 0,
                         isCardioExempt: debouncedCardioExempt,
-                    }, standards, walkStandards, altitudeData);
+                        whtr: 0, // Placeholder for now
+                        isWhtrExempt: false,
+                    }, standards, passFailStandards, altitudeCorrections, walkAltThresholds);
                     setScore(result);
                 } catch (e) {
-                    // console.error("Error during calculation: ", e);
+                    console.error("Error during calculation: ", e);
                 }
             } else {
-                setScore({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, isPass: false, walkPassed: 'n/a' });
+                setScore({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, whtrScore: 0, isPass: false, walkPassed: 'n/a' });
             }
         }
-
         runCalculations();
-
     }, [
-    // This dependency array ensures the effect only re-runs when a debounced value changes, or when the data from queries is updated.
     debouncedAge, debouncedGender, debouncedAltitudeGroup,
     debouncedPushupComponent, debouncedPushups, debouncedStrengthExempt,
     debouncedCoreComponent, debouncedSitups, debouncedReverseCrunches, debouncedPlankMinutes, debouncedPlankSeconds, debouncedCoreExempt,
     debouncedCardioComponent, debouncedRunMinutes, debouncedRunSeconds, debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds, debouncedCardioExempt,
-    standards, walkStandards, altitudeData, ageNum
+    standards, passFailStandards, altitudeCorrections, walkAltThresholds, ageNum
   ]);
 
-  // Expose all the state and derived data to the consuming component.
   return {
     demographics,
     strength,
@@ -221,6 +183,6 @@ export function usePtCalculatorState(
     minMax,
     cardioMinMax,
     ninetyPercentileThresholds,
-    altitudeData,
+    altitudeData: { run: altitudeCorrections, walk: walkAltThresholds, hamr: altitudeCorrections },
   };
 }

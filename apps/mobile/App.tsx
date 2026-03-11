@@ -68,7 +68,7 @@ export default function App() {
       plankSeconds: parseInt(plankSeconds) || 0,
     };
 
-    const result = calculatePtScore(inputs, [], [], { run: [], walk: [], hamr: [] });
+    const result = calculatePtScore(inputs, [], [], [], []);
     setScore(result);
   };
 

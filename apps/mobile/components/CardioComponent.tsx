@@ -10,7 +10,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'r
 import { NeumorphicOutset, ProgressBar, SegmentedSelector, useTheme, Icon, ICONS, MASCOT_URLS } from '@repo/ui';
 import NumberInput from './NumberInput';
 import TimeInput from './TimeInput';
-import { Tables } from '@repo/utils';
+import { Tables, timeToSeconds } from '@repo/utils';
 
 interface CardioComponentProps {
     showProgressBars: boolean;
@@ -36,9 +36,9 @@ interface CardioComponentProps {
     openDetailModal: (key: string, mascot?: ImageSourcePropType) => void;
     score: { totalScore: number; cardioScore: number | string; isPass: boolean; walkPassed: string };
     altitudeData: {
-        run: Tables<'run_altitude_adjustments'>[];
-        hamr: Tables<'hamr_altitude_adjustments'>[];
-        walk: Tables<'walk_altitude_adjustments'>[];
+        run: Tables<'pt_altitude_corrections'>[] | null | undefined;
+        hamr: Tables<'pt_altitude_corrections'>[] | null | undefined;
+        walk: Tables<'pt_altitude_walk_thresholds'>[] | null | undefined;
     };
 }
 
@@ -89,40 +89,42 @@ export default function CardioComponent({
         if (altitudeData && altitudeGroup && altitudeGroup !== 'normal' && age && gender && !isExempt) {
             const ageNum = parseInt(age);
 
-            if (cardioComponent === 'run' && (runMinutes || runSeconds)) {
+            if (cardioComponent === 'run' && altitudeData.run && (runMinutes || runSeconds)) {
                 const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
                 const adjustmentRow = altitudeData.run.find((row) => 
+                    row.exercise_type === 'run_2mile' &&
                     row.altitude_group === altitudeGroup && 
-                    row.time_range_start != null && row.time_range_end != null &&
-                    runTimeInSeconds >= row.time_range_start && 
-                    runTimeInSeconds <= row.time_range_end
+                    runTimeInSeconds >= timeToSeconds(row.perf_start) && 
+                    runTimeInSeconds <= timeToSeconds(row.perf_end)
                 );
                 if (adjustmentRow) {
                     setAdjustment(`- ${adjustmentRow.correction}s`);
                 }
 
-            } else if (cardioComponent === 'walk' && (walkMinutes || walkSeconds)) {
+            } else if (cardioComponent === 'walk' && altitudeData.walk && (walkMinutes || walkSeconds)) {
                 const capitalizedGender = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
-                const adjustmentRow = altitudeData.walk.find((row) => 
-                    row.gender?.toLowerCase() === capitalizedGender.toLowerCase() &&
-                    row.altitude_group === altitudeGroup &&
-                    row.age_range_start !== null && row.age_range_end !== null &&
-                    ageNum >= row.age_range_start &&
-                    ageNum <= row.age_range_end
-                );
+                const adjustmentRow = altitudeData.walk.find((row) => {
+                    const [min, max] = row.age_range.split('-').map(Number);
+                    return row.sex === capitalizedGender &&
+                           row.altitude_group === altitudeGroup &&
+                           ageNum >= min && ageNum <= max;
+                });
 
                 if (adjustmentRow) {
-                    const maxTime = adjustmentRow.max_time || 0;
-                    const minutes = Math.floor(maxTime / 60);
-                    const seconds = maxTime % 60;
+                    const maxTimeSeconds = timeToSeconds(adjustmentRow.max_time);
+                    const minutes = Math.floor(maxTimeSeconds / 60);
+                    const seconds = maxTimeSeconds % 60;
                     setAdjustment(`Max: ${minutes}:${seconds.toString().padStart(2, '0')}`);
-                    setAdjustedWalkMaxTime(maxTime);
+                    setAdjustedWalkMaxTime(maxTimeSeconds);
                 }
 
-            } else if (cardioComponent === 'shuttles') {
-                const adjustmentRow = altitudeData.hamr.find((row) => row.altitude_group === altitudeGroup);
+            } else if (cardioComponent === 'shuttles' && altitudeData.hamr) {
+                const adjustmentRow = altitudeData.hamr.find((row) => 
+                    row.exercise_type === 'shuttles_20m' &&
+                    row.altitude_group === altitudeGroup
+                );
                 if (adjustmentRow) {
-                    setAdjustment(`+ ${adjustmentRow.shuttles_to_add}`);
+                    setAdjustment(`+ ${adjustmentRow.correction}`);
                 }
             }
         }
@@ -212,10 +214,13 @@ export default function CardioComponent({
                             const getAdjustedShuttleCount = () => {
                                 const baseShuttles = parseInt(shuttles) || 0;
                                 
-                                if (cardioComponent === 'shuttles' && altitudeData && altitudeGroup && altitudeGroup !== 'normal') {
-                                    const adjustmentRow = altitudeData.hamr.find((row) => row.altitude_group === altitudeGroup);
-                                    if (adjustmentRow && adjustmentRow.shuttles_to_add) {
-                                        return baseShuttles + adjustmentRow.shuttles_to_add;
+                                if (cardioComponent === 'shuttles' && altitudeData && altitudeData.hamr && altitudeGroup && altitudeGroup !== 'normal') {
+                                    const adjustmentRow = altitudeData.hamr.find((row) => 
+                                        row.exercise_type === 'shuttles_20m' &&
+                                        row.altitude_group === altitudeGroup
+                                    );
+                                    if (adjustmentRow && adjustmentRow.correction) {
+                                        return baseShuttles + adjustmentRow.correction;
                                     }
                                 }
                                 
