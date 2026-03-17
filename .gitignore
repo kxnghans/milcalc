@@ -57,5 +57,8 @@ docs/sources/
 docs/*.csv
 image.png
 
+# Debugging and local tools
+packages/utils/debug.ts
+
 # Agent configuration
 .gemini/

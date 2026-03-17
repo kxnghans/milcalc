@@ -27,7 +27,7 @@ export default function App() {
   const [gender, setGender] = useState("Male");
   const [strengthComponent, setStrengthComponent] = useState("1-min Push-ups");
   const [coreComponent, setCoreComponent] = useState("1-min Sit-ups");
-  const [cardioComponent, setCardioComponent] = useState("1.5-Mile Run");
+  const [cardioComponent, setCardioComponent] = useState("2-Mile Run");
 
   const [pushups, setPushups] = useState("");
   const [handReleasePushups, setHandReleasePushups] = useState("");
@@ -56,7 +56,7 @@ export default function App() {
     const inputs: PtInputs = {
       age: parseInt(age),
       gender: gender.toLowerCase(),
-      cardioComponent: cardioComponent === "1.5-Mile Run" ? "run" : "hamr",
+      cardioComponent: cardioComponent === "2-Mile Run" ? "run" : "hamr",
       runMinutes: parseInt(runMinutes) || 0,
       runSeconds: parseInt(runSeconds) || 0,
       pushupComponent: strengthComponent === "1-min Push-ups" ? "push_ups_1min" : "hand_release_pushups_1min",
@@ -134,11 +134,11 @@ export default function App() {
         {/* Cardio Component Card */}
         <Card style={styles.fullWidthCard}>
           <SegmentedSelector
-            options={[{label: "1.5-Mile Run", value: "1.5-Mile Run"}, {label: "20m HAMR Shuttles", value: "20m HAMR Shuttles"}]}
+            options={[{label: "2-Mile Run", value: "2-Mile Run"}, {label: "20m HAMR Shuttles", value: "20m HAMR Shuttles"}]}
             selectedValues={[cardioComponent]}
             onValueChange={setCardioComponent}
           />
-          {cardioComponent === "1.5-Mile Run" ? (
+          {cardioComponent === "2-Mile Run" ? (
             <View style={styles.row}>
               <StyledTextInput value={runMinutes} onChangeText={setRunMinutes} keyboardType="number-pad" placeholder="Minutes" />
               <StyledTextInput value={runSeconds} onChangeText={setRunSeconds} keyboardType="number-pad" placeholder="Seconds" />

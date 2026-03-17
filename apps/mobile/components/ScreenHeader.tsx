@@ -12,9 +12,16 @@ interface ScreenHeaderProps {
   isLoading?: boolean;
   onMenuPress?: () => void;
   isMenuOpen?: boolean;
+  headerLeft?: React.ReactNode;
 }
 
-const ScreenHeader: React.FC<ScreenHeaderProps> = ({ title, isLoading, onMenuPress: manualOnMenuPress, isMenuOpen: _manualIsMenuOpen }) => {
+const ScreenHeader: React.FC<ScreenHeaderProps> = ({ 
+  title, 
+  isLoading, 
+  onMenuPress: manualOnMenuPress, 
+  isMenuOpen: _manualIsMenuOpen,
+  headerLeft
+}) => {
   const { theme, isDarkMode } = useTheme();
   const insets = useSafeAreaInsets();
   const { openOverlay } = useOverlay();
@@ -81,8 +88,14 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({ title, isLoading, onMenuPre
     },
     loaderContainer: {
         position: 'absolute',
+        left: headerLeft ? 70 : theme.spacing.m,
+        bottom: theme.spacing.s + 10,
+    },
+    headerLeftContainer: {
+        position: 'absolute',
         left: theme.spacing.m,
-        bottom: theme.spacing.s + 10, // Adjust to center vertically in content area
+        bottom: theme.spacing.s - 4,
+        zIndex: 20,
     },
     menuContainer: {
         position: 'absolute',
@@ -142,6 +155,11 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({ title, isLoading, onMenuPre
   return (
     <DismissKeyboardView style={styles.dismissKeyboard}>
         <View style={styles.container}>
+            {headerLeft && (
+                <View style={styles.headerLeftContainer}>
+                    {headerLeft}
+                </View>
+            )}
             {isLoading && (
                 <View style={styles.loaderContainer}>
                     <ActivityIndicator 

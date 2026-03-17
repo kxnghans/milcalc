@@ -1,0 +1,20 @@
+DELETE FROM public.pt_age_sex_groups;
+INSERT INTO public.pt_age_sex_groups (id, sex, age_range) VALUES
+(1, 'Male', '<25'),
+(2, 'Male', '25-29'),
+(3, 'Male', '30-34'),
+(4, 'Male', '35-39'),
+(5, 'Male', '40-44'),
+(6, 'Male', '45-49'),
+(7, 'Male', '50-54'),
+(8, 'Male', '55-59'),
+(9, 'Male', '60+'),
+(10, 'Female', '<25'),
+(11, 'Female', '25-29'),
+(12, 'Female', '30-34'),
+(13, 'Female', '35-39'),
+(14, 'Female', '40-44'),
+(15, 'Female', '45-49'),
+(16, 'Female', '50-54'),
+(17, 'Female', '55-59'),
+(18, 'Female', '60+');

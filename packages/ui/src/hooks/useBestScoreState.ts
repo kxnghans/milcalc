@@ -132,7 +132,7 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
         
         // Fetch all data concurrently
         const [fetchedStandards, passFailStandards, walkAltThresholds, altitudeCorrections] = await Promise.all([
-            getPtStandards(capitalizedGender, ageGroupString),
+            getPtStandards(capitalizedGender, ageGroupString), // Logic for 2025/Legacy should be handled here
             getPassFailStandards(capitalizedGender, ageGroupString),
             getPtAltitudeWalkThresholds(capitalizedGender, ageGroupString),
             getPtAltitudeCorrections(),
@@ -141,13 +141,13 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
         if (!fetchedStandards) return;
 
         const newScores: BestScores = {
-            push_ups_1min: isStrengthExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'push_ups_1min', { reps: Number(debouncedPushUps) }),
-            hand_release_pushups_2min: isStrengthExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'hand_release_pushups_2min', { reps: Number(debouncedHrPushUps) }),
-            sit_ups_1min: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'sit_ups_1min', { reps: Number(debouncedSitUps) }),
-            cross_leg_reverse_crunch_2min: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'cross_leg_reverse_crunch_2min', { reps: Number(debouncedCrunches) }),
-            forearm_plank_time: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'forearm_plank_time', { minutes: Number(debouncedPlankMinutes), seconds: Number(debouncedPlankSeconds) }),
-            run: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'run_2mile', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup, altitudeCorrections || []),
-            shuttles: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'shuttles_20m', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup, altitudeCorrections || []),
+            push_ups_1min: isStrengthExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'push_ups_1min', { reps: Number(debouncedPushUps) }).points,
+            hand_release_pushups_2min: isStrengthExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'hand_release_pushups_2min', { reps: Number(debouncedHrPushUps) }).points,
+            sit_ups_1min: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'sit_ups_1min', { reps: Number(debouncedSitUps) }).points,
+            cross_leg_reverse_crunch_2min: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'cross_leg_reverse_crunch_2min', { reps: Number(debouncedCrunches) }).points,
+            forearm_plank_time: isCoreExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'forearm_plank_time', { minutes: Number(debouncedPlankMinutes), seconds: Number(debouncedPlankSeconds) }).points,
+            run: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'run_2mile', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup, altitudeCorrections || []).points,
+            shuttles: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'shuttles_20m', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup, altitudeCorrections || []).points,
             walk: isCardioExempt ? 'Exempt' : checkWalkPass(Number(debouncedAge), capitalizedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), passFailStandards || [], walkAltThresholds || [], debouncedAltitudeGroup),
         };
         setScores(newScores);

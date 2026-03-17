@@ -15,8 +15,10 @@ interface ScoreDisplayProps {
     pushupScore?: number | string;
     coreScore?: number | string;
     cardioScore?: number | string;
+    whtrScore?: number | string;
     isPass: boolean;
     walkPassed?: string;
+    cardioRiskCategory?: string | null;
   };
   cardioComponent?: string;
   showBreakdown?: boolean;
@@ -27,7 +29,11 @@ interface ScoreDisplayProps {
  * @param {ScoreDisplayProps} props - The component props.
  * @returns {JSX.Element} The rendered score display component.
  */
-const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDisplayProps) => {
+const ScoreDisplay = ({ 
+  score, 
+  cardioComponent, 
+  showBreakdown = true
+}: ScoreDisplayProps) => {
   const { theme } = useTheme();
   const excellentColors = useScoreColors('excellent');
   const passColors = useScoreColors('pass');
@@ -67,7 +73,7 @@ const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDis
     scoreBreakdownContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        gap: theme.spacing.m,
+        gap: theme.spacing.s,
         width: '100%',
     },
     scoreText: {
@@ -85,7 +91,7 @@ const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDis
     },
     row: {
         flexDirection: 'row',
-    }
+    },
   });
 
   /**
@@ -120,7 +126,18 @@ const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDis
         const text = score.walkPassed === 'pass' ? 'Pass' : 'Fail';
         return <Text style={[styles.scoreBreakdownText, { color }]}>{text}</Text>;
     }
-    return renderComponentScore(score.cardioScore || 0, 60);
+    const cardioScoreDisplay = renderComponentScore(score.cardioScore || 0, 60);
+    if (score.cardioRiskCategory) {
+        return (
+            <View style={{ alignItems: 'center' }}>
+                {cardioScoreDisplay}
+                <Text style={[theme.typography.caption, { color: theme.colors.disabled, marginTop: -4 }]}>
+                    {score.cardioRiskCategory}
+                </Text>
+            </View>
+        );
+    }
+    return cardioScoreDisplay;
   };
 
   return (
@@ -130,6 +147,11 @@ const ScoreDisplay = ({ score, cardioComponent, showBreakdown = true }: ScoreDis
         {/* Optionally, display the breakdown of component scores */}
         {showBreakdown && (
             <View style={styles.scoreBreakdownContainer}>
+                <View style={styles.row}>
+                    <Text style={styles.scoreBreakdownText}>WHR: </Text>
+                    {renderComponentScore(score.whtrScore, 20)}
+                </View>
+                <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>Strength: </Text>
                     {renderComponentScore(score.pushupScore, 20)}

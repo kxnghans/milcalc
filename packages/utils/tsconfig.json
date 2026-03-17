@@ -8,6 +8,6 @@
       "@repo/utils/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "__tests__/**/*.ts"],
+  "include": ["src/**/*.ts", "__tests__/**/*.ts", "scripts/**/*.ts", "debug.ts"],
   "exclude": ["node_modules", "dist"]
 }

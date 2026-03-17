@@ -27,11 +27,38 @@ export const timeToSeconds = (time: string | number | null): number => {
 /**
  * Parses a performance string into a numeric value for comparison.
  */
-const parsePerformance = (perf: string | number | null): number => {
-    if (perf === null || perf === undefined) return 0;
+/**
+ * Parses a performance string into a numeric range [min, max].
+ */
+const parsePerformanceRange = (perf: string | number | null): [number, number] => {
+    if (perf === null || perf === undefined) return [0, 0];
     const s = String(perf).trim();
-    if (s.includes(':')) return timeToSeconds(s);
-    return parseFloat(s.replace(/[<>=* ]/g, '')) || 0;
+    
+    // Range format "X-Y"
+    if (s.includes('-')) {
+        const parts = s.split('-').map(p => p.trim());
+        if (parts.length === 2) {
+            const minStr = parts[0];
+            const maxStr = parts[1];
+            const min = minStr.includes(':') ? timeToSeconds(minStr) : parseFloat(minStr.replace(/[<>=* ]/g, ''));
+            const max = maxStr.includes(':') ? timeToSeconds(maxStr) : parseFloat(maxStr.replace(/[<>=* ]/g, ''));
+            if (!isNaN(min) && !isNaN(max)) {
+                return [min, max];
+            }
+        }
+    }
+
+    // Single value or prefix/suffix (>=, <=, *, etc)
+    const val = s.includes(':') ? timeToSeconds(s) : (parseFloat(s.replace(/[<>=* ]/g, '')) || 0);
+    
+    if (s.includes('>=') || s.includes('>')) {
+        return [val, Infinity];
+    }
+    if (s.includes('<=') || s.includes('<')) {
+        return [-Infinity, val];
+    }
+    
+    return [val, val];
 };
 
 /**
@@ -51,40 +78,80 @@ export const getAgeGroupString = (age: number): string | null => {
 };
 
 /**
- * Finds the score for a given performance value based on an array of standards.
+ * Finds the score and health risk category for a given performance value.
  */
-const findScore = (standards: PtStandard[], performanceValue: number, higherIsBetter: boolean): number => {
-    let bestPoints = 0;
-    for (const s of standards) {
-        const standardPerf = parsePerformance(s.measurement);
-        const match = higherIsBetter ? performanceValue >= standardPerf : performanceValue <= standardPerf;
-        if (match) {
-            bestPoints = Math.max(bestPoints, s.points);
+const findScore = (standards: PtStandard[], performanceValue: number, higherIsBetter: boolean, rawMeasurement?: string): { points: number; healthRiskCategory: string | null } => {
+    // 1. Try exact string match first if rawMeasurement is provided
+    if (rawMeasurement) {
+        const exact = standards.find(s => s.measurement === rawMeasurement);
+        if (exact) {
+            return { points: exact.points, healthRiskCategory: exact.healthRiskCategory ?? null };
         }
     }
-    return bestPoints;
+
+    let bestMatch: PtStandard | null = null;
+    let limitValue = higherIsBetter ? -1 : Infinity;
+
+    for (const s of standards) {
+        const [min, max] = parsePerformanceRange(s.measurement);
+        
+        let match = false;
+        if (higherIsBetter) {
+            match = performanceValue >= min;
+        } else {
+            match = performanceValue <= max;
+        }
+        
+        if (match) {
+            if (higherIsBetter) {
+                // We want the HIGHEST threshold we have met (the largest min)
+                if (min > limitValue) {
+                    limitValue = min;
+                    bestMatch = s;
+                } else if (min === limitValue && (!bestMatch || s.points > bestMatch.points)) {
+                    // Tie-breaker: take higher points if thresholds are equal
+                    bestMatch = s;
+                }
+            } else {
+                // We want the LOWEST threshold we are under (the smallest max)
+                if (max < limitValue) {
+                    limitValue = max;
+                    bestMatch = s;
+                } else if (max === limitValue && (!bestMatch || s.points > bestMatch.points)) {
+                    // Tie-breaker
+                    bestMatch = s;
+                }
+            }
+        }
+    }
+    
+    return { 
+        points: bestMatch ? bestMatch.points : 0, 
+        healthRiskCategory: bestMatch ? (bestMatch.healthRiskCategory ?? null) : null 
+    };
 };
 
 /**
  * Calculates score for WHtR.
  */
-const getWhtrScore = (standards: PtStandard[], whtr: number): number => {
-    if (!whtr) return 0;
+const getWhtrScore = (standards: PtStandard[], whtr: number): { points: number; healthRiskCategory: string | null } => {
+    if (!whtr) return { points: 0, healthRiskCategory: null };
     return findScore(standards.filter(s => s.exercise === 'whtr'), whtr, false); // Lower is better for WHtR
 };
 
 /**
- * Calculates score for any exercise.
+ * Calculates score and health risk for any exercise.
  */
 export const getScoreForExercise = (
     standards: PtStandard[], 
     component: string, 
     performance: PtPerformance, 
     altitudeGroup?: string, 
-    altitudeCorrections?: Tables<'pt_altitude_corrections'>[]
-): number => {
+    altitudeCorrections?: Tables<'pt_altitude_corrections'>[],
+    rawMeasurement?: string
+): { points: number; healthRiskCategory: string | null } => {
     const componentStandards = standards.filter(s => s.exercise === component);
-    if (componentStandards.length === 0) return 0;
+    if (componentStandards.length === 0) return { points: 0, healthRiskCategory: null };
 
     let perfValue = 0;
     let higherIsBetter = true;
@@ -122,7 +189,7 @@ export const getScoreForExercise = (
         higherIsBetter = true;
     }
 
-    return findScore(componentStandards, perfValue, higherIsBetter);
+    return findScore(componentStandards, perfValue, higherIsBetter, rawMeasurement);
 };
 
 /**
@@ -145,7 +212,7 @@ export const checkWalkPass = (
     if (altitudeGroup && altitudeGroup !== 'normal' && walkAltitudeThresholds) {
         const threshold = walkAltitudeThresholds.find(t => {
             const [min, max] = t.age_range.split('-').map(Number);
-            return t.altitude_group === altitudeGroup && age >= min && age <= max;
+            return t.sex === gender && t.altitude_group === altitudeGroup && age >= min && age <= max;
         });
         if (threshold) maxTime = timeToSeconds(threshold.max_time);
     } else {
@@ -168,11 +235,12 @@ export const calculatePtScore = (
     walkAltitudeThresholds: Tables<'pt_altitude_walk_thresholds'>[]
 ) => {
     if (inputs.age == null || !inputs.gender) {
-        return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, whtrScore: 0, isPass: false, walkPassed: 'n/a' };
+        return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, whtrScore: 0, isPass: false, walkPassed: 'n/a', cardioRiskCategory: null as string | null };
     }
 
     let earnedPoints = 0;
     let totalPossiblePoints = 100;
+    let cardioRiskCategory: string | null = null;
 
     // WHtR
     let whtrScore: number | string = 0;
@@ -180,8 +248,9 @@ export const calculatePtScore = (
         whtrScore = 'Exempt';
         totalPossiblePoints -= 20;
     } else {
-        whtrScore = getWhtrScore(standards, inputs.whtr || 0);
-        earnedPoints += whtrScore;
+        const res = getWhtrScore(standards, inputs.whtr || 0);
+        whtrScore = typeof res === 'object' ? res.points : res;
+        earnedPoints += typeof whtrScore === 'number' ? whtrScore : 0;
     }
 
     // Strength
@@ -190,8 +259,9 @@ export const calculatePtScore = (
         pushupScore = 'Exempt';
         totalPossiblePoints -= 15;
     } else {
-        pushupScore = getScoreForExercise(standards, inputs.pushupComponent, { reps: inputs.pushups });
-        earnedPoints += pushupScore;
+        const res = getScoreForExercise(standards, inputs.pushupComponent, { reps: inputs.pushups });
+        pushupScore = res.points;
+        earnedPoints += res.points;
     }
 
     // Core
@@ -203,8 +273,9 @@ export const calculatePtScore = (
         const perf = inputs.coreComponent === 'forearm_plank_time' 
             ? { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds }
             : { reps: inputs.coreComponent === 'sit_ups_1min' ? inputs.situps : inputs.reverseCrunches };
-        coreScore = getScoreForExercise(standards, inputs.coreComponent, perf);
-        earnedPoints += coreScore;
+        const res = getScoreForExercise(standards, inputs.coreComponent, perf);
+        coreScore = res.points;
+        earnedPoints += res.points;
     }
 
     // Cardio
@@ -217,14 +288,16 @@ export const calculatePtScore = (
         walkPassed = checkWalkPass(inputs.age, inputs.gender, inputs.walkMinutes || 0, inputs.walkSeconds || 0, passFailStandards, walkAltitudeThresholds, inputs.altitudeGroup);
         totalPossiblePoints -= 50;
     } else {
-        cardioScore = getScoreForExercise(
+        const res = getScoreForExercise(
             standards, 
             inputs.cardioComponent === 'run' ? 'run_2mile' : 'shuttles_20m',
             { minutes: inputs.runMinutes, seconds: inputs.runSeconds, shuttles: inputs.shuttles },
             inputs.altitudeGroup,
             altitudeCorrections
         );
-        earnedPoints += cardioScore;
+        cardioScore = res.points;
+        cardioRiskCategory = res.healthRiskCategory;
+        earnedPoints += res.points;
     }
 
     const compositeScore = totalPossiblePoints > 0 ? (earnedPoints / totalPossiblePoints) * 100 : 100;
@@ -237,7 +310,7 @@ export const calculatePtScore = (
                    (inputs.isCardioExempt || (inputs.cardioComponent === 'walk' ? walkPassed === 'pass' : (typeof cardioScore === 'number' && cardioScore > 0))) &&
                    (inputs.isWhtrExempt || (typeof whtrScore === 'number' && whtrScore > 0));
 
-    return { totalScore: compositeScore, cardioScore, pushupScore, coreScore, whtrScore, isPass, walkPassed };
+    return { totalScore: compositeScore, cardioScore, pushupScore, coreScore, whtrScore, isPass, walkPassed, cardioRiskCategory };
 };
 
 /**
@@ -279,7 +352,24 @@ export const getMinMaxValues = (standards: PtStandard[], component: string) => {
     const compStandards = standards.filter(s => s.exercise === component);
     if (compStandards.length === 0) return { min: 0, max: 0 };
 
-    const values = compStandards.map(s => parsePerformance(s.measurement)).filter(v => v > 0);
+    if (component === 'run_2mile' || component === 'run') {
+        // For run: parsePerformanceRange on '<= 13:25' returns [-Infinity, 805].
+        // We want min = fastest time (best), max = slowest time (worst) — both finite.
+        const finiteMaxes = compStandards
+            .map(s => parsePerformanceRange(s.measurement)[1])
+            .filter(v => isFinite(v));
+        return {
+            min: finiteMaxes.length ? Math.min(...finiteMaxes) : 0, // fastest (best) time in seconds
+            max: finiteMaxes.length ? Math.max(...finiteMaxes) : 0, // slowest (worst) time in seconds
+        };
+    }
+
+    const values = compStandards.map(s => {
+        const [min] = parsePerformanceRange(s.measurement);
+        return min;
+    }).filter(v => isFinite(v)); // filter out -Infinity / Infinity
+
+    if (values.length === 0) return { min: 0, max: 0 };
     return { min: Math.min(...values), max: Math.max(...values) };
 };
 
@@ -296,11 +386,26 @@ export const getCardioMinMaxValues = (standards: PtStandard[], passFailStandards
     const compStandards = standards.filter(s => s.exercise === comp);
     if (compStandards.length === 0) return { min: 0, max: 0 };
 
-    const values = compStandards.map(s => parsePerformance(s.measurement)).filter(v => v > 0);
     if (comp === 'run_2mile') {
-        return { min: Math.max(...values), max: Math.min(...values) }; // min is slowest, max is fastest
+        // For run: '<= 13:25' → [-Infinity, 805]. We only want finite max values.
+        // min = fastest time (best score), max = slowest time (worst score)
+        const finiteMaxes = compStandards
+            .map(s => parsePerformanceRange(s.measurement)[1])
+            .filter(v => isFinite(v));
+        return {
+            min: finiteMaxes.length ? Math.min(...finiteMaxes) : 0,
+            max: finiteMaxes.length ? Math.max(...finiteMaxes) : 0,
+        };
     }
-    return { min: Math.min(...values), max: Math.max(...values) };
+
+    // Shuttles / HAMR: '>= 100' → [100, Infinity]. Keep only finite mins.
+    const finiteMins = compStandards
+        .map(s => parsePerformanceRange(s.measurement)[0])
+        .filter(v => isFinite(v));
+    return {
+        min: finiteMins.length ? Math.min(...finiteMins) : 0,
+        max: finiteMins.length ? Math.max(...finiteMins) : 0,
+    };
 };
 
 export const getPerformanceForScore = (standards: PtStandard[], component: string, targetScore: number): number => {
@@ -308,13 +413,17 @@ export const getPerformanceForScore = (standards: PtStandard[], component: strin
     const candidates = standards.filter(s => s.exercise === comp && s.points >= targetScore);
     if (candidates.length === 0) return 0;
 
-    const values = candidates.map(c => parsePerformance(c.measurement));
+    const values = candidates.map(c => {
+        const [min] = parsePerformanceRange(c.measurement);
+        return min;
+    });
     return comp === 'run_2mile' ? Math.min(...values) : Math.max(...values);
 };
 
 export const getDynamicHelpText = (componentKey: string, age: number, gender: string, performance: PtPerformance, standards: PtStandard[]): string => {
     if (!age || !gender || !standards) return "";
-    const score = getScoreForExercise(standards, componentKey, performance);
+    const res = getScoreForExercise(standards, componentKey, performance);
+    const score = res.points;
     let perfText = "";
     if (performance.reps) perfText = `${performance.reps} reps`;
     else if (performance.minutes || performance.seconds) perfText = `${performance.minutes}:${String(performance.seconds).padStart(2, '0')}`;

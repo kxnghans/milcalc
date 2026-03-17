@@ -215,7 +215,15 @@ export default function BestScoreScreen() {
     openHelp(key, 'best_score', mascot);
   };
 
-  const { age, setAge, gender, setGender, altitudeGroup, setAltitudeGroup } = useDemographicsState();
+  const { 
+    age, setAge, 
+    gender, setGender, 
+    altitudeGroup, setAltitudeGroup,
+    waist, setWaist,
+    heightFeet, setHeightFeet,
+    heightInches, setHeightInches,
+    isHeightInInches, setIsHeightInInches
+  } = useDemographicsState();
   const { inputs, outputs, exemptions } = useBestScoreState(age, gender, altitudeGroup);
   const { isLoading } = outputs;
 
@@ -242,7 +250,7 @@ export default function BestScoreScreen() {
   const coreBestValues = { sit_ups_1min: inputs.sitUps, cross_leg_reverse_crunch_2min: inputs.crunches, forearm_plank_time: { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds } };
 
   const cardioExercises: BestScoreExercise[] = [
-    { label: '1.5-Mile Run', value: 'run', type: 'time', onValueChange: (value: { minutes: string; seconds: string }) => { inputs.setRunMinutes(value.minutes); inputs.setRunSeconds(value.seconds); } },
+    { label: '2-Mile Run', value: 'run', type: 'time', onValueChange: (value: { minutes: string; seconds: string }) => { inputs.setRunMinutes(value.minutes); inputs.setRunSeconds(value.seconds); } },
     { label: '20m HAMR', value: 'shuttles', type: 'number', onValueChange: inputs.setShuttles },
     { label: '2-km Walk', value: 'walk', type: 'time', onValueChange: (value: { minutes: string; seconds: string }) => { inputs.setWalkMinutes(value.minutes); inputs.setWalkSeconds(value.seconds); } },
   ];
@@ -260,7 +268,20 @@ export default function BestScoreScreen() {
       }
       inputContent={
         <>
-          <Demographics age={age} setAge={setAge} gender={gender} setGender={setGender} />
+          <Demographics
+            age={age}
+            setAge={setAge}
+            gender={gender}
+            setGender={setGender}
+            waist={waist}
+            setWaist={setWaist}
+            heightFeet={heightFeet}
+            setHeightFeet={setHeightFeet}
+            heightInches={heightInches}
+            setHeightInches={setHeightInches}
+            isHeightInInches={isHeightInInches}
+            setIsHeightInInches={setIsHeightInInches}
+          />
           <Divider style={styles.divider} />
           <BestScoreSection
             title="Strength"

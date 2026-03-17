@@ -8,15 +8,21 @@ import {
   Easing 
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import { NeumorphicInset } from './NeumorphicInset';
+import NeumorphicOutset from './NeumorphicOutset';
 
 interface SlideToggleProps {
   value: boolean;
   onValueChange: (value: boolean) => void;
   label?: string;
+  labelPosition?: 'right' | 'bottom';
 }
 
-export const SlideToggle: React.FC<SlideToggleProps> = ({ value, onValueChange, label }) => {
+export const SlideToggle: React.FC<SlideToggleProps> = ({ 
+  value, 
+  onValueChange, 
+  label,
+  labelPosition = 'right'
+}) => {
   const { theme } = useTheme();
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
@@ -31,25 +37,25 @@ export const SlideToggle: React.FC<SlideToggleProps> = ({ value, onValueChange, 
 
   const translateX = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [2, 22], // Track width 44, padding 2, thumb 20 -> 2 to (44-2-20)=22
+    outputRange: [2, 22],
   });
 
   const backgroundColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [theme.colors.surface, theme.colors.primary],
+    outputRange: [theme.colors.secondary, theme.colors.primary],
   });
 
+  const isBottom = labelPosition === 'bottom';
+
   return (
-    <View style={styles.container}>
-      {label && <Text style={[styles.label, { color: theme.colors.text }]}>{label}</Text>}
+    <View style={[styles.container, isBottom && styles.containerVertical]}>
       <TouchableOpacity 
         activeOpacity={0.8} 
         onPress={() => onValueChange(!value)}
       >
-        <NeumorphicInset 
-            style={styles.track} 
-            depth={2}
-            containerStyle={{ borderRadius: 15 }}
+        <NeumorphicOutset 
+            containerStyle={styles.track} 
+            style={{ borderRadius: 15 }}
         >
           <Animated.View style={[styles.trackFill, { backgroundColor }]} />
           <Animated.View 
@@ -57,12 +63,24 @@ export const SlideToggle: React.FC<SlideToggleProps> = ({ value, onValueChange, 
               styles.thumb, 
               { 
                 transform: [{ translateX }],
-                backgroundColor: theme.colors.secondaryText,
+                backgroundColor: theme.colors.surface,
+                // Add a subtle border to ensure visibility when track is secondary/surface
+                borderColor: theme.colors.border,
+                borderWidth: 0.5,
               }
             ]} 
           />
-        </NeumorphicInset>
+        </NeumorphicOutset>
       </TouchableOpacity>
+      {label && (
+        <Text style={[
+          styles.label, 
+          { color: theme.colors.text },
+          isBottom && styles.labelBottom
+        ]}>
+          {label}
+        </Text>
+      )}
     </View>
   );
 };
@@ -73,10 +91,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  containerVertical: {
+    flexDirection: 'column',
+    gap: 2,
+  },
   label: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '700',
     textTransform: 'uppercase',
+  },
+  labelBottom: {
+    marginTop: 2,
   },
   track: {
     width: 44,

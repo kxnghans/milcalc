@@ -110,7 +110,7 @@ The PT Calculator provides real-time scoring based on the latest Air Force Fitne
 ### 2.2 Supported Exercises
 
 The calculator supports the full suite of AF fitness components:
-- **Cardio**: 1.5-Mile Run, 20-Meter Shuttle Run (HAMR), and 2-Kilometer Walk.
+- **Cardio**: 2-Mile Run, 20-Meter Shuttle Run (HAMR), and 2-Kilometer Walk.
 - **Strength**: 1-Minute Pushups and 2-Minute Hand-Release Pushups.
 - **Core**: 1-Minute Situps, 2-Minute Cross-Leg Reverse Crunches, and Forearm Plank.
 

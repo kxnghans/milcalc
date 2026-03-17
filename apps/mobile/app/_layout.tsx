@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Slot } from "expo-router";
 import { ThemeProvider, BottomSheet, useTheme } from "@repo/ui";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import * as SQLite from "expo-sqlite";
@@ -88,6 +88,112 @@ function LayoutContent() {
 
   const { theme } = useTheme();
   const { isLoading, hasSeenOnboarding, setProfileData } = useProfile();
+  const queryClient = useQueryClient();
+
+  // Hydration logic: Seed the cache from seed-data.json if it's empty
+  useEffect(() => {
+    const hydrateCache = async () => {
+      // Simple check to see if we have any data (e.g., altitude corrections)
+      const existingData = queryClient.getQueryData(['altitudeCorrections']);
+      if (!existingData) {
+        console.log('Cache is empty. Hydrating from seed-data.json...');
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const seedData = require('../assets/seed-data.json');
+          
+          // 1. Demographic-independent data
+          if (seedData.pt_altitude_corrections) {
+            queryClient.setQueryData(['altitudeCorrections'], seedData.pt_altitude_corrections);
+          }
+          if (seedData.base_pay_2024) {
+            queryClient.setQueryData(['payGrades'], seedData.base_pay_2024.map((i: any) => i.pay_grade));
+          }
+          if (seedData.bas_rates) {
+            queryClient.setQueryData(['basRate', 2025], seedData.bas_rates[0]?.enlisted_rate || 460.25); // Default fallback
+          }
+          if (seedData.federal_tax_data) {
+            const years = [...new Set(seedData.federal_tax_data.map((i: any) => i.year))];
+            years.forEach(year => {
+              queryClient.setQueryData(['federalTaxData', year], seedData.federal_tax_data.filter((i: any) => i.year === year));
+            });
+            if (years.length > 0) {
+              queryClient.setQueryData(['maxFederalTaxYear'], Math.max(...years as number[]));
+            }
+          }
+          if (seedData.state_tax_data) {
+            const years = [...new Set(seedData.state_tax_data.map((i: any) => i.year))];
+            years.forEach(year => {
+              queryClient.setQueryData(['stateTaxData', year], seedData.state_tax_data.filter((i: any) => i.year === year));
+            });
+            if (years.length > 0) {
+              queryClient.setQueryData(['maxStateTaxYear'], Math.max(...years as number[]));
+            }
+          }
+          if (seedData.veterans_disability_compensation) {
+            queryClient.setQueryData(['disabilityData'], seedData.veterans_disability_compensation);
+          }
+
+          // 2. Demographic-dependent data (PT Standards)
+          if (seedData.pt_age_sex_groups && seedData.pt_scoring_standards) {
+            const whtrData = seedData.pt_scoring_standards.filter((s: any) => s.exercise_type === 'whtr');
+            
+            seedData.pt_age_sex_groups.forEach((group: any) => {
+              const groupStandards = seedData.pt_scoring_standards
+                .filter((s: any) => s.age_sex_group_id === group.id)
+                .map((item: any) => ({
+                  exercise: item.exercise_type,
+                  measurement: item.performance,
+                  points: item.points,
+                  healthRiskCategory: item.health_risk_category
+                }));
+              
+              const whtrMapped = whtrData.map((item: any) => ({
+                exercise: item.exercise_type,
+                measurement: item.performance,
+                points: item.points,
+                healthRiskCategory: item.health_risk_category
+              }));
+
+              queryClient.setQueryData(['ptStandards', group.sex, group.age_range], [...groupStandards, ...whtrMapped]);
+              
+              if (seedData.pt_pass_fail_standards) {
+                const groupPassFail = seedData.pt_pass_fail_standards.filter((s: any) => 
+                  s.age_sex_group_id === group.id || (s.sex === group.sex && s.age_range === group.age_range)
+                );
+                queryClient.setQueryData(['passFailStandards', group.sex, group.age_range], groupPassFail);
+              }
+
+              if (seedData.pt_altitude_walk_thresholds) {
+                const groupWalk = seedData.pt_altitude_walk_thresholds.filter((s: any) => 
+                  s.sex === group.sex && s.age_range === group.age_range
+                );
+                queryClient.setQueryData(['walkAltitudeThresholds', group.sex, group.age_range], groupWalk);
+              }
+            });
+          }
+
+          // 3. Help Content
+          const helpTables = ['pt_help_details', 'pay_help_details', 'retirement_help_details', 'best_score_help_details'];
+          helpTables.forEach(tableName => {
+            if (seedData[tableName]) {
+               seedData[tableName].forEach((item: any) => {
+                 const key = item.content_key || item.title;
+                 if (key) {
+                   queryClient.setQueryData(['helpContent', key], seedData[tableName].filter((i: any) => (i.content_key === key || i.title === key)));
+                 }
+               });
+            }
+          });
+
+          console.log('Hydration complete.');
+        } catch (error) {
+          console.error('Failed to hydrate cache from seed-data.json:', error);
+        }
+      }
+    };
+
+    hydrateCache();
+  }, [queryClient]);
   
   const [appState, setAppState] = useState<'LOADING' | 'PAYWALL' | 'AD' | 'READY'>('LOADING');
   const [isInitialized, setIsInitialized] = useState(false);

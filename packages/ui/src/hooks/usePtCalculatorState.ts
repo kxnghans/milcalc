@@ -43,61 +43,72 @@ export function usePtCalculatorState(
     walkPassed: string;
   }>({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, whtrScore: 0, isPass: false, walkPassed: 'n/a' });
   
-  const debouncedAge = useDebounce(demographics.age, 500);
-  const debouncedGender = useDebounce(demographics.gender, 500);
-  const debouncedAltitudeGroup = useDebounce(demographics.altitudeGroup, 500);
+  const debouncedAge = useDebounce(demographics.age, 300);
+  const debouncedGender = useDebounce(demographics.gender, 300);
+  const debouncedAltitudeGroup = useDebounce(demographics.altitudeGroup, 300);
+  const debouncedWaist = useDebounce(demographics.waist, 500);
+  const debouncedHeightFeet = useDebounce(demographics.heightFeet, 500);
+  const debouncedHeightInches = useDebounce(demographics.heightInches, 500);
+  const debouncedIsHeightInInches = useDebounce(demographics.isHeightInInches, 500);
   
-  const debouncedPushupComponent = useDebounce(strength.pushupComponent, 500);
+  const debouncedPushupComponent = useDebounce(strength.pushupComponent, 300);
   const debouncedPushups = useDebounce(strength.pushups, 500);
-  const debouncedStrengthExempt = useDebounce(strength.isExempt, 500);
+  const debouncedStrengthExempt = useDebounce(strength.isExempt, 300);
 
-  const debouncedCoreComponent = useDebounce(core.coreComponent, 500);
+  const debouncedCoreComponent = useDebounce(core.coreComponent, 300);
   const debouncedSitups = useDebounce(core.situps, 500);
   const debouncedReverseCrunches = useDebounce(core.reverseCrunches, 500);
   const debouncedPlankMinutes = useDebounce(core.plankMinutes, 500);
   const debouncedPlankSeconds = useDebounce(core.plankSeconds, 500);
-  const debouncedCoreExempt = useDebounce(core.isExempt, 500);
+  const debouncedCoreExempt = useDebounce(core.isExempt, 300);
 
-  const debouncedCardioComponent = useDebounce(cardio.cardioComponent, 500);
+  const debouncedCardioComponent = useDebounce(cardio.cardioComponent, 300);
   const debouncedRunMinutes = useDebounce(cardio.runMinutes, 500);
   const debouncedRunSeconds = useDebounce(cardio.runSeconds, 500);
   const debouncedShuttles = useDebounce(cardio.shuttles, 500);
   const debouncedWalkMinutes = useDebounce(cardio.walkMinutes, 500);
   const debouncedWalkSeconds = useDebounce(cardio.walkSeconds, 500);
-  const debouncedCardioExempt = useDebounce(cardio.isExempt, 500);
+  const debouncedCardioExempt = useDebounce(cardio.isExempt, 300);
 
   const ageNum = parseInt(debouncedAge);
   const ageGroup = getAgeGroupString(ageNum);
   const capitalizedGender = debouncedGender.charAt(0).toUpperCase() + debouncedGender.slice(1);
 
   // 1. Fetch Scoring Standards (Includes WHtR)
-  const { data: standards, isLoading: isLoadingStandards } = useQuery({
+  const { data: standards, isFetching: isFetchingStandards } = useQuery({
     queryKey: ['ptStandards', capitalizedGender, ageGroup],
-    queryFn: () => getPtStandards(capitalizedGender, ageGroup || ''),
+    queryFn: () => getPtStandards(capitalizedGender, ageGroup || ''), // Logic versioning will be handled inside API or via different table if needed
     enabled: !!capitalizedGender && !!ageGroup,
+    staleTime: 1000 * 60 * 5,
   });
 
   // 2. Fetch Pass/Fail Standards
-  const { data: passFailStandards, isLoading: isLoadingPassFail } = useQuery({
+  const { data: passFailStandards, isFetching: isFetchingPassFail } = useQuery({
     queryKey: ['passFailStandards', capitalizedGender, ageGroup],
     queryFn: () => getPassFailStandards(capitalizedGender, ageGroup || ''),
     enabled: !!capitalizedGender && !!ageGroup,
+    staleTime: 1000 * 60 * 5,
   });
 
   // 3. Fetch Altitude Corrections (Run/HAMR)
-  const { data: altitudeCorrections, isLoading: isLoadingCorrections } = useQuery({
+  const { data: altitudeCorrections, isFetching: isFetchingCorrections } = useQuery({
     queryKey: ['altitudeCorrections'],
     queryFn: () => getPtAltitudeCorrections(),
+    staleTime: 1000 * 60 * 60,
   });
 
   // 4. Fetch Walk Altitude Thresholds
-  const { data: walkAltThresholds, isLoading: isLoadingWalkAlt } = useQuery({
+  const { data: walkAltThresholds, isFetching: isFetchingWalkAlt } = useQuery({
     queryKey: ['walkAltThresholds', capitalizedGender, ageGroup],
     queryFn: () => getPtAltitudeWalkThresholds(capitalizedGender, ageGroup || ''),
     enabled: !!capitalizedGender && !!ageGroup,
+    staleTime: 1000 * 60 * 5,
   });
 
-  const isLoading = isLoadingStandards || isLoadingPassFail || isLoadingCorrections || isLoadingWalkAlt;
+  const isLoading = (isFetchingStandards && !standards) || 
+                    (isFetchingPassFail && !passFailStandards) || 
+                    (isFetchingCorrections && !altitudeCorrections) || 
+                    (isFetchingWalkAlt && !walkAltThresholds);
 
   const { minMax, cardioMinMax } = useMemo(() => {
     if (!standards || !passFailStandards) {
@@ -129,6 +140,25 @@ export function usePtCalculatorState(
       };
   }, [standards, debouncedPushupComponent, debouncedCoreComponent, debouncedCardioComponent]);
 
+    const calculatedWhtr = useMemo(() => {
+        const waistNum = parseFloat(debouncedWaist) || 0;
+        let heightNum = 0;
+        
+        if (debouncedIsHeightInInches) {
+            heightNum = parseFloat(debouncedHeightInches) || 0;
+        } else {
+            const feet = parseFloat(debouncedHeightFeet) || 0;
+            const inches = parseFloat(debouncedHeightInches) || 0;
+            heightNum = (feet * 12) + inches;
+        }
+        
+        if (waistNum > 0 && heightNum > 0) {
+            // Round to 2 decimal places to match standards exactly
+            return Math.round((waistNum / heightNum) * 100) / 100;
+        }
+        return 0;
+    }, [debouncedWaist, debouncedHeightFeet, debouncedHeightInches, debouncedIsHeightInInches]);
+
     useEffect(() => {
         const runCalculations = () => {
             if (ageNum && debouncedGender && standards && passFailStandards && altitudeCorrections && walkAltThresholds) {
@@ -153,14 +183,15 @@ export function usePtCalculatorState(
                         walkMinutes: parseInt(debouncedWalkMinutes) || 0,
                         walkSeconds: parseInt(debouncedWalkSeconds) || 0,
                         isCardioExempt: debouncedCardioExempt,
-                        whtr: 0, // Placeholder for now
+                        whtr: calculatedWhtr,
                         isWhtrExempt: false,
                     }, standards, passFailStandards, altitudeCorrections, walkAltThresholds);
                     setScore(result);
                 } catch (e) {
                     console.error("Error during calculation: ", e);
                 }
-            } else {
+            } else if (!isLoading && (!ageNum || !debouncedGender)) {
+                // Only reset score if we definitely have no demographics
                 setScore({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, whtrScore: 0, isPass: false, walkPassed: 'n/a' });
             }
         }
@@ -170,7 +201,8 @@ export function usePtCalculatorState(
     debouncedPushupComponent, debouncedPushups, debouncedStrengthExempt,
     debouncedCoreComponent, debouncedSitups, debouncedReverseCrunches, debouncedPlankMinutes, debouncedPlankSeconds, debouncedCoreExempt,
     debouncedCardioComponent, debouncedRunMinutes, debouncedRunSeconds, debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds, debouncedCardioExempt,
-    standards, passFailStandards, altitudeCorrections, walkAltThresholds, ageNum
+    calculatedWhtr,
+    standards, passFailStandards, altitudeCorrections, walkAltThresholds, ageNum, isLoading
   ]);
 
   return {

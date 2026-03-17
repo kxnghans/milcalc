@@ -12,5 +12,6 @@ module.exports = {
     '^@repo/ui$': '<rootDir>/packages/ui/src/index.ts',
   },
   clearMocks: true,
+  setupFiles: ['<rootDir>/jest.setup.js'],
   testMatch: ['<rootDir>/packages/**/__tests__/**/*.test.{ts,tsx}'],
 };

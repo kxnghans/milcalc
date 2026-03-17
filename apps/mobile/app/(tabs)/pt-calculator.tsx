@@ -54,7 +54,10 @@ export default function PTCalculator() {
       actions={['best_score', 'document', 'theme']}
       onDocument={() => openDocuments('PT')}
       summaryContent={
-        <ScoreDisplay score={score} cardioComponent={cardio.cardioComponent} />
+        <ScoreDisplay 
+          score={score} 
+          cardioComponent={cardio.cardioComponent} 
+        />
       }
       inputContent={
         <>
@@ -63,6 +66,14 @@ export default function PTCalculator() {
                 setAge={demographics.setAge}
                 gender={demographics.gender}
                 setGender={demographics.setGender}
+                waist={demographics.waist}
+                setWaist={demographics.setWaist}
+                heightFeet={demographics.heightFeet}
+                setHeightFeet={demographics.setHeightFeet}
+                heightInches={demographics.heightInches}
+                setHeightInches={demographics.setHeightInches}
+                isHeightInInches={demographics.isHeightInInches}
+                setIsHeightInInches={demographics.setIsHeightInInches}
             />
             <Divider style={styles.dividerMargin} />
             <StrengthComponent 

@@ -245,7 +245,7 @@ export default function CardioComponent({
                     })()}
                 </View>
                 <SegmentedSelector
-                    options={[{ label: "1.5-Mile Run", value: "run" }, { label: "20m HAMR", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]} 
+                    options={[{ label: "2-Mile Run", value: "run" }, { label: "20m HAMR", value: "shuttles" }, { label: "2-km Walk", value: "walk" }]} 
                     selectedValues={isExempt ? [] : [cardioComponent]}
                     onValueChange={setCardioComponent}
                 />
