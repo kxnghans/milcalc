@@ -4,6 +4,7 @@
 - **Monorepo Architecture**: Fully operational.
 - **Pure Logic Engines**: PT (50-20-15-15 refactor complete), Pay, and Retirement.
 - **Unified PT Database Refactor**: Consolidated 7 fragmented tables into 4 modular, simplified tables (`pt_scoring_standards`, `pt_pass_fail_standards`, `pt_altitude_corrections`, `pt_altitude_walk_thresholds`).
+- **Unified BAH 2026 Schema Integration**: Transitioned to the `bah_rates_2026` unified table with `has_dependents` boolean logic across the API and SyncManager.
 - **2025 PT Standards Ingestion**: 100% of standards ingested into Supabase simplified schema.
 - **PT Parser Engine**: Robust string-to-numeric calculation engine in `packages/utils`.
 - **Hybrid Seeding (Offline First)**: Integrated `seed-data.json` hydration in `_layout.tsx`.

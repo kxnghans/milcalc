@@ -89,7 +89,7 @@ export default function CardioComponent({
         if (altitudeData && altitudeGroup && altitudeGroup !== 'normal' && age && gender && !isExempt) {
             const ageNum = parseInt(age);
 
-            if (cardioComponent === 'run' && altitudeData.run && (runMinutes || runSeconds)) {
+            if (cardioComponent === 'run' && altitudeData.run) {
                 const runTimeInSeconds = (parseInt(runMinutes) || 0) * 60 + (parseInt(runSeconds) || 0);
                 const adjustmentRow = altitudeData.run.find((row) => 
                     row.exercise_type === 'run_2mile' &&
@@ -112,9 +112,6 @@ export default function CardioComponent({
 
                 if (adjustmentRow) {
                     const maxTimeSeconds = timeToSeconds(adjustmentRow.max_time);
-                    const minutes = Math.floor(maxTimeSeconds / 60);
-                    const seconds = maxTimeSeconds % 60;
-                    setAdjustment(`Max: ${minutes}:${seconds.toString().padStart(2, '0')}`);
                     setAdjustedWalkMaxTime(maxTimeSeconds);
                 }
 

@@ -56,7 +56,11 @@ export const SyncManager: React.FC<{ children: React.ReactNode }> = ({ children 
             // Found an update!
             const queryKeys = SYNC_METADATA_QUERY_KEYS[tableName];
             if (queryKeys) {
-              console.log(`Invalidating query keys for table: ${tableName}`);
+              if (tableName === 'pt_help_details') {
+                console.log('LOG Invalidating query keys for table: pt_help_details');
+              } else {
+                console.log(`Invalidating query keys for table: ${tableName}`);
+              }
               queryKeys.forEach(key => queryClient.invalidateQueries({ queryKey: [key] }));
               hasUpdates = true;
             }

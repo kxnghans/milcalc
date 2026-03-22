@@ -213,7 +213,7 @@ export const checkWalkPass = (
     if (altitudeGroup && altitudeGroup !== 'normal' && walkAltitudeThresholds) {
         const threshold = walkAltitudeThresholds.find(t => {
             const [min, max] = t.age_range.split('-').map(Number);
-            return t.sex === gender && t.altitude_group === altitudeGroup && age >= min && age <= max;
+            return t.sex.toLowerCase() === gender.toLowerCase() && t.altitude_group === altitudeGroup && age >= min && age <= max;
         });
         if (threshold) maxTime = timeToSeconds(threshold.max_time);
     } else {

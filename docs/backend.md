@@ -31,20 +31,21 @@ We categorize data into three tiers based on volatility and access patterns:
 
 ## 4. Database Schema
 
-### 4.1 Fitness Standards (2025 Architecture)
-The 2025 PT Architecture prioritizes **human auditability**. Performance values (e.g., `"13:25"`, `"<= 0.49"`, `"45-48"`) are stored as **Text** in the database to precisely match source DAFMAN 36-2905 PDFs.
+### 4.1 Fitness Standards (2025/2026 Architecture)
+The 2025/2026 PT Architecture simplifies the schema into a **4-table model** for easier maintenance and human auditability. Performance values (e.g., `"13:25"`, `"<= 0.49"`, `"45-48"`) are stored as **Text** to precisely match source DAFMAN 36-2905 PDFs.
 
--   **`pt_scoring_standards`**: Unified lookup for all exercise points. Includes `gender` and `age_group` columns for direct lookup.
--   **`pt_pass_fail_standards`**: Defines the minimum passing thresholds for all events.
+-   **`pt_scoring_standards`**: Unified lookup for all exercise points. Includes `gender`, `age_group`, `performance`, and `health_risk_category` columns for high-performance demographic filtering.
+-   **`pt_pass_fail_standards`**: Defines the minimum passing thresholds for all events by `gender` and `age_group`.
 -   **`pt_altitude_corrections`**: Performance offsets (Run subtractions / HAMR additions) for high-elevation environments.
--   **`pt_altitude_walk_thresholds`**: Demographic-specific max times for the 2km Walk at altitude.
--   **Parser Intelligence**: The `@repo/utils` logic engine features a `parsePerformanceRange` utility that handles ranges (`"45-48"`), inequalities (`">= 50"`), and exact values.
--   **Relational Groups**: Exercises are grouped via the `pt_groups` table, allowing the UI to dynamically build component lists (e.g., "Cardio", "Strength") based on backend configuration.
+-   **`pt_altitude_walk_thresholds`**: Demographic-specific max times for the 2km Walk at altitude, indexed by `sex`, `age_range`, and `altitude_group`.
+-   **Parser Intelligence**: The `@repo/utils` logic engine features a `parsePerformanceRange` utility that dynamically parses ranges (`"45-48"`), inequalities (`">= 50"`), and exact values from the text performance columns.
 
 ### 4.2 Financial Logic (Pay & Retirement)
 -   **`base_pay_2024`**: Standard basic pay tables (relational by rank/YOS).
 -   **`reserve_drill_pay`**: Prorated pay tables for Guard and Reserve drills.
--   **`bah_rates_dependents` / `bah_rates_no_dependents`**: Housing allowance lookup by MHA/Zip.
+-   **`bah_rates_2026`**: Unified housing allowance lookup. Includes a `has_dependents` boolean and columns for all pay grades (e.g., `e01` through `o10`).
+-   **`zip_mha_lookup`**: Links Zip Codes to Military Housing Areas (MHA).
+-   **`bah_rate_component_breakdown`**: Tracks rent vs. utility percentages by MHA for transparency.
 -   **`bas_rates`**: Subsistence allowance lookup (versioned by year).
 -   **`federal_tax_data` / `state_tax_data`**: Tax brackets and standard deductions.
 -   **`veterans_disability_compensation`**: Monthly VA rates for service-connected disabilities.

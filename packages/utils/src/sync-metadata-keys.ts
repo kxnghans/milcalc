@@ -8,8 +8,7 @@ export const SYNC_METADATA_QUERY_KEYS: Record<string, string[]> = {
   'pt_altitude_walk_thresholds': ['walkAltitudeThresholds'],
   'base_pay_2024': ['basePay'],
   'reserve_drill_pay': ['basePay'],
-  'bah_rates_dependents': ['bahRate', 'mhaData'],
-  'bah_rates_no_dependents': ['bahRate'],
+  'bah_rates_2026': ['bahRate', 'mhaData'],
   'bas_rates': ['basRate'],
   'federal_tax_data': ['federalTaxData', 'maxFederalTaxYear'],
   'state_tax_data': ['stateTaxData', 'maxStateTaxYear'],
@@ -18,4 +17,5 @@ export const SYNC_METADATA_QUERY_KEYS: Record<string, string[]> = {
   'pay_help_details': ['helpContent'],
   'retirement_help_details': ['helpContent'],
   'best_score_help_details': ['helpContent'],
+  'documents': ['documents'],
 };

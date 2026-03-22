@@ -78,8 +78,9 @@ export const getBasRate = async (rank: string) => {
  */
 export const getMhaData = async () => {
     const { data, error } = await supabase
-        .from('bah_rates_dependents')
-        .select('state, mha_name, mha');
+        .from('bah_rates_2026')
+        .select('state, mha_name, mha')
+        .eq('has_dependents', true); // Use one side of the table to get unique MHAs
 
     if (error) {
         console.error('Error fetching MHA data:', sanitizeError(error));
@@ -111,7 +112,7 @@ export const getMhaData = async () => {
 export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'WITH_DEPENDENTS' | 'WITHOUT_DEPENDENTS'): Promise<number | null> => {
     if (!mha || !rank || !dependencyStatus) return null;
 
-    const tableName = dependencyStatus === 'WITH_DEPENDENTS' ? 'bah_rates_dependents' : 'bah_rates_no_dependents';
+    const hasDependents = dependencyStatus === 'WITH_DEPENDENTS';
     
     const parts = rank.split('-');
     const letter = parts[0];
@@ -131,27 +132,27 @@ export const getBahRate = async (mha: string, rank: string, dependencyStatus: 'W
     }
 
     // This is a hardcoded list of columns that exist in the table.
-    // A dynamic check against information_schema was attempted but is not supported by the Supabase client.
     const existingColumns: string[] = [
         'e01', 'e02', 'e03', 'e04', 'e05', 'e06', 'e07', 'e08', 'e09',
         'w01', 'w02', 'w03', 'w04', 'w05',
         'o01e', 'o02e', 'o03e',
-        'o01', 'o02', 'o03', 'o04', 'o05', 'o06', 'o07'
+        'o01', 'o02', 'o03', 'o04', 'o05', 'o06', 'o07', 'o08', 'o09', 'o10'
     ];
 
     if (!existingColumns.includes(rankColumn)) {
-        console.warn(`Column ${rankColumn} does not exist in ${tableName}. Returning null.`);
+        console.warn(`Column ${rankColumn} does not exist in bah_rates_2026. Returning null.`);
         return null;
     }
 
     const { data, error } = await supabase
-        .from(tableName)
+        .from('bah_rates_2026')
         .select(rankColumn)
         .eq('mha', mha)
+        .eq('has_dependents', hasDependents)
         .single();
 
     if (error) {
-        console.error(`Error fetching BAH rate from ${tableName}:`, sanitizeError(error));
+        console.error(`Error fetching BAH rate from bah_rates_2026:`, sanitizeError(error));
         return null;
     }
 
