@@ -23,12 +23,14 @@ type BugCategory = 'UI/UX' | 'Calculation' | 'Sync' | 'Other';
 export const BugReportView: React.FC = () => {
   const { theme } = useTheme();
   const { closeOverlay, setOverlayFooter } = useOverlay();
-  const { firstName, lastName, email, phone } = useProfile();
+  const { firstName, lastName, email, phone, accountType } = useProfile();
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<BugCategory>('UI/UX');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isPremium = accountType === 'premium';
 
   const styles = useMemo(() => StyleSheet.create({
     viewContainer: {
@@ -55,6 +57,17 @@ export const BugReportView: React.FC = () => {
       borderRadius: 30,
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    priorityBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: getAlphaColor(theme.colors.primary, 0.1),
+      paddingHorizontal: theme.spacing.m,
+      paddingVertical: 6,
+      borderRadius: 12,
+      marginTop: theme.spacing.s,
+      borderWidth: 1,
+      borderColor: getAlphaColor(theme.colors.primary, 0.2),
     },
     formContainer: {
       gap: 0, // FormField has its own marginBottom: theme.spacing.m
@@ -117,6 +130,7 @@ export const BugReportView: React.FC = () => {
 Name: ${firstName} ${lastName}
 Email: ${email}
 Phone: ${phone}
+Account Type: ${accountType}
 
 --- System Metadata ---
 OS: ${Platform.OS} ${Platform.Version}
@@ -131,7 +145,7 @@ Timestamp: ${new Date().toISOString()}
       await submitBugReport({
         app_id: 'milcalc',
         email: email || 'anonymous@milcalc.app',
-        severity: 'medium',
+        severity: isPremium ? 'high' : 'medium',
         description: `[${category}] ${title}\n\n${description}\n\n${metadata}`,
         first_name: firstName,
         last_name: lastName,
@@ -139,7 +153,7 @@ Timestamp: ${new Date().toISOString()}
       });
 
       setIsSubmitting(false);
-      Alert.alert('Report Received', 'Thank you for helping us improve MilCalc. Our engineers are on it!', [
+      Alert.alert('Report Received', isPremium ? 'Priority report received. Our team will review this immediately!' : 'Thank you for helping us improve MilCalc. Our engineers are on it!', [
         { text: 'Dismiss', onPress: closeOverlay }
       ]);
     } catch (error) {
@@ -147,7 +161,7 @@ Timestamp: ${new Date().toISOString()}
       setIsSubmitting(false);
       Alert.alert('Transmission Error', "We couldn't send your report. Please check your connection and try again.");
     }
-  }, [title, description, firstName, lastName, email, phone, category, closeOverlay]);
+  }, [title, description, firstName, lastName, email, phone, category, closeOverlay, isPremium, accountType]);
 
   // Memoize the footer content to ensure object identity stability
   const footerContent = useMemo(() => (
@@ -197,9 +211,19 @@ Timestamp: ${new Date().toISOString()}
             textShadowRadius: 0.25,
             textShadowOffset: { width: 0, height: 0 }
           }]}>SUBMIT FEEDBACK</Text>
-          <Text style={[theme.typography.body, { color: theme.colors.text, textAlign: 'center', marginTop: theme.spacing.xs, opacity: 0.7 }]}>
-            Found a calculation error or a glitch? Let us know and we&apos;ll fix it.
-          </Text>
+          
+          {isPremium ? (
+            <View style={styles.priorityBadge}>
+              <Icon name="shield-star" size={16} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
+              <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700', marginLeft: 6 }]}>
+                PRIORITY SUPPORT ACTIVE
+              </Text>
+            </View>
+          ) : (
+            <Text style={[theme.typography.body, { color: theme.colors.text, textAlign: 'center', marginTop: theme.spacing.xs, opacity: 0.7 }]}>
+              Found a calculation error or a glitch? Let us know and we&apos;ll fix it.
+            </Text>
+          )}
         </View>
       </Card>
 

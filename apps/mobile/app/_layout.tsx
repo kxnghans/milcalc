@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Slot } from "expo-router";
 import { ThemeProvider, BottomSheet, useTheme, CalculatorStateProvider } from "@repo/ui";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
@@ -87,8 +87,32 @@ function LayoutContent() {
   } = useOverlay();
 
   const { theme } = useTheme();
-  const { isLoading, hasSeenOnboarding, setProfileData } = useProfile();
+  const { isLoading, hasSeenOnboarding, setProfileData, accountType } = useProfile();
   const queryClient = useQueryClient();
+
+  const [appState, setAppState] = useState<'LOADING' | 'PAYWALL' | 'AD' | 'READY'>('LOADING');
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Track overlay state to trigger ad on close
+  const prevVisible = useRef(isVisible);
+  const activeOverlayOnClose = useRef(overlayType);
+
+  useEffect(() => {
+    if (isVisible) {
+      activeOverlayOnClose.current = overlayType;
+    }
+    
+    // If it was visible and now it's not
+    if (prevVisible.current && !isVisible) {
+      if (activeOverlayOnClose.current === 'PAYWALL' && accountType === 'free') {
+        // Delay slightly to allow bottom sheet animation to complete
+        setTimeout(() => {
+          setAppState('AD');
+        }, 300);
+      }
+    }
+    prevVisible.current = isVisible;
+  }, [isVisible, overlayType, accountType]);
 
   // Hydration logic: Seed the cache from seed-data.json if it's empty
   useEffect(() => {
@@ -214,19 +238,18 @@ function LayoutContent() {
     hydrateCache();
   }, [queryClient]);
   
-  const [appState, setAppState] = useState<'LOADING' | 'PAYWALL' | 'AD' | 'READY'>('LOADING');
-  const [isInitialized, setIsInitialized] = useState(false);
-
   useEffect(() => {
     if (!isLoading && !isInitialized) {
       if (!hasSeenOnboarding) {
         setAppState('PAYWALL');
+      } else if (accountType === 'premium') {
+        setAppState('READY');
       } else {
         setAppState('AD');
       }
       setIsInitialized(true);
     }
-  }, [isLoading, isInitialized, hasSeenOnboarding]);
+  }, [isLoading, isInitialized, hasSeenOnboarding, accountType]);
 
   const handlePaywallComplete = () => {
     setProfileData({ hasSeenOnboarding: true });

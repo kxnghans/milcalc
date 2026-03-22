@@ -109,7 +109,12 @@ export default function SplashScreen() {
           </View>
           <View style={styles.fullWidth}>
             <SegmentedSelector
-              options={[{label: 'Spring', value: 'spring'}, {label: 'Summer', value: 'summer'}, {label: 'Fall', value: 'fall'}, {label: 'Winter', value: 'winter'}]}
+              options={[
+                {label: '', value: 'spring', icon: 'flower'}, 
+                {label: '', value: 'summer', icon: 'weather-sunny'}, 
+                {label: '', value: 'fall', icon: 'leaf'}, 
+                {label: '', value: 'winter', icon: 'snowflake'}
+              ]}
               selectedValues={[season]}
               onValueChange={seasonValueChange}
               selectedBackgroundColor={theme.colors.mascotBlue}

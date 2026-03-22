@@ -10,6 +10,7 @@ export interface ProfileData {
   gender: 'male' | 'female';
   accountType: 'free' | 'premium';
   hasSeenOnboarding: boolean;
+  donationTotal: number;
 }
 
 interface ProfileContextType extends ProfileData {
@@ -27,6 +28,7 @@ const DEFAULT_PROFILE: ProfileData = {
   gender: 'male',
   accountType: 'free',
   hasSeenOnboarding: false,
+  donationTotal: 0,
 };
 
 const ProfileContext = createContext<ProfileContextType>({

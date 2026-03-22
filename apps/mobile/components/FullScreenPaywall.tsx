@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Easing, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme, Icon, ICONS, ICON_SETS, NeumorphicOutset, NeumorphicInset, PillButton, getAlphaColor } from '@repo/ui';
 import { BlurView } from 'expo-blur';
 import { useProfile } from '../contexts/ProfileContext';
+import { DonationSection } from './DonationSection';
 
 interface FullScreenPaywallProps {
   onComplete: () => void;
@@ -15,7 +16,7 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
   // Animation Refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const contentTranslateY = useRef(new Animated.Value(30)).current;
-  const featureAnims = useRef([new Animated.Value(0), new Animated.Value(0), new Animated.Value(0)]).current;
+  const featureAnims = useRef([new Animated.Value(0), new Animated.Value(0)]).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
 
   const styles = React.useMemo(() => StyleSheet.create({
@@ -31,14 +32,15 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
       borderRadius: 200,
       opacity: 0.6,
     },
-    content: {
-      flex: 1,
+    scrollContent: {
+      flexGrow: 1,
       padding: theme.spacing.l,
       paddingTop: 80,
-      justifyContent: 'space-between',
+      paddingBottom: 40,
     },
     header: {
       alignItems: 'center',
+      marginBottom: 30,
     },
     heroIconContainer: {
       width: 120,
@@ -71,7 +73,7 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
       textAlign: 'center',
     },
     featuresContainer: {
-      marginVertical: 40,
+      marginBottom: 40,
       gap: theme.spacing.m,
     },
     featureCard: {
@@ -92,7 +94,6 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
     },
     footer: {
       alignItems: 'center',
-      paddingBottom: 30,
     },
     glassPriceCard: {
       width: '100%',
@@ -125,7 +126,7 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
       opacity: 0.5,
       marginTop: 20,
     }
-  }), [theme]);
+  }), [theme, isDarkMode]);
 
   useEffect(() => {
     // Entrance Sequence
@@ -206,65 +207,64 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
         }
       ]} />
 
-      <Animated.View style={[styles.content, { transform: [{ translateY: contentTranslateY }] }]}>
-        <View style={styles.header}>
-          <NeumorphicOutset 
-            containerStyle={styles.heroIconContainer} 
-            contentStyle={styles.heroIconContent}
-            highlightColor={getAlphaColor(theme.colors.primary, 0.4)}
-          >
-            <Icon name={ICONS.CROWN} size={54} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
-          </NeumorphicOutset>
-          
-          <Text style={styles.brandText}>MilCalc <Text style={styles.proText}>PRO</Text></Text>
-          <Text style={styles.tagline}>The standard for military excellence.</Text>
-        </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Animated.View style={{ transform: [{ translateY: contentTranslateY }] }}>
+          <View style={styles.header}>
+            <NeumorphicOutset 
+              containerStyle={styles.heroIconContainer} 
+              contentStyle={styles.heroIconContent}
+              highlightColor={getAlphaColor(theme.colors.primary, 0.4)}
+            >
+              <Icon name={ICONS.CROWN} size={54} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
+            </NeumorphicOutset>
+            
+            <Text style={styles.brandText}>MilCalc <Text style={styles.proText}>PRO</Text></Text>
+            <Text style={styles.tagline}>The standard for military excellence.</Text>
+          </View>
 
-        <View style={styles.featuresContainer}>
-          <FeatureItem 
-            index={0}
-            icon="shield-star" 
-            title="Ad-Free Experience" 
-            description="Pure focus, no distractions." 
-          />
-          <FeatureItem 
-            index={1}
-            icon="chart-areaspline" 
-            title="Predictive Analytics" 
-            description="Visualize your career trajectory." 
-          />
-          <FeatureItem 
-            index={2}
-            icon="vector-combine" 
-            title="Unified Cloud Sync" 
-            description="Data that moves at your speed." 
-          />
-        </View>
+          <View style={styles.featuresContainer}>
+            <FeatureItem 
+              index={0}
+              icon="shield-star" 
+              title="Ad-Free Experience" 
+              description="Focus on your mission, no distractions." 
+            />
+            <FeatureItem 
+              index={1}
+              icon="headset" 
+              title="Priority Support" 
+              description="Fast-lane response for all your questions." 
+            />
+          </View>
 
-        <View style={styles.footer}>
-          <BlurView intensity={isDarkMode ? 20 : 40} style={styles.glassPriceCard} tint={isDarkMode ? 'dark' : 'light'}>
-            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-              <Text style={styles.priceText}>$4.99</Text>
-              <Text style={styles.priceSub}> / month</Text>
-            </View>
-            <Text style={[theme.typography.caption, { color: theme.colors.text, opacity: 0.4, marginTop: 8 }]}>
-              Secure billing via App Store • Cancel anytime
-            </Text>
-          </BlurView>
+          <View style={styles.footer}>
+            <BlurView intensity={isDarkMode ? 20 : 40} style={styles.glassPriceCard} tint={isDarkMode ? 'dark' : 'light'}>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                <Text style={styles.priceText}>$0.99</Text>
+                <Text style={styles.priceSub}> / month</Text>
+              </View>
+              <Text style={[theme.typography.caption, { color: theme.colors.text, opacity: 0.4, marginTop: 8 }]}>
+                Support our veteran-led initiative
+              </Text>
+            </BlurView>
 
-          <PillButton
-            title="UPGRADE TO PRO"
-            onPress={handleUpgrade}
-            containerStyle={styles.upgradeButton}
-            textStyle={[theme.typography.header, { fontSize: 18, letterSpacing: 1 }]}
-            colorKey="primary"
-          />
-          
-          <TouchableOpacity onPress={onComplete} activeOpacity={0.7}>
+            <PillButton
+              title="UPGRADE TO PRO"
+              onPress={handleUpgrade}
+              containerStyle={styles.upgradeButton}
+              textStyle={[theme.typography.header, { fontSize: 18, letterSpacing: 1 }]}
+              colorKey="primary"
+            />
+          </View>
+
+          {/* Reusable Donation Section */}
+          <DonationSection onDonationComplete={onComplete} />
+
+          <TouchableOpacity onPress={onComplete} activeOpacity={0.7} style={{ marginTop: 40, alignSelf: 'center' }}>
             <Text style={styles.skipText}>Not right now</Text>
           </TouchableOpacity>
-        </View>
-      </Animated.View>
+        </Animated.View>
+      </ScrollView>
     </Animated.View>
   );
 };

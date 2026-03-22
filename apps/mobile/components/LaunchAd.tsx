@@ -209,7 +209,7 @@ export const LaunchAd: React.FC<LaunchAdProps> = ({ onSkip }) => {
           <Text style={styles.mainTitle}>MILITARY{'\n'}PRECISION</Text>
           <Text style={styles.subtitle}>Unlock your full potential.</Text>
           <Text style={styles.description}>
-            Experience advanced retirement projections, cloud-secure PT tracking, and an environment designed for elite performance.
+            Experience MilCalc at its peak with an ad-free environment and priority support from our veteran-led engineering team.
           </Text>
         </Animated.View>
 

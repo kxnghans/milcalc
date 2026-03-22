@@ -40,9 +40,18 @@ export const SlideToggle: React.FC<SlideToggleProps> = ({
     outputRange: [2, 22],
   });
 
-  const backgroundColor = animatedValue.interpolate({
+  // Track background color: secondary when off, primary (or mascotBlue) when on
+  const trackBackgroundColor = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [theme.colors.secondary, theme.colors.primary],
+  });
+
+  // Actually user said: "when its off color the circle blue when active ilke how the bar is filled and the circle our normal bg color"
+  // Let's use theme.colors.primary (which is teal/blue) for "blue".
+  
+  const thumbColor = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [theme.colors.primary, theme.colors.surface],
   });
 
   const isBottom = labelPosition === 'bottom';
@@ -57,16 +66,15 @@ export const SlideToggle: React.FC<SlideToggleProps> = ({
             containerStyle={styles.track} 
             style={styles.neumorphicStyle}
         >
-          <Animated.View style={[styles.trackFill, { backgroundColor }]} />
+          <Animated.View style={[styles.trackFill, { backgroundColor: trackBackgroundColor }]} />
           <Animated.View 
             style={[
               styles.thumb, 
               styles.thumbBorder,
               { 
                 transform: [{ translateX }],
-                backgroundColor: theme.colors.surface,
-                // Add a subtle border to ensure visibility when track is secondary/surface
-                borderColor: theme.colors.border,
+                backgroundColor: thumbColor,
+                borderColor: theme.colors.primary, // Always a distinct primary border
               }
             ]} 
           />
@@ -122,7 +130,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   thumbBorder: {
-    borderWidth: 0.5,
+    borderWidth: 1.5, // Distinct border
   },
   neumorphicStyle: {
     borderRadius: 15,

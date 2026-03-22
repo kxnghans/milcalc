@@ -1,12 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { useTheme, Icon, ICONS, ICON_SETS, NeumorphicOutset, NeumorphicInset, Divider, SegmentedSelector, PillButton } from '@repo/ui';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { useTheme, Icon, ICONS, ICON_SETS, NeumorphicOutset, NeumorphicInset, Divider, SegmentedSelector, getAlphaColor } from '@repo/ui';
 import { useOverlay } from '../contexts/OverlayContext';
 import { useProfile } from '../contexts/ProfileContext';
 import Constants from 'expo-constants';
 import { BugReportView } from './BugReportView';
 import Demographics from './Demographics';
 import FormField from './FormField';
+import { DonationSection } from './DonationSection';
 
 export const MainOverlay: React.FC = () => {
   const { overlayType } = useOverlay();
@@ -136,6 +137,19 @@ const AccountView: React.FC = () => {
       justifyContent: 'space-between',
       paddingVertical: theme.spacing.s,
     },
+    supportPrompt: {
+      borderRadius: 16,
+      marginTop: theme.spacing.s,
+    },
+    supportContent: {
+      borderRadius: 16,
+      paddingVertical: theme.spacing.m,
+      paddingHorizontal: theme.spacing.l,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: theme.spacing.m,
+    },
   }), [theme]);
 
   const themeOptions = [
@@ -158,7 +172,7 @@ const AccountView: React.FC = () => {
   };
 
   return (
-    <View style={styles.viewContainer}>
+    <ScrollView style={styles.viewContainer} showsVerticalScrollIndicator={false}>
       {/* Profile Section */}
       <View style={styles.section}>
         <Text style={styles.headerText}>Profile Details</Text>
@@ -241,14 +255,25 @@ const AccountView: React.FC = () => {
 
       <Divider style={{ marginVertical: theme.spacing.m }} />
 
+      {/* Support Prompt */}
+      <TouchableOpacity onPress={() => openOverlay('PAYWALL')} activeOpacity={0.85}>
+        <NeumorphicInset containerStyle={styles.supportPrompt} contentStyle={styles.supportContent}>
+          <Icon name="heart-outline" size={20} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
+          <Text style={[theme.typography.bodybold, { color: theme.colors.text }]}>Help us stay free</Text>
+          <Icon name="chevron-right" size={20} color={getAlphaColor(theme.colors.text, 0.35)} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
+        </NeumorphicInset>
+      </TouchableOpacity>
+
+      <Divider style={{ marginVertical: theme.spacing.m }} />
+
       {/* App Info */}
-      <View style={[styles.section, { marginBottom: theme.spacing.l }]}>
+      <View style={[styles.section, { marginBottom: theme.spacing.xl }]}>
         <View style={styles.settingsRow}>
           <Text style={[theme.typography.body, { color: theme.colors.text }]}>App Version</Text>
           <Text style={[theme.typography.bodybold, { color: theme.colors.text }]}>{Constants.expoConfig?.version || '1.0.0'}</Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -261,6 +286,7 @@ const PaywallView: React.FC = () => {
     viewContainer: {
       paddingHorizontal: theme.spacing.m,
       paddingTop: theme.spacing.s,
+      paddingBottom: theme.spacing.l,
     },
   }), [theme]);
 
@@ -270,43 +296,13 @@ const PaywallView: React.FC = () => {
     openOverlay('ACCOUNT');
   };
 
-  const BenefitItem = ({ text }: { text: string }) => (
-    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: theme.spacing.m }}>
-      <Icon name="check-circle" size={20} color={theme.colors.success} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
-      <Text style={[theme.typography.body, { color: theme.colors.text, marginLeft: theme.spacing.m }]}>{text}</Text>
-    </View>
-  );
-
   return (
-    <View style={styles.viewContainer}>
-      <View style={{ alignItems: 'center', marginBottom: theme.spacing.l }}>
-        <NeumorphicOutset containerStyle={{ width: 80, height: 80, borderRadius: 40, marginBottom: theme.spacing.m }} contentStyle={{ width: 80, height: 80, borderRadius: 40, justifyContent: 'center', alignItems: 'center' }}>
-          <Icon name={ICONS.CROWN} size={40} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
-        </NeumorphicOutset>
-        <Text style={[theme.typography.title, { color: theme.colors.primary, textAlign: 'center' }]}>Upgrade to Premium</Text>
-        <Text style={[theme.typography.body, { color: theme.colors.text, textAlign: 'center', marginTop: theme.spacing.s }]}>Unlock the full potential of MilCalc</Text>
-      </View>
-
-      <NeumorphicInset 
-        containerStyle={{ borderRadius: 16, marginBottom: theme.spacing.l }}
-        contentStyle={{ padding: theme.spacing.m }}
-      >
-        <BenefitItem text="Ad-free experience" />
-        <BenefitItem text="Advanced PT analysis" />
-        <BenefitItem text="Detailed Pay breakdowns" />
-        <BenefitItem text="Priority support" />
-        <BenefitItem text="Cloud sync for all devices" />
-      </NeumorphicInset>
-
-      <PillButton
-        title="Upgrade Now - $4.99/mo"
-        onPress={handleUpgrade}
-        containerStyle={{ marginBottom: theme.spacing.m }}
+    <ScrollView style={styles.viewContainer} showsVerticalScrollIndicator={false}>
+      {/* Integrated Premium & Donation Section */}
+      <DonationSection 
+        onDonationComplete={() => openOverlay('ACCOUNT')} 
+        onUpgradePress={handleUpgrade}
       />
-      
-      <TouchableOpacity onPress={() => openOverlay('ACCOUNT')} style={{ alignSelf: 'center', padding: theme.spacing.s }}>
-        <Text style={[theme.typography.label, { color: theme.colors.text, opacity: 0.7 }]}>Not now, maybe later</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
