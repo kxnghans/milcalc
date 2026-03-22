@@ -9,6 +9,7 @@ export * from './components';
 export * from './theme';
 export * from './icons';
 export * from './contexts/ThemeContext';
+export * from './contexts/CalculatorStateContext';
 export * from './hooks/useScoreColors';
 export * from './hooks/useDebounce';
 export * from './hooks/useNumericInput';

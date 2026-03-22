@@ -97,7 +97,7 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
     setModalVisible(false);
   };
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     pressableInput: {
         paddingVertical: theme.spacing.s,
         paddingHorizontal: theme.spacing.s,
@@ -159,7 +159,7 @@ const TwoColumnPicker: React.FC<TwoColumnPickerProps> = ({
     spacer: {
         width: theme.spacing.s,
     }
-  });
+  }), [theme]);
 
   const getDisplayText = () => {
     if (isLoading) return 'Loading Data...';

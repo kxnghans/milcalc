@@ -98,7 +98,7 @@ export default function CardioComponent({
                     runTimeInSeconds <= timeToSeconds(row.perf_end)
                 );
                 if (adjustmentRow) {
-                    setAdjustment(`- ${adjustmentRow.correction}s`);
+                    setAdjustment(`-${adjustmentRow.correction}s`);
                 }
 
             } else if (cardioComponent === 'walk' && altitudeData.walk && (walkMinutes || walkSeconds)) {
@@ -124,13 +124,13 @@ export default function CardioComponent({
                     row.altitude_group === altitudeGroup
                 );
                 if (adjustmentRow) {
-                    setAdjustment(`+ ${adjustmentRow.correction}`);
+                    setAdjustment(`+${adjustmentRow.correction}`);
                 }
             }
         }
     }, [runMinutes, runSeconds, walkMinutes, walkSeconds, shuttles, cardioComponent, altitudeGroup, age, gender, altitudeData, isExempt]);
 
-    const styles = StyleSheet.create({
+    const styles = React.useMemo(() => StyleSheet.create({
         cardTitle: {
             ...theme.typography.title,
             color: theme.colors.text,
@@ -155,7 +155,7 @@ export default function CardioComponent({
             marginHorizontal: theme.spacing.s,
             marginTop: theme.spacing.xs,
         }
-    });
+    }), [theme]);
 
     const getMascot = (): ImageSourcePropType => {
         if (cardioComponent === "run" || cardioComponent === "shuttles") {
@@ -189,7 +189,7 @@ export default function CardioComponent({
                                             ninetyPercentileThreshold={ninetyPercentileThreshold}
                                             valueIsTime={true}
                                             score={typeof score.cardioScore === 'number' ? score.cardioScore : 0}
-                                            maxScore={60}
+                                            maxScore={50}
                                         />
                                     </NeumorphicOutset>
                                 </View>
@@ -236,7 +236,7 @@ export default function CardioComponent({
                                             maxPointsThreshold={cardioMinMax.max}
                                             ninetyPercentileThreshold={ninetyPercentileThreshold}
                                             score={typeof score.cardioScore === 'number' ? score.cardioScore : 0}
-                                            maxScore={60}
+                                            maxScore={50}
                                         />
                                     </NeumorphicOutset>
                                 </View>

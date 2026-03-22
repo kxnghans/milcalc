@@ -52,7 +52,7 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({
     openOverlay(type);
   };
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     container: {
       backgroundColor: theme.colors.surface,
       paddingTop: insets.top,
@@ -150,7 +150,7 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({
         paddingHorizontal: theme.spacing.m,
         justifyContent: 'center',
     }
-  });
+  }), [theme, insets, headerLeft]);
 
   return (
     <DismissKeyboardView style={styles.dismissKeyboard}>

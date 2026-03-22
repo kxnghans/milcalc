@@ -1,51 +1,55 @@
 DELETE FROM public.pt_altitude_corrections;
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 1', '0:00', '14:00', 15);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 1', '14:01', '16:00', 20);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 1', '16:01', '18:00', 25);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 1', '18:01', '20:00', 30);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 1', '20:01', '99:59', 35);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 2', '0:00', '14:00', 30);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 2', '14:01', '16:00', 35);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 2', '16:01', '18:00', 40);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 2', '18:01', '20:00', 45);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 2', '20:01', '99:59', 50);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 3', '0:00', '14:00', 45);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 3', '14:01', '16:00', 50);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 3', '16:01', '18:00', 55);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 3', '18:01', '20:00', 60);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, perf_start, perf_end, correction) VALUES ('run_2mile', 'Group 3', '20:01', '99:59', 65);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, correction) VALUES ('shuttles_20m', 'Group 1', 3);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, correction) VALUES ('shuttles_20m', 'Group 2', 6);
-INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, correction) VALUES ('shuttles_20m', 'Group 3', 9);
+INSERT INTO public.pt_altitude_corrections (exercise_type, altitude_group, altitude_range, perf_start, perf_end, correction)
+VALUES 
+  ('run_2mile', 'Group 1', '3000-5249ft', '0:00', '14:00', 15),
+  ('run_2mile', 'Group 1', '3000-5249ft', '14:01', '16:00', 20),
+  ('run_2mile', 'Group 1', '3000-5249ft', '16:01', '18:00', 25),
+  ('run_2mile', 'Group 1', '3000-5249ft', '18:01', '20:00', 30),
+  ('run_2mile', 'Group 1', '3000-5249ft', '20:01', '99:59', 35),
+  ('run_2mile', 'Group 2', '5250-6999ft', '0:00', '14:00', 30),
+  ('run_2mile', 'Group 2', '5250-6999ft', '14:01', '16:00', 35),
+  ('run_2mile', 'Group 2', '5250-6999ft', '16:01', '18:00', 40),
+  ('run_2mile', 'Group 2', '5250-6999ft', '18:01', '20:00', 45),
+  ('run_2mile', 'Group 2', '5250-6999ft', '20:01', '99:59', 50),
+  ('run_2mile', 'Group 3', '>=7000ft', '0:00', '14:00', 45),
+  ('run_2mile', 'Group 3', '>=7000ft', '14:01', '16:00', 50),
+  ('run_2mile', 'Group 3', '>=7000ft', '16:01', '18:00', 55),
+  ('run_2mile', 'Group 3', '>=7000ft', '18:01', '20:00', 60),
+  ('run_2mile', 'Group 3', '>=7000ft', '20:01', '99:59', 65),
+  ('shuttles_20m', 'Group 1', '3000-5249ft', NULL, NULL, 3),
+  ('shuttles_20m', 'Group 2', '5250-6999ft', NULL, NULL, 6),
+  ('shuttles_20m', 'Group 3', '>=7000ft', NULL, NULL, 9);
 
 DELETE FROM public.pt_altitude_walk_thresholds;
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '18-29', 'Group 1', '20:15');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '30-39', 'Group 1', '21:14');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '40-49', 'Group 1', '22:34');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '50-59', 'Group 1', '24:06');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '60-99', 'Group 1', '25:30');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '18-29', 'Group 2', '20:30');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '30-39', 'Group 2', '21:29');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '40-49', 'Group 2', '22:49');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '50-59', 'Group 2', '24:21');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '60-99', 'Group 2', '25:45');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '18-29', 'Group 3', '20:45');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '30-39', 'Group 3', '21:44');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '40-49', 'Group 3', '23:04');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '50-59', 'Group 3', '24:36');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Male', '60-99', 'Group 3', '26:00');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '18-29', 'Group 1', '23:15');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '30-39', 'Group 1', '23:29');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '40-49', 'Group 1', '24:00');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '50-59', 'Group 1', '25:18');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '60-99', 'Group 1', '25:30');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '18-29', 'Group 2', '23:30');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '30-39', 'Group 2', '23:44');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '40-49', 'Group 2', '24:15');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '50-59', 'Group 2', '25:33');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '60-99', 'Group 2', '25:45');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '18-29', 'Group 3', '23:45');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '30-39', 'Group 3', '23:59');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '40-49', 'Group 3', '24:30');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '50-59', 'Group 3', '25:48');
-INSERT INTO public.pt_altitude_walk_thresholds (sex, age_range, altitude_group, max_time) VALUES ('Female', '60-99', 'Group 3', '26:00');
+INSERT INTO public.pt_altitude_walk_thresholds (sex, altitude_group, altitude_range, age_range, max_time)
+VALUES 
+  ('Male', 'Group 1', '3000-5249ft', '18-29', '20:15'),
+  ('Male', 'Group 1', '3000-5249ft', '30-39', '21:14'),
+  ('Male', 'Group 1', '3000-5249ft', '40-49', '22:34'),
+  ('Male', 'Group 1', '3000-5249ft', '50-59', '24:06'),
+  ('Male', 'Group 1', '3000-5249ft', '60-99', '25:30'),
+  ('Male', 'Group 2', '5250-6999ft', '18-29', '20:30'),
+  ('Male', 'Group 2', '5250-6999ft', '30-39', '21:29'),
+  ('Male', 'Group 2', '5250-6999ft', '40-49', '22:49'),
+  ('Male', 'Group 2', '5250-6999ft', '50-59', '24:21'),
+  ('Male', 'Group 2', '5250-6999ft', '60-99', '25:45'),
+  ('Male', 'Group 3', '>=7000ft', '18-29', '20:45'),
+  ('Male', 'Group 3', '>=7000ft', '30-39', '21:44'),
+  ('Male', 'Group 3', '>=7000ft', '40-49', '23:04'),
+  ('Male', 'Group 3', '>=7000ft', '50-59', '24:36'),
+  ('Male', 'Group 3', '>=7000ft', '60-99', '26:00'),
+  ('Female', 'Group 1', '3000-5249ft', '18-29', '23:15'),
+  ('Female', 'Group 1', '3000-5249ft', '30-39', '23:29'),
+  ('Female', 'Group 1', '3000-5249ft', '40-49', '24:00'),
+  ('Female', 'Group 1', '3000-5249ft', '50-59', '25:18'),
+  ('Female', 'Group 1', '3000-5249ft', '60-99', '25:30'),
+  ('Female', 'Group 2', '5250-6999ft', '18-29', '23:30'),
+  ('Female', 'Group 2', '5250-6999ft', '30-39', '23:44'),
+  ('Female', 'Group 2', '5250-6999ft', '40-49', '24:15'),
+  ('Female', 'Group 2', '5250-6999ft', '50-59', '25:33'),
+  ('Female', 'Group 2', '5250-6999ft', '60-99', '25:45'),
+  ('Female', 'Group 3', '>=7000ft', '18-29', '23:45'),
+  ('Female', 'Group 3', '>=7000ft', '30-39', '23:59'),
+  ('Female', 'Group 3', '>=7000ft', '40-49', '24:30'),
+  ('Female', 'Group 3', '>=7000ft', '50-59', '25:48'),
+  ('Female', 'Group 3', '>=7000ft', '60-99', '26:00');

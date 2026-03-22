@@ -65,17 +65,25 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   /**
    * A function to cycle through the available theme modes: auto -> light -> dark -> auto.
    */
-  const toggleTheme = () => {
+  const toggleTheme = React.useCallback(() => {
     setThemeMode(prevMode => {
       if (prevMode === 'auto') return 'light';
       if (prevMode === 'light') return 'dark';
       return 'auto';
     });
-  };
+  }, []);
+
+  const value = React.useMemo(() => ({
+    theme,
+    themeMode,
+    isDarkMode,
+    toggleTheme,
+    setThemeMode,
+  }), [theme, themeMode, isDarkMode, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, themeMode, isDarkMode, toggleTheme, setThemeMode }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
-};
+  };

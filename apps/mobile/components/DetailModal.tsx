@@ -86,7 +86,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
     const FOOTER_HEIGHT = CHEVRON_HEIGHT + 44 + theme.spacing.l; // chevron + button height + padding
     const MAX_SCROLL_HEIGHT = Dimensions.get('window').height * 0.85 - HEADER_HEIGHT - FOOTER_HEIGHT - (theme.spacing.l * 2);
 
-    const styles = StyleSheet.create({
+    const styles = React.useMemo(() => StyleSheet.create({
         safeArea: {
             flex: 1,
             alignItems: "center",
@@ -170,7 +170,7 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
         loadingIndicator: {
             marginVertical: theme.spacing.xl,
         },
-    });
+    }), [theme, MAX_SCROLL_HEIGHT, CHEVRON_HEIGHT]);
 
     const parseMarkdown = (text: string) => {
         if (!text) return null;

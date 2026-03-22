@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '@repo/ui';
 
@@ -8,7 +8,7 @@ interface VerticalDividerProps {
 
 export default function VerticalDivider({ style }: VerticalDividerProps) {
   const { theme } = useTheme();
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     divider: {
       width: 5,
       backgroundColor: theme.colors.darkenColor,
@@ -24,7 +24,7 @@ export default function VerticalDivider({ style }: VerticalDividerProps) {
       borderTopWidth: theme.colors.neumorphic.inset.borderWidth,
       borderBottomWidth: theme.colors.neumorphic.inset.borderWidth,
     },
-  });
+  }), [theme]);
 
   return (
     <View style={[styles.divider, style]} />

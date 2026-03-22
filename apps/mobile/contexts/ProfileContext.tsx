@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import * as SQLite from 'expo-sqlite';
 
 export interface ProfileData {
@@ -71,22 +71,30 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     loadProfile();
   }, []);
 
-  const setProfileData = async (newData: Partial<ProfileData>) => {
+  const setProfileData = useCallback(async (newData: Partial<ProfileData>) => {
     try {
-      const updatedProfile = { ...profile, ...newData };
-      setProfile(updatedProfile);
-      
-      db.runSync(
-        "INSERT OR REPLACE INTO cache (key, value) VALUES (?, ?)",
-        [STORAGE_KEY, JSON.stringify(updatedProfile)]
-      );
+      setProfile((prevProfile) => {
+        const updatedProfile = { ...prevProfile, ...newData };
+        db.runSync(
+          "INSERT OR REPLACE INTO cache (key, value) VALUES (?, ?)",
+          [STORAGE_KEY, JSON.stringify(updatedProfile)]
+        );
+        return updatedProfile;
+      });
     } catch (e) {
       console.error('Failed to save profile to SQLite:', e);
     }
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    ...profile,
+    setProfileData,
+    isLoading,
+    isProfileComplete
+  }), [profile, setProfileData, isLoading, isProfileComplete]);
 
   return (
-    <ProfileContext.Provider value={{ ...profile, setProfileData, isLoading, isProfileComplete }}>
+    <ProfileContext.Provider value={value}>
       {children}
     </ProfileContext.Provider>
   );

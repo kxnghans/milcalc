@@ -4,98 +4,135 @@
  * demographics, including age, gender, and altitude group selection.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { useCalculatorState } from '../contexts/CalculatorStateContext';
 
 /**
  * A custom hook to manage the state for the user demographics section.
  * @param {string} [initialAge=''] - The initial value for the age input.
  * @param {string} [initialGender='male'] - The initial selected gender.
  * @param {string} [initialAltitudeGroup='normal'] - The initial selected altitude group.
- * @returns An object containing the state variables (`age`, `gender`, `altitudeGroup`) and their respective setters.
+ * @returns An object containing the state variables and their respective setters.
  */
 export function useDemographicsState(
   initialAge: string = '', 
   initialGender: string = 'male', 
   initialAltitudeGroup: string = 'normal'
 ) {
-  // State for the user's age.
-  const [age, setAge] = useState(initialAge);
-  // State for the user's gender.
-  const [gender, setGender] = useState(initialGender);
-  // State for the selected altitude adjustment group.
-  const [altitudeGroup, setAltitudeGroup] = useState(initialAltitudeGroup);
-  // State for Waist-to-Height Ratio (WHtR) inputs.
-  const [waist, setWaist] = useState('');
-  const [heightFeet, setHeightFeet] = useState('');
-  const [heightInches, setHeightInches] = useState('');
-  const [isHeightInInches, _setIsHeightInInches] = useState(false);
+  const { ptDemographics, setPtDemographics } = useCalculatorState();
 
   // Track if the user has manually modified the fields to prevent profile hydration from overwriting their manual input.
   const hasModifiedAge = useRef(false);
   const hasModifiedGender = useRef(false);
 
   // Hydrate state when initial values change (e.g., after profile loads from SQLite),
-  // but only if the user hasn't already manually overridden them.
+  // but only if the user hasn't already manually overridden them and the current value is empty or different from default.
   useEffect(() => {
-    if (initialAge && !hasModifiedAge.current) {
-      setAge(initialAge);
+    if (initialAge && !hasModifiedAge.current && ptDemographics.age === '') {
+      setPtDemographics({ age: initialAge });
     }
-  }, [initialAge]);
+  }, [initialAge, ptDemographics.age, setPtDemographics]);
 
   useEffect(() => {
-    if (initialGender && !hasModifiedGender.current) {
-      setGender(initialGender);
+    if (initialGender && !hasModifiedGender.current && ptDemographics.gender !== initialGender) {
+      setPtDemographics({ gender: initialGender });
     }
-  }, [initialGender]);
+  }, [initialGender, ptDemographics.gender, setPtDemographics]);
+
+  useEffect(() => {
+    if (initialAltitudeGroup && initialAltitudeGroup !== 'normal' && ptDemographics.altitudeGroup === 'normal') {
+      setPtDemographics({ altitudeGroup: initialAltitudeGroup });
+    }
+  }, [initialAltitudeGroup, ptDemographics.altitudeGroup, setPtDemographics]);
 
   const handleSetAge = (newAge: string) => {
     hasModifiedAge.current = true;
-    setAge(newAge);
+    setPtDemographics({ age: newAge });
   };
 
   const handleSetGender = (newGender: string) => {
     hasModifiedGender.current = true;
-    setGender(newGender);
+    setPtDemographics({ gender: newGender });
+  };
+
+  const setAltitudeGroup = (newGroup: string) => {
+    setPtDemographics({ altitudeGroup: newGroup });
+  };
+
+  const setWaist = (newWaist: string) => {
+    setPtDemographics({ waist: newWaist });
+  };
+
+  const setHeightFeet = (newFeet: string) => {
+    setPtDemographics({ heightFeet: newFeet });
+  };
+
+  const setHeightInches = (newInches: string) => {
+    setPtDemographics({ heightInches: newInches });
   };
 
   /**
    * Toggles the height input mode and converts existing values.
    */
   const setIsHeightInInches = (toInches: boolean) => {
-    if (toInches === isHeightInInches) return;
+    if (toInches === ptDemographics.isHeightInInches) return;
 
     if (toInches) {
       // Converting Ft/In -> Inches Only
-      const feet = parseInt(heightFeet) || 0;
-      const inches = parseInt(heightInches) || 0;
+      const feet = parseInt(ptDemographics.heightFeet) || 0;
+      const inches = parseInt(ptDemographics.heightInches) || 0;
       const totalInches = (feet * 12) + inches;
-      setHeightInches(totalInches > 0 ? totalInches.toString() : '');
-      setHeightFeet('');
+      setPtDemographics({
+        isHeightInInches: true,
+        heightInches: totalInches > 0 ? totalInches.toString() : '',
+        heightFeet: '',
+      });
     } else {
       // Converting Inches Only -> Ft/In
-      const totalInches = parseInt(heightInches) || 0;
+      const totalInches = parseInt(ptDemographics.heightInches) || 0;
       const feet = Math.floor(totalInches / 12);
       const remainderInches = totalInches % 12;
-      setHeightFeet(feet > 0 ? feet.toString() : '');
-      setHeightInches(remainderInches > 0 ? remainderInches.toString() : '');
+      setPtDemographics({
+        isHeightInInches: false,
+        heightFeet: feet > 0 ? feet.toString() : '',
+        heightInches: remainderInches > 0 ? remainderInches.toString() : '',
+      });
     }
-    _setIsHeightInInches(toInches);
   };
 
+  const calculatedWhtr = (() => {
+    const waistNum = parseFloat(ptDemographics.waist) || 0;
+    let heightNum = 0;
+    
+    if (ptDemographics.isHeightInInches) {
+        heightNum = parseFloat(ptDemographics.heightInches) || 0;
+    } else {
+        const feet = parseFloat(ptDemographics.heightFeet) || 0;
+        const inches = parseFloat(ptDemographics.heightInches) || 0;
+        heightNum = (feet * 12) + inches;
+    }
+    
+    if (waistNum > 0 && heightNum > 0) {
+        return Math.round((waistNum / heightNum) * 100) / 100;
+    }
+    return 0;
+  })();
+
   return {
-    age,
+    age: ptDemographics.age,
     setAge: handleSetAge,
-    gender,
+    gender: ptDemographics.gender,
     setGender: handleSetGender,
-    altitudeGroup,
+    altitudeGroup: ptDemographics.altitudeGroup,
     setAltitudeGroup,
-    waist,
+    waist: ptDemographics.waist,
     setWaist,
-    heightFeet,
+    heightFeet: ptDemographics.heightFeet,
     setHeightFeet,
-    heightInches,
+    heightInches: ptDemographics.heightInches,
     setHeightInches,
-    isHeightInInches,
+    isHeightInInches: ptDemographics.isHeightInInches,
     setIsHeightInInches,
+    calculatedWhtr,
   };
 }

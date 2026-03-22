@@ -33,7 +33,7 @@ const FormField = React.forwardRef<TextInput, FormFieldProps>(({
 }, ref) => {
   const { theme } = useTheme();
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     container: {
       marginBottom: theme.spacing.m,
     },
@@ -48,7 +48,7 @@ const FormField = React.forwardRef<TextInput, FormFieldProps>(({
       ...theme.typography.bodybold,
       color: theme.colors.text,
     }
-  });
+  }), [theme, labelCentered, iconOnLabel]);
 
   return (
     <View style={[styles.container, containerStyle]}>

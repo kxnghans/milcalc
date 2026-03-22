@@ -33,7 +33,7 @@ export default function SplashScreen() {
     router.replace('/(tabs)/pt-calculator');
   };
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
     },
@@ -77,7 +77,7 @@ export default function SplashScreen() {
     fullWidth: {
       width: '100%',
     },
-  });
+  }), [theme, screenHeight]);
 
   const seasonValueChange = (val: string) => {
     setSeason(val as Season);

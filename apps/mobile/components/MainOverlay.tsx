@@ -12,11 +12,11 @@ export const MainOverlay: React.FC = () => {
   const { overlayType } = useOverlay();
   const { theme } = useTheme();
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     container: {
       paddingBottom: theme.spacing.m,
     }
-  });
+  }), [theme]);
 
   const renderContent = () => {
     switch (overlayType) {
@@ -43,7 +43,7 @@ const MenuView: React.FC = () => {
   const { openOverlay } = useOverlay();
   const { isProfileComplete } = useProfile();
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     viewContainer: {
       paddingHorizontal: theme.spacing.m,
       paddingTop: theme.spacing.s,
@@ -66,7 +66,7 @@ const MenuView: React.FC = () => {
       justifyContent: 'center',
       alignItems: 'center',
     },
-  });
+  }), [theme]);
 
   const handleBugReportPress = () => {
     if (isProfileComplete) {
@@ -108,7 +108,7 @@ const AccountView: React.FC = () => {
   const { firstName, lastName, email, phone, age, gender, accountType, setProfileData } = useProfile();
   const { openOverlay } = useOverlay();
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     viewContainer: {
       paddingHorizontal: theme.spacing.m,
       paddingTop: theme.spacing.s,
@@ -136,7 +136,7 @@ const AccountView: React.FC = () => {
       justifyContent: 'space-between',
       paddingVertical: theme.spacing.s,
     },
-  });
+  }), [theme]);
 
   const themeOptions = [
     { label: 'Auto', value: 'auto', icon: ICONS.THEME_AUTO },
@@ -257,12 +257,12 @@ const PaywallView: React.FC = () => {
   const { setProfileData } = useProfile();
   const { openOverlay } = useOverlay();
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     viewContainer: {
       paddingHorizontal: theme.spacing.m,
       paddingTop: theme.spacing.s,
     },
-  });
+  }), [theme]);
 
   const handleUpgrade = () => {
     setProfileData({ accountType: 'premium' });

@@ -8,26 +8,12 @@ import { PtStandard, Tables } from './types';
  * @returns An array of all standards for that group, or null if an error occurs.
  */
 export const getPtStandards = async (gender: string, age_group: string): Promise<PtStandard[] | null> => {
-  // 1. Get the age_sex_group_id
-  const { data: ageGroupData, error: ageGroupError } = await supabase
-    .from('pt_age_sex_groups')
-    .select('id')
-    .eq('sex', gender)
-    .eq('age_range', age_group)
-    .single();
-
-  if (ageGroupError || !ageGroupData) {
-    console.error('Error fetching age group ID:', sanitizeError(ageGroupError));
-    return null;
-  }
-
-  const ageSexGroupId = ageGroupData.id;
-
-  // 2. Fetch from unified scoring table
+  // 1. Fetch from unified scoring table using gender and age_group directly
   const { data, error } = await supabase
     .from('pt_scoring_standards')
     .select('exercise_type, performance, points, health_risk_category')
-    .eq('age_sex_group_id', ageSexGroupId)
+    .eq('gender', gender)
+    .eq('age_group', age_group)
     .order('points', { ascending: false });
 
   if (error) {
@@ -35,7 +21,7 @@ export const getPtStandards = async (gender: string, age_group: string): Promise
     return null;
   }
 
-  // 3. Add WHtR (age-independent)
+  // 2. Add WHtR (age/gender independent in the new schema)
   const { data: whtrData, error: whtrError } = await supabase
     .from('pt_scoring_standards')
     .select('exercise_type, performance, points, health_risk_category')
@@ -48,7 +34,7 @@ export const getPtStandards = async (gender: string, age_group: string): Promise
 
   const combinedData = [...(data || []), ...(whtrData || [])];
 
-  // 4. Transform to consistent format
+  // 3. Transform to consistent format
   return combinedData.map(item => ({
     exercise: item.exercise_type,
     measurement: item.performance,
@@ -64,23 +50,11 @@ export const getPtStandards = async (gender: string, age_group: string): Promise
  * @returns An array of pass/fail standards.
  */
 export const getPassFailStandards = async (gender: string, age_group: string): Promise<Tables<'pt_pass_fail_standards'>[] | null> => {
-  // Try to find by age group ID first
-  const { data: ageGroupData } = await supabase
-    .from('pt_age_sex_groups')
-    .select('id')
-    .eq('sex', gender)
-    .eq('age_range', age_group)
-    .single();
-
-  const query = supabase.from('pt_pass_fail_standards').select('*');
-  
-  if (ageGroupData) {
-    query.or(`age_sex_group_id.eq.${ageGroupData.id},and(sex.eq.${gender},age_range.eq.${age_group})`);
-  } else {
-    query.eq('sex', gender).eq('age_range', age_group);
-  }
-
-  const { data, error } = await query;
+  const { data, error } = await supabase
+    .from('pt_pass_fail_standards')
+    .select('*')
+    .eq('gender', gender)
+    .eq('age_group', age_group);
 
   if (error) {
     console.error('Error fetching pass/fail standards:', sanitizeError(error));
@@ -109,12 +83,11 @@ export const getPtAltitudeCorrections = async (): Promise<Tables<'pt_altitude_co
 /**
  * Fetches altitude walk thresholds.
  */
-export const getPtAltitudeWalkThresholds = async (gender: string, age_group: string): Promise<Tables<'pt_altitude_walk_thresholds'>[] | null> => {
+export const getPtAltitudeWalkThresholds = async (gender: string): Promise<Tables<'pt_altitude_walk_thresholds'>[] | null> => {
   const { data, error } = await supabase
     .from('pt_altitude_walk_thresholds')
     .select('*')
-    .eq('sex', gender)
-    .eq('age_range', age_group);
+    .eq('sex', gender);
 
   if (error) {
     console.error('Error fetching altitude walk thresholds:', sanitizeError(error));

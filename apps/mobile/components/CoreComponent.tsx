@@ -58,7 +58,7 @@ export default function CoreComponent({
     score,
 }: CoreComponentProps) {
     const { theme } = useTheme();
-    const styles = StyleSheet.create({
+    const styles = React.useMemo(() => StyleSheet.create({
         cardTitle: {
             ...theme.typography.title,
             color: theme.colors.text,
@@ -83,7 +83,7 @@ export default function CoreComponent({
             marginHorizontal: theme.spacing.s,
             marginTop: theme.spacing.xs,
         }
-    });
+    }), [theme]);
 
     const getMascot = (): ImageSourcePropType => {
         if (coreComponent === "sit_ups_1min" || coreComponent === "cross_leg_reverse_crunch_2min") {
@@ -119,7 +119,7 @@ export default function CoreComponent({
                                             ninetyPercentileThreshold={ninetyPercentileThreshold}
                                             valueIsTime={true}
                                             score={typeof score.coreScore === 'number' ? score.coreScore : 0}
-                                            maxScore={20}
+                                            maxScore={15}
                                         />
                                     </NeumorphicOutset>
                                 </View>
@@ -135,7 +135,7 @@ export default function CoreComponent({
                                         maxPointsThreshold={minMax.core.max}
                                         ninetyPercentileThreshold={ninetyPercentileThreshold}
                                         score={typeof score.coreScore === 'number' ? score.coreScore : 0}
-                                        maxScore={20}
+                                        maxScore={15}
                                     />
                                 </NeumorphicOutset>
                             </View>

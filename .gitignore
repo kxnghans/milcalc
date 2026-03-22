@@ -59,6 +59,7 @@ image.png
 
 # Debugging and local tools
 packages/utils/debug.ts
+packages/utils/*.txt
 
 # Agent configuration
 .gemini/

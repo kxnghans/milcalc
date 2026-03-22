@@ -85,6 +85,7 @@ To maintain visual parity and avoid artifacts:
 -   **Banned**: Hardcoded margin/padding values. **Use**: `theme.spacing` tokens.
 -   **Banned**: Direct `Elevation` props on Android. **Use**: Wrapped primitives from `@repo/ui`.
 -   **Banned**: Redundant theme icon logic or manual modal state (`isVisible`, `contentKey`) in screen files. **Use**: `MainCalculatorLayout`, `SmartIconRow`, and global overlay hooks (`useOverlay`).
+-   **Banned**: Unstable `StyleSheet.create` calls inside component bodies or un-memoized context values. **Use**: `useMemo` or move styles outside the component. Use `useCallback` for context setters.
 
 ## 5. Composition Primitives
 

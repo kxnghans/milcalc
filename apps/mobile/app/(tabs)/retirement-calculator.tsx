@@ -11,15 +11,40 @@ import { useOverlay } from '../../contexts/OverlayContext';
 
 const retirementMascot = { uri: MASCOT_URLS.RETIREMENT };
 
+const componentOptions = [{label: 'Active', value: 'Active'}, {label: 'Reserves', value: 'Reserves'}, {label: 'Guard', value: 'Guard'}];
+const componentRatios = [4, 5, 4];
+const retirementSystemOptions = [{label: 'High 3', value: 'High 3'}, {label: 'BRS', value: 'BRS'}];
+const filingStatusOptions = [{label: 'Single', value: 'Single'}, {label: 'Married', value: 'Married'}];
+const tspTypeOptions = [{label: 'Roth', value: 'Roth'}, {label: 'Traditional', value: 'Traditional'}];
+
+interface LabelWithHelpProps {
+  label: string;
+  contentKey: string;
+  onPress: (key: string) => void;
+  style: any;
+  textStyle: any;
+  iconColor: string;
+}
+
+const LabelWithHelp = ({ label, contentKey, onPress, style, textStyle, iconColor }: LabelWithHelpProps) => (
+  <View style={style}>
+    <Text style={textStyle}>{label}</Text>
+    <Pressable onPress={() => onPress(contentKey)}>
+      <MaterialCommunityIcons name="help-circle-outline" size={16} color={iconColor} />
+    </Pressable>
+  </View>
+);
+
 export default function RetirementCalculatorScreen() {
   const { theme } = useTheme();
   const { openHelp, openDocuments } = useOverlay();
 
-  const handleOpenHelp = (key: string, mascot?: ImageSourcePropType) => {
+  const handleOpenHelp = React.useCallback((key: string, mascot?: ImageSourcePropType) => {
     openHelp(key, 'retirement', mascot);
-  };
+  }, [openHelp]);
 
   const {
+    // ... (rest of the destructuring remains the same)
     component,
     setComponent,
     retirementSystem,
@@ -130,7 +155,7 @@ export default function RetirementCalculatorScreen() {
     };
   }, [setIsPayDisplayExpanded]);
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     fieldRow: {
       marginBottom: theme.spacing.m,
     },
@@ -207,33 +232,29 @@ export default function RetirementCalculatorScreen() {
     returnColumn: {
         flex: 3,
     }
-    });
-
-    const LabelWithHelp = ({ label, contentKey }: { label: string; contentKey: string }) => (
-    <View style={styles.labelRow}>
-        <Text style={styles.labelHelpText}>{label}</Text>
-        <Pressable onPress={() => handleOpenHelp(contentKey)}>
-            <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
-        </Pressable>
-    </View>
-    );
+    }), [theme]);
     
   const tspWithdrawal = tsp * 0.04;
   const annualPay = pension * 12 + disabilityIncome * 12 - (taxes?.federal || 0) - (taxes?.state || 0) + tspWithdrawal;
   const monthlyPay = pension + disabilityIncome - ((taxes?.federal || 0) / 12) - ((taxes?.state || 0) / 12) + (tspWithdrawal / 12);
 
-  const payDetails = [
+  const payDetails = React.useMemo(() => [
     { label: 'Pension', value: pension },
     { label: 'VA DISABILITY', value: disabilityIncome },
     { label: 'TSP', value: tspWithdrawal / 12 },
-  ];
+  ], [pension, disabilityIncome, tspWithdrawal]);
 
-  const deductions = [
+  const deductions = React.useMemo(() => [
     { label: 'Federal Tax', value: taxes?.federal || 0 },
     { label: 'State Tax', value: taxes?.state || 0 },
-  ];
+  ], [taxes?.federal, taxes?.state]);
 
   const yearsOfServiceNum = parseInt(yearsOfService) || 0;
+
+  const payGradesForYear1Options = React.useMemo(() => payGradesForYear1.map(grade => ({label: grade, value: grade})), [payGradesForYear1]);
+  const payGradesForYear2Options = React.useMemo(() => payGradesForYear2.map(grade => ({label: grade, value: grade})), [payGradesForYear2]);
+  const payGradesForYear3Options = React.useMemo(() => payGradesForYear3.map(grade => ({label: grade, value: grade})), [payGradesForYear3]);
+  const tspReturnOptions = React.useMemo(() => Array.from({ length: 51 }, (_, i) => ({ label: `${i}%`, value: i })), []);
 
   return (
     <MainCalculatorLayout
@@ -268,42 +289,49 @@ export default function RetirementCalculatorScreen() {
       inputContent={
         <>
             <SegmentedSelector
-              options={[{label: 'Active', value: 'Active'}, {label: 'Reserves', value: 'Reserves'}, {label: 'Guard', value: 'Guard'}]}
-              ratios={[4, 5, 4]}
+              options={componentOptions}
+              ratios={componentRatios}
               selectedValues={[component]}
               onValueChange={(value) => setComponent(value)}
             />
             <SegmentedSelector
               style={styles.segmentedSelectorSpacing}
-              options={[{label: 'High 3', value: 'High 3'}, {label: 'BRS', value: 'BRS'}]}
+              options={retirementSystemOptions}
               selectedValues={[retirementSystem]}
               onValueChange={(value) => setRetirementSystem(value)}
             />
 
             <View style={styles.fieldRow}>
-              <LabelWithHelp label="Years of Service" contentKey="High-3" />
+              <LabelWithHelp 
+                label="Years of Service" 
+                contentKey="High-3" 
+                onPress={handleOpenHelp}
+                style={styles.labelRow}
+                textStyle={styles.labelHelpText}
+                iconColor={theme.colors.disabled}
+              />
               <NumberInput placeholder="0" value={yearsOfService} onChangeText={setYearsOfService} style={styles.marginHorizontalS} />
             </View>
 
             <View style={styles.row}>
               <View style={styles.yearColumn}>
                   <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Year -2</Text>
-                  <PickerInput items={payGradesForYear1.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade1} onValueChange={(val) => setHigh3PayGrade1(val as string | null)} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
+                  <PickerInput items={payGradesForYear1Options} selectedValue={high3PayGrade1} onValueChange={(val) => setHigh3PayGrade1(val as string | null)} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
               </View>
               <View style={styles.yearColumn}>
                   <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Year -1</Text>
-                  <PickerInput items={payGradesForYear2.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade2} onValueChange={(val) => setHigh3PayGrade2(val as string | null)} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
+                  <PickerInput items={payGradesForYear2Options} selectedValue={high3PayGrade2} onValueChange={(val) => setHigh3PayGrade2(val as string | null)} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
               </View>
               <View style={styles.lastYearColumn}>
                   <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Final Year</Text>
-                  <PickerInput items={payGradesForYear3.map(grade => ({label: grade, value: grade}))} selectedValue={high3PayGrade3} onValueChange={(val) => setHigh3PayGrade3(val as string | null)} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
+                  <PickerInput items={payGradesForYear3Options} selectedValue={high3PayGrade3} onValueChange={(val) => setHigh3PayGrade3(val as string | null)} placeholder="Select..." disabled={yearsOfServiceNum < 3} />
               </View>
             </View>
 
             <View style={styles.fieldRow}>
               <Text style={styles.boldLabel}>Filing Status</Text>
               <SegmentedSelector
-                  options={[{label: 'Single', value: 'Single'}, {label: 'Married', value: 'Married'}]}
+                  options={filingStatusOptions}
                   selectedValues={[filingStatus]}
                   onValueChange={(value) => setFilingStatus(value)}
               />
@@ -318,10 +346,17 @@ export default function RetirementCalculatorScreen() {
                 <TwoColumnPicker data={disabilityPickerData as Record<string, { label: string; value: string | number | null }[]> | null} selectedValue={dependentStatus} onChange={(val, prim) => handleDisabilityChange(val as string, prim)} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select disability rating" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} style={styles.marginHorizontalS} />
             </View>
             <View style={styles.fieldRow}>
-                <LabelWithHelp label="TSP" contentKey="TSP" />
+                <LabelWithHelp 
+                  label="TSP" 
+                  contentKey="TSP" 
+                  onPress={handleOpenHelp}
+                  style={styles.labelRow}
+                  textStyle={styles.labelHelpText}
+                  iconColor={theme.colors.disabled}
+                />
                 <SegmentedSelector
                 style={styles.segmentedSelectorSpacing}
-                options={[{label: 'Roth', value: 'Roth'}, {label: 'Traditional', value: 'Traditional'}]}
+                options={tspTypeOptions}
                 selectedValues={[tspType]}
                 onValueChange={(value) => setTspType(value)}
                 />
@@ -348,20 +383,41 @@ export default function RetirementCalculatorScreen() {
                     </View>
                     <View style={styles.returnColumn}>
                         <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Return</Text>
-                        <PickerInput items={Array.from({ length: 51 }, (_, i) => ({ label: `${i}%`, value: i }))} selectedValue={tspReturn} onValueChange={(val) => setTspReturn(val as number)} placeholder="Select..." />
+                        <PickerInput items={tspReturnOptions} selectedValue={tspReturn} onValueChange={(val) => setTspReturn(val as number)} placeholder="Select..." />
                     </View>
                 </View>
             )}
             {showServicePoints && <View style={styles.fieldRow}>
-                <LabelWithHelp label="Service Points" contentKey="Service Points" />
+                <LabelWithHelp 
+                  label="Service Points" 
+                  contentKey="Service Points" 
+                  onPress={handleOpenHelp}
+                  style={styles.labelRow}
+                  textStyle={styles.labelHelpText}
+                  iconColor={theme.colors.disabled}
+                />
                 <NumberInput placeholder="0" value={servicePoints} onChangeText={setServicePoints} style={styles.marginHorizontalS} />
             </View>}
             {showGoodYears && <View style={styles.fieldRow}>
-                <LabelWithHelp label="Good Years" contentKey="Good Years" />
+                <LabelWithHelp 
+                  label="Good Years" 
+                  contentKey="Good Years" 
+                  onPress={handleOpenHelp}
+                  style={styles.labelRow}
+                  textStyle={styles.labelHelpText}
+                  iconColor={theme.colors.disabled}
+                />
                 <NumberInput placeholder="0" value={goodYears} onChangeText={setGoodYears} style={styles.marginHorizontalS} />
             </View>}
             {component !== 'Active' && <View style={styles.fieldRow}>
-                <LabelWithHelp label="Qualifying Deployment Days" contentKey="Qualifying Deployment Days" />
+                <LabelWithHelp 
+                  label="Qualifying Deployment Days" 
+                  contentKey="Qualifying Deployment Days" 
+                  onPress={handleOpenHelp}
+                  style={styles.labelRow}
+                  textStyle={styles.labelHelpText}
+                  iconColor={theme.colors.disabled}
+                />
                 <NumberInput placeholder="0" value={qualifyingDeploymentDays} onChangeText={setQualifyingDeploymentDays} style={styles.marginHorizontalS} />
             </View>}
         </>

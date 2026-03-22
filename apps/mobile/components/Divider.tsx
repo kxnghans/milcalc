@@ -23,7 +23,7 @@ interface DividerProps {
  */
 export default function Divider({ style }: DividerProps) {
   const { theme } = useTheme();
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     divider: {
       height: 5,
       backgroundColor: theme.colors.darkenColor,
@@ -39,7 +39,7 @@ export default function Divider({ style }: DividerProps) {
       borderBottomColor: theme.colors.neumorphic.inset.highlight,
       borderRightColor: theme.colors.neumorphic.inset.highlight,
     },
-  });
+  }), [theme]);
 
   return (
     <View style={[styles.divider, style]} />

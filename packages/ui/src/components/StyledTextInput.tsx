@@ -15,8 +15,10 @@ import { useTheme } from "../contexts/ThemeContext";
  * @param {React.Ref<TextInput>} ref - The ref to be forwarded to the TextInput component.
  * @returns {JSX.Element} The styled TextInput component.
  */
-export const StyledTextInput = React.forwardRef<TextInput, TextInputProps>(({ style, ...props }, ref) => {
+export const StyledTextInput = React.forwardRef<TextInput, TextInputProps>(({ style, onFocus, selectTextOnFocus, value, ...props }, ref) => {
   const { theme } = useTheme();
+  const internalRef = React.useRef<TextInput>(null);
+  const resolvedRef = (ref as React.RefObject<TextInput>) ?? internalRef;
 
   const styles = useMemo(() => StyleSheet.create({
     input: {
@@ -28,13 +30,34 @@ export const StyledTextInput = React.forwardRef<TextInput, TextInputProps>(({ st
       backgroundColor: theme.colors.surface,
       color: theme.colors.text,
       textAlign: 'center',
-      textAlignVertical: 'center', // Added for Android cursor position fix
+      textAlignVertical: 'center',
     },
   }), [theme]);
 
-  // The component applies the default styles and merges any custom styles passed in the `style` prop.
-  // It also sets the placeholder text color from the theme.
-  return <TextInput ref={ref} style={[styles.input, style]} placeholderTextColor={theme.colors.placeholder} selectionColor={theme.colors.primary} {...props} />;
+  const handleFocus = React.useCallback((e: Parameters<NonNullable<TextInputProps['onFocus']>>[0]) => {
+    // Cross-platform select-all on focus. selectTextOnFocus is Android-only in RN,
+    // so we replicate the behaviour for iOS via setNativeProps after a brief delay.
+    if (selectTextOnFocus) {
+      setTimeout(() => {
+        resolvedRef.current?.setNativeProps({
+          selection: { start: 0, end: value?.length ?? 999 },
+        });
+      }, 50);
+    }
+    onFocus?.(e);
+  }, [selectTextOnFocus, onFocus, value, resolvedRef]);
+
+  return (
+    <TextInput
+      ref={resolvedRef}
+      style={[styles.input, style]}
+      placeholderTextColor={theme.colors.placeholder}
+      selectionColor={theme.colors.primary}
+      value={value}
+      onFocus={handleFocus}
+      {...props}
+    />
+  );
 });
 
 StyledTextInput.displayName = 'StyledTextInput';

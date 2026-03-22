@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Slot } from "expo-router";
-import { ThemeProvider, BottomSheet, useTheme } from "@repo/ui";
+import { ThemeProvider, BottomSheet, useTheme, CalculatorStateProvider } from "@repo/ui";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
@@ -106,24 +106,24 @@ function LayoutContent() {
             queryClient.setQueryData(['altitudeCorrections'], seedData.pt_altitude_corrections);
           }
           if (seedData.base_pay_2024) {
-            queryClient.setQueryData(['payGrades'], seedData.base_pay_2024.map((i: any) => i.pay_grade));
+            queryClient.setQueryData(['payGrades'], seedData.base_pay_2024.map((i: { pay_grade: string }) => i.pay_grade));
           }
           if (seedData.bas_rates) {
             queryClient.setQueryData(['basRate', 2025], seedData.bas_rates[0]?.enlisted_rate || 460.25); // Default fallback
           }
           if (seedData.federal_tax_data) {
-            const years = [...new Set(seedData.federal_tax_data.map((i: any) => i.year))];
+            const years = [...new Set(seedData.federal_tax_data.map((i: { year: number }) => i.year))];
             years.forEach(year => {
-              queryClient.setQueryData(['federalTaxData', year], seedData.federal_tax_data.filter((i: any) => i.year === year));
+              queryClient.setQueryData(['federalTaxData', year], seedData.federal_tax_data.filter((i: { year: number }) => i.year === year));
             });
             if (years.length > 0) {
               queryClient.setQueryData(['maxFederalTaxYear'], Math.max(...years as number[]));
             }
           }
           if (seedData.state_tax_data) {
-            const years = [...new Set(seedData.state_tax_data.map((i: any) => i.year))];
+            const years = [...new Set(seedData.state_tax_data.map((i: { year: number }) => i.year))];
             years.forEach(year => {
-              queryClient.setQueryData(['stateTaxData', year], seedData.state_tax_data.filter((i: any) => i.year === year));
+              queryClient.setQueryData(['stateTaxData', year], seedData.state_tax_data.filter((i: { year: number }) => i.year === year));
             });
             if (years.length > 0) {
               queryClient.setQueryData(['maxStateTaxYear'], Math.max(...years as number[]));
@@ -134,40 +134,59 @@ function LayoutContent() {
           }
 
           // 2. Demographic-dependent data (PT Standards)
-          if (seedData.pt_age_sex_groups && seedData.pt_scoring_standards) {
-            const whtrData = seedData.pt_scoring_standards.filter((s: any) => s.exercise_type === 'whtr');
+          if (seedData.pt_scoring_standards) {
+            const scoringStandards = seedData.pt_scoring_standards as Array<{
+              exercise_type: string;
+              gender: string;
+              age_group: string;
+              performance: string;
+              points: number;
+              health_risk_category: string | null;
+            }>;
+            const whtrData = scoringStandards.filter((s) => s.exercise_type === 'whtr');
             
-            seedData.pt_age_sex_groups.forEach((group: any) => {
-              const groupStandards = seedData.pt_scoring_standards
-                .filter((s: any) => s.age_sex_group_id === group.id)
-                .map((item: any) => ({
+            // Get unique combinations of gender and age_group
+            const groups = [...new Set(scoringStandards.filter((s) => s.exercise_type !== 'whtr').map((s) => `${s.gender}|${s.age_group}`))];
+
+            groups.forEach((groupKey: string) => {
+              const [gender, ageRange] = groupKey.split('|');
+              
+              const groupStandards = scoringStandards
+                .filter((s) => s.gender === gender && s.age_group === ageRange)
+                .map((item) => ({
                   exercise: item.exercise_type,
                   measurement: item.performance,
                   points: item.points,
                   healthRiskCategory: item.health_risk_category
                 }));
               
-              const whtrMapped = whtrData.map((item: any) => ({
+              const whtrMapped = whtrData.map((item) => ({
                 exercise: item.exercise_type,
                 measurement: item.performance,
                 points: item.points,
                 healthRiskCategory: item.health_risk_category
               }));
 
-              queryClient.setQueryData(['ptStandards', group.sex, group.age_range], [...groupStandards, ...whtrMapped]);
+              queryClient.setQueryData(['ptStandards', gender, ageRange], [...groupStandards, ...whtrMapped]);
               
               if (seedData.pt_pass_fail_standards) {
-                const groupPassFail = seedData.pt_pass_fail_standards.filter((s: any) => 
-                  s.age_sex_group_id === group.id || (s.sex === group.sex && s.age_range === group.age_range)
+                const groupPassFail = (seedData.pt_pass_fail_standards as Array<{
+                  gender: string;
+                  age_group: string;
+                }>).filter((s) => 
+                  s.gender === gender && s.age_group === ageRange
                 );
-                queryClient.setQueryData(['passFailStandards', group.sex, group.age_range], groupPassFail);
+                queryClient.setQueryData(['passFailStandards', gender, ageRange], groupPassFail);
               }
 
               if (seedData.pt_altitude_walk_thresholds) {
-                const groupWalk = seedData.pt_altitude_walk_thresholds.filter((s: any) => 
-                  s.sex === group.sex && s.age_range === group.age_range
+                const groupWalk = (seedData.pt_altitude_walk_thresholds as Array<{
+                  sex: string;
+                  age_range: string;
+                }>).filter((s) => 
+                  s.sex === gender && s.age_range === ageRange
                 );
-                queryClient.setQueryData(['walkAltitudeThresholds', group.sex, group.age_range], groupWalk);
+                queryClient.setQueryData(['walkAltitudeThresholds', gender, ageRange], groupWalk);
               }
             });
           }
@@ -176,10 +195,10 @@ function LayoutContent() {
           const helpTables = ['pt_help_details', 'pay_help_details', 'retirement_help_details', 'best_score_help_details'];
           helpTables.forEach(tableName => {
             if (seedData[tableName]) {
-               seedData[tableName].forEach((item: any) => {
+               seedData[tableName].forEach((item: { content_key?: string, title?: string }) => {
                  const key = item.content_key || item.title;
                  if (key) {
-                   queryClient.setQueryData(['helpContent', key], seedData[tableName].filter((i: any) => (i.content_key === key || i.title === key)));
+                   queryClient.setQueryData(['helpContent', key], (seedData[tableName] as Array<{ content_key?: string, title?: string }>).filter((i) => (i.content_key === key || i.title === key)));
                  }
                });
             }
@@ -280,9 +299,11 @@ export default function Layout() {
       >
         <ThemeProvider>
           <ProfileProvider>
-            <OverlayProvider>
-              <LayoutContent />
-            </OverlayProvider>
+            <CalculatorStateProvider>
+              <OverlayProvider>
+                <LayoutContent />
+              </OverlayProvider>
+            </CalculatorStateProvider>
           </ProfileProvider>
         </ThemeProvider>
       </PersistQueryClientProvider>

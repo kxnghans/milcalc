@@ -82,7 +82,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
     const FOOTER_HEIGHT = CHEVRON_HEIGHT + 44 + theme.spacing.l; // chevron + button height + padding
     const MAX_SCROLL_HEIGHT = Dimensions.get('window').height * 0.85 - HEADER_HEIGHT - FOOTER_HEIGHT - (theme.spacing.l * 2);
 
-    const styles = StyleSheet.create({
+    const styles = React.useMemo(() => StyleSheet.create({
         mascot: {
             width: theme.mascot.width,
             height: theme.mascot.height,
@@ -163,7 +163,7 @@ export default function DocumentModal({ category, isModalVisible, setModalVisibl
             ...theme.typography.body,
             color: theme.colors.primary,
         }
-    });
+    }), [theme, MAX_SCROLL_HEIGHT, CHEVRON_HEIGHT]);
 
     return (
         <Modal

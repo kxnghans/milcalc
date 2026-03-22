@@ -19,7 +19,7 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
   const selectedLabel = (items || []).find(item => item.value === selectedValue)?.label || placeholder || 'Select...';
   const textColor = disabled ? theme.colors.disabled : (selectedValue ? theme.colors.text : theme.colors.placeholder);
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     wrapper: {
       flex: 1,
     },
@@ -49,7 +49,7 @@ const PickerInput: React.FC<PickerInputProps> = ({ items, selectedValue, onValue
     doneButton: {
         alignSelf: 'flex-end',
     }
-  });
+  }), [theme]);
 
   const pickerItems = [
     { label: placeholder || 'Select...', value: null },

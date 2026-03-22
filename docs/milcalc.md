@@ -35,6 +35,12 @@ To reduce boilerplate and ensure a consistent user experience, we utilize a **Co
 #### Standardized Calculator Layout
 All primary calculators consume the `MainCalculatorLayout` wrapper. This component encapsulates the nested hierarchy of `ScreenHeader`, `DismissKeyboardView`, and `KeyboardAwareScrollView`, allowing screen files to focus exclusively on their unique input fields and results.
 
+#### Stability & Performance Optimization
+To prevent "Maximum update depth exceeded" errors—especially common in complex React Native applications using global contexts—we enforce strict memoization and style stability:
+- **Provider Hardening**: All context providers (`ProfileContext`, `ThemeContext`, `OverlayContext`, `CalculatorStateContext`) must memoize their `value` object using `useMemo` and all setter functions using `useCallback`. This prevents re-renders from cascading down the tree unless state actually changes.
+- **Style Stabilization**: Components MUST NOT call `StyleSheet.create` directly in the render body. If styles depend on the `theme` object, they must be wrapped in `useMemo(() => StyleSheet.create({...}), [theme])`. Otherwise, they should be defined outside the component scope.
+- **Hydration Guardrails**: Hydration effects (e.g., loading profile data into a calculator) must use explicit comparison checks (e.g., `if (val !== currentVal)`) rather than truthy checks to prevent infinite update loops during initialization.
+
 #### Debouncing User Input
 We use debouncing to prevent recalculating the pay on every keystroke, which makes the app more responsive.
 
@@ -123,6 +129,9 @@ We intentionally separated the code into three distinct layers:
 2.  **State Management (`usePtCalculatorState.ts`, `useBestScoreState.ts`):** Custom hooks that manage calculation triggers, debouncing, and loading states.
 3.  **Calculation Logic (`pt-calculator.ts`):** Pure functions that perform the scoring based on demographics and altitude-adjusted performance.
 
+#### Health Risk Category Tracking
+The PT Calculator now tracks and displays **Health Risk Categories** for critical components (WHtR and Cardio). This metadata is integrated directly into the scoring engine, allowing the UI to provide visual feedback beyond simple point totals.
+
 #### Exemption Handling
 The calculator includes robust **Exemption** logic. Users can mark individual components (Strength, Core, or Cardio) as exempt. The composite score is then automatically recalculated by excluding those points from the total possible score (e.g., if Strength is exempt, the total possible points drop from 100 to 80).
 
@@ -141,15 +150,19 @@ The `useBestScoreState` hook tracks the highest achieved score for each componen
 The core calculation logic is located in `packages/utils/src/pt-calculator.ts`. 
 
 #### `calculatePtScore`
-This function determines the composite score and pass/fail status:
-1.  **Component Scoring**: Calls `getScoreForExercise` for each active component.
+This function determines the composite score, pass/fail status, and health risk indicators:
+1.  **Component Scoring**: Calls `getScoreForExercise` for each active component. This function now returns a structured object `{ points: number, healthRiskCategory: string | null }`.
 2.  **Pass Criteria**: Checks that the user meets the **Minimum Performance Threshold** for every non-exempt component and achieves a composite score of **75 or higher**.
-3.  **Walk Test**: The 2km Walk is a pass/fail assessment. If selected, it does not contribute points to the composite score; the score is calculated based on the remaining 40 points.
+3.  **Walk Test**: The 2km Walk is a pass/fail assessment per **DAFMAN 36-2905 (2025)**. If selected, it does not contribute points to the composite score; the total score is calculated based on the remaining 40 points (Strength + Core). The `checkWalkPass` engine uses specific demographic filtering (Sex and Age Range) to ensure 100% precision against sea-level and altitude thresholds.
+4.  **Health Risk Mapping**: Automatically identifies and propagates risk categories for WHtR and Cardio components to the UI.
+
+#### Range and Inequality Parsing
+The engine now features a sophisticated `parsePerformanceRange` utility. This allows the backend to store standards in human-readable formats (e.g., `"45-48"`, `">= 50"`, `"<= 13:25"`) which are then dynamically parsed into numeric comparison ranges. This ensures 100% fidelity to source PDF charts without manual normalization errors.
 
 ### 2.6 Data Fetching
 
 Data is fetched from Supabase via `packages/utils/src/pt-supabase-api.ts` and cached locally:
-- **Unified Standards Lookup**: Consumes the `pt_scoring_standards` and `pt_pass_fail_standards` tables. Demographics are mapped via `pt_age_sex_groups`.
+- **Simplified Standards Lookup**: Consumes the `pt_scoring_standards` and `pt_pass_fail_standards` tables. These tables now include direct `gender` and `age_group` columns for high-performance demographic filtering.
 - **Text-Based Performance**: The API layer now returns raw performance strings (e.g., `"13:25"`) which are parsed into seconds or integers by the `pt-calculator.ts` engine.
 - **Altitude Data**: Dynamically loads Run/HAMR corrections from `pt_altitude_corrections` and demographic-specific Walk thresholds from `pt_altitude_walk_thresholds`.
 

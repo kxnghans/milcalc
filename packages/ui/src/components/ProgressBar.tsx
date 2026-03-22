@@ -111,7 +111,8 @@ const ProgressBarComponent = ({
     }
 
     if (invertScale) {
-        // For inverted scales (like run time), progress is calculated relative to the pass threshold.
+        // For inverted scales (like run time), lower time is better, but visually we
+        // want the bar to fill up as the entered time increases, hitting 100% width at passThreshold.
         if (passThreshold > 0) {
             progress = value / passThreshold;
         }

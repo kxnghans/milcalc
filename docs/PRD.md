@@ -21,8 +21,9 @@ MilCalc is a professional-grade calculation suite designed specifically for US m
 ## 4. Logical Domains & Features
 
 ### 4.1 Fitness: PT & Performance Tracker
--   **Air Force PT Standard**: Real-time scoring for all muscular and cardio-respiratory events.
+-   **Air Force PT Standard**: Real-time scoring for all muscular and cardio-respiratory events, aligned with **DAFMAN 36-2905 (2025)**.
 -   **Altitude Adaptation**: Integrated lookup for altitude offsets (HAMR, 1.5M, 2KM Walk).
+-   **Health Risk Mapping**: Automated calculation and visualization of health risk categories for WHtR and Cardio components.
 -   **Personal Bests**: Persistent local tracking of achievement milestones.
 
 ### 4.2 Finance: Active & Reserve Pay

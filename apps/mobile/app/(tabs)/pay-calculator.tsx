@@ -1,17 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, LayoutAnimation, TouchableOpacity, ImageSourcePropType } from 'react-native';
+import { StyleSheet, ImageSourcePropType } from 'react-native';
 
-import { usePayCalculatorState, PayDisplay, SegmentedSelector, useTheme, PillButton, MASCOT_URLS, getAlphaColor } from '@repo/ui';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { usePayCalculatorState, PayDisplay, useTheme, MASCOT_URLS } from '@repo/ui';
 import Divider from '../../components/Divider';
-import InsetTextInput from '../../components/InsetTextInput';
-import PickerInput from '../../components/PickerInput';
-import NumberInput from '../../components/NumberInput';
-import CurrencyInput from '../../components/CurrencyInput';
-import VerticalDivider from '../../components/VerticalDivider';
-import TwoColumnPicker from '../../components/TwoColumnPicker';
 import MainCalculatorLayout from '../../components/MainCalculatorLayout';
 import { useOverlay } from '../../contexts/OverlayContext';
+
+// Extracted Components
+import PayDemographics from '../../components/PayCalculator/PayDemographics';
+import PaySpecialDuty from '../../components/PayCalculator/PaySpecialDuty';
+import PayDeductions from '../../components/PayCalculator/PayDeductions';
 
 const payMascots = [
   { uri: MASCOT_URLS.PAY },
@@ -25,6 +23,7 @@ export default function PayCalculatorScreen() {
   const [payMascotIndex, setPayMascotIndex] = React.useState(0);
 
   const {
+    // ... (rest of destructuring)
     // Display Values
     annualPay,
     monthlyPay,
@@ -69,168 +68,21 @@ export default function PayCalculatorScreen() {
     disabilityPercentageItems,
   } = usePayCalculatorState();
 
-  const toggleIncome = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIncomeExpanded(!isIncomeExpanded);
-  };
-
-  const toggleDeductions = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setDeductionsExpanded(!isDeductionsExpanded);
-  };
-
-  const getNextPayMascot = () => {
+  const getNextPayMascot = React.useCallback(() => {
     const mascot = payMascots[payMascotIndex];
     setPayMascotIndex((prevIndex) => (prevIndex + 1) % payMascots.length);
     return mascot;
-  };
+  }, [payMascotIndex]);
 
-  const handleOpenHelp = (key: string, mascot?: ImageSourcePropType) => {
+  const handleOpenHelp = React.useCallback((key: string, mascot?: ImageSourcePropType) => {
     openHelp(key, 'pay', mascot || getNextPayMascot());
-  };
+  }, [openHelp, getNextPayMascot]);
 
-  const LabelWithHelp = ({ label, contentKey }: { label: string; contentKey: string }) => (
-    <View style={styles.labelRow}>
-        <Text style={styles.label}>{label}</Text>
-        <Pressable onPress={() => handleOpenHelp(contentKey)}>
-            <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
-        </Pressable>
-    </View>
-  );
-
-  const RoundIconButton = ({ onPress, iconName, backgroundColor, size = 24, iconSize = 16, iconColor = '#FFFFFF' }: { onPress: () => void; iconName: keyof typeof MaterialCommunityIcons.glyphMap; backgroundColor: string; size?: number; iconSize?: number; iconColor?: string }) => (
-    <TouchableOpacity
-        onPress={onPress}
-        style={[styles.roundIconButton, {
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            backgroundColor: backgroundColor,
-        }]}
-    >
-        <MaterialCommunityIcons name={iconName} size={iconSize} color={iconColor} />
-    </TouchableOpacity>
-);
-
-  const AddButton = ({ onPress }: { onPress: () => void }) => (
-    <View style={styles.addIconContainer}>
-        <RoundIconButton
-            onPress={onPress}
-            iconName="plus"
-            backgroundColor={theme.colors.primary}
-            size={20}
-            iconSize={14}
-        />
-    </View>
-  );
-
-  const CancelButton = ({ onPress }: { onPress: () => void }) => (
-    <RoundIconButton
-        onPress={onPress}
-        iconName="close"
-        backgroundColor={theme.colors.error}
-        size={20}
-        iconSize={14}
-    />
-  );
-
-  const styles = StyleSheet.create({
-    fieldRow: {
-      marginBottom: theme.spacing.m,
-    },
-    label: {
-      ...theme.typography.body,
-      color: theme.colors.text,
-      marginBottom: theme.spacing.s,
-    },
-    boldLabel: {
-        ...theme.typography.subtitle,
-        color: theme.colors.text,
-        marginBottom: theme.spacing.s,
-    },
-    labelRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: theme.spacing.s,
-    },
-    expandableHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    expandableContent: {
-        overflow: 'hidden',
-        marginTop: theme.spacing.s,
-    },
-    addIconContainer: {
-        alignItems: 'center',
-        marginBottom: theme.spacing.s,
-    },
-    roundIconButton: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 1,
-    },
-    demographicsRow: {
-        flexDirection: 'row',
-    },
-    flex1: {
-        flex: 1,
-    },
-    noMarginHorizontal: {
-        marginLeft: 0,
-        marginRight: 0,
-    },
-    marginBottomS: {
-        marginBottom: theme.spacing.s,
-    },
-    noMarginBottom: {
-        marginBottom: 0,
-    },
-    noMarginTopBottom: {
-        marginTop: 0,
-        marginBottom: 0,
-    },
-    marginTopS: {
-        marginTop: theme.spacing.s,
-    },
-    verticalDivider: {
-        marginHorizontal: theme.spacing.m,
-        backgroundColor: getAlphaColor('#000000', 0.01),
-    },
-    rightColumn: {
-        flex: 0.9,
-        paddingRight: theme.spacing.s,
-    },
+  const styles = React.useMemo(() => StyleSheet.create({
     dividerMargin: {
         marginVertical: theme.spacing.s,
     },
-    additionalIncomeRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    incomeDescription: {
-        flex: 1,
-        marginRight: theme.spacing.s,
-    },
-    incomeAmount: {
-        flex: 1,
-        marginLeft: theme.spacing.s,
-        marginRight: theme.spacing.s,
-    },
-    expandableContentNoTopMargin: {
-        marginTop: 0,
-    },
-    centeredItems: {
-        alignItems: 'center',
-    }
-  });
+  }), [theme]);
 
   return (
     <MainCalculatorLayout
@@ -255,207 +107,63 @@ export default function PayCalculatorScreen() {
       }
       inputContent={
         <>
-            {/* Two-Column Layout for Demographics */}
-            <View style={styles.demographicsRow}>
-                {/* Left Column */}
-                <View style={styles.flex1}>
-                    <View style={[styles.fieldRow, styles.marginBottomS]}>
-                        <Text style={[styles.boldLabel, styles.noMarginBottom]}>Component</Text>
-                        <SegmentedSelector
-                            options={[{label: 'Active', value: 'Active'}, {label: 'Guard', value: 'Guard'}, {label: 'Reserve', value: 'Reserve'}]}
-                            ratios={[4, 4, 5]}
-                            selectedValues={[component]}
-                            onValueChange={(value) => setComponent(value)}
-                            style={styles.noMarginHorizontal}
-                        />
-                    </View>
-                    <View style={[styles.fieldRow, styles.marginBottomS]}>
-                        <Text style={[styles.boldLabel, styles.noMarginBottom]}>Status</Text>
-                        <SegmentedSelector
-                            options={[{label: 'Enlisted', value: 'Enlisted'}, {label: 'WO', value: 'Warrant Officer'}, {label: 'Officer', value: 'Officer'}]}
-                            ratios={[5, 2.75, 4]}
-                            selectedValues={[status]}
-                            onValueChange={(value) => setStatus(value)}
-                            style={styles.noMarginHorizontal}
-                        />
-                    </View>
-                    <View style={styles.fieldRow} collapsable={false}>
-                        <Text style={styles.boldLabel}>Pay Grade</Text>
-                        <PickerInput items={filteredRanks} selectedValue={rank} onValueChange={(val) => setRank(val as string | null)} placeholder="Select..." />
-                    </View>
-                    <View style={styles.fieldRow}>
-                        <Text style={styles.boldLabel}>Years of Service</Text>
-                        <NumberInput placeholder="0" value={yearsOfService} onChangeText={setYearsOfService} />
-                    </View>
-                </View>
-
-                <VerticalDivider style={styles.verticalDivider} />
-
-                {/* Right Column */}
-                <View style={styles.rightColumn}>
-                    <View style={[styles.fieldRow, styles.marginBottomS]}>
-                        <Text style={[styles.boldLabel, styles.noMarginBottom]}>Tax Filing Status</Text>
-                        <SegmentedSelector
-                            options={[{label: 'Single', value: 'single'}, {label: 'Married', value: 'married'}]}
-                            selectedValues={[filingStatus]}
-                            onValueChange={(value) => setFilingStatus(value)}
-                            style={styles.noMarginHorizontal}
-                        />
-                    </View>
-                    <View style={[styles.fieldRow, styles.noMarginBottom]}>
-                        <Text style={[styles.boldLabel, styles.noMarginTopBottom]}>Dependents</Text>
-                        <SegmentedSelector
-                            options={[{label: 'No', value: 'WITHOUT_DEPENDENTS'}, {label: 'Yes', value: 'WITH_DEPENDENTS'}]}
-                            selectedValues={[bahDependencyStatus]}
-                            onValueChange={(value) => setBahDependencyStatus(value)}
-                            style={styles.noMarginHorizontal}
-                        />
-                    </View>
-                    <View style={[styles.fieldRow, styles.marginTopS]}>
-                        <Text style={styles.boldLabel}>Mil Housing Area</Text>
-                        <TwoColumnPicker data={mhaData || null} selectedValue={mha} onChange={(val, prim) => handleMhaChange(val as string, prim)} displayName={mhaDisplayName} isLoading={isLoading} error={mhaError} primaryColumnValue={state} secondaryPlaceholder="Select a location" />
-                    </View>
-                    <View style={[styles.fieldRow, styles.marginTopS]}>
-                        <Text style={styles.boldLabel}>VA Disability</Text>
-                        <TwoColumnPicker data={disabilityPickerData as Record<string, { label: string; value: string | number | null }[]> | null} selectedValue={vaDependencyStatus} onChange={(val, prim) => handleDisabilityChange(val as string, prim)} displayName={disabilityDisplayName} isLoading={isLoading} error={disabilityError} primaryColumnValue={disabilityPercentage} primaryItems={disabilityPercentageItems} primaryPlaceholder="..." secondaryPlaceholder="Select disability rating" primarySort={(a, b) => Number(a.replace('%', '')) - Number(b.replace('%', ''))} />
-                    </View>
-                </View>
-            </View>
+            <PayDemographics 
+                component={component}
+                setComponent={setComponent}
+                status={status}
+                setStatus={setStatus}
+                rank={rank}
+                setRank={setRank}
+                yearsOfService={yearsOfService}
+                setYearsOfService={setYearsOfService}
+                filteredRanks={filteredRanks}
+                filingStatus={filingStatus}
+                setFilingStatus={setFilingStatus}
+                bahDependencyStatus={bahDependencyStatus}
+                setBahDependencyStatus={setBahDependencyStatus}
+                mhaData={mhaData || null}
+                mha={mha}
+                handleMhaChange={handleMhaChange}
+                mhaDisplayName={mhaDisplayName}
+                isLoading={isLoading}
+                mhaError={mhaError}
+                state={state}
+                disabilityPickerData={disabilityPickerData as Record<string, { label: string; value: string | number | null }[]> | null}
+                vaDependencyStatus={vaDependencyStatus}
+                handleDisabilityChange={handleDisabilityChange}
+                disabilityDisplayName={disabilityDisplayName}
+                disabilityError={disabilityError}
+                disabilityPercentage={disabilityPercentage}
+                disabilityPercentageItems={disabilityPercentageItems}
+            />
 
             <Divider style={styles.dividerMargin} />
 
-            {/* Special Duty Pay Section */}
-            <View style={[styles.fieldRow, styles.noMarginBottom]}>
-                <Pressable onPress={toggleIncome} style={styles.expandableHeader}>
-                    <Text style={styles.boldLabel}>Special Duty Pay</Text>
-                    <RoundIconButton
-                        onPress={toggleIncome}
-                        iconName={isIncomeExpanded ? "chevron-up" : "chevron-down"}
-                        backgroundColor={theme.colors.primary}
-                        iconSize={18}
-                    />
-                </Pressable>
-                {isIncomeExpanded && (
-                    <View style={styles.expandableContent}>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Clothing Allowance" contentKey="Clothing Allowance" /><CurrencyInput placeholder="0.00" value={specialPays.clothing} onChangeText={(text) => setSpecialPays(p => ({...p, clothing: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Hostile Fire Pay" contentKey="Hostile Fire Pay (HFP)" /><CurrencyInput placeholder="0.00" value={specialPays.hostileFire} onChangeText={(text) => setSpecialPays(p => ({...p, hostileFire: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Imminent Danger Pay" contentKey="Imminent Danger Pay (IDP)" /><CurrencyInput placeholder="0.00" value={specialPays.imminentDanger} onChangeText={(text) => setSpecialPays(p => ({...p, imminentDanger: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Hazardous Duty Incentive Pay" contentKey="Hazardous Duty Incentive Pay (HDIP)" /><CurrencyInput placeholder="0.00" value={specialPays.hazardousDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hazardousDuty: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Hardship Duty Pay" contentKey="Hardship Duty Pay - Location (HDP-L)" /><CurrencyInput placeholder="0.00" value={specialPays.hardshipDuty} onChangeText={(text) => setSpecialPays(p => ({...p, hardshipDuty: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Aviation Incentive Pay" contentKey="Aviation Incentive Pays (AvIP)" /><CurrencyInput placeholder="0.00" value={specialPays.aviation} onChangeText={(text) => setSpecialPays(p => ({...p, aviation: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Assignment Incentive Pay" contentKey="Assignment Incentive Pay (AIP)" /><CurrencyInput placeholder="0.00" value={specialPays.assignment} onChangeText={(text) => setSpecialPays(p => ({...p, assignment: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Career Sea Pay" contentKey="Career Sea Pay" /><CurrencyInput placeholder="0.00" value={specialPays.careerSea} onChangeText={(text) => setSpecialPays(p => ({...p, careerSea: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Health Professions Officers" contentKey="Health Professions Special Pays" /><CurrencyInput placeholder="0.00" value={specialPays.healthProfessions} onChangeText={(text) => setSpecialPays(p => ({...p, healthProfessions: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Foreign Language Proficiency Bonus" contentKey="Foreign Language Proficiency Bonus (FLPB)" /><CurrencyInput placeholder="0.00" value={specialPays.foreignLanguage} onChangeText={(text) => setSpecialPays(p => ({...p, foreignLanguage: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="Special Duty Assignment Pay" contentKey="Special Duty Assignment Pay (SDAP)" /><CurrencyInput placeholder="0.00" value={specialPays.specialDuty} onChangeText={(text) => setSpecialPays(p => ({...p, specialDuty: text}))} /></View>
-                        
-                        <LabelWithHelp label="Additional Income" contentKey="Additional Income" />
-                        {additionalIncomes.map((income, index) => (
-                            <View key={index} style={[styles.fieldRow, styles.additionalIncomeRow]}>
-                                <View style={styles.incomeDescription}>
-                                    <InsetTextInput
-                                        placeholder="Description"
-                                        value={income.name}
-                                        onChangeText={(text) => { const newIncomes = [...additionalIncomes]; newIncomes[index].name = text; setAdditionalIncomes(newIncomes); }}
-                                    />
-                                </View>
-                                <View style={styles.incomeAmount}>
-                                    <CurrencyInput
-                                        placeholder="0.00"
-                                        value={income.amount}
-                                        onChangeText={(text) => { const newIncomes = [...additionalIncomes]; newIncomes[index].amount = text; setAdditionalIncomes(newIncomes); }}
-                                    />
-                                </View>
-                                {(income.name || income.amount) && (
-                                    <CancelButton onPress={() => {
-                                        const newIncomes = [...additionalIncomes];
-                                        if (newIncomes.length > 1) {
-                                            newIncomes.splice(index, 1);
-                                        } else {
-                                            newIncomes[index] = { name: '', amount: '' };
-                                        }
-                                        setAdditionalIncomes(newIncomes);
-                                    }} />
-                                )}
-                            </View>
-                        ))}
-                        {showAddIncomeButton && (
-                            <AddButton onPress={() => setAdditionalIncomes(i => [...i, {name: '', amount: ''}])} />
-                        )}
-                    </View>
-                )}
-            </View>
+            <PaySpecialDuty 
+                isIncomeExpanded={isIncomeExpanded}
+                toggleIncome={() => setIncomeExpanded(!isIncomeExpanded)}
+                specialPays={specialPays}
+                setSpecialPays={setSpecialPays}
+                additionalIncomes={additionalIncomes}
+                setAdditionalIncomes={setAdditionalIncomes}
+                showAddIncomeButton={showAddIncomeButton}
+                openDetailModal={(contentKey) => handleOpenHelp(contentKey)}
+            />
 
             <Divider style={styles.dividerMargin} />
 
-            {/* Deductions Section */}
-            <View style={styles.fieldRow}>
-                <Pressable onPress={toggleDeductions} style={styles.expandableHeader}>
-                    <Text style={styles.boldLabel}>Deductions</Text>
-                    <RoundIconButton
-                        onPress={toggleDeductions}
-                        iconName={isDeductionsExpanded ? "chevron-up" : "chevron-down"}
-                        backgroundColor={theme.colors.primary}
-                        iconSize={18}
-                    />
-                </Pressable>
-                {isDeductionsExpanded && (
-                    <View style={[styles.expandableContent, styles.expandableContentNoTopMargin]}>
-                        <View style={styles.centeredItems}>
-                            <PillButton 
-                                title={isTaxOverride ? 'Use Calculated Taxes' : 'Override Taxes'} 
-                                onPress={() => setIsTaxOverride(!isTaxOverride)} 
-                                textStyle={theme.typography.subtitle}
-                            />
-                        </View>
-
-                        {isTaxOverride && (
-                            <>
-                                <View style={styles.fieldRow}><LabelWithHelp label="Federal Tax" contentKey="Federal Tax" /><CurrencyInput placeholder="0.00" value={deductions.overrideFedTax} onChangeText={(text) => setDeductions(d => ({...d, overrideFedTax: text}))} /></View>
-                                <View style={styles.fieldRow}><LabelWithHelp label="State Tax" contentKey="State Tax" /><CurrencyInput placeholder="0.00" value={deductions.overrideStateTax} onChangeText={(text) => setDeductions(d => ({...d, overrideStateTax: text}))} /></View>
-                                <View style={styles.fieldRow}><LabelWithHelp label="FICA" contentKey="FICA" /><CurrencyInput placeholder="0.00" value={deductions.overrideFicaTax} onChangeText={(text) => setDeductions(d => ({...d, overrideFicaTax: text}))} /></View>
-                            </>
-                        )}
-
-                        <View style={styles.fieldRow}><LabelWithHelp label="SGLI" contentKey="Servicemembers' Group Life Insurance (SGLI)" /><CurrencyInput placeholder="0.00" value={deductions.sgli} onChangeText={(text) => setDeductions(d => ({...d, sgli: text}))} /></View>
-                        <View style={styles.fieldRow}><LabelWithHelp label="TSP" contentKey="Thrift Savings Plan (TSP)" /><CurrencyInput placeholder="0.00" value={deductions.tsp} onChangeText={(text) => setDeductions(d => ({...d, tsp: text}))} /></View>
-
-                        <LabelWithHelp label="Additional Deductions" contentKey="Additional Deductions" />
-                        {additionalDeductions.map((deduction, index) => (
-                            <View key={index} style={[styles.fieldRow, styles.additionalIncomeRow]}>
-                                <View style={styles.incomeDescription}>
-                                    <InsetTextInput
-                                        placeholder="Description"
-                                        value={deduction.name}
-                                        onChangeText={(text) => { const newDeductions = [...additionalDeductions]; newDeductions[index].name = text; setAdditionalDeductions(newDeductions); }}
-                                    />
-                                </View>
-                                <View style={styles.incomeAmount}>
-                                    <CurrencyInput
-                                        placeholder="0.00"
-                                        value={deduction.amount}
-                                        onChangeText={(text) => { const newDeductions = [...additionalDeductions]; newDeductions[index].amount = text; setAdditionalDeductions(newDeductions); }}
-                                    />
-                                </View>
-                                {(deduction.name || deduction.amount) && (
-                                    <CancelButton onPress={() => {
-                                        const newDeductions = [...additionalDeductions];
-                                        if (newDeductions.length > 1) {
-                                            newDeductions.splice(index, 1);
-                                        } else {
-                                            newDeductions[index] = { name: '', amount: '' };
-                                        }
-                                        setAdditionalDeductions(newDeductions);
-                                    }} />
-                                )}
-                            </View>
-                        ))}
-                        {showAddDeductionButton && (
-                            <AddButton onPress={() => setAdditionalDeductions(d => [...d, {name: '', amount: ''}])} />
-                        )}
-                    </View>
-                )}
-            </View>
+            <PayDeductions 
+                isDeductionsExpanded={isDeductionsExpanded}
+                toggleDeductions={() => setDeductionsExpanded(!isDeductionsExpanded)}
+                isTaxOverride={isTaxOverride}
+                setIsTaxOverride={setIsTaxOverride}
+                deductions={deductions}
+                setDeductions={setDeductions}
+                additionalDeductions={additionalDeductions}
+                setAdditionalDeductions={setAdditionalDeductions}
+                showAddDeductionButton={showAddDeductionButton}
+                openDetailModal={(contentKey) => handleOpenHelp(contentKey)}
+            />
         </>
       }
     />

@@ -203,15 +203,15 @@ export function parseCSVData() {
                 const minPerf = row[j];
                 passFailStandards.push({
                     exercise_type: mappedEx,
-                    sex: sex,
-                    age_range: age_range,
+                    gender: sex,
+                    age_group: age_range,
                     min_performance: minPerf
                 });
                 if (mappedEx === 'run_2mile') {
                     passFailStandards.push({
                         exercise_type: 'run',
-                        sex: sex,
-                        age_range: age_range,
+                        gender: sex,
+                        age_group: age_range,
                         min_performance: minPerf
                     });
                 }
@@ -219,8 +219,28 @@ export function parseCSVData() {
         }
     }
 
-    // Standard walk minimum
-    passFailStandards.push({ exercise_type: 'walk_2km', min_performance: '17:28' });
+    // Parse actual walk sea level standards
+    try {
+        const walkSeaLevelRows = readCSV('pt_standards_walk.csv');
+        const walkHeaders = walkSeaLevelRows[0];
+        for (let i = 1; i < walkSeaLevelRows.length; i++) {
+            const row = walkSeaLevelRows[i];
+            const sex = row[0];
+            for (let j = 1; j < walkHeaders.length; j++) {
+                const age_range = walkHeaders[j];
+                const minPerf = row[j];
+                passFailStandards.push({
+                    exercise_type: 'walk_2km',
+                    gender: sex,
+                    age_group: age_range,
+                    min_performance: minPerf
+                });
+            }
+        }
+    } catch (e) {
+        console.warn('Missing pt_standards_walk.csv, falling back to 17:28');
+        passFailStandards.push({ exercise_type: 'walk_2km', min_performance: '17:28' });
+    }
 
     // Parse Altitude Adjustments
     const altitudeCorrections: Partial<Tables<'pt_altitude_corrections'>>[] = [];

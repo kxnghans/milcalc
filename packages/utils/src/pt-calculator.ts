@@ -134,7 +134,7 @@ const findScore = (standards: PtStandard[], performanceValue: number, higherIsBe
 /**
  * Calculates score for WHtR.
  */
-const getWhtrScore = (standards: PtStandard[], whtr: number): { points: number; healthRiskCategory: string | null } => {
+export const getWhtrScore = (standards: PtStandard[], whtr: number): { points: number; healthRiskCategory: string | null } => {
     if (!whtr) return { points: 0, healthRiskCategory: null };
     return findScore(standards.filter(s => s.exercise === 'whtr'), whtr, false); // Lower is better for WHtR
 };
@@ -159,7 +159,8 @@ export const getScoreForExercise = (
     if (component === 'run' || component === 'run_2mile') {
         higherIsBetter = false;
         perfValue = (performance.minutes || 0) * 60 + (performance.seconds || 0);
-        
+        if (perfValue === 0) return { points: 0, healthRiskCategory: null };
+
         // Apply correction
         if (altitudeGroup && altitudeGroup !== 'normal' && altitudeCorrections) {
             const correction = altitudeCorrections.find(c => 
@@ -216,7 +217,12 @@ export const checkWalkPass = (
         });
         if (threshold) maxTime = timeToSeconds(threshold.max_time);
     } else {
-        const standard = passFailStandards.find(s => s.exercise_type === 'walk_2km');
+        const ageGroup = getAgeGroupString(age);
+        const standard = passFailStandards.find(s => 
+            s.exercise_type === 'walk_2km' && 
+            s.gender === gender && 
+            s.age_group === ageGroup
+        );
         if (standard) maxTime = timeToSeconds(standard.min_performance);
     }
 
@@ -235,12 +241,23 @@ export const calculatePtScore = (
     walkAltitudeThresholds: Tables<'pt_altitude_walk_thresholds'>[]
 ) => {
     if (inputs.age == null || !inputs.gender) {
-        return { totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, whtrScore: 0, isPass: false, walkPassed: 'n/a', cardioRiskCategory: null as string | null };
+        return { 
+            totalScore: 0, 
+            cardioScore: 0, 
+            pushupScore: 0, 
+            coreScore: 0, 
+            whtrScore: 0, 
+            isPass: false, 
+            walkPassed: 'n/a', 
+            cardioRiskCategory: null as string | null,
+            whtrRiskCategory: null as string | null
+        };
     }
 
     let earnedPoints = 0;
     let totalPossiblePoints = 100;
     let cardioRiskCategory: string | null = null;
+    let whtrRiskCategory: string | null = null;
 
     // WHtR
     let whtrScore: number | string = 0;
@@ -249,8 +266,9 @@ export const calculatePtScore = (
         totalPossiblePoints -= 20;
     } else {
         const res = getWhtrScore(standards, inputs.whtr || 0);
-        whtrScore = typeof res === 'object' ? res.points : res;
-        earnedPoints += typeof whtrScore === 'number' ? whtrScore : 0;
+        whtrScore = res.points;
+        whtrRiskCategory = res.healthRiskCategory;
+        earnedPoints += res.points;
     }
 
     // Strength
@@ -310,7 +328,17 @@ export const calculatePtScore = (
                    (inputs.isCardioExempt || (inputs.cardioComponent === 'walk' ? walkPassed === 'pass' : (typeof cardioScore === 'number' && cardioScore > 0))) &&
                    (inputs.isWhtrExempt || (typeof whtrScore === 'number' && whtrScore > 0));
 
-    return { totalScore: compositeScore, cardioScore, pushupScore, coreScore, whtrScore, isPass, walkPassed, cardioRiskCategory };
+    return { 
+        totalScore: compositeScore, 
+        cardioScore, 
+        pushupScore, 
+        coreScore, 
+        whtrScore, 
+        isPass, 
+        walkPassed, 
+        cardioRiskCategory,
+        whtrRiskCategory 
+    };
 };
 
 /**
@@ -348,33 +376,35 @@ export const calculateBestScore = (scores: { [key: string]: number | string }): 
 /**
  * Gets min/max for muscular components.
  */
+/**
+ * Gets the maximum points possible for a given exercise component.
+ */
+export const getMaxScoreForExercise = (component: string): number => {
+    if (component === 'run' || component === 'run_2mile' || component === 'shuttles' || component === 'shuttles_20m' || component === 'walk') return 50;
+    if (component === 'whtr') return 20;
+    // Strength (Pushups) and Core (Situps/Plank) are 15 points each in the 2025 standards.
+    return 15;
+};
+
+/**
+ * Gets semantic min/max thresholds for muscular components.
+ */
 export const getMinMaxValues = (standards: PtStandard[], component: string) => {
     const compStandards = standards.filter(s => s.exercise === component);
     if (compStandards.length === 0) return { min: 0, max: 0 };
 
-    if (component === 'run_2mile' || component === 'run') {
-        // For run: parsePerformanceRange on '<= 13:25' returns [-Infinity, 805].
-        // We want min = fastest time (best), max = slowest time (worst) — both finite.
-        const finiteMaxes = compStandards
-            .map(s => parsePerformanceRange(s.measurement)[1])
-            .filter(v => isFinite(v));
-        return {
-            min: finiteMaxes.length ? Math.min(...finiteMaxes) : 0, // fastest (best) time in seconds
-            max: finiteMaxes.length ? Math.max(...finiteMaxes) : 0, // slowest (worst) time in seconds
-        };
-    }
+    // Pass Threshold: The performance required for the lowest possible positive score.
+    const passThreshold = getPerformanceForScore(standards, component, 0.1); 
+    
+    // Max Points Threshold: The performance required for 100% points in this component.
+    const maxPoints = Math.max(...compStandards.map(s => s.points));
+    const maxPointsThreshold = getPerformanceForScore(standards, component, maxPoints);
 
-    const values = compStandards.map(s => {
-        const [min] = parsePerformanceRange(s.measurement);
-        return min;
-    }).filter(v => isFinite(v)); // filter out -Infinity / Infinity
-
-    if (values.length === 0) return { min: 0, max: 0 };
-    return { min: Math.min(...values), max: Math.max(...values) };
+    return { min: passThreshold, max: maxPointsThreshold };
 };
 
 /**
- * Gets min/max for cardio components.
+ * Gets semantic min/max thresholds for cardio components.
  */
 export const getCardioMinMaxValues = (standards: PtStandard[], passFailStandards: Tables<'pt_pass_fail_standards'>[], component: string) => {
     if (component === 'walk') {
@@ -386,38 +416,36 @@ export const getCardioMinMaxValues = (standards: PtStandard[], passFailStandards
     const compStandards = standards.filter(s => s.exercise === comp);
     if (compStandards.length === 0) return { min: 0, max: 0 };
 
-    if (comp === 'run_2mile') {
-        // For run: '<= 13:25' → [-Infinity, 805]. We only want finite max values.
-        // min = fastest time (best score), max = slowest time (worst score)
-        const finiteMaxes = compStandards
-            .map(s => parsePerformanceRange(s.measurement)[1])
-            .filter(v => isFinite(v));
-        return {
-            min: finiteMaxes.length ? Math.min(...finiteMaxes) : 0,
-            max: finiteMaxes.length ? Math.max(...finiteMaxes) : 0,
-        };
-    }
+    const passThreshold = getPerformanceForScore(standards, comp, 0.1);
+    const maxPoints = Math.max(...compStandards.map(s => s.points));
+    const maxPointsThreshold = getPerformanceForScore(standards, comp, maxPoints);
 
-    // Shuttles / HAMR: '>= 100' → [100, Infinity]. Keep only finite mins.
-    const finiteMins = compStandards
-        .map(s => parsePerformanceRange(s.measurement)[0])
-        .filter(v => isFinite(v));
-    return {
-        min: finiteMins.length ? Math.min(...finiteMins) : 0,
-        max: finiteMins.length ? Math.max(...finiteMins) : 0,
-    };
+    return { min: passThreshold, max: maxPointsThreshold };
 };
 
 export const getPerformanceForScore = (standards: PtStandard[], component: string, targetScore: number): number => {
     const comp = component === 'run' ? 'run_2mile' : (component === 'shuttles' ? 'shuttles_20m' : component);
+    // Find all standards that grant AT LEAST the target score.
     const candidates = standards.filter(s => s.exercise === comp && s.points >= targetScore);
-    if (candidates.length === 0) return 0;
+    if (candidates.length === 0) {
+        // Fallback: If no one reaches targetScore, return the best performance available.
+        const allComp = standards.filter(s => s.exercise === comp);
+        if (allComp.length === 0) return 0;
+        const allValues = allComp.map(c => parsePerformanceRange(c.measurement)[0]);
+        return comp === 'run_2mile' ? Math.min(...allValues) : Math.max(...allValues);
+    }
 
+    const higherIsBetter = !(comp === 'run_2mile');
     const values = candidates.map(c => {
-        const [min] = parsePerformanceRange(c.measurement);
-        return min;
+        const [min, max] = parsePerformanceRange(c.measurement);
+        // For 'higher is better', the minimum performance required is the 'min' of the range.
+        // For 'lower is better' (run), the maximum performance allowed is the 'max' of the range.
+        return higherIsBetter ? min : max;
     });
-    return comp === 'run_2mile' ? Math.min(...values) : Math.max(...values);
+
+    // For run: we want the slowest time (max value) that still achieves the target score.
+    // For others: we want the lowest reps (min value) that still achieves the target score.
+    return higherIsBetter ? Math.min(...values) : Math.max(...values);
 };
 
 export const getDynamicHelpText = (componentKey: string, age: number, gender: string, performance: PtPerformance, standards: PtStandard[]): string => {

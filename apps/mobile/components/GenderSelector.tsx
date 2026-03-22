@@ -27,7 +27,7 @@ type IconSet = keyof typeof Icons;
 
 export default function GenderSelector({ gender, setGender }: GenderSelectorProps) {
     const { theme, isDarkMode } = useTheme();
-    const styles = StyleSheet.create({
+    const styles = React.useMemo(() => StyleSheet.create({
         genderSelectorContainer: {
             flexDirection: "row",
             overflow: 'hidden',
@@ -43,7 +43,7 @@ export default function GenderSelector({ gender, setGender }: GenderSelectorProp
         buttonStyle: {
             flex: 1,
         }
-    });
+    }), [theme, isDarkMode]);
 
     return (
         <View style={styles.genderSelectorContainer}>

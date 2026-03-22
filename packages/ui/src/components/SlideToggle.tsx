@@ -33,7 +33,7 @@ export const SlideToggle: React.FC<SlideToggleProps> = ({
       easing: Easing.bezier(0.4, 0.0, 0.2, 1),
       useNativeDriver: false,
     }).start();
-  }, [value]);
+  }, [value, animatedValue]);
 
   const translateX = animatedValue.interpolate({
     inputRange: [0, 1],
@@ -55,18 +55,18 @@ export const SlideToggle: React.FC<SlideToggleProps> = ({
       >
         <NeumorphicOutset 
             containerStyle={styles.track} 
-            style={{ borderRadius: 15 }}
+            style={styles.neumorphicStyle}
         >
           <Animated.View style={[styles.trackFill, { backgroundColor }]} />
           <Animated.View 
             style={[
               styles.thumb, 
+              styles.thumbBorder,
               { 
                 transform: [{ translateX }],
                 backgroundColor: theme.colors.surface,
                 // Add a subtle border to ensure visibility when track is secondary/surface
                 borderColor: theme.colors.border,
-                borderWidth: 0.5,
               }
             ]} 
           />
@@ -120,5 +120,11 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     zIndex: 1,
+  },
+  thumbBorder: {
+    borderWidth: 0.5,
+  },
+  neumorphicStyle: {
+    borderRadius: 15,
   },
 });

@@ -22,12 +22,13 @@ This document defines the foundational mandates and operational boundaries for A
 ## 🏗 Logical Domain Boundaries
 
 1.  **UI Domain (`@repo/ui`)**: Stateless primitives and feature-level state hooks. No direct API calls; hooks must consume `@repo/utils` APIs.
-2.  **Logic Domain (`@repo/utils`)**: Pure math and data-fetching definitions. This package is the "Single Source of Truth" for military standards.
+2.  **Logic Domain (`@repo/utils`)**: Pure math and data-fetching definitions. This package is the "Single Source of Truth" for military standards. Features a sophisticated **Range-Based Performance Parser** (`parsePerformanceRange`) that handles ranges, inequalities, and health risk category mapping.
 3.  **Delivery Domain (`apps/mobile`)**: Composition of UI primitives and routing. Screens should be thin wrappers around state hooks.
 
 ### 🎨 Interaction & Layout Mandates
 - **Context-Driven UI**: All interactive overlays (Help, Documents, Bug Reports) MUST be triggered via global `OverlayContext` hooks. Never declare local modal state (`isVisible`, `contentKey`) within screen files.
 - **Structural Standardization**: Primary calculator screens MUST use the `MainCalculatorLayout` and `SmartIconRow` components. Inline `IconRow` configurations with manual theme/reset logic are prohibited.
+- **Stability & Performance**: All context providers MUST memoize their value objects and functions (`useMemo`, `useCallback`). Inside components, `StyleSheet.create` MUST be moved outside the component body OR wrapped in `useMemo` if it depends on the `theme` to prevent "Maximum update depth exceeded" errors.
 
 ## 🚦 Operational Constraints
 
@@ -46,10 +47,13 @@ This document defines the foundational mandates and operational boundaries for A
 - [x] Background Metadata Sync engine deployed.
 - [x] iOS/Android standardization to `dev.milcalc.mobile`.
 - [x] Context-Driven UI pattern (Global Overlays) established.
+- [x] Advanced PT Performance Parsing & Health Risk Tracking implemented.
+- [x] Hybrid Seeding (Offline First-Launch) logic implemented using `seed-data.json`.
+- [x] Integrated 2025 PT standards into simplified Supabase schema (4-table model).
 
 ## 🚀 Active To-Do
 
-- [ ] Implement Hybrid Seeding (Offline First-Launch) logic using `seed-data.json`.
 - [ ] Conduct physical device performance audit (React 19 / New Architecture).
 - [ ] Configure Maestro E2E test suite for Golden Path validation.
+- [ ] Implement UI fallback logic for missing Cardio Risk Categories.
 - [ ] Finalize RLS security policies in Supabase production.

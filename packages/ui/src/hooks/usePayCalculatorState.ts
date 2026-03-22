@@ -277,10 +277,10 @@ export const usePayCalculatorState = () => {
   }, [debouncedDeductions, calculatedTaxes, isTaxOverride, debouncedAdditionalDeductions]);
 
   const lastAdditionalIncome = additionalIncomes[additionalIncomes.length - 1];
-  const showAddIncomeButton = lastAdditionalIncome && lastAdditionalIncome.name && lastAdditionalIncome.amount;
+  const showAddIncomeButton = !!(lastAdditionalIncome && lastAdditionalIncome.name && lastAdditionalIncome.amount);
 
   const lastAdditionalDeduction = additionalDeductions[additionalDeductions.length - 1];
-  const showAddDeductionButton = lastAdditionalDeduction && lastAdditionalDeduction.name && lastAdditionalDeduction.amount;
+  const showAddDeductionButton = !!(lastAdditionalDeduction && lastAdditionalDeduction.name && lastAdditionalDeduction.amount);
 
 
   const mhaDisplayName = useMemo(() => {
@@ -296,8 +296,10 @@ export const usePayCalculatorState = () => {
     return "...";
   }, [mha, mhaData]);
 
-  const handleMhaChange = (mha: string, state: string) => {
-    setMha(mha);
+  const handleMhaChange = (mha: string | number | null, state: string) => {
+    if (mha !== null) {
+      setMha(String(mha));
+    }
     setState(state);
   };
 
@@ -334,8 +336,10 @@ export const usePayCalculatorState = () => {
     return `${disabilityPercentage} - ${vaDependencyStatus}`;
   }, [disabilityPercentage, vaDependencyStatus]);
 
-  const handleDisabilityChange = (status: string, percentage: string) => {
-    setVaDependencyStatus(status as DependentStatus);
+  const handleDisabilityChange = (status: string | number | null, percentage: string) => {
+    if (status !== null) {
+      setVaDependencyStatus(String(status) as DependentStatus);
+    }
     setDisabilityPercentage(percentage as DisabilityPercentage);
     if (percentage === '0%') {
         setVaDependencyStatus('none');
@@ -343,10 +347,11 @@ export const usePayCalculatorState = () => {
   };
 
 
-  const setRankAndStatus = (selectedRank: string | null) => {
-    setRank(selectedRank);
-    if (selectedRank) {
-        const rankType = selectedRank.charAt(0).toUpperCase();
+  const setRankAndStatus = (selectedRank: string | number | null) => {
+    const rankStr = selectedRank === null ? null : String(selectedRank);
+    setRank(rankStr);
+    if (rankStr) {
+        const rankType = rankStr.charAt(0).toUpperCase();
         if (rankType === 'O' && status !== 'Officer') {
             setStatus('Officer');
         } else if (rankType === 'E' && status !== 'Enlisted') {

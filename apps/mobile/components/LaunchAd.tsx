@@ -21,7 +21,7 @@ export const LaunchAd: React.FC<LaunchAdProps> = ({ onSkip }) => {
   const contentTranslateY = useRef(new Animated.Value(20)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     container: {
       ...StyleSheet.absoluteFillObject,
       backgroundColor: theme.colors.background,
@@ -111,7 +111,7 @@ export const LaunchAd: React.FC<LaunchAdProps> = ({ onSkip }) => {
       bottom: 0,
       backgroundColor: getAlphaColor(theme.colors.primary, 0.15),
     }
-  });
+  }), [theme]);
 
   useEffect(() => {
     // Entrance Sequence

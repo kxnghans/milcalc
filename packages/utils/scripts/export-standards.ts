@@ -18,7 +18,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const TABLES_TO_EXPORT = [
-  'pt_age_sex_groups',
   'pt_scoring_standards',
   'pt_pass_fail_standards',
   'pt_altitude_corrections',
@@ -33,7 +32,8 @@ const TABLES_TO_EXPORT = [
   'pt_help_details',
   'pay_help_details',
   'retirement_help_details',
-  'best_score_help_details'
+  'best_score_help_details',
+  'sync_metadata'
 ];
 
 async function exportData() {
@@ -41,12 +41,40 @@ async function exportData() {
 
   for (const table of TABLES_TO_EXPORT) {
     console.log(`Fetching ${table}...`);
-    const { data, error } = await supabase.from(table).select('*');
-    if (error) {
-      console.error(`Error fetching ${table}:`, error);
-      continue;
+    let allData: unknown[] = [];
+    let from = 0;
+    const limit = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .range(from, from + limit - 1);
+
+      if (error) {
+        console.error(`Error fetching ${table}:`, error);
+        hasMore = false;
+        break;
+      }
+
+      if (!data || data.length === 0) {
+        hasMore = false;
+        break;
+      }
+
+      allData = [...allData, ...data];
+
+      if (data.length < limit) {
+        hasMore = false;
+        break;
+      }
+
+      from += limit;
     }
-    seedData[table] = data;
+    
+    seedData[table] = allData;
+    console.log(`Fetched ${allData.length} total rows for ${table}`);
   }
 
   const outputPath = path.join(__dirname, '../../../apps/mobile/assets/seed-data.json');

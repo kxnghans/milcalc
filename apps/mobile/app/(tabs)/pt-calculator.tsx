@@ -1,6 +1,6 @@
 import * as React from "react";
 import { StyleSheet, ImageSourcePropType } from "react-native";
-import { usePtCalculatorState, useTheme } from "@repo/ui";
+import { usePtCalculatorState, useTheme, useCalculatorState } from "@repo/ui";
 import ScoreDisplay from "../../components/ScoreDisplay";
 import StrengthComponent from "../../components/StrengthComponent";
 import CoreComponent from "../../components/CoreComponent";
@@ -16,6 +16,7 @@ export default function PTCalculator() {
   const { theme } = useTheme();
   const { openHelp, openDocuments } = useOverlay();
   const { age, gender } = useProfile();
+  const { resetPtDemographics } = useCalculatorState();
 
     const {
       demographics,
@@ -30,13 +31,13 @@ export default function PTCalculator() {
       altitudeData,
     } = usePtCalculatorState(age, gender, 'normal');
 
-    const handleOpenHelp = (key: string, mascot?: ImageSourcePropType) => {
+    const handleOpenHelp = React.useCallback((key: string, mascot?: ImageSourcePropType) => {
       openHelp(key, 'pt', mascot);
-    };
+    }, [openHelp]);
 
     const showProgressBars = !!(demographics.age && demographics.gender);
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     dividerMargin: {
         marginTop: theme.spacing.s,
         marginBottom: 0,
@@ -45,13 +46,14 @@ export default function PTCalculator() {
         marginTop: theme.spacing.s,
         marginBottom: theme.spacing.s,
     }
-  });
+  }), [theme]);
 
   return (
     <MainCalculatorLayout
       title="Air Force PT Calculator"
       isLoading={isLoading}
       actions={['best_score', 'document', 'theme']}
+      onReset={() => resetPtDemographics(age, gender)}
       onDocument={() => openDocuments('PT')}
       summaryContent={
         <ScoreDisplay 
@@ -74,6 +76,10 @@ export default function PTCalculator() {
                 setHeightInches={demographics.setHeightInches}
                 isHeightInInches={demographics.isHeightInInches}
                 setIsHeightInInches={demographics.setIsHeightInInches}
+                showProgressBars={false}
+                minMax={minMax}
+                score={score}
+                calculatedWhtr={demographics.calculatedWhtr}
             />
             <Divider style={styles.dividerMargin} />
             <StrengthComponent 

@@ -18,7 +18,7 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
   const featureAnims = useRef([new Animated.Value(0), new Animated.Value(0), new Animated.Value(0)]).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     container: {
       ...StyleSheet.absoluteFillObject,
       backgroundColor: theme.colors.background,
@@ -125,7 +125,7 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
       opacity: 0.5,
       marginTop: 20,
     }
-  });
+  }), [theme]);
 
   useEffect(() => {
     // Entrance Sequence

@@ -5,7 +5,7 @@
  * NOTE: This file is a duplicate of the ThemeProvider in `@repo/ui`. It's recommended to use the shared provider.
  */
 
-import React, { createContext, useState, useContext, useMemo, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useMemo, ReactNode, useCallback } from 'react';
 import { Appearance } from 'react-native';
 import { theme as defaultTheme, lightColors, darkColors } from '@repo/ui';
 
@@ -50,16 +50,22 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   /**
    * A function to cycle through the available theme modes: auto -> light -> dark -> auto.
    */
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setThemeMode(prevMode => {
       if (prevMode === 'auto') return 'light';
       if (prevMode === 'light') return 'dark';
       return 'auto';
     });
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    theme,
+    themeMode,
+    toggleTheme
+  }), [theme, themeMode, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, themeMode, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

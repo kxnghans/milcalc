@@ -37,6 +37,19 @@ interface BestScoreSectionProps {
   openHelp: (key: string, mascot?: ImageSourcePropType) => void;
 }
 
+const getMascot = (sectionTitle: string): ImageSourcePropType => {
+  switch (sectionTitle) {
+    case "Strength":
+      return { uri: MASCOT_URLS.PUSHUP };
+    case "Core":
+      return { uri: MASCOT_URLS.CRUNCH };
+    case "Cardio":
+      return { uri: MASCOT_URLS.RUN };
+    default:
+      return { uri: MASCOT_URLS.SPLASH };
+  }
+};
+
 const BestScoreSection = ({
   title,
   exercises,
@@ -53,16 +66,17 @@ const BestScoreSection = ({
   const passColors = useScoreColors('pass');
   const failColors = useScoreColors('fail');
 
-  const getScoreColor = (score: number | string, maxScore: number) => {
+  const getScoreColor = React.useCallback((score: number | string, maxScore: number) => {
     const numericScore = typeof score === 'number' ? score : parseFloat(String(score)) || 0;
     const category = getScoreCategory(numericScore, maxScore);
     if (category === 'excellent') return excellentColors.progressColor;
     if (category === 'pass') return passColors.progressColor;
     if (category === 'fail') return failColors.progressColor;
     return theme.colors.text;
-  }
+  }, [excellentColors.progressColor, passColors.progressColor, failColors.progressColor, theme.colors.text]);
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
+// ... (rest of styles)
     sectionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -99,7 +113,7 @@ const BestScoreSection = ({
     fullWidth: {
       width: '100%',
     },
-  });
+  }), [theme]);
 
   const maxNumericScore = Math.max(0, ...scores.filter((s): s is number => typeof s === 'number'));
   let selectedExerciseValues: string[] = [];
@@ -112,19 +126,6 @@ const BestScoreSection = ({
       return acc;
     }, []);
   }
-
-  const getMascot = (sectionTitle: string): ImageSourcePropType => {
-    switch (sectionTitle) {
-      case "Strength":
-        return { uri: MASCOT_URLS.PUSHUP };
-      case "Core":
-        return { uri: MASCOT_URLS.CRUNCH };
-      case "Cardio":
-        return { uri: MASCOT_URLS.RUN };
-      default:
-        return { uri: MASCOT_URLS.SPLASH };
-    }
-  };
 
   return (
     <View>
@@ -211,9 +212,9 @@ export default function BestScoreScreen() {
   const { theme } = useTheme();
   const { openHelp, openDocuments } = useOverlay();
 
-  const handleOpenHelp = (key: string, mascot?: ImageSourcePropType) => {
+  const handleOpenHelp = React.useCallback((key: string, mascot?: ImageSourcePropType) => {
     openHelp(key, 'best_score', mascot);
-  };
+  }, [openHelp]);
 
   const { 
     age, setAge, 
@@ -227,35 +228,39 @@ export default function BestScoreScreen() {
   const { inputs, outputs, exemptions } = useBestScoreState(age, gender, altitudeGroup);
   const { isLoading } = outputs;
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     divider: {
       marginTop: theme.spacing.s,
       marginBottom: theme.spacing.s,
     }
-  });
+  }), [theme]);
 
-  const strengthExercises: BestScoreExercise[] = [
+  const strengthExercises: BestScoreExercise[] = React.useMemo(() => [
     { label: '1-Min Push-ups', value: 'push_ups_1min', type: 'number', onValueChange: inputs.setPushUps },
     { label: '2-Min HR Push-ups', value: 'hand_release_pushups_2min', type: 'number', onValueChange: inputs.setHrPushUps },
-  ];
-  const strengthScores = [outputs.scores.push_ups_1min || 0, outputs.scores.hand_release_pushups_2min || 0];
-  const strengthBestValues = { push_ups_1min: inputs.pushUps, hand_release_pushups_2min: inputs.hrPushUps };
+  ], [inputs]);
 
-  const coreExercises: BestScoreExercise[] = [
+  const strengthScores = React.useMemo(() => [outputs.scores.push_ups_1min || 0, outputs.scores.hand_release_pushups_2min || 0], [outputs]);
+  const strengthBestValues = React.useMemo(() => ({ push_ups_1min: inputs.pushUps, hand_release_pushups_2min: inputs.hrPushUps }), [inputs]);
+
+  const coreExercises: BestScoreExercise[] = React.useMemo(() => [
     { label: '1-Min Sit-ups', value: 'sit_ups_1min', type: 'number', onValueChange: inputs.setSitUps },
     { label: '2-Min CL Crunch', value: 'cross_leg_reverse_crunch_2min', type: 'number', onValueChange: inputs.setCrunches },
     { label: 'Forearm Planks', value: 'forearm_plank_time', type: 'time', onValueChange: (value: { minutes: string; seconds: string }) => { inputs.setPlankMinutes(value.minutes); inputs.setPlankSeconds(value.seconds); } },
-  ];
-  const coreScores = [outputs.scores.sit_ups_1min || 0, outputs.scores.cross_leg_reverse_crunch_2min || 0, outputs.scores.forearm_plank_time || 0];
-  const coreBestValues = { sit_ups_1min: inputs.sitUps, cross_leg_reverse_crunch_2min: inputs.crunches, forearm_plank_time: { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds } };
+  ], [inputs]);
 
-  const cardioExercises: BestScoreExercise[] = [
+  const coreScores = React.useMemo(() => [outputs.scores.sit_ups_1min || 0, outputs.scores.cross_leg_reverse_crunch_2min || 0, outputs.scores.forearm_plank_time || 0], [outputs]);
+  const coreBestValues = React.useMemo(() => ({ sit_ups_1min: inputs.sitUps, cross_leg_reverse_crunch_2min: inputs.crunches, forearm_plank_time: { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds } }), [inputs]);
+
+  const cardioExercises: BestScoreExercise[] = React.useMemo(() => [
     { label: '2-Mile Run', value: 'run', type: 'time', onValueChange: (value: { minutes: string; seconds: string }) => { inputs.setRunMinutes(value.minutes); inputs.setRunSeconds(value.seconds); } },
     { label: '20m HAMR', value: 'shuttles', type: 'number', onValueChange: inputs.setShuttles },
     { label: '2-km Walk', value: 'walk', type: 'time', onValueChange: (value: { minutes: string; seconds: string }) => { inputs.setWalkMinutes(value.minutes); inputs.setWalkSeconds(value.seconds); } },
-  ];
-  const cardioScores = [outputs.scores.run || 0, outputs.scores.shuttles || 0, outputs.scores.walk || 'N/A'];
-  const cardioBestValues = { run: { minutes: inputs.runMinutes, seconds: inputs.runSeconds }, shuttles: inputs.shuttles, walk: { minutes: inputs.walkMinutes, seconds: inputs.walkSeconds } };
+  ], [inputs]);
+
+  const cardioScores = React.useMemo(() => [outputs.scores.run || 0, outputs.scores.shuttles || 0, outputs.scores.walk || 'N/A'], [outputs]);
+  const cardioBestValues = React.useMemo(() => ({ run: { minutes: inputs.runMinutes, seconds: inputs.runSeconds }, shuttles: inputs.shuttles, walk: { minutes: inputs.walkMinutes, seconds: inputs.walkSeconds } }), [inputs]);
+
 
   return (
     <MainCalculatorLayout
@@ -281,6 +286,7 @@ export default function BestScoreScreen() {
             setHeightInches={setHeightInches}
             isHeightInInches={isHeightInInches}
             setIsHeightInInches={setIsHeightInInches}
+            showProgressBars={false}
           />
           <Divider style={styles.divider} />
           <BestScoreSection
@@ -288,7 +294,7 @@ export default function BestScoreScreen() {
             exercises={strengthExercises}
             scores={strengthScores}
             bestValues={strengthBestValues}
-            maxScore={20}
+            maxScore={15}
             isExempt={exemptions.isStrengthExempt}
             onToggleExempt={exemptions.toggleStrengthExempt}
             openHelp={handleOpenHelp}
@@ -299,7 +305,7 @@ export default function BestScoreScreen() {
             exercises={coreExercises}
             scores={coreScores}
             bestValues={coreBestValues}
-            maxScore={20}
+            maxScore={15}
             isExempt={exemptions.isCoreExempt}
             onToggleExempt={exemptions.toggleCoreExempt}
             openHelp={handleOpenHelp}
@@ -310,7 +316,7 @@ export default function BestScoreScreen() {
             exercises={cardioExercises}
             scores={cardioScores}
             bestValues={cardioBestValues}
-            maxScore={60}
+            maxScore={50}
             isExempt={exemptions.isCardioExempt}
             onToggleExempt={exemptions.toggleCardioExempt}
             openHelp={handleOpenHelp}

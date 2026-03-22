@@ -120,14 +120,17 @@ const TimeInput: React.FC<TimeInputProps> = ({
       flex: 1,
       left: onToggleExempt ? ('-15%' as const) : ('0%' as const),
     },
-    adjustment: {
+    rightContentContainer: {
       position: 'absolute' as const,
       right: 0,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    adjustment: {
       color: theme.colors.success,
       ...theme.typography.label,
+      paddingRight: theme.spacing.s,
       backgroundColor: 'transparent',
-      textShadowRadius: 0.05,
-      textShadowColor: theme.colors.neumorphic.outset.shadow,
     }
   }), [theme, onToggleExempt]);
 
@@ -136,45 +139,51 @@ const TimeInput: React.FC<TimeInputProps> = ({
   const currentSecondsPlaceholder = isExempt ? 'xx' : secondsPlaceholder;
 
   return (
-    <NeumorphicInset containerStyle={style} contentStyle={styles.container}>
-      {onToggleExempt ? (
-        <View style={styles.leftContainer}>
-          <ExemptButton
-            onPress={onToggleExempt}
-            isActive={!!isExempt}
-          />
-        </View>
-      ) : <View style={styles.leftContainer} />}
+    <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
+      <NeumorphicInset containerStyle={{ flex: 1 }} contentStyle={styles.container}>
+        {onToggleExempt ? (
+          <View style={styles.leftContainer}>
+            <ExemptButton
+              onPress={onToggleExempt}
+              isActive={!!isExempt}
+            />
+          </View>
+        ) : <View style={styles.leftContainer} />}
 
-      <View style={styles.rightGroup}>
-        <View style={styles.inputGroup}>
-          <StyledTextInput
-            value={minutes}
-            onChangeText={handleMinutesChange}
-            placeholder={currentMinutesPlaceholder}
-            maxLength={2}
-            keyboardType="numeric"
-            style={styles.input}
-            editable={!isExempt}
-          />
-          <Text style={styles.separator}>:</Text>
-          <StyledTextInput
-            ref={secondsInput}
-            value={seconds}
-            onChangeText={handleSecondsChange}
-            onBlur={handleSecondsBlur}
-            placeholder={currentSecondsPlaceholder}
-            maxLength={2}
-            keyboardType="numeric"
-            style={styles.input}
-            editable={!isExempt}
-          />
+        <View style={styles.rightGroup}>
+          <View style={styles.inputGroup}>
+            <StyledTextInput
+              value={minutes}
+              onChangeText={handleMinutesChange}
+              placeholder={currentMinutesPlaceholder}
+              maxLength={2}
+              keyboardType="numeric"
+              style={styles.input}
+              editable={!isExempt}
+              selectTextOnFocus={true}
+            />
+            <Text style={styles.separator}>:</Text>
+            <StyledTextInput
+              ref={secondsInput}
+              value={seconds}
+              onChangeText={handleSecondsChange}
+              onBlur={handleSecondsBlur}
+              placeholder={currentSecondsPlaceholder}
+              maxLength={2}
+              keyboardType="numeric"
+              style={styles.input}
+              editable={!isExempt}
+              selectTextOnFocus={true}
+            />
+          </View>
+          {adjustment && (
+            <View style={styles.rightContentContainer}>
+              <Text style={styles.adjustment}>{adjustment}</Text>
+            </View>
+          )}
         </View>
-        {adjustment && (
-          <Text style={styles.adjustment}>{adjustment}</Text>
-        )}
-      </View>
-    </NeumorphicInset>
+      </NeumorphicInset>
+    </View>
   );
 };
 

@@ -41,7 +41,19 @@ export function usePtCalculatorState(
     whtrScore: number | string;
     isPass: boolean;
     walkPassed: string;
-  }>({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, whtrScore: 0, isPass: false, walkPassed: 'n/a' });
+    cardioRiskCategory: string | null;
+    whtrRiskCategory: string | null;
+  }>({ 
+    totalScore: 0, 
+    cardioScore: 0, 
+    pushupScore: 0, 
+    coreScore: 0, 
+    whtrScore: 0, 
+    isPass: false, 
+    walkPassed: 'n/a',
+    cardioRiskCategory: null,
+    whtrRiskCategory: null
+  });
   
   const debouncedAge = useDebounce(demographics.age, 300);
   const debouncedGender = useDebounce(demographics.gender, 300);
@@ -99,9 +111,9 @@ export function usePtCalculatorState(
 
   // 4. Fetch Walk Altitude Thresholds
   const { data: walkAltThresholds, isFetching: isFetchingWalkAlt } = useQuery({
-    queryKey: ['walkAltThresholds', capitalizedGender, ageGroup],
-    queryFn: () => getPtAltitudeWalkThresholds(capitalizedGender, ageGroup || ''),
-    enabled: !!capitalizedGender && !!ageGroup,
+    queryKey: ['walkAltThresholds', capitalizedGender],
+    queryFn: () => getPtAltitudeWalkThresholds(capitalizedGender),
+    enabled: !!capitalizedGender,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -113,15 +125,16 @@ export function usePtCalculatorState(
   const { minMax, cardioMinMax } = useMemo(() => {
     if (!standards || !passFailStandards) {
         return { 
-            minMax: { pushups: {min: 0, max: 0}, core: {min: 0, max: 0}}, 
+            minMax: { pushups: {min: 0, max: 0}, core: {min: 0, max: 0}, whtr: {min: 0, max: 0}}, 
             cardioMinMax: { min: 0, max: 0 } 
         };
     }
     const pushupValues = getMinMaxValues(standards, debouncedPushupComponent);
     const coreValues = getMinMaxValues(standards, debouncedCoreComponent);
+    const whtrValues = getMinMaxValues(standards, 'whtr');
     const cardioValues = getCardioMinMaxValues(standards, passFailStandards, debouncedCardioComponent);
     return { 
-        minMax: {pushups: pushupValues, core: coreValues}, 
+        minMax: {pushups: pushupValues, core: coreValues, whtr: whtrValues}, 
         cardioMinMax: cardioValues 
     };
   }, [standards, passFailStandards, debouncedPushupComponent, debouncedCoreComponent, debouncedCardioComponent]);
@@ -190,9 +203,32 @@ export function usePtCalculatorState(
                 } catch (e) {
                     console.error("Error during calculation: ", e);
                 }
-            } else if (!isLoading && (!ageNum || !debouncedGender)) {
-                // Only reset score if we definitely have no demographics
-                setScore({ totalScore: 0, cardioScore: 0, pushupScore: 0, coreScore: 0, whtrScore: 0, isPass: false, walkPassed: 'n/a' });
+            } else if (!isLoading) {
+                // If we're not loading but conditions aren't met, or if demographics are missing, reset.
+                setScore({ 
+                    totalScore: 0, 
+                    cardioScore: 0, 
+                    pushupScore: 0, 
+                    coreScore: 0, 
+                    whtrScore: 0, 
+                    isPass: false, 
+                    walkPassed: 'n/a',
+                    cardioRiskCategory: null,
+                    whtrRiskCategory: null
+                });
+            } else if (isLoading && !standards) {
+                // If we ARE loading and have no standards yet for this age group, clear old score to avoid stale results.
+                setScore({ 
+                    totalScore: 0, 
+                    cardioScore: '...', 
+                    pushupScore: '...', 
+                    coreScore: '...', 
+                    whtrScore: '...', 
+                    isPass: false, 
+                    walkPassed: 'n/a',
+                    cardioRiskCategory: null,
+                    whtrRiskCategory: null
+                });
             }
         }
         runCalculations();

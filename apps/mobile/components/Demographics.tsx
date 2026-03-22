@@ -4,9 +4,9 @@
  * for the demographics section of the calculator.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { View, Text, StyleSheet, StyleProp, TextStyle, TextInput } from 'react-native';
-import { useTheme, SlideToggle } from '@repo/ui';
+import { useTheme, SlideToggle, NeumorphicOutset, ProgressBar } from '@repo/ui';
 import NumberInput from './NumberInput';
 import GenderSelector from './GenderSelector';
 
@@ -40,6 +40,14 @@ interface DemographicsProps {
     isHeightInInches?: boolean;
     /** Optional function to toggle Height input mode */
     setIsHeightInInches?: (val: boolean) => void;
+    /** Whether to show progress bars */
+    showProgressBars?: boolean;
+    /** Min/Max thresholds for WHtR */
+    minMax?: { whtr: { min: number; max: number } };
+    /** Current calculated scores */
+    score?: { whtrScore: number | string };
+    /** Calculated WHtR value */
+    calculatedWhtr?: number;
 }
 
 /**
@@ -49,10 +57,10 @@ interface DemographicsProps {
  */
 export default function Demographics({ 
     age, setAge, gender, setGender, inputStyle,
-    waist, setWaist, heightFeet, setHeightFeet, heightInches, setHeightInches, isHeightInInches, setIsHeightInInches
+    waist, setWaist, heightFeet, setHeightFeet, heightInches, setHeightInches, isHeightInInches, setIsHeightInInches,
+    showProgressBars, minMax, score, calculatedWhtr
 }: DemographicsProps) {
     const { theme } = useTheme();
-    const [focusedField, setFocusedField] = useState<string | null>(null);
 
     const waistRef = useRef<TextInput>(null);
     const heightFeetRef = useRef<TextInput>(null);
@@ -64,7 +72,7 @@ export default function Demographics({
     const heightFlex = isInchesOnly ? 1 : 2;
     const toggleFlex = 0.5;
 
-    const styles = StyleSheet.create({
+    const styles = React.useMemo(() => StyleSheet.create({
         cardTitle: {
             ...theme.typography.bodybold,
             color: theme.colors.text,
@@ -133,27 +141,20 @@ export default function Demographics({
             color: theme.colors.text,
             textAlign: 'center',
             marginBottom: theme.spacing.s,
+        },
+        progressBarWrapper: {
+            marginTop: theme.spacing.s,
+            marginBottom: theme.spacing.xs,
         }
-    });
-
-    const formatFeet = (val: string | undefined) => {
-        if (!val) return '';
-        return val + "'";
-    };
-
-    const formatInches = (val: string | undefined, pad: boolean = false) => {
-        if (!val) return '';
-        let display = val;
-        if (pad && val.length === 1) {
-            display = '0' + val;
-        }
-        return display + '"';
-    };
+    }), [theme, waistFlex, heightFlex, toggleFlex]);
 
     const handleWaistChange = (val: string) => {
         if (setWaist) {
             setWaist(val);
-            if (val.length === 2) {
+            // Auto-advance if it has 1 decimal place (e.g. 35.5) or if user enters a 2-digit number? 
+            // The user requested: "waist should be able to take one decimal place and then it goes automatically to the next box"
+            // We'll advance if the string has a decimal point and exactly one digit after it.
+            if (val.includes('.') && val.split('.')[1].length === 1) {
                 if (isInchesOnly) {
                     heightTotalRef.current?.focus();
                 } else {
@@ -215,7 +216,7 @@ export default function Demographics({
                         </View>
                         <View style={styles.toggleHeaderContainer}>
                             <Text style={styles.toggleLabel}>
-                                {isHeightInInches ? "In" : "Ft/In"}
+                                {isHeightInInches ? "IN" : "FT/IN"}
                             </Text>
                         </View>
                     </View>
@@ -224,10 +225,9 @@ export default function Demographics({
                         <View style={styles.waistInputContainer}>
                             <NumberInput
                                 ref={waistRef}
-                                value={focusedField === 'waist' ? (waist || '') : formatInches(waist)}
+                                value={waist}
+                                adjustment={'"'}
                                 onChangeText={handleWaistChange}
-                                onFocus={() => setFocusedField('waist')}
-                                onBlur={() => setFocusedField(null)}
                                 placeholder="inches"
                                 inputStyle={[styles.numberInput, inputStyle]}
                                 style={styles.ageInputStyle}
@@ -238,10 +238,9 @@ export default function Demographics({
                             {isHeightInInches ? (
                                 <NumberInput
                                     ref={heightTotalRef}
-                                    value={focusedField === 'heightTotal' ? (heightInches || '') : formatInches(heightInches)}
+                                    value={heightInches}
+                                    adjustment={'"'}
                                     onChangeText={setHeightInches}
-                                    onFocus={() => setFocusedField('heightTotal')}
-                                    onBlur={() => setFocusedField(null)}
                                     placeholder="inches"
                                     inputStyle={[styles.numberInput, inputStyle]}
                                     style={styles.ageInputStyle}
@@ -252,10 +251,9 @@ export default function Demographics({
                                     <View style={{ flex: 1 }}>
                                         <NumberInput
                                             ref={heightFeetRef}
-                                            value={focusedField === 'heightFeet' ? (heightFeet || '') : formatFeet(heightFeet)}
+                                            value={heightFeet}
+                                            adjustment={"'"}
                                             onChangeText={handleHeightFeetChange}
-                                            onFocus={() => setFocusedField('heightFeet')}
-                                            onBlur={() => setFocusedField(null)}
                                             placeholder="feet"
                                             inputStyle={[styles.numberInput, inputStyle]}
                                             style={styles.ageInputStyle}
@@ -265,11 +263,10 @@ export default function Demographics({
                                     <View style={{ flex: 1 }}>
                                         <NumberInput
                                             ref={heightInchesRef}
-                                            value={focusedField === 'heightInches' ? (heightInches || '') : formatInches(heightInches, true)}
+                                            value={heightInches}
+                                            adjustment={'"'}
                                             onChangeText={setHeightInches}
-                                            onFocus={() => setFocusedField('heightInches')}
-                                            onBlur={() => setFocusedField(null)}
-                                            placeholder="inches"
+                                            placeholder="in"
                                             inputStyle={[styles.numberInput, inputStyle]}
                                             style={styles.ageInputStyle}
                                             selectTextOnFocus={true}
@@ -286,6 +283,21 @@ export default function Demographics({
                             />
                         </View>
                     </View>
+
+                    {showProgressBars && minMax && score && calculatedWhtr !== undefined && (
+                        <View style={styles.progressBarWrapper}>
+                            <NeumorphicOutset>
+                                <ProgressBar
+                                    value={calculatedWhtr}
+                                    passThreshold={minMax.whtr.min}
+                                    maxPointsThreshold={minMax.whtr.max}
+                                    invertScale={true}
+                                    score={typeof score.whtrScore === 'number' ? score.whtrScore : 0}
+                                    maxScore={20}
+                                />
+                            </NeumorphicOutset>
+                        </View>
+                    )}
                 </View>
             )}
         </View>

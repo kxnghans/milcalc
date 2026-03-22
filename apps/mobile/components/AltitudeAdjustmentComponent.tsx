@@ -40,7 +40,7 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
     return mascot;
   };
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     cardTitle: {
       ...theme.typography.title,
       color: theme.colors.text,
@@ -50,7 +50,7 @@ export default function AltitudeAdjustmentComponent({ selectedValue, onValueChan
         flexDirection: 'row', 
         alignItems: 'center',
     }
-  });
+  }), [theme]);
 
   // The options for the segmented selector, including labels with line breaks for better readability.
   const altitudeOptions = [

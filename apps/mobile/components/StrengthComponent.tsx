@@ -44,7 +44,7 @@ export default function StrengthComponent({
     score,
 }: StrengthComponentProps) {
     const { theme } = useTheme();
-    const styles = StyleSheet.create({
+    const styles = React.useMemo(() => StyleSheet.create({
         cardTitle: {
             ...theme.typography.title,
             color: theme.colors.text,
@@ -69,7 +69,7 @@ export default function StrengthComponent({
             marginHorizontal: theme.spacing.s,
             marginTop: theme.spacing.xs,
         }
-    });
+    }), [theme]);
 
     const getMascot = (): ImageSourcePropType => {
         if (pushupComponent === "push_ups_1min" || pushupComponent === "hand_release_pushups_2min") {
@@ -98,7 +98,7 @@ export default function StrengthComponent({
                                     maxPointsThreshold={minMax.pushups.max}
                                     ninetyPercentileThreshold={ninetyPercentileThreshold}
                                     score={typeof score.pushupScore === 'number' ? score.pushupScore : 0}
-                                    maxScore={20}
+                                    maxScore={15}
                                 />
                             </NeumorphicOutset>
                         </View>

@@ -19,6 +19,7 @@ interface ScoreDisplayProps {
     isPass: boolean;
     walkPassed?: string;
     cardioRiskCategory?: string | null;
+    whtrRiskCategory?: string | null;
   };
   cardioComponent?: string;
   showBreakdown?: boolean;
@@ -57,7 +58,7 @@ const ScoreDisplay = ({
   // The total score is colored red if the test is a fail, otherwise it's colored based on the score category.
   const scoreColor = score.isPass ? getScoreColor(score.totalScore, 100) : failColors.progressColor;
 
-  const styles = StyleSheet.create({
+  const styles = React.useMemo(() => StyleSheet.create({
     scoreContainer: {
         borderRadius: theme.borderRadius.m,
         backgroundColor: theme.colors.background,
@@ -92,7 +93,7 @@ const ScoreDisplay = ({
     row: {
         flexDirection: 'row',
     },
-  });
+  }), [theme]);
 
   /**
    * Renders a component score, handling numeric values and the "Exempt" status.
@@ -100,14 +101,36 @@ const ScoreDisplay = ({
    * @param {number} maxScore - The maximum possible score for the component.
    * @returns {JSX.Element} The rendered score text.
    */
-  const renderComponentScore = (componentScore: number | string | undefined, maxScore: number) => {
+  const renderComponentScore = (componentScore: number | string | undefined, maxScore: number, riskCategory?: string | null, isWhtr?: boolean) => {
     if (componentScore === 'Exempt') {
         return <Text style={[styles.scoreBreakdownText, { color: theme.colors.disabled }]}>Exempt</Text>;
     }
     if (componentScore === undefined) {
         return <Text style={[styles.scoreBreakdownText, { color: theme.colors.disabled }]}>N/A</Text>;
     }
-    return <Text style={[styles.scoreBreakdownText, { color: getScoreColor(componentScore, maxScore) }]}>{componentScore}</Text>;
+    
+    let color = getScoreColor(componentScore, maxScore);
+    if (isWhtr && riskCategory) {
+        if (riskCategory === 'Low Risk') color = excellentColors.progressColor;
+        else if (riskCategory === 'Moderate Risk') color = theme.colors.success;
+        else if (riskCategory === 'High Risk') color = theme.colors.error;
+    }
+
+    const scoreDisplay = <Text style={[styles.scoreBreakdownText, { color }]}>{componentScore}</Text>;
+    
+    // Only display the risk category label if it's not WHR
+    if (riskCategory && !isWhtr) {
+        return (
+            <View style={{ alignItems: 'center' }}>
+                {scoreDisplay}
+                <Text style={[theme.typography.caption, { color: theme.colors.disabled, marginTop: -4 }]}>
+                    {riskCategory}
+                </Text>
+            </View>
+        );
+    }
+    
+    return scoreDisplay;
   };
 
   /**
@@ -126,18 +149,7 @@ const ScoreDisplay = ({
         const text = score.walkPassed === 'pass' ? 'Pass' : 'Fail';
         return <Text style={[styles.scoreBreakdownText, { color }]}>{text}</Text>;
     }
-    const cardioScoreDisplay = renderComponentScore(score.cardioScore || 0, 60);
-    if (score.cardioRiskCategory) {
-        return (
-            <View style={{ alignItems: 'center' }}>
-                {cardioScoreDisplay}
-                <Text style={[theme.typography.caption, { color: theme.colors.disabled, marginTop: -4 }]}>
-                    {score.cardioRiskCategory}
-                </Text>
-            </View>
-        );
-    }
-    return cardioScoreDisplay;
+    return renderComponentScore(score.cardioScore || 0, 50, score.cardioRiskCategory);
   };
 
   return (
@@ -149,17 +161,17 @@ const ScoreDisplay = ({
             <View style={styles.scoreBreakdownContainer}>
                 <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>WHR: </Text>
-                    {renderComponentScore(score.whtrScore, 20)}
+                    {renderComponentScore(score.whtrScore, 20, score.whtrRiskCategory, true)}
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>Strength: </Text>
-                    {renderComponentScore(score.pushupScore, 20)}
+                    {renderComponentScore(score.pushupScore, 15)}
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>Core: </Text>
-                    {renderComponentScore(score.coreScore, 20)}
+                    {renderComponentScore(score.coreScore, 15)}
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={styles.row}>
