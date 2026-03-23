@@ -27,11 +27,13 @@ const TierPill: React.FC<TierPillProps> = ({ amount, icon, onPress }) => {
     Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 24, bounciness: 6 }).start();
 
   const s = React.useMemo(() => StyleSheet.create({
-    card: { borderRadius: 18, flex: 1, height: 72 },
+    card: { borderRadius: 18, flex: 1, height: 72, margin: 0 },
     content: {
       flex: 1, borderRadius: 18,
       justifyContent: 'center', alignItems: 'center',
       gap: 4,
+      borderWidth: 1,
+      borderColor: getAlphaColor(theme.colors.primary, 0.15),
     },
     amount: { ...theme.typography.header, color: theme.colors.primary, fontSize: 20 },
   }), [theme]);
@@ -45,7 +47,12 @@ const TierPill: React.FC<TierPillProps> = ({ amount, icon, onPress }) => {
         activeOpacity={1}
         style={{ flex: 1 }}
       >
-        <NeumorphicOutset containerStyle={s.card} contentStyle={s.content} highlightColor={getAlphaColor(theme.colors.primary, 0.08)}>
+        <NeumorphicOutset 
+          containerStyle={s.card} 
+          contentStyle={s.content} 
+          highlightStyle={{ flex: 1 }}
+          highlightColor={getAlphaColor(theme.colors.primary, 0.08)}
+        >
           <Icon name={icon} size={18} color={getAlphaColor(theme.colors.primary, 0.6)} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
           <Text style={s.amount}>${amount}</Text>
         </NeumorphicOutset>
@@ -124,12 +131,12 @@ export const DonationSection: React.FC<DonationSectionProps> = ({ onDonationComp
       flexDirection: 'row', alignItems: 'center',
       paddingHorizontal: theme.spacing.m, gap: 4,
     },
-    dollarSign: { ...theme.typography.label, color: theme.colors.text, fontSize: 18, opacity: 0.5 },
+    dollarSign: { ...theme.typography.label, color: theme.colors.text, opacity: 0.5 },
     input: {
-      flex: 1, ...theme.typography.label, fontSize: 18,
+      flex: 1, ...theme.typography.label,
       color: theme.colors.text, padding: 0,
     },
-    sendBtn: { borderRadius: 16, height: 52, width: 60 },
+    sendBtn: { borderRadius: 16, height: 52, width: 60, margin: 0 },
     sendContent: {
       borderRadius: 16, height: 52,
       justifyContent: 'center', alignItems: 'center',
@@ -193,7 +200,7 @@ export const DonationSection: React.FC<DonationSectionProps> = ({ onDonationComp
             contentStyle={styles.benefitInsetContent}
           >
             <BenefitItem text="Ad-free experience" />
-            <BenefitItem text="Priority support on tickets" />
+            <BenefitItem text="Priority support" />
             <BenefitItem text="Support our veteran community" />
           </NeumorphicInset>
 
@@ -248,10 +255,13 @@ export const DonationSection: React.FC<DonationSectionProps> = ({ onDonationComp
               <NeumorphicOutset
                 containerStyle={[
                   styles.sendBtn,
-                  { backgroundColor: parsedCustom > 0 ? theme.colors.primary : 'transparent' }
+                  { 
+                    backgroundColor: parsedCustom > 0 ? theme.colors.primary : theme.colors.background,
+                  }
                 ]}
                 contentStyle={styles.sendContent}
                 highlightColor={parsedCustom > 0 ? getAlphaColor(theme.colors.primary, 0.3) : undefined}
+                highlightStyle={{ flex: 1 }}
               >
                 <Icon
                   name="send"

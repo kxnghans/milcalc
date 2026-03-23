@@ -22,10 +22,13 @@ MilCalc is designed for military environments (flightlines, bunkers, deployed lo
 -   **Verification**: Utilize network throttling in Chrome DevTools or iOS Network Link Conditioner.
 -   **Success Metric**: `SyncManager` must fail silently and retry on the next clean boot without blocking the main UI thread.
 
-### 2.3 Limited Memory / Thermal Throttling
--   **Constraint**: Older hardware (iPhone 8 / Galaxy S9) in high-heat environments.
--   **Verification**: Memory leak profiling using React Native Debugger and Xcode Instruments.
--   **Success Metric**: The PT Calculator must maintain 60 FPS during rapid score updates, even under 80% CPU load simulations.
+### 2.4 New Architecture (Bridgeless) & React 19
+-   **Constraint**: Full compatibility with React Native's New Architecture and React 19's concurrent rendering.
+-   **Verification**: 
+    -   Enable `newArchEnabled: true` in `app.config.ts` (Active).
+    -   Audit for "Synchronous Layout" warnings in Metro logs.
+    -   Verify that complex state updates in `usePtCalculatorState` (triggered by rapid slider movement) do not cause UI jank or "Maximum update depth" regressions.
+-   **Success Metric**: Bridgeless mode remains stable; zero native crashes during rapid context switching between calculators.
 
 ## 3. Offline Data Integrity
 

@@ -55,7 +55,15 @@ coverage/
 # Temporary and Source files
 docs/sources/
 docs/*.csv
-image.png
+# image.png
+
+# Common temporary files
+*.tmp
+*.bak
+*.swp
+*.lock
+.DS_Store
+Thumbs.db
 
 # Debugging and local tools
 packages/utils/debug.ts

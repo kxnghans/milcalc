@@ -25,7 +25,7 @@ The implementation is spread across several files in the monorepo:
 ### 1.3 Architectural Choices
 
 #### Separation of Concerns
-Similar to the PT Calculator, we have separated the code into UI, state management, and calculation layers. This makes the code easier to understand, test, and maintain.
+We have strictly separated the code into UI components, state management (hooks), and pure calculation logic. This ensures that the math is 100% testable without a database or UI environment.
 
 #### Context-Driven UI (Globalized Overlays)
 To reduce boilerplate and ensure a consistent user experience, we utilize a **Context-Driven UI** pattern. Common interactive elements like Help modals (`DetailModal`), PDF viewers (`DocumentModal`), and system-wide menus are managed via the `OverlayContext`.
@@ -37,43 +37,35 @@ All primary calculators consume the `MainCalculatorLayout` wrapper. This compone
 
 #### Stability & Performance Optimization
 To prevent "Maximum update depth exceeded" errors—especially common in complex React Native applications using global contexts—we enforce strict memoization and style stability:
-- **Provider Hardening**: All context providers (`ProfileContext`, `ThemeContext`, `OverlayContext`, `CalculatorStateContext`) must memoize their `value` object using `useMemo` and all setter functions using `useCallback`. This prevents re-renders from cascading down the tree unless state actually changes.
-- **Style Stabilization**: Components MUST NOT call `StyleSheet.create` directly in the render body. If styles depend on the `theme` object, they must be wrapped in `useMemo(() => StyleSheet.create({...}), [theme])`. Otherwise, they should be defined outside the component scope.
-- **Hydration Guardrails**: Hydration effects (e.g., loading profile data into a calculator) must use explicit comparison checks (e.g., `if (val !== currentVal)`) rather than truthy checks to prevent infinite update loops during initialization.
-
-#### Debouncing User Input
-We use debouncing to prevent recalculating the pay on every keystroke, which makes the app more responsive.
+- **Provider Hardening**: All context providers (`ProfileContext`, `ThemeContext`, `OverlayContext`) must memoize their `value` object using `useMemo` and all setter functions using `useCallback`.
+- **Style Stabilization**: Components MUST NOT call `StyleSheet.create` directly in the render body. If styles depend on the `theme` object, they must be wrapped in `useMemo`.
+- **Hydration Guardrails**: Hydration effects use explicit comparison checks (e.g., `if (val !== currentVal)`) to prevent infinite update loops during initialization.
 
 ### 1.4 State Management
 
 The state of the Pay Calculator is managed by the `usePayCalculatorState` hook. This hook is responsible for:
 
--   Fetching all necessary data (pay tables, BAH rates, etc.) from Supabase when the component mounts or when user inputs change.
--   Managing the user's input for rank, years of service, etc.
--   Calculating the total pay and its components.
+-   **Data Fetching**: Orchestrates React Query calls to fetch base pay (from `base_pay_2024` or `reserve_drill_pay`), BAH, BAS, and tax metadata from Supabase.
+-   **User Inputs**: Manages state for rank, years of service, location (MHA), filing status, and additional incomes/deductions.
+-   **Calculation Orchestration**: Debounces user inputs and triggers the `calculatePay` engine whenever inputs change.
 
 ### 1.5 Calculation Logic
 
-The core calculation logic is located in `packages/utils/src/pay-calculator.ts`. The main function is `calculatePay`.
+The core calculation logic is located in `packages/utils/src/pay-calculator.ts`.
 
 #### `calculatePay`
-This function calculates the user's total pay. It takes the user's rank, years of service, and other inputs as parameters.
+This is a **pure function** that performs the heavy lifting for the financial simulation. It takes the pre-fetched base pay, allowances, and tax metadata as inputs.
 
 The function works as follows:
 
-1.  **Base Pay**: It looks up the user's base pay in the pay table based on their rank and years of service. For Guard and Reserve members, it calculates **Drill Pay** (typically 4 drills per month).
-2.  **BAS (Basic Allowance for Subsistence)**: It adds the current BAS rate.
-3.  **BAH (Basic Allowance for Housing)**: It looks up the BAH rate based on the user's rank, dependency status, and location (MHA).
-4.  **Special Pays & Incomes**: It adds any special pays or additional incomes that the user is entitled to.
-5.  **Total Pay**: It sums up all the components to get the total monthly pay.
-6.  **Annual Pay**: It multiplies the monthly pay by 12 to get the total annual pay.
+1.  **Income Categorization**: Distinguishes between taxable (Base Pay, Special Pays, Additional Incomes) and non-taxable (BAH, BAS) components.
+2.  **FICA Taxes**: Calculates Social Security and Medicare taxes at a fixed 7.65% rate on taxable income.
+3.  **Income Tax Simulation**: Applies federal and state tax brackets and standard deductions. It supports manual **Tax Overrides** for users who want 100% precision against their actual paychecks.
+4.  **Deduction Summation**: Aggregates FICA, Federal, State, and user-defined deductions (SGLI, TSP, etc.) to determine the final take-home pay.
 
-#### Tax Calculations
+#### VA Disability Integration (The "Offset" Logic)
+The calculator includes a **VA Disability** picker. When a disability rating is selected, the state hook fetches the tax-free VA monthly payment. The logic engine compares the military net pay against the VA amount and identifies the **Optimal Income** source, as a member generally cannot receive both for the same period.
 
--   **Taxable vs. Non-Taxable Income**: The calculator correctly distinguishes between taxable and non-taxable income. Base pay and most special pays are taxable, while allowances like BAH and BAS are not.
--   **FICA Taxes**: The Federal Insurance Contributions Act (FICA) tax is calculated at a fixed rate of 7.65% (6.2% Social Security + 1.45% Medicare).
--   **Federal and State Income Taxes**: The calculator utilizes tax brackets and standard deductions (Single vs. Married) cached locally from Supabase. It calculates tax by applying tiered rates to the taxable income after standard and additional deductions.
--   **Tax Overrides**: For users who prefer to use their actual paycheck values, the calculator provides an "Override Taxes" mode. This allows manual entry of Federal, State, and FICA taxes, bypassing the automated simulation for 100% precision against historical records.
 
 ### 1.6 Pay Summary Display
 

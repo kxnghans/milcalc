@@ -33,10 +33,9 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
       opacity: 0.6,
     },
     scrollContent: {
-      flexGrow: 1,
       padding: theme.spacing.l,
       paddingTop: 80,
-      paddingBottom: 40,
+      paddingBottom: 60,
     },
     header: {
       alignItems: 'center',
@@ -207,7 +206,11 @@ export const FullScreenPaywall: React.FC<FullScreenPaywallProps> = ({ onComplete
         }
       ]} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <Animated.View style={{ transform: [{ translateY: contentTranslateY }] }}>
           <View style={styles.header}>
             <NeumorphicOutset 

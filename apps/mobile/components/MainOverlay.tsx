@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useTheme, Icon, ICONS, ICON_SETS, NeumorphicOutset, NeumorphicInset, Divider, SegmentedSelector, getAlphaColor } from '@repo/ui';
 import { useOverlay } from '../contexts/OverlayContext';
 import { useProfile } from '../contexts/ProfileContext';
@@ -36,7 +36,11 @@ export const MainOverlay: React.FC = () => {
     }
   };
 
-  return <View style={styles.container}>{renderContent()}</View>;
+  return (
+    <View style={styles.container}>
+      {renderContent()}
+    </View>
+  );
 };
 
 const MenuView: React.FC = () => {
@@ -172,7 +176,7 @@ const AccountView: React.FC = () => {
   };
 
   return (
-    <ScrollView style={styles.viewContainer} showsVerticalScrollIndicator={false}>
+    <View style={styles.viewContainer}>
       {/* Profile Section */}
       <View style={styles.section}>
         <Text style={styles.headerText}>Profile Details</Text>
@@ -273,7 +277,7 @@ const AccountView: React.FC = () => {
           <Text style={[theme.typography.bodybold, { color: theme.colors.text }]}>{Constants.expoConfig?.version || '1.0.0'}</Text>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -297,12 +301,12 @@ const PaywallView: React.FC = () => {
   };
 
   return (
-    <ScrollView style={styles.viewContainer} showsVerticalScrollIndicator={false}>
+    <View style={styles.viewContainer}>
       {/* Integrated Premium & Donation Section */}
       <DonationSection 
         onDonationComplete={() => openOverlay('ACCOUNT')} 
         onUpgradePress={handleUpgrade}
       />
-    </ScrollView>
+    </View>
   );
 };
