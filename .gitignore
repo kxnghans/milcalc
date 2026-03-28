@@ -53,8 +53,8 @@ apps/mobile/assets/*
 coverage/
 
 # Temporary and Source files
-docs/sources/
-docs/*.csv
+# docs/sources/
+# docs/*.csv
 # image.png
 
 # Common temporary files

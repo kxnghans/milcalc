@@ -21,13 +21,13 @@ MilCalc is a professional-grade calculation suite designed specifically for US m
 ## 4. Logical Domains & Features
 
 ### 4.1 Fitness: PT & Performance Tracker
--   **Air Force PT Standard**: Real-time scoring for all muscular and cardio-respiratory events, aligned with **DAFMAN 36-2905 (2025)**.
+-   **Air Force PT Standard**: Real-time scoring for all muscular and cardio-respiratory events, aligned with **DAFMAN 36-2905 (2025/2026)**.
 -   **Altitude Adaptation**: Integrated lookup for altitude offsets (HAMR, 1.5M, 2KM Walk).
 -   **Health Risk Mapping**: Automated calculation and visualization of health risk categories for WHtR and Cardio components.
 -   **Personal Bests**: Persistent local tracking of achievement milestones.
 
 ### 4.2 Finance: Active & Reserve Pay
--   **Consolidated Pay Engine**: Breakdown of Basic Pay, BAH (Housing), and BAS (Subsistence).
+-   **Consolidated Pay Engine**: Breakdown of Basic Pay (2025), BAH (Housing 2026), and BAS (Subsistence 2025).
 -   **Drill Pay Projections**: Prorated calculations for Guard and Reserve drills.
 -   **Tax Simulation & Overrides**: Accurate FICA and withholding estimates with the ability for users to manually override calculated taxes for precise modeling.
 -   **VA Disability Integration**: Real-time "Offset" logic comparing military pay vs. tax-free VA compensation.

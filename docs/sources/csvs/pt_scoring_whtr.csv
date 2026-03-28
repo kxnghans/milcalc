@@ -1,0 +1,13 @@
+whtr_value,health_risk_category,points
+<= 0.49,Low Risk,20.0
+0.5,Moderate Risk,19.0
+0.51,Moderate Risk,18.0
+0.52,Moderate Risk,17.0
+0.53,Moderate Risk,16.0
+0.54,Moderate Risk,15.0
+0.55,High Risk,12.5
+0.56,High Risk,10.0
+0.57,High Risk,7.5
+0.58,High Risk,5.0
+0.59,High Risk,2.5
+>= 0.6,High Risk,0.0

@@ -45,7 +45,7 @@ To prevent "Maximum update depth exceeded" errors—especially common in complex
 
 The state of the Pay Calculator is managed by the `usePayCalculatorState` hook. This hook is responsible for:
 
--   **Data Fetching**: Orchestrates React Query calls to fetch base pay (from `base_pay_2024` or `reserve_drill_pay`), BAH, BAS, and tax metadata from Supabase.
+-   **Data Fetching**: Orchestrates React Query calls to fetch base pay (from `base_pay_2025` or `reserve_drill_pay`), BAH (2026), BAS, and tax metadata from Supabase.
 -   **User Inputs**: Manages state for rank, years of service, location (MHA), filing status, and additional incomes/deductions.
 -   **Calculation Orchestration**: Debounces user inputs and triggers the `calculatePay` engine whenever inputs change.
 
@@ -145,8 +145,8 @@ The core calculation logic is located in `packages/utils/src/pt-calculator.ts`.
 This function determines the composite score, pass/fail status, and health risk indicators:
 1.  **Component Scoring**: Calls `getScoreForExercise` for each active component. This function now returns a structured object `{ points: number, healthRiskCategory: string | null }`.
 2.  **Pass Criteria**: Checks that the user meets the **Minimum Performance Threshold** for every non-exempt component and achieves a composite score of **75 or higher**.
-3.  **Walk Test**: The 2km Walk is a pass/fail assessment per **DAFMAN 36-2905 (2025)**. If selected, it does not contribute points to the composite score; the total score is calculated based on the remaining 40 points (Strength + Core). The `checkWalkPass` engine uses specific demographic filtering (Sex and Age Range) to ensure 100% precision against sea-level and altitude thresholds.
-4.  **Health Risk Mapping**: Automatically identifies and propagates risk categories for WHtR and Cardio components to the UI.
+3.  **Walk Test**: The 2km Walk is a pass/fail assessment per **DAFMAN 36-2905 (2025/2026)**. If selected, it does not contribute points to the composite score; the total score is calculated based on the remaining points. The `checkWalkPass` engine uses specific demographic filtering (Sex and Age Range) to ensure 100% precision against sea-level and altitude thresholds.
+4.  **Health Risk Mapping**: Automatically identifies and propagates risk categories for WHtR and Cardio components (e.g., "Optimal", "Moderate", "High Risk") to the UI.
 
 #### Range and Inequality Parsing
 The engine now features a sophisticated `parsePerformanceRange` utility. This allows the backend to store standards in human-readable formats (e.g., `"45-48"`, `">= 50"`, `"<= 13:25"`) which are then dynamically parsed into numeric comparison ranges. This ensures 100% fidelity to source PDF charts without manual normalization errors.
@@ -154,9 +154,9 @@ The engine now features a sophisticated `parsePerformanceRange` utility. This al
 ### 2.6 Data Fetching
 
 Data is fetched from Supabase via `packages/utils/src/pt-supabase-api.ts` and cached locally:
-- **Simplified Standards Lookup**: Consumes the `pt_scoring_standards` and `pt_pass_fail_standards` tables. These tables now include direct `gender` and `age_group` columns for high-performance demographic filtering.
-- **Text-Based Performance**: The API layer now returns raw performance strings (e.g., `"13:25"`) which are parsed into seconds or integers by the `pt-calculator.ts` engine.
-- **Altitude Data**: Dynamically loads Run/HAMR corrections from `pt_altitude_corrections` and demographic-specific Walk thresholds from `pt_altitude_walk_thresholds`.
+- **Simplified Standards Lookup**: Consumes the `pt_scoring_standards` and `pt_pass_fail_standards` tables (2025/2026 updates). These tables include direct `gender` and `age_group` columns for high-performance demographic filtering.
+- **Text-Based Performance**: The API layer returns raw performance strings (e.g., `"13:25"`) which are parsed into seconds or integers by the `pt-calculator.ts` engine via the `parsePerformanceRange` and `timeToSeconds` utilities.
+- **Altitude Data**: Dynamically loads Run/HAMR corrections from `pt_altitude_corrections` and demographic-specific Walk thresholds from `pt_altitude_walk_thresholds` (covering all 3 altitude groups).
 
 ---
 

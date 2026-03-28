@@ -43,12 +43,12 @@ The 2025/2026 PT Architecture simplifies the schema into a **4-table model** for
 ### 4.2 Financial Logic (Pay & Retirement)
 The financial system uses a mix of the most recent available scales. Versioning is handled at the table-name level to allow for historical comparisons.
 
--   **`base_pay_2024`**: Standard basic pay tables (relational by rank/YOS). *Note: 2025/2026 updates are pending ingestion but orchestrated via the same schema.*
+-   **`base_pay_2025`**: Standard basic pay tables for the current year (relational by rank/YOS).
 -   **`reserve_drill_pay`**: Prorated pay tables for Guard and Reserve drills, calculated as 1/30th of monthly base pay per drill period.
--   **`bah_rates_2026`**: Unified housing allowance lookup. Includes a `has_dependents` boolean and columns for all pay grades (`e01` through `o10`).
--   **`bas_rates`**: Subsistence allowance lookup. The API defaults to the 2025 rate until 2026 values are finalized.
--   **`federal_tax_data` / `state_tax_data`**: Tax brackets and standard deductions.
--   **`veterans_disability_compensation`**: Monthly VA rates for service-connected disabilities, used for the VA Offset logic.
+-   **`bah_rates_2026`**: Unified housing allowance lookup reflecting the 2026 rate cycle. Includes a `has_dependents` boolean and columns for all pay grades.
+-   **`bas_rates_2025`**: Subsistence allowance lookup.
+-   **`federal_tax_data` / `state_tax_data`**: Tax brackets and standard deductions (with specific overrides for CA logic).
+-   **`veterans_disability_compensation_2025`**: Monthly VA rates for service-connected disabilities.
 
 
 ### 4.3 Contextual CMS (Help System)
@@ -67,11 +67,11 @@ The local SQLite database mirrors the relational structure of PostgreSQL. This a
 
 ## 6. Security & Access Control
 
-MilCalc enforces strict **Row Level Security (RLS)** to protect data integrity:
--   **`anon` Role**: Read-only access (`SELECT`) to all standards and help tables.
--   **No Client Writes**: The mobile application cannot modify standard tables, preventing accidental corruption or malicious injection.
--   **Audit Logs**: All modifications to the Global Source of Truth are performed via migrations or authenticated management tools.
--   **Triggers**: Updates are protected by the `update_sync_metadata()` function, ensuring client caches are invalidated immediately upon backend changes.
+MilCalc enforces strict **Row Level Security (RLS)** to protect data integrity and ensure public accessibility where required:
+-   **Public `anon` Role**: Read-only access (`SELECT`) to all standards, help, and metadata tables. This allows the application to function without user accounts.
+-   **Security Defenses**: Table RLS policies explicitly deny `INSERT`, `UPDATE`, and `DELETE` for the anonymous role, preventing any client-side tampering with military standards.
+-   **Server-Side Integrity**: All schema modifications and data updates are handled via `service_role` migrations, ensuring a verifiable audit trail for the Global Source of Truth.
+-   **Cache Invalidation**: Automated triggers on standard tables update the `sync_metadata` timestamp, forcing a background refresh on all client devices upon their next "Pulse".
 
 ## 7. Data Management Workflow
 

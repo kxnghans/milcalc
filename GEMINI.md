@@ -49,11 +49,11 @@ This document defines the foundational mandates and operational boundaries for A
 - [x] Context-Driven UI pattern (Global Overlays) established.
 - [x] Advanced PT Performance Parsing & Health Risk Tracking implemented.
 - [x] Hybrid Seeding (Offline First-Launch) logic implemented using `seed-data.json`.
-- [x] Integrated 2025 PT standards into simplified Supabase schema (4-table model).
+- [x] Integrated 2025 PT standards and 2026 BAH rates into simplified Supabase schema (4-table model).
 
 ## 🚀 Active To-Do
 
 - [ ] Conduct physical device performance audit (React 19 / New Architecture).
 - [ ] Configure Maestro E2E test suite for Golden Path validation.
 - [ ] Implement UI fallback logic for missing Cardio Risk Categories.
-- [ ] Finalize RLS security policies in Supabase production.
+- [x] Finalize RLS security policies in Supabase production.

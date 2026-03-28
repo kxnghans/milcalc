@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useTheme } from '@repo/ui';
 import CurrencyInput from '../CurrencyInput';
 import InsetTextInput from '../InsetTextInput';
-import Divider from '../Divider';
 import { NewLabelWithHelp, RoundIconButton, AddButton, CancelButton } from './PayUiComponents';
 
 interface SpecialPays {
@@ -83,8 +82,6 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
 
   return (
     <>
-      <Divider style={styles.divider} />
-
       {/* Special Duty Pay Section */}
       <View style={[styles.fieldRow, styles.noMarginBottom]}>
           <Pressable onPress={toggleIncome} style={styles.expandableHeader}>

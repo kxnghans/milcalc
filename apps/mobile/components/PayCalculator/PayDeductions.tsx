@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useTheme, PillButton } from '@repo/ui';
 import CurrencyInput from '../CurrencyInput';
 import InsetTextInput from '../InsetTextInput';
-import Divider from '../Divider';
 import { NewLabelWithHelp, RoundIconButton, AddButton, CancelButton } from './PayUiComponents';
 
 interface DeductionsState {
@@ -92,8 +91,6 @@ export default function PayDeductions({
 
   return (
     <>
-      <Divider style={styles.divider} />
-
       {/* Deductions Section */}
       <View style={styles.fieldRow}>
           <Pressable onPress={toggleDeductions} style={styles.expandableHeader}>
