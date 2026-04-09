@@ -55,10 +55,17 @@ This document defines the foundational mandates and operational boundaries for A
 - [x] Integrated 2025 PT standards and 2026 BAH rates into simplified Supabase schema (4-table model).
 - [x] **Script Standardization**: Unified development workflow under `milcalc:*` namespace.
 - [x] **Workspace Environment Audit**: Deep clean of build artifacts, caches (.turbo, .expo, .gradle), and log files completed to ensure environment parity.
+- [x] **WHtR WHtR Scoring Integration**: `getWhtrScore` integrated into `calculatePtScore` with `toFixed(2)` rounding guard; RPC updated to include `gender='Both'` standards.
+- [x] **Bug Report Keyboard UX**: `BugReportView` refactored with `KeyboardAwareScrollView` for reliable field visibility above the keyboard.
+- [x] **PT Standards CSV Audit (2025/2026)**: All 6 CSV source tables audited against DAFMAN 36-2905 and PFRA charts; 180 exhaustive tests pass.
+- [x] **Retirement Calculator Layout Refinement**: "Retirement Age" calculator relocated into the input section; `isPayDisplayExpanded` auto-collapses on keyboard to prevent scroll issues.
+- [x] **Document Modal Fix**: `openDocument` flow audited; storage bucket paths and page navigation confirmed functional for both local and remote PDFs.
+- [x] **TypeScript Stability Pass**: Profile data save types corrected in PT and Pay calculator state hooks; unused imports cleaned to satisfy strict linting.
 
 ## 🚀 Active To-Do
 
 - [ ] Conduct physical device performance audit (React 19 / New Architecture).
 - [ ] Configure Maestro E2E test suite for Golden Path validation.
 - [ ] Implement UI fallback logic for missing Cardio Risk Categories.
+- [ ] Extract shared `calculateFederalTax` / `calculateStateTax` into `packages/utils/src/tax-utils.ts` (DRY violation between `pay-calculator.ts` and `retirement-calculator.ts`).
 - [x] Finalize RLS security policies in Supabase production.

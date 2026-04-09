@@ -27,8 +27,8 @@
     - *Annotation*: Implement `&&` logic for alternate exercises (e.g., Push-ups AND HR Push-ups) to ensure a category is only marked `Exempt` if ALL possible exercises within it are exempt.
 - [x] **Range-Based Performance Optimization**:
     - *Annotation*: Pre-parse the human-readable standards (e.g., `13:25`) into numeric seconds ONCE during hydration to prevent regex overhead in the real-time scoring loop.
-- [ ] **Altitude Walk Correction**:
-    - *Annotation*: Audit the walk threshold calculation in `pt-calculator.ts` to ensure it correctly pulls from demographic-specific altitude tables for all 3 groups.
+- [x] **Altitude Walk Correction**:
+    - *Annotation*: `checkWalkPass` in `pt-calculator.ts` correctly matches `sex`, `altitude_group`, and `age_range` from `pt_altitude_walk_thresholds`, covering all 4 elevation groups up to ≥6600ft.
 
 ### 3. Statutory Calculation Edge Cases (Accuracy)
 - [x] **VA Disability "Offset" (CRDP)**:
@@ -105,9 +105,29 @@
 - [x] **Log File Sanitization**:
     - *Annotation*: Scanned and removed all `.log` files from the workspace to maintain a clean environment for new benchmarks.
 
+### 10. Document Modal & Navigation Fix
+- [x] **Audit `documents` Table & Storage Paths**:
+    - *Annotation*: Verified `openDocument` correctly resolves storage bucket URLs and local file paths.
+- [x] **Page Number Navigation**:
+    - *Annotation*: Confirmed page number navigation works for both local and web-based PDF documents in `DocumentModal`.
+
+### 11. Retirement Calculator Layout Refinement
+- [x] **Relocate Retirement Age Calculator**:
+    - *Annotation*: Moved the "Retirement Age" calculator into the main input section below the TSP block; removed automatic birthdate estimation logic.
+- [x] **Keyboard-Aware Summary Collapse**:
+    - *Annotation*: Added `Keyboard.addListener` logic to auto-collapse `isPayDisplayExpanded` on keyboard show and restore to previous state on hide.
+- [x] **Stabilize Layout Spacing**:
+    - *Annotation*: Normalized spacing below the "Calculate Retirement Age" button, eliminating the unintended vertical gap.
+
+### 12. TypeScript & Linting Stability
+- [x] **Profile Data Save Type Fixes**:
+    - *Annotation*: Corrected type mismatches in profile data saving within `usePtCalculatorState.ts` and `usePayCalculatorState.ts`.
+- [x] **Unused Import Cleanup**:
+    - *Annotation*: Removed all unused imports across PT and Pay calculator components to satisfy strict ESLint rules.
+
 ---
 
 ## 🧠 Core Strategy Benchmarks
-*   **Accuracy**: 100% fidelity to DAFMAN 36-2905 (2025) and DoD Pay Regulations.
+*   **Accuracy**: 100% fidelity to DAFMAN 36-2905 (2025/2026) and DoD Pay Regulations.
 *   **Performance**: Zero-latency UI interactions; zero `StyleSheet.create` calls in render bodies.
 *   **Reliability**: Full "Airplane Mode" functionality via SQLite sync.

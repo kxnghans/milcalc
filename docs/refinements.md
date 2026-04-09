@@ -10,7 +10,7 @@ This document centralizes architectural reviews, logic corrections, and performa
 
 | Issue | Target Files | Current State | Refactored State / Fix | Impact |
 | :--- | :--- | :--- | :--- | :--- |
-| **DRY Violation** | `pay-calculator.ts`, `retirement-calculator.ts` | Identical tax implementations exist in both. | Extract to shared `tax-utils.ts`. | **High** |
+| **DRY Violation** | `pay-calculator.ts`, `retirement-calculator.ts` | Identical tax implementations exist in both. | Extract to shared `tax-utils.ts`. | **Pending** |
 | **CA Tax Rate Bug** | `pay-calculator.ts` | Hardcoded `rate === 1.0` fix for CA inside the loop. | Patch at API boundary or DB level. | **Medium** |
 | **FICA Calculation** | `pay-calculator.ts` | Calculated against total taxable income. | Calculate against **Base Pay ONLY**. | **High** |
 | **Decimal Accuracy** | `pay-calculator.ts` | Integer `+1/-1` hack in state tax brackets. | Use standard bound subtraction. | **High** |

@@ -49,8 +49,10 @@ The financial system uses a mix of the most recent available scales. Versioning 
 -   **`bah_rates_2026`**: Unified housing allowance lookup reflecting the 2026 rate cycle. Includes a `has_dependents` boolean and columns for all pay grades.
 -   **`bas_rates_2025`**: Subsistence allowance lookup.
 -   **`federal_tax_data` / `state_tax_data`**: Tax brackets and standard deductions. The API layer sanitizes known data errors (e.g., incorrect CA tax rates) before sending them to the client.
--   **`veterans_disability_compensation_2025`**: Monthly VA rates for service-connected disabilities.
+-   **`veterans_disability_compensation`**: Monthly VA rates for service-connected disabilities.
 
+> [!NOTE]
+> Tax calculation functions (`calculateFederalTax`, `calculateStateTax`) are currently inlined in both `pay-calculator.ts` and `retirement-calculator.ts`. A tracked refactor to extract these into a shared `packages/utils/src/tax-utils.ts` is pending.
 
 ### 4.3 Contextual CMS (Help System)
 All help content is managed via a segmented key-value store to support rich markdown rendering:

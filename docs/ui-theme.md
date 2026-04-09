@@ -36,7 +36,7 @@ To eliminate "magic numbers" and ensure accessibility, we enforce strict adheren
 | :--- | :--- | :--- |
 | **Hero** | 40 | 700 |
 | **Header** | 20 | 700 |
-| **Title** | 16.5 | 700 |
+| **Title** | 17 | 700 |
 | **Subtitle** | 14 | 600 |
 | **Label** | 15 | 400 |
 | **Body** | 13 | 400 |
@@ -90,7 +90,6 @@ To maintain visual parity and avoid artifacts:
 -   **Banned**: Direct `Elevation` props on Android. **Use**: Wrapped primitives from `@repo/ui`.
 -   **Banned**: Redundant theme icon logic or manual modal state (`isVisible`, `contentKey`) in screen files. **Use**: `MainCalculatorLayout`, `SmartIconRow`, and global overlay hooks (`useOverlay`).
 -   **Banned**: Unstable `StyleSheet.create` calls inside component bodies or un-memoized context values. **Use**: `useMemo` or move styles outside the component. Use `useCallback` for context setters.
--   **Banned**: Loading game elements before the session starts in `Biblical Banter`. **Requirement**: Game screens (like `Altar`) must maintain a transparent background with twinkling stars until the game is officially triggered.
 
 ## 5. Composition Primitives
 

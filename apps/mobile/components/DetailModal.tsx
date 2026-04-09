@@ -174,7 +174,9 @@ export default function DetailModal({ isVisible, onClose, contentKey, source, ma
 
     const parseMarkdown = (text: string) => {
         if (!text) return null;
-        const paragraphs = text.split('\n\n');
+        // Handle literal \n string sequences that may come from DB/JSON escaping
+        const cleanedText = text.replace(/\\n/g, '\n');
+        const paragraphs = cleanedText.split('\n\n');
         return paragraphs.map((paragraph, pIndex) => {
             const parts = paragraph.match(/[^*_]+|(\*\*.*?\*\*|\*.*?\*|_.*?_)/g) || [];
             const styledText = parts.map((part, index) => {

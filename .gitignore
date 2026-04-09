@@ -39,8 +39,9 @@ secrets.local.json
 # Ignore all assets in the mobile assets folder...
 apps/mobile/assets/*
 
-# ...except for the splash screen
+# ...except for the splash screen and offline seed data
 !apps/mobile/assets/3d_splash.png
+!apps/mobile/assets/seed-data.json
 
 # IDE directories
 .vscode/
