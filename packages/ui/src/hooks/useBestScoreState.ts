@@ -37,10 +37,11 @@ export interface BestScores {
  * @param {string} age - The user's age.
  * @param {string} gender - The user's gender.
  * @param {string} altitudeGroup - The selected altitude group.
+ * @param {number} calculatedWhtr - The calculated waist-to-height ratio from demographics.
  * @returns An object containing the state values and setters (`inputs`), the calculated results (`outputs`),
  * and the exemption state and toggles (`exemptions`).
  */
-export function useBestScoreState(age: string, gender: string, altitudeGroup: string) {
+export function useBestScoreState(age: string, gender: string, altitudeGroup: string, calculatedWhtr: number) {
   // State for raw user inputs for each exercise component.
   const [pushUps, setPushUps] = useState("");
   const [hrPushUps, setHrPushUps] = useState("");
@@ -50,7 +51,7 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   const { minutes: runMinutes, setMinutes: setRunMinutes, seconds: runSeconds, setSeconds: setRunSeconds } = useTimeInput();
   const [shuttles, setShuttles] = useState("");
   const { minutes: walkMinutes, setMinutes: setWalkMinutes, seconds: walkSeconds, setSeconds: setWalkSeconds } = useTimeInput();
-  const [whtr, setWhtr] = useState("");
+
 
   // State for exemption status of each component category.
   const [isStrengthExempt, setIsStrengthExempt] = useState(false);
@@ -78,7 +79,7 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   const debouncedShuttles = useDebounce(shuttles, 500);
   const debouncedWalkMinutes = useDebounce(walkMinutes, 500);
   const debouncedWalkSeconds = useDebounce(walkSeconds, 500);
-  const debouncedWhtr = useDebounce(whtr, 500);
+
 
   const toggleStrengthExempt = React.useCallback(() => {
     setIsStrengthExempt(current => {
@@ -119,13 +120,7 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
   }, [setRunMinutes, setRunSeconds, setWalkMinutes, setWalkSeconds]);
 
   const toggleWhtrExempt = React.useCallback(() => {
-    setIsWhtrExempt(current => {
-      const next = !current;
-      if (next) {
-        setWhtr('');
-      }
-      return next;
-    });
+    setIsWhtrExempt(current => !current);
   }, []);
 
   // This effect runs whenever a debounced input value changes.
@@ -164,7 +159,7 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
             run: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'run_2mile', { minutes: Number(debouncedRunMinutes), seconds: Number(debouncedRunSeconds) }, debouncedAltitudeGroup, altitudeCorrections || []).points,
             shuttles: isCardioExempt ? 'Exempt' : getScoreForExercise(fetchedStandards, 'shuttles_20m', { shuttles: Number(debouncedShuttles) }, debouncedAltitudeGroup, altitudeCorrections || []).points,
             walk: isCardioExempt ? 'Exempt' : checkWalkPass(Number(debouncedAge), capitalizedGender, Number(debouncedWalkMinutes), Number(debouncedWalkSeconds), passFailStandards || [], walkAltThresholds || [], debouncedAltitudeGroup),
-            whtr: isWhtrExempt ? 'Exempt' : getWhtrScore(fetchedStandards, Number(debouncedWhtr)).points,
+            whtr: isWhtrExempt ? 'Exempt' : getWhtrScore(fetchedStandards, calculatedWhtr).points,
         };
         setScores(newScores);
         setBestScore(calculateBestScore(newScores as Record<string, number | string>));
@@ -178,8 +173,9 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
     debouncedAge, debouncedGender, debouncedAltitudeGroup,
     debouncedPushUps, debouncedHrPushUps, debouncedSitUps, debouncedCrunches,
     debouncedPlankMinutes, debouncedPlankSeconds, debouncedRunMinutes, debouncedRunSeconds,
-    debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds, debouncedWhtr,
-    isStrengthExempt, isCoreExempt, isCardioExempt, isWhtrExempt
+    debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds,
+    isStrengthExempt, isCoreExempt, isCardioExempt, isWhtrExempt,
+    calculatedWhtr
   ]);
 
   const inputs = React.useMemo(() => ({
@@ -194,19 +190,40 @@ export function useBestScoreState(age: string, gender: string, altitudeGroup: st
     shuttles, setShuttles,
     walkMinutes, setWalkMinutes,
     walkSeconds, setWalkSeconds,
-    whtr, setWhtr,
   }), [
     pushUps, setPushUps, hrPushUps, setHrPushUps, sitUps, setSitUps, crunches, setCrunches,
     plankMinutes, setPlankMinutes, plankSeconds, setPlankSeconds,
     runMinutes, setRunMinutes, runSeconds, setRunSeconds,
-    shuttles, setShuttles, walkMinutes, setWalkMinutes, walkSeconds, setWalkSeconds, whtr, setWhtr
+    shuttles, setShuttles, walkMinutes, setWalkMinutes, walkSeconds, setWalkSeconds
   ]);
 
-  const outputs = React.useMemo(() => ({
-    scores,
-    bestScore,
-    isLoading,
-  }), [scores, bestScore, isLoading]);
+  const outputs = React.useMemo(() => {
+    const sBest = Math.max(
+        typeof scores.push_ups_1min === 'number' ? scores.push_ups_1min : 0,
+        typeof scores.hand_release_pushups_2min === 'number' ? scores.hand_release_pushups_2min : 0
+    );
+    const coreBest = Math.max(
+        typeof scores.sit_ups_1min === 'number' ? scores.sit_ups_1min : 0,
+        typeof scores.cross_leg_reverse_crunch_2min === 'number' ? scores.cross_leg_reverse_crunch_2min : 0,
+        typeof scores.forearm_plank_time === 'number' ? scores.forearm_plank_time : 0
+    );
+    const cardioBest = Math.max(
+        typeof scores.run === 'number' ? scores.run : 0,
+        typeof scores.shuttles === 'number' ? scores.shuttles : 0
+    );
+
+    return {
+      scores,
+      bestScore,
+      isLoading,
+      componentScores: {
+        pushupScore: isStrengthExempt ? 'Exempt' : sBest,
+        coreScore: isCoreExempt ? 'Exempt' : coreBest,
+        cardioScore: isCardioExempt ? 'Exempt' : (scores.walk === 'pass' || scores.walk === 'fail' ? scores.walk : cardioBest),
+        whtrScore: isWhtrExempt ? 'Exempt' : (typeof scores.whtr === 'number' ? scores.whtr : 0),
+      }
+    };
+  }, [scores, bestScore, isLoading, isStrengthExempt, isCoreExempt, isCardioExempt, isWhtrExempt]);
 
   const exemptions = React.useMemo(() => ({
     isStrengthExempt,

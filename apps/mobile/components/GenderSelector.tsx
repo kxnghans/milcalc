@@ -58,6 +58,7 @@ export default function GenderSelector({ gender, setGender }: GenderSelectorProp
                 iconSet={ICON_SETS.FONTISTO as IconSet}
                 icon={ICONS.GENDER_MALE}
                 highlightOpacity={isDarkMode ? 0.33 : undefined}
+                testID="gender-male"
             />
             <StyledButton
                 title="Female"
@@ -69,6 +70,7 @@ export default function GenderSelector({ gender, setGender }: GenderSelectorProp
                 iconSet={ICON_SETS.FONTISTO as IconSet}
                 icon={ICONS.GENDER_FEMALE}
                 highlightOpacity={isDarkMode ? 0.33 : undefined}
+                testID="gender-female"
             />
         </View>
     );

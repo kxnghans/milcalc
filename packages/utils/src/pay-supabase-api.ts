@@ -200,7 +200,15 @@ export const getStateTaxData = async (year: number) => {
     return [];
   }
 
-  return data || [];
+  // Sanitize data: Fix CA 1.0 tax rate bug in source data
+  const sanitizedData = (data || []).map(row => {
+    if (row.state === 'CA' && row.income_bracket_low === 0 && row.tax_rate === 1.0) {
+      return { ...row, tax_rate: 0.01 };
+    }
+    return row;
+  });
+
+  return sanitizedData;
 };
 
 export const getMaxFederalTaxYear = async () => {

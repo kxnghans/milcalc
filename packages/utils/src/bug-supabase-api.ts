@@ -14,7 +14,7 @@ export interface BugReport {
 /**
  * Submits a bug report to the dedicated bug tracking Supabase database.
  * @param {BugReport} report - The bug report data.
- * @returns {Promise<any>} The response data from Supabase.
+ * @returns {Promise<unknown>} The response data from Supabase.
  */
 export const submitBugReport = async (report: BugReport) => {
   if (!bugSupabase) {

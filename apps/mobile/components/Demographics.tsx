@@ -197,6 +197,7 @@ export default function Demographics({
                         inputStyle={[styles.numberInput, inputStyle]}
                         style={styles.ageInputStyle}
                         selectTextOnFocus={true}
+                        testID="age-input"
                     />
                 </View>
                 <View style={styles.genderSelectorContainer}>

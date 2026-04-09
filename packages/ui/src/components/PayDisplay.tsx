@@ -8,12 +8,6 @@ interface PayDetail {
   value: number;
 }
 
-import { DatePickerModal } from './DatePickerModal';
-import { PillButton } from './PillButton';
-import { StyledTextInput } from './StyledTextInput';
-
-import NeumorphicInset from './NeumorphicInset';
-
 interface PayDisplayProps {
   annualPay: number;
   monthlyPay: number;
@@ -24,24 +18,12 @@ interface PayDisplayProps {
   stateStandardDeduction: number;
   isStandardDeductionsExpanded: boolean;
   onToggleStandardDeductions: () => void;
-  onGetRetirementAge?: () => void;
-  isRetirementAgeCalculatorVisible?: boolean;
-  birthDate?: Date;
-  setBirthDate?: (date: Date) => void;
-  serviceEntryDate?: Date;
-  setServiceEntryDate?: (date: Date) => void;
-  retirementAge?: number;
-  component?: string;
   paySource?: string;
   onHelpPress?: () => void;
-  breakInService?: string;
-  setBreakInService?: (text: string) => void;
 }
 
-export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, payDetails, deductions, containerStyle, federalStandardDeduction, stateStandardDeduction, isStandardDeductionsExpanded, onToggleStandardDeductions, onGetRetirementAge, isRetirementAgeCalculatorVisible, birthDate, setBirthDate, serviceEntryDate, setServiceEntryDate, retirementAge, component, paySource, onHelpPress, breakInService, setBreakInService }) => {
+export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, payDetails, deductions, containerStyle, federalStandardDeduction, stateStandardDeduction, isStandardDeductionsExpanded, onToggleStandardDeductions, paySource, onHelpPress }) => {
   const { theme } = useTheme();
-  const [showBirthDatePicker, setShowBirthDatePicker] = React.useState(false);
-  const [showServiceEntryDatePicker, setShowServiceEntryDatePicker] = React.useState(false);
 
   const styles = StyleSheet.create({
     container: {
@@ -248,84 +230,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
                   <Text style={styles.detailLabel}>State Std Deduction</Text>
                   <Text style={styles.detailValue}>${renderNumber(stateStandardDeduction)}</Text>
               </View>
-              {retirementAge !== null && retirementAge !== undefined && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Retirement Age</Text>
-                  <Text style={styles.detailValue}>{renderNumber(retirementAge)}</Text>
-                </View>
-              )}
           </View>
-          {onGetRetirementAge && component === 'Active' && (
-            <View style={styles.fullWidth}>
-              <PillButton title="Get Retirement Age" onPress={onGetRetirementAge} textStyle={theme.typography.bodybold} />
-            </View>
-          )}
-          {isRetirementAgeCalculatorVisible && component === 'Active' && (
-            <View style={styles.retirementCalculatorContainer}>
-              <View style={styles.datePickerContainer}>
-                <Text style={[styles.detailLabel, styles.dateLabel]}>Birth Date</Text>
-                <Pressable style={styles.marginBottomS} onPress={() => setShowBirthDatePicker(true)}>
-                  <NeumorphicInset 
-                    containerStyle={{ borderRadius: theme.borderRadius.m }}
-                    contentStyle={styles.pressableInput}
-                  >
-                    <Text style={[styles.pressableText, !birthDate && styles.placeholderText]}>
-                      {birthDate ? birthDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Select Date'}
-                    </Text>
-                  </NeumorphicInset>
-                </Pressable>
-                <DatePickerModal
-                  visible={showBirthDatePicker}
-                  onClose={() => setShowBirthDatePicker(false)}
-                  onDone={(date) => {
-                    if (setBirthDate && date) setBirthDate(date);
-                    setShowBirthDatePicker(false);
-                  }}
-                  value={birthDate}
-                />
-              </View>
-              <View style={styles.serviceEntryDatePickerContainer}>
-                <Text style={[styles.detailLabel, styles.dateLabel]}>Service Entry Date</Text>
-                <Pressable style={styles.marginBottomS} onPress={() => setShowServiceEntryDatePicker(true)}>
-                  <NeumorphicInset 
-                    containerStyle={{ borderRadius: theme.borderRadius.m }}
-                    contentStyle={styles.pressableInput}
-                  >
-                    <Text style={[styles.pressableText, !serviceEntryDate && styles.placeholderText]}>
-                      {serviceEntryDate ? serviceEntryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Select Date'}
-                    </Text>
-                  </NeumorphicInset>
-                </Pressable>
-                <DatePickerModal
-                  visible={showServiceEntryDatePicker}
-                  onClose={() => setShowServiceEntryDatePicker(false)}
-                  onDone={(date) => {
-                    if (setServiceEntryDate && date) setServiceEntryDate(date);
-                    setShowServiceEntryDatePicker(false);
-                  }}
-                  value={serviceEntryDate}
-                />
-              </View>
-              <View style={styles.serviceBreakContainer}>
-                <Text style={[styles.detailLabel, styles.dateLabel]}>Service Break</Text>
-                <NeumorphicInset 
-                    containerStyle={{ borderRadius: theme.borderRadius.m, marginBottom: theme.spacing.s }}
-                    contentStyle={styles.pressableInput}
-                >
-                    <StyledTextInput
-                      keyboardType="number-pad"
-                      value={breakInService || ''}
-                      onChangeText={setBreakInService}
-                      placeholder="Years"
-                      style={[
-                        styles.pressableText,
-                        styles.serviceBreakInput
-                      ]}
-                    />
-                </NeumorphicInset>
-              </View>
-            </View>
-          )}
           <View style={styles.fullWidthCentered}>
             <Pressable onPress={onToggleStandardDeductions}>
               <MaterialCommunityIcons name='chevron-up' size={24} color={theme.colors.primary} />

@@ -33,66 +33,60 @@ export const getDocumentsByCategory = async (category: string): Promise<Tables<'
 };
 
 /**
+ * Internal helper to append page number to URL if present.
+ */
+const buildUrlWithPage = (url: string, page?: number | null): string => {
+    if (!page) return url;
+    const separator = url.includes('#') ? '&' : '#';
+    return `${url}${separator}page=${page}`;
+};
+
+/**
  * Handles opening a document, either by fetching a signed URL for private files
  * or by opening a public web link.
  * @param doc - The document object from the database.
  */
 export const openDocument = async (doc: Tables<'documents'>) => {
-    const buildUrlWithPage = (url: string, page?: number | null) => {
-        if (!page) return url;
-        // Append #page=N if it's a PDF or we have a page number
-        const separator = url.includes('#') ? '&' : '#';
-        return `${url}${separator}page=${page}`;
-    };
-
-    // Override for DAFMAN 36-2905 to use a specific static link
-    if (doc.name.toLowerCase().replace(/\s+/g, '') === 'dafman36-2905') {
-        const staticLink = 'https://static.e-publishing.af.mil/production/1/af_a1/publication/dafman36-2905/dafman36-2905.pdf';
-        const finalLink = buildUrlWithPage(staticLink, doc.page_number);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        try {
-            await Linking.openURL(finalLink);
-        } catch (error) {
-            console.error('Error opening static DAFMAN 36-2905 URL:', error);
+    // 1. Handle web links or custom learn_more links
+    if (doc.type === 'web' || doc.learn_more_uri) {
+        let urlToOpen = doc.learn_more_uri || doc.source;
+        if (urlToOpen) {
+            urlToOpen = buildUrlWithPage(urlToOpen, doc.page_number);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            try {
+                await Linking.openURL(urlToOpen);
+            } catch (error) {
+                console.error('Error opening URL:', error);
+            }
+            return;
         }
-        return;
     }
 
-    // Use learn_more_uri if it exists, otherwise use the source based on type.
-    let urlToOpen = doc.learn_more_uri || (doc.type === 'web' ? doc.source : null);
-
-    if (urlToOpen) {
-        urlToOpen = buildUrlWithPage(urlToOpen, doc.page_number);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        try {
-            await Linking.openURL(urlToOpen);
-        } catch (error) {
-            console.error('Error opening URL:', error);
-        }
-        return;
-    }
-
-    // Handle private files that need a signed URL.
+    // 2. Handle private files (local pdfs/audio) via get-signed-url edge function
     if ((doc.type === 'local' || doc.type === 'audio') && doc.source) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         try {
+            // Remove leading slash if exists for consistent pathing in storage
+            const sanitizedPath = doc.source.startsWith('/') ? doc.source.slice(1) : doc.source;
+            
             const { data, error } = await supabase.functions.invoke('get-signed-url', {
-                body: { filePath: doc.source },
+                body: { filePath: sanitizedPath },
             });
-    
-            if (error) {
-                throw error;
-            }
-    
+
+            if (error) throw error;
+
             if (data && data.signedURL) {
-                const finalUrl = buildUrlWithPage(data.signedURL, doc.page_number);
+                let finalUrl = data.signedURL;
+                // Append page number for local PDFs if applicable
+                if (doc.type === 'local' && doc.page_number) {
+                    finalUrl = buildUrlWithPage(finalUrl, doc.page_number);
+                }
                 await Linking.openURL(finalUrl);
             } else {
-                console.error('No signed URL returned from edge function');
+                console.error('No signed URL returned from edge function', data);
             }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            console.error('Error getting signed URL:', errorMessage);
+            console.error('Error getting signed URL:', error);
         }
         return;
     }

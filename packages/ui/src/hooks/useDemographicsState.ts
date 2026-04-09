@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { Alert } from 'react-native';
 import { useCalculatorState } from '../contexts/CalculatorStateContext';
 
 /**
@@ -12,12 +13,14 @@ import { useCalculatorState } from '../contexts/CalculatorStateContext';
  * @param {string} [initialAge=''] - The initial value for the age input.
  * @param {string} [initialGender='male'] - The initial selected gender.
  * @param {string} [initialAltitudeGroup='normal'] - The initial selected altitude group.
+ * @param {Function} [onSaveToProfile] - Optional callback to save demographic changes to the user's permanent profile.
  * @returns An object containing the state variables and their respective setters.
  */
 export function useDemographicsState(
   initialAge: string = '', 
   initialGender: string = 'male', 
-  initialAltitudeGroup: string = 'normal'
+  initialAltitudeGroup: string = 'normal',
+  onSaveToProfile?: (data: { age?: string; gender?: string }) => void
 ) {
   const { ptDemographics, setPtDemographics } = useCalculatorState();
 
@@ -45,14 +48,48 @@ export function useDemographicsState(
     }
   }, [initialAltitudeGroup, ptDemographics.altitudeGroup, setPtDemographics]);
 
+  /**
+   * Triggers a native alert asking if the user wants to save the demographic change to their profile.
+   */
+  const promptSaveToProfile = (type: 'age' | 'gender', value: string) => {
+    if (!onSaveToProfile) return;
+
+    // Check if the corresponding profile field is currently empty
+    // We only prompt if the profile is empty, to respect the "leave profile as is" unless assigned mandate.
+    const isProfileEmpty = type === 'age' ? !initialAge : false; // gender defaults to 'male', so it's technically never empty.
+
+    if (isProfileEmpty) {
+      Alert.alert(
+        "Save to Profile?",
+        `Would you like to save this ${type} to your permanent profile?`,
+        [
+          { text: "Not Now", style: "cancel" },
+          { 
+            text: "Save", 
+            onPress: () => onSaveToProfile({ [type]: value })
+          }
+        ]
+      );
+    }
+  };
+
   const handleSetAge = (newAge: string) => {
     hasModifiedAge.current = true;
     setPtDemographics({ age: newAge });
+
+    // If a valid age is entered and profile is empty, prompt to save
+    if (newAge.length >= 2 && !initialAge) {
+      promptSaveToProfile('age', newAge);
+    }
   };
 
   const handleSetGender = (newGender: string) => {
     hasModifiedGender.current = true;
     setPtDemographics({ gender: newGender });
+
+    // Gender usually has a default, but if we haven't modified it yet and it's different from profile, we might prompt
+    // However, the user said "unless it is empty then use the native alert", so for gender we might skip prompt 
+    // unless we add a 'none' state to profile gender, which we shouldn't do now.
   };
 
   const setAltitudeGroup = (newGroup: string) => {

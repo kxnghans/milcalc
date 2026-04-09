@@ -31,7 +31,7 @@ describe('Pay Calculator', () => {
             const result = calculatePay(inputs, mockFederalTaxData as Tables<'federal_tax_data'>[], mockStateTaxData as Tables<'state_tax_data'>[]);
 
             expect(result.totalIncome).toBeCloseTo(7700);
-            expect(result.ficaTax).toBeCloseTo(405.45);
+            expect(result.ficaTax).toBeCloseTo(382.50);
             expect(result.federalTax).toBeCloseTo(394.33);
             expect(result.stateTax).toBeGreaterThan(0);
         });

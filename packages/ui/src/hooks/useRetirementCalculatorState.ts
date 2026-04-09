@@ -1,9 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Alert } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from './useDebounce';
 import { getDisabilityData, getMhaData, getPayGrades, getFederalTaxData, getStateTaxData, calculatePension, calculateDisabilityIncome, calculateTsp, calculateTaxes, getRetirementAge, DisabilityPercentage, DependentStatus } from '@repo/utils';
 
-export const useRetirementCalculatorState = () => {
+export const useRetirementCalculatorState = (
+  initialAge: string = '',
+  onSaveToProfile?: (data: { age?: string }) => void
+) => {
   const [component, setComponent] = useState('Active');
   const [retirementSystem, setRetirementSystem] = useState('High 3');
 
@@ -24,13 +28,56 @@ export const useRetirementCalculatorState = () => {
 
   const [federalStandardDeduction, setFederalStandardDeduction] = useState(0);
   const [stateStandardDeduction, setStateStandardDeduction] = useState(0);
-  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [birthDate, setBirthDateState] = useState<Date | null>(null);
   const [serviceEntryDate, setServiceEntryDate] = useState<Date | null>(null);
   const [qualifyingDeploymentDays, setQualifyingDeploymentDays] = useState('');
   const [isPayDisplayExpanded, setIsPayDisplayExpanded] = useState(false);
   const [isRetirementAgeCalculatorVisible, setIsRetirementAgeCalculatorVisible] = useState(false);
   const [retirementAge, setRetirementAge] = useState<number | null>(null);
   const [breakInService, setBreakInService] = useState('');
+
+  const hasModifiedBirthDate = useRef(false);
+
+  // --- Hydration Logic ---
+  // We no longer estimate birth date from initialAge to avoid "guessing" for the user.
+
+
+  /**
+   * Triggers a native alert asking if the user wants to save the age change to their profile.
+   */
+  const promptSaveToProfile = (calculatedAge: number) => {
+    if (!onSaveToProfile || initialAge) return;
+
+    Alert.alert(
+      "Save to Profile?",
+      `Would you like to save your calculated age (${calculatedAge}) to your permanent profile?`,
+      [
+        { text: "Not Now", style: "cancel" },
+        { 
+          text: "Save", 
+          onPress: () => onSaveToProfile({ age: calculatedAge.toString() })
+        }
+      ]
+    );
+  };
+
+  const setBirthDate = (date: Date | null) => {
+    hasModifiedBirthDate.current = true;
+    setBirthDateState(date);
+
+    if (date && !initialAge) {
+      // Calculate age from birth date
+      const today = new Date();
+      let age = today.getFullYear() - date.getFullYear();
+      const m = today.getMonth() - date.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
+          age--;
+      }
+      if (age > 0) {
+        promptSaveToProfile(age);
+      }
+    }
+  };
 
   // Calculated values
   const [pension, setPension] = useState(0);
@@ -77,7 +124,7 @@ export const useRetirementCalculatorState = () => {
           }
           return 400;
         };
-        return (data || []).sort((a, b) => getRankOrder(a) - getRankOrder(b));
+        return (data || []).sort((a: string, b: string) => getRankOrder(a) - getRankOrder(b));
       },
       staleTime: Infinity,
     });
@@ -179,8 +226,8 @@ export const useRetirementCalculatorState = () => {
 
   useEffect(() => {
     if (high3PayGrade1 && high3PayGrade2 && payGrades) {
-      const year1Index = payGrades.findIndex(p => p === high3PayGrade1);
-      const year2Index = payGrades.findIndex(p => p === high3PayGrade2);
+      const year1Index = payGrades.findIndex((p: string) => p === high3PayGrade1);
+      const year2Index = payGrades.findIndex((p: string) => p === high3PayGrade2);
       if (year1Index > year2Index) {
         setHigh3PayGrade2(null);
         setHigh3PayGrade3(null);
@@ -190,8 +237,8 @@ export const useRetirementCalculatorState = () => {
 
   useEffect(() => {
     if (high3PayGrade2 && high3PayGrade3 && payGrades) {
-      const year2Index = payGrades.findIndex(p => p === high3PayGrade2);
-      const year3Index = payGrades.findIndex(p => p === high3PayGrade3);
+      const year2Index = payGrades.findIndex((p: string) => p === high3PayGrade2);
+      const year3Index = payGrades.findIndex((p: string) => p === high3PayGrade3);
       if (year2Index > year3Index) {
         setHigh3PayGrade3(null);
       }
@@ -204,7 +251,7 @@ export const useRetirementCalculatorState = () => {
     if (!high3PayGrade1 || !payGrades) {
       return payGrades || [];
     }
-    const selectedIndex = payGrades.findIndex(p => p === high3PayGrade1);
+    const selectedIndex = payGrades.findIndex((p: string) => p === high3PayGrade1);
     if (selectedIndex === -1) {
       return payGrades;
     }
@@ -215,7 +262,7 @@ export const useRetirementCalculatorState = () => {
     if (!high3PayGrade2) {
       return payGradesForYear2;
     }
-    const selectedIndex = payGradesForYear2.findIndex(p => p === high3PayGrade2);
+    const selectedIndex = payGradesForYear2.findIndex((p: string) => p === high3PayGrade2);
     if (selectedIndex === -1) {
       return payGradesForYear2;
     }
@@ -271,7 +318,8 @@ export const useRetirementCalculatorState = () => {
     if (mha === 'ON_BASE') return "ON BASE";
     if (!mha || !mhaData) return "...";
     for (const stateKey in mhaData) {
-      const mhaObject = mhaData[stateKey].find((m: { value: string; label: string }) => m.value === mha);
+      const mhaList = mhaData[stateKey] as { label: string; value: string }[];
+      const mhaObject = mhaList.find((m) => m.value === mha);
       if (mhaObject) {
         return mhaObject.label;
       }
@@ -320,6 +368,9 @@ export const useRetirementCalculatorState = () => {
     setBrsPayGrade(null);
     setTspType('Roth');
     setTspReturn(8);
+    setBirthDateState(null);
+    setServiceEntryDate(null);
+    hasModifiedBirthDate.current = false;
   };
 
   const percentageItems = [

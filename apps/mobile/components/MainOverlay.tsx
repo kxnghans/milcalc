@@ -15,9 +15,10 @@ export const MainOverlay: React.FC = () => {
 
   const styles = React.useMemo(() => StyleSheet.create({
     container: {
+      flex: overlayType === 'BUG_REPORT' ? 1 : 0,
       paddingBottom: theme.spacing.m,
     }
-  }), [theme]);
+  }), [theme, overlayType]);
 
   const renderContent = () => {
     switch (overlayType) {

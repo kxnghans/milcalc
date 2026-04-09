@@ -9,6 +9,7 @@ export const Constants = {
 export interface PtStandard {
   exercise: string | null;
   measurement: string | number | null;
+  performanceRange?: [number, number]; // [min, max] pre-parsed numeric values
   points: number;
   healthRiskCategory?: string | null;
 }

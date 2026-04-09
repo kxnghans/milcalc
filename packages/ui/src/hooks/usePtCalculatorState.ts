@@ -12,10 +12,7 @@ import {
   getCardioMinMaxValues,
   getPerformanceForScore,
   getAgeGroupString,
-  getPtStandards,
-  getPassFailStandards,
-  getPtAltitudeCorrections,
-  getPtAltitudeWalkThresholds,
+  getPtStandardsBundle,
 } from '@repo/utils';
 import { useDebounce } from './useDebounce';
 import { useDemographicsState } from './useDemographicsState';
@@ -26,12 +23,15 @@ import { useCardioState } from './useCardioState';
 export function usePtCalculatorState(
   initialAge: string = '', 
   initialGender: string = 'male', 
-  initialAltitudeGroup: string = 'normal'
+  initialAltitudeGroup: string = 'normal',
+  onSaveToProfile?: (data: { age?: string; gender?: string }) => void
 ) {
-  const demographics = useDemographicsState(initialAge, initialGender, initialAltitudeGroup);
+  const demographics = useDemographicsState(initialAge, initialGender, initialAltitudeGroup, onSaveToProfile);
   const strength = useStrengthState();
   const core = useCoreState();
   const cardio = useCardioState();
+
+
 
   const [score, setScore] = useState<{
     totalScore: number;
@@ -86,41 +86,20 @@ export function usePtCalculatorState(
   const ageGroup = getAgeGroupString(ageNum);
   const capitalizedGender = debouncedGender.charAt(0).toUpperCase() + debouncedGender.slice(1);
 
-  // 1. Fetch Scoring Standards (Includes WHtR)
-  const { data: standards, isFetching: isFetchingStandards } = useQuery({
-    queryKey: ['ptStandards', capitalizedGender, ageGroup],
-    queryFn: () => getPtStandards(capitalizedGender, ageGroup || ''), // Logic versioning will be handled inside API or via different table if needed
+  // Consolidate data fetching into a single bundled RPC call
+  const { data: bundle, isFetching: isFetchingBundle } = useQuery({
+    queryKey: ['ptStandardsBundle', capitalizedGender, ageGroup],
+    queryFn: () => getPtStandardsBundle(capitalizedGender, ageGroup || ''),
     enabled: !!capitalizedGender && !!ageGroup,
     staleTime: 1000 * 60 * 5,
   });
 
-  // 2. Fetch Pass/Fail Standards
-  const { data: passFailStandards, isFetching: isFetchingPassFail } = useQuery({
-    queryKey: ['passFailStandards', capitalizedGender, ageGroup],
-    queryFn: () => getPassFailStandards(capitalizedGender, ageGroup || ''),
-    enabled: !!capitalizedGender && !!ageGroup,
-    staleTime: 1000 * 60 * 5,
-  });
+  const standards = bundle?.standards;
+  const passFailStandards = bundle?.passFail;
+  const altitudeCorrections = bundle?.corrections;
+  const walkAltThresholds = bundle?.walkThresholds;
 
-  // 3. Fetch Altitude Corrections (Run/HAMR)
-  const { data: altitudeCorrections, isFetching: isFetchingCorrections } = useQuery({
-    queryKey: ['altitudeCorrections'],
-    queryFn: () => getPtAltitudeCorrections(),
-    staleTime: 1000 * 60 * 60,
-  });
-
-  // 4. Fetch Walk Altitude Thresholds
-  const { data: walkAltThresholds, isFetching: isFetchingWalkAlt } = useQuery({
-    queryKey: ['walkAltThresholds', capitalizedGender],
-    queryFn: () => getPtAltitudeWalkThresholds(capitalizedGender),
-    enabled: !!capitalizedGender,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const isLoading = (isFetchingStandards && !standards) || 
-                    (isFetchingPassFail && !passFailStandards) || 
-                    (isFetchingCorrections && !altitudeCorrections) || 
-                    (isFetchingWalkAlt && !walkAltThresholds);
+  const isLoading = isFetchingBundle && !bundle;
 
   const { minMax, cardioMinMax } = useMemo(() => {
     if (!standards || !passFailStandards) {
@@ -251,6 +230,10 @@ export function usePtCalculatorState(
     minMax,
     cardioMinMax,
     ninetyPercentileThresholds,
-    altitudeData: { run: altitudeCorrections, walk: walkAltThresholds, hamr: altitudeCorrections },
+    altitudeData: { 
+        run: altitudeCorrections || [], 
+        walk: walkAltThresholds || [], 
+        hamr: altitudeCorrections || [] 
+    },
   };
 }

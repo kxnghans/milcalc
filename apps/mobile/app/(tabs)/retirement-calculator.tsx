@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform, Pressable, Keyboard, ImageSourcePropType } from 'react-native';
-import { useRetirementCalculatorState, PayDisplay, SegmentedSelector, PillButton, MASCOT_URLS, useTheme } from '@repo/ui';
+import { useRetirementCalculatorState, PayDisplay, SegmentedSelector, PillButton, MASCOT_URLS, useTheme, NeumorphicInset, DatePickerModal, StyledTextInput } from '@repo/ui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PickerInput from '../../components/PickerInput';
 import CurrencyInput from '../../components/CurrencyInput';
@@ -8,8 +8,13 @@ import NumberInput from '../../components/NumberInput';
 import TwoColumnPicker from '../../components/TwoColumnPicker';
 import MainCalculatorLayout from '../../components/MainCalculatorLayout';
 import { useOverlay } from '../../contexts/OverlayContext';
+import { useProfile } from '../../contexts/ProfileContext';
 
 const retirementMascot = { uri: MASCOT_URLS.RETIREMENT };
+const payMascots = [
+  { uri: MASCOT_URLS.PAY },
+  { uri: MASCOT_URLS.PAY1 },
+];
 
 const componentOptions = [{label: 'Active', value: 'Active'}, {label: 'Reserves', value: 'Reserves'}, {label: 'Guard', value: 'Guard'}];
 const componentRatios = [4, 5, 4];
@@ -38,13 +43,19 @@ const LabelWithHelp = ({ label, contentKey, onPress, style, textStyle, iconColor
 export default function RetirementCalculatorScreen() {
   const { theme } = useTheme();
   const { openHelp, openDocuments } = useOverlay();
+  const { age: profileAge, setProfileData } = useProfile();
+  const [showBirthDatePicker, setShowBirthDatePicker] = React.useState(false);
+  const [showEntryDatePicker, setShowEntryDatePicker] = React.useState(false);
 
   const handleOpenHelp = React.useCallback((key: string, mascot?: ImageSourcePropType) => {
-    openHelp(key, 'retirement', mascot);
+    let helpMascot = mascot || retirementMascot;
+    if (key === 'TSP' && !mascot) {
+      helpMascot = payMascots[Math.floor(Math.random() * payMascots.length)];
+    }
+    openHelp(key, 'retirement', helpMascot);
   }, [openHelp]);
 
   const {
-    // ... (rest of the destructuring remains the same)
     component,
     setComponent,
     retirementSystem,
@@ -116,7 +127,7 @@ export default function RetirementCalculatorScreen() {
     taxes,
     breakInService,
     setBreakInService,
-  } = useRetirementCalculatorState();
+  } = useRetirementCalculatorState(profileAge, (data) => setProfileData(data));
 
   const wasExpandedBeforeKeyboard = React.useRef(false);
   const isExpandedRef = React.useRef(isPayDisplayExpanded);
@@ -231,6 +242,49 @@ export default function RetirementCalculatorScreen() {
     },
     returnColumn: {
         flex: 3,
+    },
+    retirementAgeContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    datePickerColumn: {
+        flex: 1,
+        marginRight: theme.spacing.s,
+    },
+    entryDatePickerColumn: {
+        flex: 1,
+        marginHorizontal: theme.spacing.s,
+    },
+    serviceBreakColumn: {
+        flex: 1,
+        marginLeft: theme.spacing.s,
+    },
+    pressableInput: {
+        paddingVertical: theme.spacing.s,
+        paddingHorizontal: theme.spacing.s,
+    },
+    pressableText: {
+        ...theme.typography.body,
+        color: theme.colors.text,
+        textAlign: 'left',
+    },
+    placeholderText: {
+        color: theme.colors.placeholder,
+        textAlign: 'left',
+    },
+    serviceBreakInput: {
+        textAlign: 'center',
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        padding: 0,
+        borderRadius: 0,
+    },
+    retirementAgeDisplay: {
+        ...theme.typography.subtitle,
+        color: theme.colors.primary,
+        textAlign: 'right',
+        marginTop: 4,
     }
     }), [theme]);
     
@@ -274,16 +328,6 @@ export default function RetirementCalculatorScreen() {
             stateStandardDeduction={stateStandardDeduction}
             isStandardDeductionsExpanded={isPayDisplayExpanded}
             onToggleStandardDeductions={() => setIsPayDisplayExpanded(!isPayDisplayExpanded)}
-            onGetRetirementAge={() => setIsRetirementAgeCalculatorVisible(!isRetirementAgeCalculatorVisible)}
-            isRetirementAgeCalculatorVisible={isRetirementAgeCalculatorVisible}
-            birthDate={birthDate || undefined}
-            setBirthDate={setBirthDate}
-            serviceEntryDate={serviceEntryDate || undefined}
-            setServiceEntryDate={setServiceEntryDate}
-            retirementAge={retirementAge || undefined}
-            component={component}
-            breakInService={breakInService}
-            setBreakInService={setBreakInService}
         />
       }
       inputContent={
@@ -384,6 +428,85 @@ export default function RetirementCalculatorScreen() {
                     <View style={styles.returnColumn}>
                         <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Return</Text>
                         <PickerInput items={tspReturnOptions} selectedValue={tspReturn} onValueChange={(val) => setTspReturn(val as number)} placeholder="Select..." />
+                    </View>
+                </View>
+            )}
+
+            <View style={styles.fieldRow}>
+                <LabelWithHelp 
+                    label="Retirement Age" 
+                    contentKey="Retirement Age" 
+                    onPress={handleOpenHelp}
+                    style={styles.labelRow}
+                    textStyle={styles.labelHelpText}
+                    iconColor={theme.colors.disabled}
+                />
+                <View style={{ alignItems: 'center', marginTop: -theme.spacing.s }}>
+                    <PillButton 
+                        title={isRetirementAgeCalculatorVisible ? "Hide Calculator" : "Calculate Retirement Age"} 
+                        onPress={() => setIsRetirementAgeCalculatorVisible(!isRetirementAgeCalculatorVisible)} 
+                        backgroundColor={isRetirementAgeCalculatorVisible ? theme.colors.disabled : theme.colors.primary}
+                        textStyle={theme.typography.bodybold}
+                    />
+                    {retirementAge !== null && (
+                        <Text style={[styles.retirementAgeDisplay, { marginTop: theme.spacing.xs, textAlign: 'center' }]}>
+                            Estimated Eligibility: {retirementAge} years
+                        </Text>
+                    )}
+                </View>
+            </View>
+
+            {isRetirementAgeCalculatorVisible && (
+                <View style={[styles.row, styles.retirementAgeContainer]}>
+                    <View style={styles.datePickerColumn}>
+                        <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Birth Date</Text>
+                        <Pressable onPress={() => setShowBirthDatePicker(true)}>
+                            <NeumorphicInset containerStyle={{ borderRadius: theme.borderRadius.m }} contentStyle={styles.pressableInput}>
+                                <Text style={[styles.pressableText, !birthDate && styles.placeholderText]}>
+                                    {birthDate ? birthDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Select...'}
+                                </Text>
+                            </NeumorphicInset>
+                        </Pressable>
+                        <DatePickerModal
+                            visible={showBirthDatePicker}
+                            onClose={() => setShowBirthDatePicker(false)}
+                            onDone={(date) => {
+                                if (setBirthDate && date) setBirthDate(date);
+                                setShowBirthDatePicker(false);
+                            }}
+                            value={birthDate || undefined}
+                        />
+                    </View>
+                    <View style={styles.entryDatePickerColumn}>
+                        <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Entry Date</Text>
+                        <Pressable onPress={() => setShowEntryDatePicker(true)}>
+                            <NeumorphicInset containerStyle={{ borderRadius: theme.borderRadius.m }} contentStyle={styles.pressableInput}>
+                                <Text style={[styles.pressableText, !serviceEntryDate && styles.placeholderText]}>
+                                    {serviceEntryDate ? serviceEntryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Select...'}
+                                </Text>
+                            </NeumorphicInset>
+                        </Pressable>
+                        <DatePickerModal
+                            visible={showEntryDatePicker}
+                            onClose={() => setShowEntryDatePicker(false)}
+                            onDone={(date) => {
+                                if (setServiceEntryDate && date) setServiceEntryDate(date);
+                                setShowEntryDatePicker(false);
+                            }}
+                            value={serviceEntryDate || undefined}
+                        />
+                    </View>
+                    <View style={styles.serviceBreakColumn}>
+                        <Text style={[styles.boldLabel, styles.centerLabel, styles.boldLabelNoMargin]}>Break (Yrs)</Text>
+                        <NeumorphicInset containerStyle={{ borderRadius: theme.borderRadius.m }} contentStyle={styles.pressableInput}>
+                            <StyledTextInput
+                                keyboardType="number-pad"
+                                value={breakInService || ''}
+                                onChangeText={setBreakInService}
+                                placeholder="0"
+                                style={[styles.pressableText, styles.serviceBreakInput]}
+                            />
+                        </NeumorphicInset>
                     </View>
                 </View>
             )}

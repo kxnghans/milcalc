@@ -21,11 +21,15 @@ To eliminate "magic numbers" and ensure accessibility, we enforce strict adheren
 ### 2.1 Color Palette
 | Token | Light Value | Dark Value | Intent |
 | :--- | :--- | :--- | :--- |
-| `primary` | `rgba(0, 122, 255, 1)` | `rgba(0, 122, 255, 1)` | Brand / Action |
-| `background` | `rgba(224, 229, 236, 1)` | `rgba(44, 44, 46, 1)` | Main Surface |
-| `text` | `rgba(0, 0, 0, 1)` | `rgba(255, 255, 255, 1)` | Primary Content |
-| `success` | `rgba(28, 176, 87, 1)` | `rgba(52, 199, 89, 1)` | Pass / Positive |
-| `error` | `rgba(236, 52, 40, 1)` | `rgba(255, 59, 48, 1)` | Fail / Critical |
+| `primary` | `#00BFA5` (Teal) | `#00BFA5` (Teal) | Brand / Primary Action |
+| `secondary` | `#0073ed` | `#006ce0` | Secondary Action / Links |
+| `background` | `#bbbfc6` | `#141415` | Main Surface |
+| `surface` | `#e5e5ea` | `#2c2c2f` | Card Surface / Elevated |
+| `text` | `#0065d1` | `#268ffe` | Subtitles / Secondary Text |
+| `primaryText` | `#00251A` | `#00251A` | Primary Content / High Contrast |
+| `success` | `#00C853` | `#00C853` | Pass / Positive |
+| `error` | `#d92f20` | `#d93d2f` | Fail / Critical |
+| `warning` | `#FFD600` | `#FFD600` | Cautionary States |
 
 ### 2.2 Typography
 | Type | Size | Weight |
@@ -81,11 +85,12 @@ To maintain visual parity and avoid artifacts:
 
 ## 4. Banned Practices
 
--   **Banned**: Inline `rgba()` strings. **Use**: `getAlphaColor(hex, alpha)`.
+-   **Banned**: Inline `rgba()` strings or manually manipulating hex opacities. **Mandatory**: Use `getAlphaColor(hex, alpha)` from `ThemeContext`. Hex strings are only allowed as arguments to this utility.
 -   **Banned**: Hardcoded margin/padding values. **Use**: `theme.spacing` tokens.
 -   **Banned**: Direct `Elevation` props on Android. **Use**: Wrapped primitives from `@repo/ui`.
 -   **Banned**: Redundant theme icon logic or manual modal state (`isVisible`, `contentKey`) in screen files. **Use**: `MainCalculatorLayout`, `SmartIconRow`, and global overlay hooks (`useOverlay`).
 -   **Banned**: Unstable `StyleSheet.create` calls inside component bodies or un-memoized context values. **Use**: `useMemo` or move styles outside the component. Use `useCallback` for context setters.
+-   **Banned**: Loading game elements before the session starts in `Biblical Banter`. **Requirement**: Game screens (like `Altar`) must maintain a transparent background with twinkling stars until the game is officially triggered.
 
 ## 5. Composition Primitives
 

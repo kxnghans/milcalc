@@ -4,33 +4,36 @@ import * as SQLite from 'expo-sqlite';
 import { getSyncMetadata, SYNC_METADATA_QUERY_KEYS } from '@repo/utils';
 
 const SYNC_METADATA_STORAGE_KEY = 'last_synced_metadata';
+const LAST_SYNC_TIMESTAMP_KEY = 'last_sync_timestamp';
+const SYNC_TTL_MS = 24 * 60 * 60 * 1000; // 24 Hours
+
 const db = SQLite.openDatabaseSync("milcalc-cache.db");
 
 // Initialize schema immediately to prevent "no such table" errors
 db.execSync("CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, value TEXT)");
 
 // Helper for metadata persistence in SQLite
-const getStoredMetadata = (): Record<string, string> => {
+const getStoredValue = (key: string): string | null => {
   try {
     const result = db.getFirstSync<{ value: string }>(
       "SELECT value FROM cache WHERE key = ?",
-      [SYNC_METADATA_STORAGE_KEY]
+      [key]
     );
-    return result ? JSON.parse(result.value) : {};
+    return result ? result.value : null;
   } catch (e) {
-    console.error("Error reading stored metadata from SQLite:", e);
-    return {};
+    console.error(`Error reading ${key} from SQLite:`, e);
+    return null;
   }
 };
 
-const setStoredMetadata = (metadata: Record<string, string>) => {
+const setStoredValue = (key: string, value: string) => {
   try {
     db.runSync(
       "INSERT OR REPLACE INTO cache (key, value) VALUES (?, ?)",
-      [SYNC_METADATA_STORAGE_KEY, JSON.stringify(metadata)]
+      [key, value]
     );
   } catch (e) {
-    console.error("Error saving stored metadata to SQLite:", e);
+    console.error(`Error saving ${key} to SQLite:`, e);
   }
 };
 
@@ -40,10 +43,20 @@ export const SyncManager: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
+        const lastSyncStr = getStoredValue(LAST_SYNC_TIMESTAMP_KEY);
+        const lastSync = lastSyncStr ? parseInt(lastSyncStr) : 0;
+        const now = Date.now();
+
+        if (now - lastSync < SYNC_TTL_MS) {
+          console.log(`Sync skipped: TTL active. Next sync in ${((SYNC_TTL_MS - (now - lastSync)) / 3600000).toFixed(2)} hours.`);
+          return;
+        }
+
         const cloudMetadata = await getSyncMetadata();
         if (!cloudMetadata) return;
 
-        const storedMetadata = getStoredMetadata();
+        const storedMetadataStr = getStoredValue(SYNC_METADATA_STORAGE_KEY);
+        const storedMetadata = storedMetadataStr ? JSON.parse(storedMetadataStr) : {};
         let hasUpdates = false;
         const newStoredMetadata = { ...storedMetadata };
 
@@ -56,11 +69,7 @@ export const SyncManager: React.FC<{ children: React.ReactNode }> = ({ children 
             // Found an update!
             const queryKeys = SYNC_METADATA_QUERY_KEYS[tableName];
             if (queryKeys) {
-              if (tableName === 'pt_help_details') {
-                console.log('LOG Invalidating query keys for table: pt_help_details');
-              } else {
-                console.log(`Invalidating query keys for table: ${tableName}`);
-              }
+              console.log(`Invalidating query keys for table: ${tableName}`);
               queryKeys.forEach(key => queryClient.invalidateQueries({ queryKey: [key] }));
               hasUpdates = true;
             }
@@ -69,8 +78,11 @@ export const SyncManager: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         if (hasUpdates) {
-          setStoredMetadata(newStoredMetadata);
+          setStoredValue(SYNC_METADATA_STORAGE_KEY, JSON.stringify(newStoredMetadata));
         }
+        
+        // Update the timestamp even if no data changed, to respect the TTL
+        setStoredValue(LAST_SYNC_TIMESTAMP_KEY, now.toString());
       } catch (error) {
         console.error('Error during background sync check:', error);
       }
