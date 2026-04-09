@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { Alert } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from './useDebounce';
 import { getBasePay, getBasRate, getBahRate, getMhaData, getFederalTaxData, getStateTaxData, calculatePay, getMaxFederalTaxYear, getMaxStateTaxYear, getDisabilityData, getReserveDrillPay, calculateDisabilityIncome, DisabilityPercentage, DependentStatus } from '@repo/utils';
@@ -33,7 +34,11 @@ const enlistedRanks = [
   { label: 'E-7', value: 'E-7' }, { label: 'E-8', value: 'E-8' }, { label: 'E-9', value: 'E-9' },
 ];
 
-export const usePayCalculatorState = () => {
+export const usePayCalculatorState = (
+  initialAge: string = '',
+  initialGender: string = 'male',
+  onSaveToProfile?: (data: { age?: string; gender?: string }) => void
+) => {
   // --- Raw Input State ---
   const [status, setStatus] = useState('Enlisted');
   const [rank, setRank] = useState<string | null>(null);
@@ -47,6 +52,62 @@ export const usePayCalculatorState = () => {
   const [disabilityPercentage, setDisabilityPercentage] = useState<DisabilityPercentage>('0%');
   const [paySource, setPaySource] = useState('Military');
   const [vaDisabilityPay, setVaDisabilityPay] = useState(0);
+
+  // Demographic state for consistency across calculators
+  const [age, setAgeState] = useState('');
+  const [gender, setGenderState] = useState('male');
+
+  const hasModifiedAge = useRef(false);
+  const hasModifiedGender = useRef(false);
+
+  // --- Hydration logic ---
+  useEffect(() => {
+    if (initialAge && !hasModifiedAge.current && age === '') {
+      setAgeState(initialAge);
+    }
+  }, [initialAge, age]);
+
+  useEffect(() => {
+    if (initialGender && !hasModifiedGender.current && gender !== initialGender) {
+      setGenderState(initialGender);
+    }
+  }, [initialGender, gender]);
+
+  /**
+   * Triggers a native alert asking if the user wants to save the demographic change to their profile.
+   */
+  const promptSaveToProfile = (type: 'age' | 'gender', value: string) => {
+    if (!onSaveToProfile) return;
+
+    const isProfileEmpty = type === 'age' ? !initialAge : false;
+
+    if (isProfileEmpty) {
+      Alert.alert(
+        "Save to Profile?",
+        `Would you like to save this ${type} to your permanent profile?`,
+        [
+          { text: "Not Now", style: "cancel" },
+          { 
+            text: "Save", 
+            onPress: () => onSaveToProfile({ [type]: value })
+          }
+        ]
+      );
+    }
+  };
+
+  const setAge = (newAge: string) => {
+    hasModifiedAge.current = true;
+    setAgeState(newAge);
+    if (newAge.length >= 2 && !initialAge) {
+      promptSaveToProfile('age', newAge);
+    }
+  };
+
+  const setGender = (newGender: string) => {
+    hasModifiedGender.current = true;
+    setGenderState(newGender);
+  };
 
   // --- User Input Income/Deduction States ---
   const [isIncomeExpanded, setIncomeExpanded] = useState(false);
@@ -287,8 +348,9 @@ export const usePayCalculatorState = () => {
     if (mha === 'initial') return "Select a state";
     if (mha === 'ON_BASE') return "ON BASE";
     if (!mha || !mhaData) return "...";
-    for (const state in mhaData) {
-        const mhaObject = mhaData[state].find((m: { label: string; value: string }) => m.value === mha);
+    for (const stateCode in mhaData) {
+        const mhaList = mhaData[stateCode] as { label: string; value: string }[];
+        const mhaObject = mhaList.find((m) => m.value === mha);
         if (mhaObject) {
             return mhaObject.label;
         }
@@ -377,9 +439,14 @@ export const usePayCalculatorState = () => {
     setDeductions({ sgli: '', tsp: '', overrideFedTax: '', overrideStateTax: '', overrideFicaTax: '' });
     setAdditionalDeductions([{ name: '', amount: '' }]);
     setIsTaxOverride(false);
+    setAgeState(initialAge);
+    setGenderState(initialGender);
+    hasModifiedAge.current = false;
+    hasModifiedGender.current = false;
   };
 
   return {
+    age, setAge, gender, setGender,
     status, setStatus, rank, setRank: setRankAndStatus, yearsOfService, setYearsOfService, mha, setMha, handleMhaChange, bahDependencyStatus, setBahDependencyStatus, vaDependencyStatus, filingStatus, setFilingStatus, state, setState, component, setComponent, disabilityPercentage, setDisabilityPercentage, disabilityData, disabilityError, paySource, vaDisabilityPay, mhaData, mhaError, filteredRanks, isTaxOverride, setIsTaxOverride, basePay, bah, bas, isLoading, isIncomeExpanded, setIncomeExpanded, specialPays, setSpecialPays, additionalIncomes, setAdditionalIncomes, isDeductionsExpanded, setDeductionsExpanded, isStandardDeductionsExpanded, setIsStandardDeductionsExpanded, deductions, setDeductions, additionalDeductions, setAdditionalDeductions, calculatedTaxes, federalTaxData, stateTaxData, federalTaxYear, stateTaxYear, totalIncome, totalDeductions, monthlyPay, annualPay, incomeForDisplay, deductionsForDisplay, showAddIncomeButton, showAddDeductionButton, mhaDisplayName, disabilityPercentageItems, disabilityPickerData, disabilityDisplayName, handleDisabilityChange, resetState,
     federalStandardDeduction: calculatedTaxes.federalStandardDeduction,
     stateStandardDeduction: calculatedTaxes.stateStandardDeduction

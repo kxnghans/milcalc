@@ -160,6 +160,7 @@ export default function CoreComponent({
                         style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
+                        testID="core-situps-input"
                     />
                 )}
                 {coreComponent === "cross_leg_reverse_crunch_2min" && (
@@ -170,6 +171,7 @@ export default function CoreComponent({
                         style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
+                        testID="core-crunches-input"
                     />
                 )}
                 {coreComponent === "forearm_plank_time" && (
@@ -183,6 +185,8 @@ export default function CoreComponent({
                         style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
+                        minutesTestID="core-plank-min-input"
+                        secondsTestID="core-plank-sec-input"
                     />
                 )}
             </View>

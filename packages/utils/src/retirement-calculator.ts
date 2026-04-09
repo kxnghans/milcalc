@@ -17,7 +17,9 @@ export const calculatePension = async (
   high3PayGrade3: string,
   yearsOfService: number,
   points: number,
-  goodYears: number
+  goodYears: number,
+  vaDisabilityPay: number = 0,
+  disabilityPercentage: number = 0
 ): Promise<number> => {
   if (component === 'Active') {
     if (yearsOfService < 20) {
@@ -45,14 +47,26 @@ export const calculatePension = async (
 
   const high3 = (pay1 + pay2 + pay3) / 3;
 
+  let grossPension = 0;
   if (component === 'Active') {
     const multiplier = retirementSystem === 'High 3' ? 0.025 : 0.02;
-    return high3 * yearsOfService * multiplier;
+    grossPension = high3 * yearsOfService * multiplier;
   } else {
-    const equivalentYears = points / 360;
+    // Reserve/Guard: Points are capped at 130 per year for pension purposes (Title 10 U.S.C. § 12733)
+    const cappedPoints = Math.min(points, goodYears * 130);
+    const equivalentYears = cappedPoints / 360;
     const multiplier = retirementSystem === 'High 3' ? 0.025 : 0.02;
-    return high3 * equivalentYears * multiplier;
+    grossPension = high3 * equivalentYears * multiplier;
   }
+
+  // Statutory VA Offset (CRDP Rule):
+  // If disability < 50%, retirement pay is reduced dollar-for-dollar by disability pay.
+  // If disability >= 50%, the user receives BOTH (CRDP).
+  if (disabilityPercentage < 50) {
+    return Math.max(0, grossPension - vaDisabilityPay);
+  }
+
+  return grossPension;
 };
 
 
@@ -79,18 +93,33 @@ export const calculateTsp = (
 
   if (retirementSystem === 'BRS') {
     const automaticContribution = avgSalary * 0.01;
-    const matchingContribution = Math.min(avgSalary * 0.04, userContribution);
+    
+    // Statutory Tiered Matching: 100% on first 3%, 50% on next 2%
+    const userPct = contributionPercentage / 100;
+    let matchPct = 0;
+    if (userPct > 0) {
+      matchPct += Math.min(userPct, 0.03); // 100% match on first 3%
+      if (userPct > 0.03) {
+        matchPct += Math.min(userPct - 0.03, 0.02) * 0.5; // 50% match on next 2%
+      }
+    }
+    
+    const matchingContribution = avgSalary * matchPct;
     employerContribution = automaticContribution + matchingContribution;
   }
 
   const totalAnnualContribution = userContribution + employerContribution;
-  const rate = tspReturn / 100;
+  const monthlyContribution = totalAnnualContribution / 12;
+  const annualRate = tspReturn / 100;
+  const monthlyRate = annualRate / 12;
+  const totalMonths = years * 12;
 
-  if (rate === 0) {
+  if (annualRate === 0) {
     return totalAnnualContribution * years;
   }
 
-  const futureValue = totalAnnualContribution * ((Math.pow(1 + rate, years) - 1) / rate);
+  // Monthly Compounding Formula: FV = P * [((1 + r)^n - 1) / r]
+  const futureValue = monthlyContribution * ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate);
   return futureValue;
 };
 

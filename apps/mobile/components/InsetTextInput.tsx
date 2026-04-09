@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { TextInput, TextInputProps, StyleSheet, StyleProp, ViewStyle, TextStyle, View } from 'react-native';
+import React, { useMemo, useRef, useImperativeHandle } from 'react';
+import { TextInput, TextInputProps, StyleSheet, StyleProp, ViewStyle, TextStyle, View, TouchableWithoutFeedback } from 'react-native';
 import { NeumorphicInset, StyledTextInput, useTheme } from '@repo/ui';
 
 interface InsetTextInputProps extends Omit<TextInputProps, 'style'> {
@@ -12,6 +12,9 @@ interface InsetTextInputProps extends Omit<TextInputProps, 'style'> {
 
 const InsetTextInput = React.forwardRef<TextInput, InsetTextInputProps>(({ style, inputStyle, children, leftContent, rightContent, ...props }, ref) => {
   const { theme } = useTheme();
+  const inputRef = useRef<TextInput>(null);
+
+  useImperativeHandle(ref, () => inputRef.current!);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -19,7 +22,7 @@ const InsetTextInput = React.forwardRef<TextInput, InsetTextInputProps>(({ style
       alignItems: 'center',
       paddingLeft: theme.spacing.s,
       paddingRight: theme.spacing.s,
-      paddingVertical: theme.spacing.s, // Reverted to 's' padding as per instruction
+      paddingVertical: theme.spacing.s,
     },
     input: {
       borderWidth: 0,
@@ -51,30 +54,38 @@ const InsetTextInput = React.forwardRef<TextInput, InsetTextInputProps>(({ style
     },
   }), [theme, leftContent]);
 
+  const handlePress = () => {
+    inputRef.current?.focus();
+  };
+
   return (
     <NeumorphicInset
       containerStyle={style}
-      contentStyle={styles.container}
+      contentStyle={{ padding: 0 }}
     >
-      {leftContent ? (
-        <View style={styles.leftContentContainer}>
-          {leftContent}
-        </View>
-      ) : <View style={styles.leftContentContainer} />}
+      <TouchableWithoutFeedback onPress={handlePress}>
+        <View style={styles.container}>
+          {leftContent ? (
+            <View style={styles.leftContentContainer}>
+              {leftContent}
+            </View>
+          ) : <View style={styles.leftContentContainer} />}
 
-      <View style={styles.rightGroup}>
-        <StyledTextInput
-          ref={ref}
-          {...props}
-          style={[styles.input, inputStyle]}
-        />
-        {rightContent && (
-          <View style={styles.rightContentContainer}>
-            {rightContent}
+          <View style={styles.rightGroup}>
+            <StyledTextInput
+              ref={inputRef}
+              {...props}
+              style={[styles.input, inputStyle]}
+            />
+            {rightContent && (
+              <View style={styles.rightContentContainer}>
+                {rightContent}
+              </View>
+            )}
           </View>
-        )}
-      </View>
-      {children}
+          {children}
+        </View>
+      </TouchableWithoutFeedback>
     </NeumorphicInset>
   );
 });

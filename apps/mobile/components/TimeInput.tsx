@@ -32,6 +32,10 @@ interface TimeInputProps {
   onToggleExempt?: () => void;
   /** Whether the component is currently exempt. When true, the input is non-editable and shows 'xx'. */
   isExempt?: boolean;
+  /** Optional testID for minutes input */
+  minutesTestID?: string;
+  /** Optional testID for seconds input */
+  secondsTestID?: string;
 }
 
 /**
@@ -50,6 +54,8 @@ const TimeInput: React.FC<TimeInputProps> = ({
   secondsPlaceholder = "ss",
   onToggleExempt,
   isExempt,
+  minutesTestID,
+  secondsTestID,
 }) => {
   const { theme } = useTheme();
   // A ref to the seconds input field to allow for programmatic focusing.
@@ -161,6 +167,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
               style={styles.input}
               editable={!isExempt}
               selectTextOnFocus={true}
+              testID={minutesTestID}
             />
             <Text style={styles.separator}>:</Text>
             <StyledTextInput
@@ -174,6 +181,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
               style={styles.input}
               editable={!isExempt}
               selectTextOnFocus={true}
+              testID={secondsTestID}
             />
           </View>
           {adjustment && (

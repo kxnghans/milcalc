@@ -69,5 +69,13 @@ Thumbs.db
 packages/utils/debug.ts
 packages/utils/*.txt
 
+# Root-level temporary artifacts (generated during dev sessions)
+scratch/
+uploadcsv/
+*.txt
+
+# Maestro E2E tests (not yet committed)
+apps/mobile/maestro/
+
 # Agent configuration
 .gemini/

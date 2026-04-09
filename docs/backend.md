@@ -12,12 +12,13 @@ MilCalc is designed for high-reliability in disconnected environments. The backe
 
 ## 2. Connection & Sync Strategy
 
-MilCalc utilizes the `@supabase/supabase-js` client (v2.74+) for all data orchestration. To minimize battery drain and data usage, the application avoids frequent polling of large standards tables through a lightweight "Metadata Pulse" system.
+MilCalc utilizes the `@supabase/supabase-js` client (v2.74+) for all data orchestration. To minimize battery drain and data usage, the application avoids frequent polling of large standards tables through a lightweight "Metadata Pulse" system with a **24-hour TTL cache**.
 
-1.  **Metadata Tracking**: A `sync_metadata` table on Supabase tracks the `last_updated_at` timestamp for each logical table (e.g., `pt_standards`, `pay_scales`).
-2.  **The Pulse**: Upon app launch or foregrounding, the `SyncManager` performs a single, small fetch of the `sync_metadata` table.
-3.  **Invalidation & Hydration**: If the local metadata timestamp is older than the backend timestamp, the `SyncManager` initiates a background fetch for only the affected tables, updating the local SQLite cache.
-4.  **Operational Flow**: Supabase ↔ `sync_metadata` ↔ `SyncManager` ↔ `expo-sqlite`.
+1.  **TTL Caching**: The `SyncManager` stores a `last_sync_timestamp` in the local SQLite database. It will only proceed with a network check if more than 24 hours have passed since the last successful sync.
+2.  **Metadata Tracking**: A `sync_metadata` table on Supabase tracks the `last_updated_at` timestamp for each logical table (e.g., `pt_standards`, `pay_scales`).
+3.  **The Pulse**: Upon app launch (and if the TTL has expired), the `SyncManager` performs a single, small fetch of the `sync_metadata` table.
+4.  **Invalidation & Hydration**: If the local metadata timestamp is older than the backend timestamp, the `SyncManager` initiates a background fetch for only the affected tables, updating the local SQLite cache.
+5.  **Operational Flow**: Supabase ↔ `sync_metadata` ↔ `SyncManager` (TTL Gate) ↔ `expo-sqlite`.
 
 ## 3. Data Tiering
 
@@ -25,20 +26,20 @@ We categorize data into three tiers based on volatility and access patterns:
 
 | Tier | Example | Storage | Sync Frequency |
 | :--- | :--- | :--- | :--- |
-| **Static Standards** | PT Scoring, Pay Scales | SQLite / `seed-data.json` | First Launch / On Change |
-| **Dynamic Metadata** | `sync_metadata` | SQLite / Memory | Every Launch |
+| **Static Standards** | PT Scoring, Pay Scales | SQLite / `seed-data.json` | First Launch / On Change (24hr TTL) |
+| **Dynamic Metadata** | `sync_metadata` | SQLite / Memory | Every Launch (Gated by 24hr TTL) |
 | **User State** | Current Inputs, Best Scores | SQLite (Smart Cache) | Never (Local Only) |
 
 ## 4. Database Schema
 
-### 4.1 Fitness Standards (2025/2026 Architecture)
-The 2025/2026 PT Architecture simplifies the schema into a **4-table model** for easier maintenance and human auditability. Performance values (e.g., `"13:25"`, `"<= 0.49"`, `"45-48"`) are stored as **Text** to precisely match source DAFMAN 36-2905 PDFs.
+### 4.1 Fitness Standards (2026 Architecture)
+The 2026 PT Architecture simplifies the schema into a **4-table model** for easier maintenance and human auditability. Performance values (e.g., `"13:25"`, `"<= 0.49"`, `"45-48"`) are stored as **Text** to precisely match source DAFMAN 36-2905 PDFs.
 
 -   **`pt_scoring_standards`**: Unified lookup for all exercise points. Includes `gender`, `age_group`, `exercise_type`, `performance`, `points`, and `health_risk_category`.
 -   **`pt_pass_fail_standards`**: Defines the minimum passing thresholds for all events by `gender` and `age_group`.
--   **`pt_altitude_corrections`**: Performance offsets (Run subtractions / HAMR additions) for high-elevation environments.
--   **`pt_altitude_walk_thresholds`**: Demographic-specific max times for the 2km Walk at altitude, indexed by `sex` and `altitude_group`.
--   **Parser Intelligence**: The `@repo/utils` logic engine features a `parsePerformanceRange` utility that dynamically parses ranges (`"45-48"`), inequalities (`">= 50"`), and exact values from the text performance columns.
+-   **`pt_altitude_corrections`**: Performance offsets for high-elevation environments. For the 2.0-mile run, this now supports granular **time-range brackets** rather than single-value offsets, ensuring statutory accuracy across all performance levels.
+-   **`pt_altitude_walk_thresholds`**: Demographic-specific max times for the 2km Walk at altitude, indexed by `sex`, `age_range`, and `altitude_group` (covering 4 altitude groups up to >= 6600ft).
+-   **Optimized Parsing**: The `pt-supabase-api.ts` layer now **pre-parses** the text-based performance strings into numeric `performanceRange: [min, max]` arrays. This offloads expensive string manipulation from the client, ensuring the real-time scoring engine only performs highly optimized numeric comparisons.
 
 ### 4.2 Financial Logic (Pay & Retirement)
 The financial system uses a mix of the most recent available scales. Versioning is handled at the table-name level to allow for historical comparisons.
@@ -47,7 +48,7 @@ The financial system uses a mix of the most recent available scales. Versioning 
 -   **`reserve_drill_pay`**: Prorated pay tables for Guard and Reserve drills, calculated as 1/30th of monthly base pay per drill period.
 -   **`bah_rates_2026`**: Unified housing allowance lookup reflecting the 2026 rate cycle. Includes a `has_dependents` boolean and columns for all pay grades.
 -   **`bas_rates_2025`**: Subsistence allowance lookup.
--   **`federal_tax_data` / `state_tax_data`**: Tax brackets and standard deductions (with specific overrides for CA logic).
+-   **`federal_tax_data` / `state_tax_data`**: Tax brackets and standard deductions. The API layer sanitizes known data errors (e.g., incorrect CA tax rates) before sending them to the client.
 -   **`veterans_disability_compensation_2025`**: Monthly VA rates for service-connected disabilities.
 
 

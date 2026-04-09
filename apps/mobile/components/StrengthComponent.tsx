@@ -116,6 +116,7 @@ export default function StrengthComponent({
                     style={styles.inputMargin}
                     onToggleExempt={toggleExempt}
                     isExempt={isExempt}
+                    testID="strength-input"
                 />
             </View>
         </View>

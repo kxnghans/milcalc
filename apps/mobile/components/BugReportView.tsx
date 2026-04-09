@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Alert, Platform } from 'react-native';
-import { 
-  useTheme, 
-  Icon, 
-  ICONS, 
-  ICON_SETS, 
-  NeumorphicInset, 
-  PillButton, 
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import {
+  useTheme,
+  Icon,
+  ICONS,
+  ICON_SETS,
+  NeumorphicInset,
+  PillButton,
   SegmentedSelector,
   Card,
   getAlphaColor
@@ -17,6 +18,7 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import { submitBugReport } from '@repo/utils';
 import FormField from './FormField';
+import DismissKeyboardView from './DismissKeyboardView';
 
 type BugCategory = 'UI/UX' | 'Calculation' | 'Sync' | 'Other';
 
@@ -24,7 +26,7 @@ export const BugReportView: React.FC = () => {
   const { theme } = useTheme();
   const { closeOverlay, setOverlayFooter } = useOverlay();
   const { firstName, lastName, email, phone, accountType } = useProfile();
-  
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<BugCategory>('UI/UX');
@@ -33,9 +35,13 @@ export const BugReportView: React.FC = () => {
   const isPremium = accountType === 'premium';
 
   const styles = useMemo(() => StyleSheet.create({
-    viewContainer: {
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
       paddingHorizontal: 12, // Match MainCalculatorLayout content padding
       paddingTop: theme.spacing.s,
+      paddingBottom: theme.spacing.xl * 2, // Increased to ensure content isn't hidden behind sticky footer
     },
     headerCard: {
       // Individually override NeumorphicOutset default margins
@@ -123,7 +129,7 @@ export const BugReportView: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const metadata = `
 --- User Profile ---
@@ -188,88 +194,97 @@ Timestamp: ${new Date().toISOString()}
   }, [setOverlayFooter]);
 
   return (
-    <View style={styles.viewContainer}>
-      {/* Header Card */}
-      <Card containerStyle={styles.headerCard}>
-        <View style={styles.headerCardContent}>
-          <View style={styles.headerIconContainer}>
-            <NeumorphicInset 
+    <KeyboardAwareScrollView
+      style={styles.scrollView}
+      contentContainerStyle={styles.scrollContent}
+      enableOnAndroid
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+      enableAutomaticScroll={true}
+    >
+      <DismissKeyboardView>
+        {/* Header Card */}
+        <Card containerStyle={styles.headerCard}>
+          <View style={styles.headerCardContent}>
+            <View style={styles.headerIconContainer}>
+              <NeumorphicInset
                 containerStyle={[styles.headerIconBg, { backgroundColor: getAlphaColor(theme.colors.error, 0.1), borderRadius: 30 }]}
-            >
-              <Icon 
-                name={ICONS.BUG} 
-                size={36} 
-                color={theme.colors.error} 
-                iconSet={ICON_SETS.MATERIAL_COMMUNITY} 
-              />
-            </NeumorphicInset>
-          </View>
-          <Text style={[theme.typography.title, { 
-            color: theme.colors.text, 
-            textAlign: 'center',
-            textShadowColor: theme.colors.neumorphic.outset.shadow,
-            textShadowRadius: 0.25,
-            textShadowOffset: { width: 0, height: 0 }
-          }]}>SUBMIT FEEDBACK</Text>
-          
-          {isPremium ? (
-            <View style={styles.priorityBadge}>
-              <Icon name="shield-star" size={16} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
-              <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700', marginLeft: 6 }]}>
-                PRIORITY SUPPORT ACTIVE
-              </Text>
+              >
+                <Icon
+                  name={ICONS.BUG}
+                  size={36}
+                  color={theme.colors.error}
+                  iconSet={ICON_SETS.MATERIAL_COMMUNITY}
+                />
+              </NeumorphicInset>
             </View>
-          ) : (
-            <Text style={[theme.typography.body, { color: theme.colors.text, textAlign: 'center', marginTop: theme.spacing.xs, opacity: 0.7 }]}>
-              Found a calculation error or a glitch? Let us know and we&apos;ll fix it.
-            </Text>
-          )}
-        </View>
-      </Card>
+            <Text style={[theme.typography.title, {
+              color: theme.colors.text,
+              textAlign: 'center',
+              textShadowColor: theme.colors.neumorphic.outset.shadow,
+              textShadowRadius: 0.25,
+              textShadowOffset: { width: 0, height: 0 }
+            }]}>SUBMIT FEEDBACK</Text>
 
-      {/* Form Sections */}
-      <View style={styles.formContainer}>
-        {/* Summary Input */}
-        <FormField
-          label="SUMMARY"
-          icon="text-short"
-          iconOnLabel
-          placeholder="Briefly describe the issue"
-          value={title}
-          onChangeText={setTitle}
-          maxLength={50}
-          labelStyle={{ paddingTop: theme.spacing.m }}
-        />
-
-        {/* Category Selector */}
-        <View style={styles.formSection}>
-          <View style={styles.labelRow}>
-            <Icon name="tag-outline" size={18} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
-            <Text style={[theme.typography.bodybold, { color: theme.colors.text, marginLeft: theme.spacing.s }]}>CATEGORY</Text>
+            {isPremium ? (
+              <View style={styles.priorityBadge}>
+                <Icon name="shield-star" size={16} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
+                <Text style={[theme.typography.caption, { color: theme.colors.primary, fontWeight: '700', marginLeft: 6 }]}>
+                  PRIORITY SUPPORT ACTIVE
+                </Text>
+              </View>
+            ) : (
+              <Text style={[theme.typography.body, { color: theme.colors.text, textAlign: 'center', marginTop: theme.spacing.xs, opacity: 0.7 }]}>
+                Found a calculation error or a glitch? Let us know and we&apos;ll fix it.
+              </Text>
+            )}
           </View>
-          <SegmentedSelector
-            options={categories}
-            selectedValues={[category]}
-            onValueChange={(val) => setCategory(val as BugCategory)}
-            style={styles.selector}
+        </Card>
+
+        {/* Form Sections */}
+        <View style={styles.formContainer}>
+          {/* Summary Input */}
+          <FormField
+            label="SUMMARY"
+            icon="text-short"
+            iconOnLabel
+            placeholder="Briefly describe the issue"
+            value={title}
+            onChangeText={setTitle}
+            maxLength={50}
+            labelStyle={{ paddingTop: theme.spacing.m }}
+          />
+
+          {/* Category Selector */}
+          <View style={styles.formSection}>
+            <View style={styles.labelRow}>
+              <Icon name="tag-outline" size={18} color={theme.colors.primary} iconSet={ICON_SETS.MATERIAL_COMMUNITY} />
+              <Text style={[theme.typography.bodybold, { color: theme.colors.text, marginLeft: theme.spacing.s }]}>CATEGORY</Text>
+            </View>
+            <SegmentedSelector
+              options={categories}
+              selectedValues={[category]}
+              onValueChange={(val) => setCategory(val as BugCategory)}
+              style={styles.selector}
+            />
+          </View>
+
+          {/* Description Input */}
+          <FormField
+            label="DETAILS"
+            icon="message-text-outline"
+            iconOnLabel
+            placeholder="Steps to reproduce or calculation details..."
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={6}
+            inputStyle={styles.textArea}
+            insetStyle={styles.textAreaWrapper}
+            containerStyle={{ marginBottom: theme.spacing.l }}
           />
         </View>
-
-        {/* Description Input */}
-        <FormField
-          label="DETAILS"
-          icon="message-text-outline"
-          iconOnLabel
-          placeholder="Steps to reproduce or calculation details..."
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          numberOfLines={6}
-          inputStyle={styles.textArea}
-          insetStyle={styles.textAreaWrapper}
-          containerStyle={{ marginBottom: theme.spacing.l }}
-        />
-      </View>
-    </View>
+      </DismissKeyboardView>
+    </KeyboardAwareScrollView>
   );
 };

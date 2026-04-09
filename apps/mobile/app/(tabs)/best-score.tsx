@@ -223,9 +223,10 @@ export default function BestScoreScreen() {
     waist, setWaist,
     heightFeet, setHeightFeet,
     heightInches, setHeightInches,
-    isHeightInInches, setIsHeightInInches
+    isHeightInInches, setIsHeightInInches,
+    calculatedWhtr
   } = useDemographicsState();
-  const { inputs, outputs, exemptions } = useBestScoreState(age, gender, altitudeGroup);
+  const { inputs, outputs, exemptions } = useBestScoreState(age, gender, altitudeGroup, calculatedWhtr);
   const { isLoading } = outputs;
 
   const styles = React.useMemo(() => StyleSheet.create({
@@ -269,7 +270,14 @@ export default function BestScoreScreen() {
       actions={['home', 'document', 'theme']}
       onDocument={() => openDocuments('PT')}
       summaryContent={
-        <ScoreDisplay score={{ totalScore: outputs.bestScore, isPass: outputs.bestScore >= 75 }} showBreakdown={false} />
+        <ScoreDisplay 
+          score={{ 
+            totalScore: outputs.bestScore, 
+            isPass: outputs.bestScore >= 75,
+            ...outputs.componentScores
+          }} 
+          showBreakdown={true} 
+        />
       }
       inputContent={
         <>

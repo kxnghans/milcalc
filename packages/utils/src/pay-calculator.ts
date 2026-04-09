@@ -25,7 +25,12 @@ export const calculatePay = (
 ) => {
   const { basePay, bah, bas, specialPays, additionalIncomes, filingStatus, additionalDeductions, state } = inputs;
 
-  const monthlyBasePay = basePay || 0;
+  const monthlyBasePayRaw = basePay || 0;
+  // Statutory Senior Officer Pay Cap (Executive Level II)
+  // For 2024, the cap is $18,444.17 monthly ($221,330 annually)
+  const LEVEL_II_CAP = 18444.17;
+  const monthlyBasePay = monthlyBasePayRaw > LEVEL_II_CAP ? LEVEL_II_CAP : monthlyBasePayRaw;
+
   const monthlyBah = bah || 0;
   const monthlyBas = bas || 0;
   const monthlySpecialPays = Object.values(specialPays).reduce((a: number, b: string | number) => a + parseCurrency(b), 0);
@@ -50,9 +55,9 @@ export const calculatePay = (
   const nonTaxableIncome = annualBah + annualBas;
   const totalIncome = taxableIncome + nonTaxableIncome;
 
-  // 2. Calculate FICA tax based on taxable income
+  // 2. Calculate FICA tax based on taxable income (Military Rule: Base Pay only)
   const FICA_RATE = 0.0765; // 6.2% Social Security + 1.45% Medicare
-  const ficaTax = taxableIncome * FICA_RATE;
+  const ficaTax = annualBasePay * FICA_RATE;
 
   // 3. Calculate Federal and State tax based on taxable income
   const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
@@ -152,12 +157,7 @@ const calculateStateTax = (
   // Reconstruct brackets from the flawed data structure
   const brackets = rawBrackets.map((bracket, index) => {
     const nextBracket = rawBrackets[index + 1];
-    let rate = bracket.tax_rate || 0;
-
-    // Hardcoded fix for incorrect tax rate in the data for CA's first bracket
-    if (state === 'CA' && bracket.income_bracket_low === 0 && rate === 1.0) {
-      rate = 0.01;
-    }
+    const rate = bracket.tax_rate || 0;
 
     return {
       min: bracket.income_bracket_low || 0,

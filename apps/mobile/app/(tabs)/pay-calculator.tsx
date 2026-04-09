@@ -5,6 +5,7 @@ import { usePayCalculatorState, PayDisplay, useTheme, MASCOT_URLS } from '@repo/
 import Divider from '../../components/Divider';
 import MainCalculatorLayout from '../../components/MainCalculatorLayout';
 import { useOverlay } from '../../contexts/OverlayContext';
+import { useProfile, ProfileData } from '../../contexts/ProfileContext';
 
 // Extracted Components
 import PayDemographics from '../../components/PayCalculator/PayDemographics';
@@ -14,16 +15,14 @@ import PayDeductions from '../../components/PayCalculator/PayDeductions';
 const payMascots = [
   { uri: MASCOT_URLS.PAY },
   { uri: MASCOT_URLS.PAY1 },
-  { uri: MASCOT_URLS.RETIREMENT },
 ];
 
 export default function PayCalculatorScreen() {
   const { theme } = useTheme();
   const { openHelp, openDocuments } = useOverlay();
-  const [payMascotIndex, setPayMascotIndex] = React.useState(0);
+  const { age: profileAge, gender: profileGender, setProfileData } = useProfile();
 
   const {
-    // ... (rest of destructuring)
     // Display Values
     annualPay,
     monthlyPay,
@@ -66,13 +65,12 @@ export default function PayCalculatorScreen() {
     paySource,
     disabilityPickerData,
     disabilityPercentageItems,
-  } = usePayCalculatorState();
+  } = usePayCalculatorState(profileAge, profileGender, (data) => setProfileData(data as Partial<ProfileData>));
 
   const getNextPayMascot = React.useCallback(() => {
-    const mascot = payMascots[payMascotIndex];
-    setPayMascotIndex((prevIndex) => (prevIndex + 1) % payMascots.length);
-    return mascot;
-  }, [payMascotIndex]);
+    const randomIndex = Math.floor(Math.random() * payMascots.length);
+    return payMascots[randomIndex];
+  }, []);
 
   const handleOpenHelp = React.useCallback((key: string, mascot?: ImageSourcePropType) => {
     openHelp(key, 'pay', mascot || getNextPayMascot());

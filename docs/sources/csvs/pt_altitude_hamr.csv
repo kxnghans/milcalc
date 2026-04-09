@@ -1,4 +1,5 @@
 altitude_group,altitude_range,shuttles_to_add
-Group 1,3000-5249ft,3
-Group 2,5250-6999ft,6
-Group 3,>=7000ft,9
+Group 1,5250-5499ft,1
+Group 2,5500-5999ft,2
+Group 3,6000-6599ft,3
+Group 4,>=6600ft,4

@@ -59,13 +59,15 @@ This is a **pure function** that performs the heavy lifting for the financial si
 The function works as follows:
 
 1.  **Income Categorization**: Distinguishes between taxable (Base Pay, Special Pays, Additional Incomes) and non-taxable (BAH, BAS) components.
-2.  **FICA Taxes**: Calculates Social Security and Medicare taxes at a fixed 7.65% rate on taxable income.
-3.  **Income Tax Simulation**: Applies federal and state tax brackets and standard deductions. It supports manual **Tax Overrides** for users who want 100% precision against their actual paychecks.
+2.  **FICA Taxes**: Calculates Social Security and Medicare taxes at a fixed 7.65% rate strictly on **Base Pay**, ensuring compliance with military pay regulations.
+3.  **Income Tax Simulation**: Applies federal and state tax brackets and **2026 standard deductions** ($16,100 for Single, $32,200 for Married Filing Jointly). It supports manual **Tax Overrides** for users who want 100% precision against their actual paychecks.
 4.  **Deduction Summation**: Aggregates FICA, Federal, State, and user-defined deductions (SGLI, TSP, etc.) to determine the final take-home pay.
 
-#### VA Disability Integration (The "Offset" Logic)
-The calculator includes a **VA Disability** picker. When a disability rating is selected, the state hook fetches the tax-free VA monthly payment. The logic engine compares the military net pay against the VA amount and identifies the **Optimal Income** source, as a member generally cannot receive both for the same period.
+#### VA Disability Integration
+The calculator includes a **VA Disability** picker. When a disability rating is selected, the state hook fetches the tax-free VA monthly payment.
 
+#### Senior Officer Pay Cap
+The engine enforces the statutory **Executive Level II pay cap** for officers O-7 and above, ensuring base pay does not exceed the legal limit.
 
 ### 1.6 Pay Summary Display
 
@@ -73,29 +75,12 @@ The pay summary is displayed using the `PayDisplay.tsx` component. This componen
 
 - **Standard Deduction Expansion**: Users can expand the "Standard Deductions" section in the summary to see the specific federal and state deductions applied to their calculation.
 
-### 1.7 Recent Enhancements
-
-Several new features have been added to improve the accuracy and user experience of the Pay Calculator.
-
-#### 1. Component Selector (Active vs. Reserve)
-A **Component** selector has been added, allowing users to specify whether they are *Active*, *Guard*, or *Reserve*.
--   **Active**: Calculates standard monthly base pay and allowances.
--   **Guard/Reserve**: Calculates estimated **Drill Pay** based on the `reserve_drill_pay` standards, typically representing a standard drill weekend (4 drill periods).
-
-#### 2. VA Disability Pay Integration (The "Offset" Logic)
-The calculator includes a **VA Disability** picker. When a disability rating and dependent status are selected, the calculator will:
-1.  Calculate the estimated military pay (Base Pay or Drill Pay).
-2.  Fetch the corresponding tax-free VA Disability monthly payment.
-3.  The main display will automatically show the **higher of the two values**, as a member cannot receive both simultaneously for the same period. The `paySource` indicator in the `PayDisplay` component clearly shows whether *Military* or *VA* pay is being displayed.
-
-#### 3. Contextual Help
-A help icon has been added to the top-right corner of the `PayDisplay` summary. Tapping this icon opens a detailed modal explaining the breakdown of Income and Deductions columns.
-
-### 1.8 Data Fetching & Sync Strategy
+### 1.7 Data Fetching & Sync Strategy
 
 All data for the Pay Calculator is synchronized from Supabase into a local **Smart Cache** (SQLite) via the `SyncManager`. 
 - **Offline Reliability**: Once initial hydration is complete, the app performs all calculations locally, ensuring zero-latency even in "Airplane Mode".
-- **Background Refresh**: The app uses the `sync_metadata` table to check for updates on launch. If a newer version is available on the backend (e.g., a 2025 pay scale update), it background-fetches the diff without interrupting the user.
+- **TTL Caching**: The app uses a **24-hour Time-to-Live (TTL)** cache, checking for data updates only once per day to minimize network requests and improve launch performance.
+- **Data Sanitization**: The API layer now sanitizes known data anomalies (e.g., incorrect tax rates for California's first bracket) during the fetch process, ensuring the calculation engine receives clean, reliable data.
 
 ---
 
@@ -125,7 +110,7 @@ We intentionally separated the code into three distinct layers:
 The PT Calculator now tracks and displays **Health Risk Categories** for critical components (WHtR and Cardio). This metadata is integrated directly into the scoring engine, allowing the UI to provide visual feedback beyond simple point totals.
 
 #### Exemption Handling
-The calculator includes robust **Exemption** logic. Users can mark individual components (Strength, Core, or Cardio) as exempt. The composite score is then automatically recalculated by excluding those points from the total possible score (e.g., if Strength is exempt, the total possible points drop from 100 to 80).
+The calculator includes robust **Exemption** logic. Users can mark individual components (Strength, Core, or Cardio) as exempt. The composite score is then automatically recalculated. A component category is only considered exempt if *all* alternate exercises within it are unavailable, preventing incorrect score calculations.
 
 ### 2.4 State Management
 
@@ -145,18 +130,18 @@ The core calculation logic is located in `packages/utils/src/pt-calculator.ts`.
 This function determines the composite score, pass/fail status, and health risk indicators:
 1.  **Component Scoring**: Calls `getScoreForExercise` for each active component. This function now returns a structured object `{ points: number, healthRiskCategory: string | null }`.
 2.  **Pass Criteria**: Checks that the user meets the **Minimum Performance Threshold** for every non-exempt component and achieves a composite score of **75 or higher**.
-3.  **Walk Test**: The 2km Walk is a pass/fail assessment per **DAFMAN 36-2905 (2025/2026)**. If selected, it does not contribute points to the composite score; the total score is calculated based on the remaining points. The `checkWalkPass` engine uses specific demographic filtering (Sex and Age Range) to ensure 100% precision against sea-level and altitude thresholds.
+3.  **Walk Test**: The 2km Walk is a pass/fail assessment per **DAFMAN 36-2905 (2026)**. If selected, it does not contribute points to the composite score; the total score is calculated based on the remaining points. The `checkWalkPass` engine uses specific demographic filtering (Sex and Age Range) and granular altitude-specific thresholds to ensure 100% precision.
 4.  **Health Risk Mapping**: Automatically identifies and propagates risk categories for WHtR and Cardio components (e.g., "Optimal", "Moderate", "High Risk") to the UI.
 
-#### Range and Inequality Parsing
-The engine now features a sophisticated `parsePerformanceRange` utility. This allows the backend to store standards in human-readable formats (e.g., `"45-48"`, `">= 50"`, `"<= 13:25"`) which are then dynamically parsed into numeric comparison ranges. This ensures 100% fidelity to source PDF charts without manual normalization errors.
+#### Optimized Range and Inequality Parsing
+The data fetching layer now pre-parses human-readable standards (e.g., `"45-48"`, `">= 50"`, `"<= 13:25"`) into numeric `performanceRange` arrays. The scoring engine consumes these pre-calculated values, eliminating expensive string parsing and regex operations from the real-time scoring loop for maximum performance.
 
 ### 2.6 Data Fetching
 
 Data is fetched from Supabase via `packages/utils/src/pt-supabase-api.ts` and cached locally:
-- **Simplified Standards Lookup**: Consumes the `pt_scoring_standards` and `pt_pass_fail_standards` tables (2025/2026 updates). These tables include direct `gender` and `age_group` columns for high-performance demographic filtering.
-- **Text-Based Performance**: The API layer returns raw performance strings (e.g., `"13:25"`) which are parsed into seconds or integers by the `pt-calculator.ts` engine via the `parsePerformanceRange` and `timeToSeconds` utilities.
-- **Altitude Data**: Dynamically loads Run/HAMR corrections from `pt_altitude_corrections` and demographic-specific Walk thresholds from `pt_altitude_walk_thresholds` (covering all 3 altitude groups).
+- **Simplified Standards Lookup**: Consumes the `pt_scoring_standards` and `pt_pass_fail_standards` tables (2026 updates). These tables include direct `gender` and `age_group` columns for high-performance demographic filtering.
+- **Pre-Parsed Performance**: The API layer now returns pre-parsed numeric ranges (`performanceRange: [min, max]`) for each standard, offloading expensive string manipulation from the client's real-time calculation engine.
+- **Altitude Data**: Dynamically loads Run/HAMR corrections from `pt_altitude_corrections` and demographic-specific Walk thresholds from `pt_altitude_walk_thresholds` (covering all 4 altitude groups up to >= 6600ft).
 
 ---
 
@@ -169,7 +154,7 @@ The Retirement Calculator estimates military retirement income by modeling the H
 ### 3.2 Key Features
 
 - **Plan Modeling**: Accurate multipliers for High-3 (2.5% per year) and BRS (2.0% per year).
-- **TSP Integration**: Forecasts future value based on contributions, BRS matching, and user-defined rates of return (defaulting to 8%).
+- **TSP Integration**: Forecasts future value using **monthly compounding** and statutory **BRS tiered matching** (100% on first 3%, 50% on next 2%).
 - **Retirement Age Calculator**: A specialized tool to estimate the first day of retirement pay eligibility.
 
 ### 3.3 Retirement Age Calculation
@@ -182,13 +167,13 @@ The **Retirement Age Calculator** (integrated within the summary) uses the follo
 
 The `useRetirementCalculatorState` hook manages a comprehensive set of inputs:
 - **High-3 Averaging**: Allows users to select pay grades for their final three years of service to calculate an accurate average basic pay.
-- **Service Points & Good Years**: For Guard/Reserve members, calculates "equivalent years" of service (Points / 360) for the pension multiplier.
-- **VA Disability Income**: Unlike the Pay Calculator (which uses an offset logic), the Retirement Calculator **adds** VA disability pay to the pension, assuming concurrent receipt (CRDP/CRSC eligibility).
+- **Service Points & Good Years**: For Guard/Reserve members, calculates "equivalent years" of service (Points / 360). This calculation enforces the statutory **130-point annual cap** (`min(points, goodYears * 130)`) for pension eligibility to prevent inflation of retirement pay from inactive duty points.
+- **VA Disability Income**: Accurately models the pension offset for non-CRDP cases. If disability is < 50%, the pension is reduced dollar-for-dollar by VA pay. If >= 50%, the user is assumed to be eligible for concurrent receipt and receives both.
 
 ### 3.5 Calculation Logic
 
 #### TSP Withdrawal (The "4% Rule")
-The calculator estimates the total TSP balance at retirement and applies the industry-standard **4% Rule** to determine a safe monthly withdrawal amount. This amount is then added to the monthly pension and VA income to provide a total gross retirement income figure.
+The calculator estimates the total TSP balance at retirement using monthly compounding and applies the industry-standard **4% Rule** to determine a safe monthly withdrawal amount. This amount is then added to the monthly pension and VA income to provide a total gross retirement income figure.
 
 #### Tax Estimation
 The calculator performs a full tax simulation for retirement income:

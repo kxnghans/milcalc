@@ -5,61 +5,7 @@
  */
 
 import { PtStandard, PtPerformance, PtInputs, Tables } from './types';
-
-/**
- * Converts a time string (e.g., "mm:ss", "mm:ss*", "<= 15:30") to seconds.
- */
-export const timeToSeconds = (time: string | number | null): number => {
-    if (time === null || time === undefined) return 0;
-    const timeStr = String(time).trim();
-    if (!timeStr || timeStr.toUpperCase() === 'N/A') return 0;
-
-    // Remove prefixes and artifacts
-    const cleaned = timeStr.replace(/[<>=* ]/g, '');
-    const parts = cleaned.split(':').map(Number);
-    
-    if (parts.length === 2) {
-        return parts[0] * 60 + parts[1];
-    }
-    return isNaN(Number(cleaned)) ? 0 : Number(cleaned);
-};
-
-/**
- * Parses a performance string into a numeric value for comparison.
- */
-/**
- * Parses a performance string into a numeric range [min, max].
- */
-const parsePerformanceRange = (perf: string | number | null): [number, number] => {
-    if (perf === null || perf === undefined) return [0, 0];
-    const s = String(perf).trim();
-    
-    // Range format "X-Y"
-    if (s.includes('-')) {
-        const parts = s.split('-').map(p => p.trim());
-        if (parts.length === 2) {
-            const minStr = parts[0];
-            const maxStr = parts[1];
-            const min = minStr.includes(':') ? timeToSeconds(minStr) : parseFloat(minStr.replace(/[<>=* ]/g, ''));
-            const max = maxStr.includes(':') ? timeToSeconds(maxStr) : parseFloat(maxStr.replace(/[<>=* ]/g, ''));
-            if (!isNaN(min) && !isNaN(max)) {
-                return [min, max];
-            }
-        }
-    }
-
-    // Single value or prefix/suffix (>=, <=, *, etc)
-    const val = s.includes(':') ? timeToSeconds(s) : (parseFloat(s.replace(/[<>=* ]/g, '')) || 0);
-    
-    if (s.includes('>=') || s.includes('>')) {
-        return [val, Infinity];
-    }
-    if (s.includes('<=') || s.includes('<')) {
-        return [-Infinity, val];
-    }
-    
-    return [val, val];
-};
+import { timeToSeconds, parsePerformanceRange, parseAgeRange } from './pt-utils';
 
 /**
  * Determines the appropriate age group string based on age.
@@ -93,7 +39,7 @@ const findScore = (standards: PtStandard[], performanceValue: number, higherIsBe
     let limitValue = higherIsBetter ? -1 : Infinity;
 
     for (const s of standards) {
-        const [min, max] = parsePerformanceRange(s.measurement);
+        const [min, max] = s.performanceRange || parsePerformanceRange(s.measurement);
         
         let match = false;
         if (higherIsBetter) {
@@ -136,7 +82,9 @@ const findScore = (standards: PtStandard[], performanceValue: number, higherIsBe
  */
 export const getWhtrScore = (standards: PtStandard[], whtr: number): { points: number; healthRiskCategory: string | null } => {
     if (!whtr) return { points: 0, healthRiskCategory: null };
-    return findScore(standards.filter(s => s.exercise === 'whtr'), whtr, false); // Lower is better for WHtR
+    // Force 2-decimal rounding before comparison to prevent "rounding into failure"
+    const roundedWhtr = parseFloat(whtr.toFixed(2));
+    return findScore(standards.filter(s => s.exercise === 'whtr'), roundedWhtr, false); // Lower is better for WHtR
 };
 
 /**
@@ -212,7 +160,7 @@ export const checkWalkPass = (
 
     if (altitudeGroup && altitudeGroup !== 'normal' && walkAltitudeThresholds) {
         const threshold = walkAltitudeThresholds.find(t => {
-            const [min, max] = t.age_range.split('-').map(Number);
+            const [min, max] = parseAgeRange(t.age_range);
             return t.sex.toLowerCase() === gender.toLowerCase() && t.altitude_group === altitudeGroup && age >= min && age <= max;
         });
         if (threshold) maxTime = timeToSeconds(threshold.max_time);
@@ -220,7 +168,7 @@ export const checkWalkPass = (
         const ageGroup = getAgeGroupString(age);
         const standard = passFailStandards.find(s => 
             s.exercise_type === 'walk_2km' && 
-            s.gender === gender && 
+            s.gender.toLowerCase() === gender.toLowerCase() && 
             s.age_group === ageGroup
         );
         if (standard) maxTime = timeToSeconds(standard.min_performance);
@@ -366,9 +314,25 @@ export const calculateBestScore = (scores: { [key: string]: number | string }): 
     );
 
     if (scores.whtr === 'Exempt') totalPossiblePoints -= 20; else earnedPoints += whtrScore;
-    if (scores.push_ups_1min === 'Exempt' || scores.hand_release_pushups_2min === 'Exempt') totalPossiblePoints -= 15; else earnedPoints += strengthScore;
-    if (scores.sit_ups_1min === 'Exempt' || scores.cross_leg_reverse_crunch_2min === 'Exempt' || scores.forearm_plank_time === 'Exempt') totalPossiblePoints -= 15; else earnedPoints += coreScore;
-    if (scores.run === 'Exempt' || scores.run_2mile === 'Exempt' || scores.shuttles === 'Exempt' || scores.shuttles_20m === 'Exempt') totalPossiblePoints -= 50; else earnedPoints += cardioScore;
+    
+    // Alternate PT Score Trap: Only exempt if ALL alternate exercises are exempt
+    if (scores.push_ups_1min === 'Exempt' && scores.hand_release_pushups_2min === 'Exempt') {
+        totalPossiblePoints -= 15; 
+    } else {
+        earnedPoints += strengthScore;
+    }
+    
+    if (scores.sit_ups_1min === 'Exempt' && scores.cross_leg_reverse_crunch_2min === 'Exempt' && scores.forearm_plank_time === 'Exempt') {
+        totalPossiblePoints -= 15; 
+    } else {
+        earnedPoints += coreScore;
+    }
+    
+    if (scores.run === 'Exempt' && scores.run_2mile === 'Exempt' && scores.shuttles === 'Exempt' && scores.shuttles_20m === 'Exempt') {
+        totalPossiblePoints -= 50; 
+    } else {
+        earnedPoints += cardioScore;
+    }
 
     return totalPossiblePoints > 0 ? (earnedPoints / totalPossiblePoints) * 100 : 100;
 };
@@ -437,7 +401,7 @@ export const getPerformanceForScore = (standards: PtStandard[], component: strin
 
     const higherIsBetter = !(comp === 'run_2mile');
     const values = candidates.map(c => {
-        const [min, max] = parsePerformanceRange(c.measurement);
+        const [min, max] = c.performanceRange || parsePerformanceRange(c.measurement);
         // For 'higher is better', the minimum performance required is the 'min' of the range.
         // For 'lower is better' (run), the maximum performance allowed is the 'max' of the range.
         return higherIsBetter ? min : max;

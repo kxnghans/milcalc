@@ -64,8 +64,9 @@ function validateScoringSeed(csvFile: string, sqlFile: string, exerciseType: str
 
             if (isNaN(expectedPoints) || !performance || performance === 'N/A') continue;
 
-            // Escape special regex characters in performance
+            // Escape special regex characters in performance and age
             const escapedPerf = performance.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const escapedAge = age.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             
             // Search for the entry in SQL: ('Gender', 'Age', 'Perf', Points)
             const pointsStr = expectedPoints.toFixed(1);
@@ -73,7 +74,7 @@ function validateScoringSeed(csvFile: string, sqlFile: string, exerciseType: str
             
             // Match either 15.0 or 15
             const pointsPattern = `(${pointsStr.replace('.', '\\.')}|${pointsIntStr})`;
-            const sqlPattern = new RegExp(`\\('${gender}',\\s*'${age}',\\s*'${escapedPerf}',\\s*${pointsPattern}`, 'i');
+            const sqlPattern = new RegExp(`'${exerciseType}',\\s*'${gender}',\\s*'${escapedAge}',\\s*'${escapedPerf}',\\s*${pointsPattern}`, 'i');
             
             if (!sqlPattern.test(sqlContent)) {
                 console.error(`  [MISSING] ${gender} ${age} perf=${performance} points=${expectedPoints}`);
@@ -120,14 +121,14 @@ function validateWhtr() {
 function validateAll() {
     let totalErrors = 0;
     
-    totalErrors += validateScoringSeed('pt_scoring_pushups_1min.csv', 'pt_standards/push_ups_1min.sql', 'push_ups_1min');
-    totalErrors += validateScoringSeed('pt_scoring_situps_1min.csv', 'pt_standards/sit_ups_1min.sql', 'sit_ups_1min');
-    totalErrors += validateScoringSeed('pt_scoring_hand_release_pushups_2min.csv', 'pt_standards/hand_release_pushups_2min.sql', 'hand_release_pushups_2min');
-    totalErrors += validateScoringSeed('pt_scoring_cross_leg_reverse_crunch_2min.csv', 'pt_standards/cross_leg_reverse_crunch_2min.sql', 'cross_leg_reverse_crunch_2min');
-    totalErrors += validateScoringSeed('pt_scoring_forearm_plank.csv', 'pt_standards/forearm_plank_time.sql', 'forearm_plank_time');
+    totalErrors += validateScoringSeed('pt_scoring_pushups_1min.csv', 'pt_standards.sql', 'push_ups_1min', true);
+    totalErrors += validateScoringSeed('pt_scoring_situps_1min.csv', 'pt_standards.sql', 'sit_ups_1min', true);
+    totalErrors += validateScoringSeed('pt_scoring_hand_release_pushups_2min.csv', 'pt_standards.sql', 'hand_release_pushups_2min', true);
+    totalErrors += validateScoringSeed('pt_scoring_cross_leg_reverse_crunch_2min.csv', 'pt_standards.sql', 'cross_leg_reverse_crunch_2min', true);
+    totalErrors += validateScoringSeed('pt_scoring_forearm_plank.csv', 'pt_standards.sql', 'forearm_plank_time', true);
     
-    totalErrors += validateScoringSeed('pt_scoring_run_2mile.csv', 'pt_standards/run_2mile.sql', 'run_2mile', true);
-    totalErrors += validateScoringSeed('pt_scoring_hamr_shuttles.csv', 'pt_standards/shuttles_20m.sql', 'shuttles_20m', true);
+    totalErrors += validateScoringSeed('pt_scoring_run_2mile.csv', 'pt_standards.sql', 'run_2mile', true);
+    totalErrors += validateScoringSeed('pt_scoring_hamr_shuttles.csv', 'pt_standards.sql', 'shuttles_20m', true);
     
     totalErrors += validateWhtr();
 

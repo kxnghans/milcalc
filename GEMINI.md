@@ -22,8 +22,9 @@ This document defines the foundational mandates and operational boundaries for A
 ## 🏗 Logical Domain Boundaries
 
 1.  **UI Domain (`@repo/ui`)**: Stateless primitives and feature-level state hooks. No direct API calls; hooks must consume `@repo/utils` APIs.
-2.  **Logic Domain (`@repo/utils`)**: Pure math and data-fetching definitions. This package is the "Single Source of Truth" for military standards. Features a sophisticated **Range-Based Performance Parser** (`parsePerformanceRange`) that handles ranges, inequalities, and health risk category mapping.
-3.  **Delivery Domain (`apps/mobile`)**: Composition of UI primitives and routing. Screens should be thin wrappers around state hooks.
+2.  **Logic Domain (`@repo/utils`)**: Pure math and data-fetching definitions. This package is the "Single Source of Truth" for military standards. It consumes pre-parsed and sanitized data from the API layer.
+3.  **API Layer (`@repo/utils/src/*-api.ts`)**: The bridge between Supabase and the client. Responsible for fetching, shaping, and **pre-parsing** raw data (e.g., converting performance strings to numeric ranges) before it enters the application's state.
+4.  **Delivery Domain (`apps/mobile`)**: Composition of UI primitives and routing. Screens should be thin wrappers around state hooks.
 
 ### 🎨 Interaction & Layout Mandates
 - **Context-Driven UI**: All interactive overlays (Help, Documents, Bug Reports) MUST be triggered via global `OverlayContext` hooks. Never declare local modal state (`isVisible`, `contentKey`) within screen files.
@@ -44,12 +45,16 @@ This document defines the foundational mandates and operational boundaries for A
 - [x] Neumorphic UI library established in `@repo/ui`.
 - [x] PT, Pay, and Retirement logic validated with 100% test coverage.
 - [x] Persistent "Smart Cache" (SQLite) implemented for offline reliability.
-- [x] Background Metadata Sync engine deployed.
+- [x] Background Metadata Sync engine deployed with 24-hour TTL caching.
 - [x] iOS/Android standardization to `dev.milcalc.mobile`.
 - [x] Context-Driven UI pattern (Global Overlays) established.
 - [x] Advanced PT Performance Parsing & Health Risk Tracking implemented.
+- [x] **Performance Optimization**: PT scoring logic refactored to use pre-parsed numeric ranges, eliminating real-time string manipulation.
+- [x] **Statutory Accuracy Refinement**: Implemented BRS tiered matching, monthly TSP compounding, CRDP offsets, Reserve point caps, and Senior Officer pay caps.
 - [x] Hybrid Seeding (Offline First-Launch) logic implemented using `seed-data.json`.
 - [x] Integrated 2025 PT standards and 2026 BAH rates into simplified Supabase schema (4-table model).
+- [x] **Script Standardization**: Unified development workflow under `milcalc:*` namespace.
+- [x] **Workspace Environment Audit**: Deep clean of build artifacts, caches (.turbo, .expo, .gradle), and log files completed to ensure environment parity.
 
 ## 🚀 Active To-Do
 

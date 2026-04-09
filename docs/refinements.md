@@ -283,25 +283,7 @@ export const RoundIconButton = ({ backgroundColor, size }) => (
 );
 ```
 
-### 3.2 TTS with Disk Caching (`useScribeAudio`)
-Hash the text string to create unique local cache files, preventing redundant Google Cloud API hits.
 
-```typescript
-export const useScribeAudio = () => {
-  const speakWord = useCallback(async (word: string) => {
-    const safeFilename = word.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    const fileUri = `${FileSystem.cacheDirectory}scribe_${safeFilename}.mp3`;
-    
-    const fileInfo = await FileSystem.getInfoAsync(fileUri);
-    if (!fileInfo.exists) {
-        // Fetch from Cloud and write to fileUri
-    }
-    // Play from local fileUri
-  }, []);
-};
-```
-
----
 
 ## 4. Type Safety & Stability
 

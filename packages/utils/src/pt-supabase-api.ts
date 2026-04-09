@@ -1,5 +1,6 @@
 import { supabase, sanitizeError } from './supabaseClient';
 import { PtStandard, Tables } from './types';
+import { parsePerformanceRange } from './pt-utils';
 
 /**
  * Fetches all PT scoring standards for a given gender and age group.
@@ -34,10 +35,11 @@ export const getPtStandards = async (gender: string, age_group: string): Promise
 
   const combinedData = [...(data || []), ...(whtrData || [])];
 
-  // 3. Transform to consistent format
+  // 3. Transform to consistent format and pre-parse performance ranges
   return combinedData.map(item => ({
     exercise: item.exercise_type,
     measurement: item.performance,
+    performanceRange: parsePerformanceRange(item.performance),
     points: item.points,
     healthRiskCategory: item.health_risk_category
   }));
@@ -139,4 +141,49 @@ export const getHelpContent = async (contentKey: string) => {
   }, { title: data[0].title });
 
   return combinedContent;
+};
+
+interface PtBundleResponse {
+    standards: (Tables<'pt_scoring_standards'> & { exercise_type: string })[];
+    pass_fail: Tables<'pt_pass_fail_standards'>[];
+    corrections: Tables<'pt_altitude_corrections'>[];
+    walk_thresholds: Tables<'pt_altitude_walk_thresholds'>[];
+}
+
+/**
+ * Fetches all necessary PT reference data in a single handshake.
+ * @param gender - The user's gender.
+ * @param age_group - The user's age group.
+ * @returns A bundled object containing all scoring and altitude standards.
+ */
+export const getPtStandardsBundle = async (gender: string, age_group: string): Promise<{
+    standards: PtStandard[];
+    passFail: Tables<'pt_pass_fail_standards'>[];
+    corrections: Tables<'pt_altitude_corrections'>[];
+    walkThresholds: Tables<'pt_altitude_walk_thresholds'>[];
+} | null> => {
+    const { data, error } = await (supabase.rpc as unknown as (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>)('get_pt_standards_bundle', {
+        p_gender: gender,
+        p_age_group: age_group
+    });
+
+    if (error || !data) {
+        console.error('Error fetching PT standards bundle:', sanitizeError(error));
+        return null;
+    }
+
+    const bundleData = data as unknown as PtBundleResponse;
+
+    return {
+        standards: (bundleData.standards || []).map((item) => ({
+            exercise: item.exercise_type,
+            measurement: item.performance,
+            performanceRange: parsePerformanceRange(item.performance),
+            points: item.points,
+            healthRiskCategory: item.health_risk_category
+        })),
+        passFail: bundleData.pass_fail || [],
+        corrections: bundleData.corrections || [],
+        walkThresholds: bundleData.walk_thresholds || []
+    };
 };

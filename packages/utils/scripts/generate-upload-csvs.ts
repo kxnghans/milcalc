@@ -32,35 +32,6 @@ function readCSV(filename: string): string[][] {
 
 const AGE_GROUPS = ['<25', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60+'];
 
-function processScoringCSV(csvFile: string, exerciseType: string): string[] {
-    const rows = readCSV(csvFile);
-    const headers = rows[0];
-    const ageIndices: Record<string, number> = {};
-    AGE_GROUPS.forEach(age => {
-        const idx = headers.indexOf(age);
-        if (idx !== -1) ageIndices[age] = idx;
-    });
-
-    const output: string[] = [];
-    for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        if (row.length < headers.length) continue;
-        const gender = row[0];
-        const performance = row[1];
-
-        for (const age of AGE_GROUPS) {
-            const ageIdx = ageIndices[age];
-            if (ageIdx === undefined) continue;
-            
-            const points = parseFloat(row[ageIdx]);
-            if (isNaN(points)) continue;
-
-            output.push(`${exerciseType},${gender},${age},${performance},${points.toFixed(1)},`);
-        }
-    }
-    return output;
-}
-
 function processInvertedScoringCSV(csvFile: string, exerciseType: string): string[] {
     const rows = readCSV(csvFile);
     const headers = rows[0];
@@ -93,11 +64,11 @@ function processInvertedScoringCSV(csvFile: string, exerciseType: string): strin
 function generateScoringStandards() {
     const scoringRows: string[] = ['exercise_type,gender,age_group,performance,points,health_risk_category'];
     
-    scoringRows.push(...processScoringCSV('pt_scoring_pushups_1min.csv', 'push_ups_1min'));
-    scoringRows.push(...processScoringCSV('pt_scoring_situps_1min.csv', 'sit_ups_1min'));
-    scoringRows.push(...processScoringCSV('pt_scoring_hand_release_pushups_2min.csv', 'hand_release_pushups_2min'));
-    scoringRows.push(...processScoringCSV('pt_scoring_cross_leg_reverse_crunch_2min.csv', 'cross_leg_reverse_crunch_2min'));
-    scoringRows.push(...processScoringCSV('pt_scoring_forearm_plank.csv', 'forearm_plank_time'));
+    scoringRows.push(...processInvertedScoringCSV('pt_scoring_pushups_1min.csv', 'push_ups_1min'));
+    scoringRows.push(...processInvertedScoringCSV('pt_scoring_situps_1min.csv', 'sit_ups_1min'));
+    scoringRows.push(...processInvertedScoringCSV('pt_scoring_hand_release_pushups_2min.csv', 'hand_release_pushups_2min'));
+    scoringRows.push(...processInvertedScoringCSV('pt_scoring_cross_leg_reverse_crunch_2min.csv', 'cross_leg_reverse_crunch_2min'));
+    scoringRows.push(...processInvertedScoringCSV('pt_scoring_forearm_plank.csv', 'forearm_plank_time'));
     scoringRows.push(...processInvertedScoringCSV('pt_scoring_run_2mile.csv', 'run_2mile'));
     scoringRows.push(...processInvertedScoringCSV('pt_scoring_hamr_shuttles.csv', 'shuttles_20m'));
 

@@ -21,22 +21,23 @@ MilCalc is a professional-grade calculation suite designed specifically for US m
 ## 4. Logical Domains & Features
 
 ### 4.1 Fitness: PT & Performance Tracker
--   **Air Force PT Standard**: Real-time scoring for all muscular and cardio-respiratory events, aligned with **DAFMAN 36-2905 (2025/2026)**.
--   **Altitude Adaptation**: Integrated lookup for altitude offsets (HAMR, 1.5M, 2KM Walk).
+-   **Air Force PT Standard**: Real-time scoring for all muscular and cardio-respiratory events, aligned with **DAFMAN 36-2905 (2026)**. The engine uses pre-parsed numeric ranges for maximum performance.
+-   **Altitude Adaptation**: Integrated lookup for altitude offsets (HAMR, 2.0M, 2KM Walk) across 4 elevation groups.
 -   **Health Risk Mapping**: Automated calculation and visualization of health risk categories for WHtR and Cardio components.
+-   **Exemption Logic**: Precisely models composite score adjustments, ensuring a category is only exempt if all alternates are unavailable.
 -   **Personal Bests**: Persistent local tracking of achievement milestones.
 
 ### 4.2 Finance: Active & Reserve Pay
--   **Consolidated Pay Engine**: Breakdown of Basic Pay (2025), BAH (Housing 2026), and BAS (Subsistence 2025).
+-   **Consolidated Pay Engine**: Breakdown of Basic Pay (2025), BAH (Housing 2026), and BAS (Subsistence 2025), with enforcement of the **Senior Officer pay cap**.
 -   **Drill Pay Projections**: Prorated calculations for Guard and Reserve drills.
--   **Tax Simulation & Overrides**: Accurate FICA and withholding estimates with the ability for users to manually override calculated taxes for precise modeling.
+-   **Tax Simulation & Overrides**: Accurate FICA (on Base Pay only) and withholding estimates with the ability for users to manually override calculated taxes for precise modeling.
 -   **VA Disability Integration**: Real-time "Offset" logic comparing military pay vs. tax-free VA compensation.
 
 ### 4.3 Strategy: Retirement & TSP Growth
--   **Plan Modeling**: High-3 vs. BRS pension comparisons.
--   **TSP Forecasting**: Investment growth projections based on contributions, BRS matching, and user-defined rates of return.
+-   **Plan Modeling**: High-3 vs. BRS pension comparisons, including statutory caps for **Reserve inactive duty points**.
+-   **TSP Forecasting**: Investment growth projections using **monthly compounding** and statutory **BRS tiered matching**.
 -   **Retirement Age Calculator**: Projects eligibility dates for Active (including Break in Service) and "Reduced Age" for Guard/Reserve (based on qualifying deployments).
--   **VA Integration**: Models "Concurrent Receipt" (CRDP/CRSC) where VA disability pay is added to the pension for eligible retirees.
+-   **VA Integration**: Accurately models the pension offset for non-CRDP cases (<50% disability) and "Concurrent Receipt" for eligible retirees.
 
 ## 5. Non-Functional Requirements (UX Standards)
 

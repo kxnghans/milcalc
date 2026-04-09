@@ -62,11 +62,13 @@ describe('Retirement Calculator', () => {
             mockedPayApi.getBasePay.mockResolvedValue(6000); // Assume constant pay for simplicity
 
             // High-3 Average: 6000
-            // Equivalent Years: 4000 points / 360 = 11.11 years
-            // Multiplier: 11.11 * 2.5% = 27.77%
-            // Pension: 6000 * (4000 / 360) * 0.025 = 1666.67
+            // Good Years: 21, Points: 4000
+            // Capped Points (130/yr): min(4000, 21 * 130) = 2730
+            // Equivalent Years: 2730 / 360 = 7.5833
+            // Multiplier: 7.5833 * 2.5% = 18.958%
+            // Pension: 6000 * (2730 / 360) * 0.025 = 1137.5
             const pension = await calculatePension('Reserve', 'High 3', 'O-4', 'O-4', 'O-4', 22, 4000, 21);
-            expect(pension).toBeCloseTo(1666.67);
+            expect(pension).toBeCloseTo(1137.5);
         });
 
         it('should return 0 for less than 20 good years for Guard/Reserve', async () => {
@@ -93,24 +95,24 @@ describe('Retirement Calculator', () => {
             // Annual Salary: 60000
             // User Annual: 3000
             // Employer Annual: 600 (1%) + 2400 (4%) = 3000
-            // Total Annual: 6000
-            // Rate: 7%
-            // Years: 20
-            // FV = 6000 * (((1 + 0.07)^20 - 1) / 0.07) = 245972.95
+            // Total Annual: 6000 (500 monthly)
+            // Rate: 7% (0.07 annual, 0.005833 monthly)
+            // Months: 20 * 12 = 240
+            // FV = 500 * (((1 + 0.07/12)^240 - 1) / (0.07/12)) = 260463.33
             const futureValue = calculateTsp('0', true, 60000, 5, 20, 'BRS', 7);
-            expect(futureValue).toBeCloseTo(245972.95);
+            expect(futureValue).toBeCloseTo(260463.33);
         });
 
         it('should calculate TSP future value for High-3 with no matching', () => {
             // User contributes 10%, gets 0% match
             // Annual Salary: 80000
             // User Annual: 8000
-            // Total Annual: 8000
-            // Rate: 5%
-            // Years: 25
-            // FV = 8000 * (((1 + 0.05)^25 - 1) / 0.05) = 381816.79
+            // Total Annual: 8000 (666.67 monthly)
+            // Rate: 5% (0.05 annual, 0.004167 monthly)
+            // Months: 25 * 12 = 300
+            // FV = 666.67 * (((1 + 0.05/12)^300 - 1) / (0.05/12)) = 397006.47
             const futureValue = calculateTsp('0', true, 80000, 10, 25, 'High 3', 5);
-            expect(futureValue).toBeCloseTo(381816.79);
+            expect(futureValue).toBeCloseTo(397006.47);
         });
 
         it('should calculate simple interest for a 0% return', () => {
@@ -137,13 +139,10 @@ describe('Retirement Calculator', () => {
         it('should calculate federal and state taxes correctly for a single person in CA', () => {
             const grossIncome = 60000;
             const state = 'CA';
-            const filingStatus = 'single';
+            const filingStatus = 'Single';
 
-            // Federal Taxable: 60000 - 13850 = 46150
-            // Federal Tax: (11000 * 0.10) + ((44725 - 11001) * 0.12) + ((46150 - 44726) * 0.22)
-            // = 1100 + 4046.88 + 313.28 = 5460.16
-            // State Taxable: 60000 - 5202 = 54798
-            // State Tax: (10412 * 0.01) + ((24684 - 10413) * 0.02) + ...
+            // Federal Taxable: 60000 - 16100 (2026 Single) = 43900
+            // Federal Tax: (12400 * 0.10) + ((43900 - 12400) * 0.12) = 1240 + 3780 = 5020
             const { federal, state: stateTax } = calculateTaxes(grossIncome, state, filingStatus, mockFederalTaxData, mockStateTaxData);
 
             expect(federal).toBeCloseTo(5020);
@@ -151,12 +150,12 @@ describe('Retirement Calculator', () => {
         });
 
         it('should calculate zero state tax for a state with no income tax', () => {
-            const { state: stateTax } = calculateTaxes(80000, 'TX', 'single', mockFederalTaxData, mockStateTaxData);
+            const { state: stateTax } = calculateTaxes(80000, 'TX', 'Single', mockFederalTaxData, mockStateTaxData);
             expect(stateTax).toEqual(0);
         });
 
         it('should return zero taxes for zero income', () => {
-            const { federal, state: stateTax } = calculateTaxes(0, 'CA', 'single', mockFederalTaxData, mockStateTaxData);
+            const { federal, state: stateTax } = calculateTaxes(0, 'CA', 'Single', mockFederalTaxData, mockStateTaxData);
             expect(federal).toEqual(0);
             expect(stateTax).toEqual(0);
         });

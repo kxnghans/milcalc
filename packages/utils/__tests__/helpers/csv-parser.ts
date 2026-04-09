@@ -76,34 +76,17 @@ export function parseCSVData() {
             const gender = row[0];
             if (gender !== 'Male' && gender !== 'Female') continue;
 
+            const points = parseFloat(row[1]);
+            if (isNaN(points)) continue;
+
             for (const age of ageGroups) {
                 const ageIdx = ageIndices[age];
                 if (ageIdx === undefined) continue;
                 const cellValue = row[ageIdx];
 
-                if (!cellValue || cellValue === 'N/A' || cellValue === '') continue;
+                if (!cellValue || cellValue === 'N/A' || cellValue === '' || cellValue === '-') continue;
 
-                let points = 0;
-                let measurement: string = '';
-
-                if (file.type === 'reps') {
-                    // Row structure: gender, reps, <25, 25-29...
-                    // row[1] is reps count (measurement), cellValue is points
-                    measurement = row[1];
-                    points = parseFloat(cellValue);
-                } else if (file.type === 'time') {
-                    // Row structure: gender, time, <25, 25-29...
-                    // row[1] is the time string (e.g. '2:30') = measurement, cellValue is points
-                    measurement = row[1];
-                    points = parseFloat(cellValue);
-                } else {
-                    // 'points' type: gender, points, <25, 25-29...
-                    // cellValue is performance range/value (e.g. '<= 13:25', '94-99')
-                    points = parseFloat(row[1]);
-                    measurement = cellValue;
-                }
-
-                if (isNaN(points)) continue;
+                const measurement = cellValue;
 
                 const standardEntry: PtStandard = {
                     exercise: file.exercise,
@@ -289,9 +272,19 @@ export function parseCSVData() {
         }
     } catch (e) { console.warn('Missing pt_altitude_walk.csv'); }
 
+    // Deduplicate exhaustiveExpectedScores to take the max points for any given (gender, age, exercise, performance)
+    const dedupedMap = new Map<string, ExpectedScore>();
+    for (const exp of exhaustiveExpectedScores) {
+        const key = `${exp.gender}-${exp.ageGroup}-${exp.exercise}-${exp.performance}`;
+        const existing = dedupedMap.get(key);
+        if (!existing || exp.points > existing.points) {
+            dedupedMap.set(key, exp);
+        }
+    }
+
     return {
         standards,
-        exhaustiveExpectedScores,
+        exhaustiveExpectedScores: Array.from(dedupedMap.values()),
         passFailStandards,
         altitudeCorrections,
         walkAltThresholds

@@ -259,6 +259,8 @@ export default function CardioComponent({
                         style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
+                        minutesTestID="cardio-run-min-input"
+                        secondsTestID="cardio-run-sec-input"
                     />
                 )}
                 {cardioComponent === "shuttles" && (
@@ -270,6 +272,7 @@ export default function CardioComponent({
                         style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
+                        testID="cardio-shuttles-input"
                     />
                 )}
                 {cardioComponent === "walk" && (
@@ -284,6 +287,8 @@ export default function CardioComponent({
                         style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
                         isExempt={isExempt}
+                        minutesTestID="cardio-walk-min-input"
+                        secondsTestID="cardio-walk-sec-input"
                     />
                 )}
             </View>

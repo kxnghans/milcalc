@@ -155,28 +155,36 @@ const ScoreDisplay = ({
   return (
     <View style={[styles.scoreContainer, styles.scoreContent]}>
         {/* Display the total score */}
-        <Text style={[styles.scoreText, { color: scoreColor }, showBreakdown && { marginBottom: theme.spacing.s }]}>{score.totalScore.toFixed(2)}</Text>
+        <Text testID="total-score" style={[styles.scoreText, { color: scoreColor }, showBreakdown && { marginBottom: theme.spacing.s }]}>{score.totalScore.toFixed(2)}</Text>
         {/* Optionally, display the breakdown of component scores */}
         {showBreakdown && (
             <View style={styles.scoreBreakdownContainer}>
                 <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>WHR: </Text>
-                    {renderComponentScore(score.whtrScore, 20, score.whtrRiskCategory, true)}
+                    <View testID="score-whr">
+                        {renderComponentScore(score.whtrScore, 20, score.whtrRiskCategory, true)}
+                    </View>
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>Strength: </Text>
-                    {renderComponentScore(score.pushupScore, 15)}
+                    <View testID="score-strength">
+                        {renderComponentScore(score.pushupScore, 15)}
+                    </View>
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>Core: </Text>
-                    {renderComponentScore(score.coreScore, 15)}
+                    <View testID="score-core">
+                        {renderComponentScore(score.coreScore, 15)}
+                    </View>
                 </View>
                 <Text style={styles.scoreBreakdownText}>|</Text>
                 <View style={styles.row}>
                     <Text style={styles.scoreBreakdownText}>Cardio: </Text>
-                    {renderCardioScore()}
+                    <View testID="score-cardio">
+                        {renderCardioScore()}
+                    </View>
                 </View>
             </View>
         )}

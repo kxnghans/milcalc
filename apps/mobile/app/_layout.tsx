@@ -286,6 +286,7 @@ function LayoutContent() {
         }}
         mode="standard"
         footer={overlayFooter}
+        isScrollable={overlayType !== 'BUG_REPORT'}
       >
         <MainOverlay />
       </BottomSheet>
