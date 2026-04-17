@@ -1,7 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { Linking } from "react-native";
 
-import { supabase } from "./supabaseClient";
+import { handleApiError, supabase } from "./supabaseClient";
 import { Tables } from "./types";
 
 /**
@@ -27,7 +27,7 @@ export const getDocumentsByCategory = async (
     .order("sort_order");
 
   if (error) {
-    console.error("Error fetching documents:", error);
+    handleApiError("Error fetching documents", error);
     return [];
   }
 
@@ -59,7 +59,7 @@ export const openDocument = async (doc: Tables<"documents">) => {
       try {
         await Linking.openURL(urlToOpen);
       } catch (error) {
-        console.error("Error opening URL:", error);
+        handleApiError("Error opening URL", error);
       }
       return;
     }
@@ -92,13 +92,16 @@ export const openDocument = async (doc: Tables<"documents">) => {
         }
         await Linking.openURL(finalUrl);
       } else {
-        console.error("No signed URL returned from edge function", result.data);
+        handleApiError(
+          "No signed URL returned from edge function",
+          result.data,
+        );
       }
     } catch (error) {
-      console.error("Error getting signed URL:", error);
+      handleApiError("Error getting signed URL", error);
     }
     return;
   }
 
-  console.error("No valid URL or source found for this document:", doc);
+  handleApiError("No valid URL or source found for this document", doc);
 };

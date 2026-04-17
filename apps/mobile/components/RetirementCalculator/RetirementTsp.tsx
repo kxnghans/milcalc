@@ -1,11 +1,15 @@
-import { PillButton, SegmentedSelector, useTheme } from "@repo/ui";
-import React from "react";
+import {
+  LabelWithHelp,
+  PillButton,
+  SegmentedSelector,
+  useTheme,
+} from "@repo/ui";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import CurrencyInput from "../CurrencyInput";
 import NumberInput from "../NumberInput";
 import PickerInput from "../PickerInput";
-import { LabelWithHelp } from "./RetirementUiComponents";
 
 export const tspTypeOptions = [
   { label: "Roth", value: "Roth" },
@@ -54,94 +58,107 @@ export const RetirementTsp: React.FC<RetirementTspProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  const styles = StyleSheet.create({
-    fieldRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: theme.spacing.m,
-    },
-    row: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: theme.spacing.m,
-    },
-    labelRow: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    labelHelpText: {
-      ...theme.typography.subtitle,
-      color: theme.colors.text,
-      marginRight: theme.spacing.xs,
-    },
-    segmentedSelectorSpacing: {
-      marginBottom: theme.spacing.m,
-      marginLeft: theme.spacing.s,
-    },
-    tspInputRow: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      marginLeft: theme.spacing.s,
-    },
-    tspAmountInput: {
-      flex: 1,
-    },
-    tspPillButton: {
-      paddingHorizontal: theme.spacing.s,
-      paddingVertical: theme.spacing.xs,
-      flexShrink: 0,
-      marginLeft: theme.spacing.s,
-    },
-    tspSpacer: {
-      width: theme.spacing.s,
-    },
-    boldLabel: {
-      ...theme.typography.subtitle,
-      color: theme.colors.text,
-      marginBottom: theme.spacing.s,
-    },
-    boldLabelNoMargin: {
-      marginBottom: 0,
-    },
-    centerLabel: {
-      textAlign: "center",
-    },
-    avgSalaryColumn: {
-      flex: 1.5,
-      marginRight: theme.spacing.s,
-    },
-    contPercentageColumn: {
-      flex: 1,
-      marginRight: theme.spacing.s,
-    },
-    contYearsColumn: {
-      flex: 1,
-      marginRight: theme.spacing.s,
-    },
-    returnColumn: {
-      flex: 1,
-    },
-  });
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        // Vertical field block
+        fieldBlock: {
+          marginBottom: theme.spacing.m,
+        },
+        // Label row: LabelWithHelp + SegmentedSelector side by side
+        tspLabelRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: theme.spacing.s,
+        },
+        labelRow: {
+          flexDirection: "row",
+          alignItems: "center",
+        },
+        labelHelpText: {
+          ...theme.typography.subtitle,
+          color: theme.colors.text,
+          marginRight: theme.spacing.xs,
+        },
+        // TSP type selector — fixed width next to label
+        tspTypeSelector: {
+          flex: 1,
+          marginLeft: theme.spacing.s,
+        },
+        // Input row: CurrencyInput fills space, PillButton on right
+        tspInputRow: {
+          flexDirection: "row",
+          alignItems: "center",
+        },
+        tspAmountInput: {
+          flex: 1,
+        },
+        tspPillButton: {
+          paddingHorizontal: theme.spacing.s,
+          paddingVertical: theme.spacing.xs,
+          flexShrink: 0,
+          marginLeft: theme.spacing.s,
+        },
+        // TSP calculator expanded row
+        calculatorRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: theme.spacing.m,
+        },
+        boldLabel: {
+          ...theme.typography.subtitle,
+          color: theme.colors.text,
+          marginBottom: theme.spacing.s,
+        },
+        boldLabelNoMargin: {
+          marginBottom: 0,
+        },
+        centerLabel: {
+          textAlign: "center",
+        },
+        avgSalaryColumn: {
+          flex: 1.5,
+          marginRight: theme.spacing.s,
+        },
+        contPercentageColumn: {
+          flex: 1,
+          marginRight: theme.spacing.s,
+        },
+        contYearsColumn: {
+          flex: 1,
+          marginRight: theme.spacing.s,
+        },
+        returnColumn: {
+          flex: 1,
+        },
+      }),
+    [theme],
+  );
 
   return (
     <>
-      <View style={styles.fieldRow}>
-        <LabelWithHelp
-          label="TSP"
-          contentKey="TSP"
-          onPress={handleOpenHelp}
-          style={styles.labelRow}
-          textStyle={styles.labelHelpText}
-          iconColor={theme.colors.disabled}
-        />
-        <SegmentedSelector
-          style={styles.segmentedSelectorSpacing}
-          options={tspTypeOptions}
-          selectedValues={[tspType]}
-          onValueChange={(value) => setTspType(value)}
-        />
+      {/* TSP section — label+toggle on top row, input+button on bottom row */}
+      <View style={styles.fieldBlock}>
+        {/* Row 1: "TSP ?" label + Roth/Traditional toggle */}
+        <View style={styles.tspLabelRow}>
+          <LabelWithHelp
+            label="TSP"
+            contentKey="TSP"
+            onPress={handleOpenHelp}
+            style={styles.labelRow}
+            textStyle={styles.labelHelpText}
+            iconColor={theme.colors.disabled}
+          />
+          <SegmentedSelector
+            style={styles.tspTypeSelector}
+            options={tspTypeOptions}
+            selectedValues={[tspType]}
+            onValueChange={(value) => setTspType(value)}
+          />
+        </View>
+
+        {/* Row 2: Currency input + Calculate pill button */}
         <View style={styles.tspInputRow}>
           <CurrencyInput
             style={styles.tspAmountInput}
@@ -164,8 +181,9 @@ export const RetirementTsp: React.FC<RetirementTspProps> = ({
         </View>
       </View>
 
+      {/* Expanded TSP calculator: Avg Salary / Cont.% / Years / Return */}
       {isTspCalculatorVisible && (
-        <View style={styles.row}>
+        <View style={styles.calculatorRow}>
           <View style={styles.avgSalaryColumn}>
             <Text
               style={[

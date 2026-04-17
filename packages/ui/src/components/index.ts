@@ -13,6 +13,7 @@ export { default as Divider } from "./Divider";
 export * from "./ExemptButton";
 export * from "./Icon";
 export * from "./IconRow";
+export * from "./LabelWithHelp";
 export { default as NeumorphicInset } from "./NeumorphicInset";
 export { default as NeumorphicOutset } from "./NeumorphicOutset";
 export * from "./PayDisplay";

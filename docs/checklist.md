@@ -30,8 +30,8 @@
 
 ### Phase 1: Pay API Sanitization
 *Goal: Remove logic duplication in database access layer.*
-- [ ] **YOS Column Selector**: Extract the 40+ branch `if/else` ladders for Years of Service (YOS) column selection into a shared utility in `pay-supabase-api.ts`.
-- [ ] **Query Result Wrapping**: Standardize `sanitizeError` and result logging across all Supabase API files to reduce boilerplate.
+- [x] **YOS Column Selector**: Extract the 40+ branch `if/else` ladders for Years of Service (YOS) column selection into a shared utility in `pay-supabase-api.ts`.
+- [x] **Query Result Wrapping**: Standardize `sanitizeError` and result logging across all Supabase API files to reduce boilerplate.
 
 ### Phase 2: Type Safety Hardening
 *Goal: Eliminate remaining `any` boundaries in data hydration.*
@@ -40,10 +40,10 @@
 
 ### Phase 3: Component Housekeeping & Standardization
 *Goal: Fix duplication and optimize the component tree.*
-- [ ] **Consolidate `LabelWithHelp`**: Merge `NewLabelWithHelp` (Pay) and `LabelWithHelp` (Retirement) into a single optimized primitive in `@repo/ui`.
-- [ ] **Extract `BestScoreSection`**: Pull the 450+ line inline component from `best-score.tsx` into `components/PtCalculator/`.
-- [ ] **Scope `GenderSelector`**: Move from root `components/` to `PtCalculator/` (or promote to `@repo/ui` if shared intent).
-- [ ] **Memoize `PayDemographics` Styles**: Move `StyleSheet.create` inside a `useMemo` block to comply with performance standards.
+- [x] **Consolidate `LabelWithHelp`**: Merge `NewLabelWithHelp` (Pay) and `LabelWithHelp` (Retirement) into a single optimized primitive in `@repo/ui`.
+- [x] **Extract `BestScoreSection`**: Pull the 450+ line inline component from `best-score.tsx` into `components/PtCalculator/`.
+- [x] **Scope `GenderSelector`**: Move from root `components/` to `PtCalculator/` (or promote to `@repo/ui` if shared intent).
+- [x] **Memoize `PayDemographics` Styles**: Move `StyleSheet.create` inside a `useMemo` block to comply with performance standards.
 
 ### Phase 4: Structural Decomposition & "God" Modals
 *Goal: Thin the root layout and monolithic UI components.*
@@ -56,7 +56,14 @@
 - [ ] **Scoring Engine Split**: Break down `pt-calculator.ts` into `scoring.ts`, `altitude.ts`, and `standards-utils.ts` to separate pure math from metadata lookups.
 - [ ] **Income/Deduction Reducers**: Modularize special pay and deduction summation logic in `pay-calculator.ts`.
 
-### Phase 5: Reliability & Quality Gates
+### Phase 6: Refactoring Monolithic Calculation Hooks
+*Goal: Modularize massive calculator state hooks without modifying their public API signatures to prevent stale closures and performance issues.*
+- [ ] **Modularize `usePayCalculatorState`**: Split the 760+ line hook into domain-specific internal hooks (`usePayInputState`, `usePayApiData`, `usePayCalculations`) for safe composition.
+- [x] **Decouple `useRetirementCalculatorState`**: Extract TSP logic and MHA/Disability API interactions into independent internal sub-hooks.
+- [x] **Refactor `usePtCalculatorState`**: Extract the payload constructor mapping into an isolated `useMemo` block from the 150-line inline setup.
+- [x] **Standardize `useBestScoreState`**: Convert individual `useState` declarations to a `useReducer` pattern to manage inputs and exemptions simultaneously.
+
+### Phase 7: Reliability & Quality Gates
 *Goal: Establish permanent safety nets for the production target.*
 - [ ] **PT Fallback Engine**: Add missing Cardio Risk Category safety guards in `ScoreDisplay.tsx` to prevent crashes on partial DB results.
 - [ ] **Standardize Style Linting**: Resolve the noise from `no-unused-styles` vs Style Factory pattern.

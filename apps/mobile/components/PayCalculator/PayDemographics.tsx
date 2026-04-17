@@ -78,47 +78,51 @@ export const PayDemographics: React.FC<PayDemographicsProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  const styles = StyleSheet.create({
-    container: {
-      flexDirection: "row",
-    },
-    leftColumn: {
-      flex: 1.1,
-    },
-    rightColumn: {
-      flex: 0.9,
-      paddingRight: theme.spacing.s,
-    },
-    fieldRow: {
-      marginBottom: theme.spacing.m,
-    },
-    boldLabel: {
-      ...theme.typography.subtitle,
-      color: theme.colors.text,
-      marginBottom: theme.spacing.s,
-    },
-    verticalDivider: {
-      marginHorizontal: theme.spacing.m,
-      backgroundColor: getAlphaColor("#000000", 0.01),
-    },
-    marginBottomS: {
-      marginBottom: theme.spacing.s,
-    },
-    noMarginBottom: {
-      marginBottom: 0,
-    },
-    noMarginTopBottom: {
-      marginTop: 0,
-      marginBottom: 0,
-    },
-    noMarginHorizontal: {
-      marginLeft: 0,
-      marginRight: 0,
-    },
-    marginTopS: {
-      marginTop: theme.spacing.s,
-    },
-  });
+  const styles = React.useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flexDirection: "row",
+        },
+        leftColumn: {
+          flex: 1.1,
+        },
+        rightColumn: {
+          flex: 0.9,
+          paddingRight: theme.spacing.s,
+        },
+        fieldRow: {
+          marginBottom: theme.spacing.m,
+        },
+        boldLabel: {
+          ...theme.typography.subtitle,
+          color: theme.colors.text,
+          marginBottom: theme.spacing.s,
+        },
+        verticalDivider: {
+          marginHorizontal: theme.spacing.m,
+          backgroundColor: getAlphaColor("#000000", 0.01),
+        },
+        marginBottomS: {
+          marginBottom: theme.spacing.s,
+        },
+        noMarginBottom: {
+          marginBottom: 0,
+        },
+        noMarginTopBottom: {
+          marginTop: 0,
+          marginBottom: 0,
+        },
+        noMarginHorizontal: {
+          marginLeft: 0,
+          marginRight: 0,
+        },
+        marginTopS: {
+          marginTop: theme.spacing.s,
+        },
+      }),
+    [theme],
+  );
 
   return (
     <View style={styles.container}>

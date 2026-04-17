@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 
+import { useNumericInput } from "./useNumericInput";
 import { useTimeInput } from "./useTimeInput";
 
 /**
@@ -28,9 +29,17 @@ export function useCoreState(
   // State for the selected core exercise component (e.g., 'sit_ups_1min').
   const [coreComponent, setCoreComponent] = useState(initialComponent);
   // State for the number of sit-ups.
-  const [situps, setSitups] = useState(initialSitups);
+  const {
+    value: situps,
+    onChangeText: setSitups,
+    setValue: setSitupsValue,
+  } = useNumericInput(initialSitups, { max: 200 });
   // State for the number of reverse crunches.
-  const [reverseCrunches, setReverseCrunches] = useState(initialCrunches);
+  const {
+    value: reverseCrunches,
+    onChangeText: setReverseCrunches,
+    setValue: setReverseCrunchesValue,
+  } = useNumericInput(initialCrunches, { max: 200 });
   // State for the minutes part of the plank time.
   const {
     minutes: plankMinutes,
@@ -49,8 +58,8 @@ export function useCoreState(
     setIsExempt((current) => {
       const nextIsExempt = !current;
       if (nextIsExempt) {
-        setSitups("");
-        setReverseCrunches("");
+        setSitupsValue("");
+        setReverseCrunchesValue("");
         setPlankMinutes("");
         setPlankSeconds("");
       }

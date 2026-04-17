@@ -1,56 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getAlphaColor, useTheme } from "@repo/ui";
 import React from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-// Corrected LabelWithHelp for extraction
-interface NewLabelWithHelpProps {
-  label: string;
-  contentKey: string;
-  onHelpPress: (contentKey: string) => void;
-}
-
-export const NewLabelWithHelp: React.FC<NewLabelWithHelpProps> = ({
-  label,
-  contentKey,
-  onHelpPress,
-}) => {
-  const { theme } = useTheme();
-
-  const styles = StyleSheet.create({
-    labelRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: theme.spacing.s,
-    },
-    labelStyle: {
-      // Based on original usage of `styles.boldLabel`
-      ...theme.typography.subtitle,
-      color: theme.colors.text,
-      marginBottom: theme.spacing.s,
-    },
-  });
-
-  return (
-    <View style={styles.labelRow}>
-      <Text style={styles.labelStyle}>{label}</Text>
-      <Pressable onPress={() => onHelpPress(contentKey)}>
-        <MaterialCommunityIcons
-          name="help-circle-outline"
-          size={16}
-          color={theme.colors.disabled}
-        />
-      </Pressable>
-    </View>
-  );
-};
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface RoundIconButtonProps {
   onPress: () => void;
@@ -137,5 +88,3 @@ export const CancelButton: React.FC<CancelButtonProps> = ({ onPress }) => {
     />
   );
 };
-
-export default NewLabelWithHelp;

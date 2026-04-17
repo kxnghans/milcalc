@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient";
+import { handleApiError, supabase } from "./supabaseClient";
 import { Database } from "./types";
 
 export type SyncMetadata = Database["public"]["Tables"]["sync_metadata"]["Row"];
@@ -13,7 +13,7 @@ export const getSyncMetadata = async (): Promise<SyncMetadata[] | null> => {
     .select("table_name, last_updated_at");
 
   if (error) {
-    console.error("Error fetching sync metadata:", error);
+    handleApiError("Error fetching sync metadata", error);
     return null;
   }
 

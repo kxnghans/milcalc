@@ -18,6 +18,243 @@ import { Alert } from "react-native";
 
 import { useDebounce } from "./useDebounce";
 
+function useRetirementTsp(retirementSystem: string) {
+  const [isTspCalculatorVisible, setIsTspCalculatorVisible] = useState(false);
+  const [tspContributionAmount, setTspContributionAmount] = useState("");
+  const [tspContributionPercentage, setTspContributionPercentage] =
+    useState("");
+  const [tspContributionYears, setTspContributionYears] = useState("");
+  const [tspAmount, setTspAmount] = useState("");
+  const [tspType, setTspType] = useState("Roth");
+  const [tspReturn, setTspReturn] = useState(8);
+  const [tsp, setTsp] = useState(0);
+
+  const debouncedTspContributionAmount = useDebounce(
+    tspContributionAmount,
+    500,
+  );
+  const debouncedTspContributionPercentage = useDebounce(
+    tspContributionPercentage,
+    500,
+  );
+  const debouncedTspContributionYears = useDebounce(tspContributionYears, 500);
+
+  useEffect(() => {
+    const tspValue = calculateTsp(
+      tspAmount,
+      isTspCalculatorVisible,
+      Number(debouncedTspContributionAmount),
+      Number(debouncedTspContributionPercentage),
+      Number(debouncedTspContributionYears),
+      retirementSystem as "High 3" | "BRS",
+      tspReturn,
+    );
+    setTsp(tspValue);
+
+    if (isTspCalculatorVisible) {
+      setTspAmount(tspValue.toString());
+    }
+  }, [
+    tspAmount,
+    isTspCalculatorVisible,
+    debouncedTspContributionAmount,
+    debouncedTspContributionPercentage,
+    debouncedTspContributionYears,
+    retirementSystem,
+    tspReturn,
+  ]);
+
+  useEffect(() => {
+    if (isTspCalculatorVisible) {
+      setTspAmount("");
+    }
+  }, [isTspCalculatorVisible]);
+
+  const resetTsp = () => {
+    setIsTspCalculatorVisible(false);
+    setTspContributionAmount("");
+    setTspContributionPercentage("");
+    setTspContributionYears("");
+    setTspAmount("");
+    setTspType("Roth");
+    setTspReturn(8);
+  };
+
+  return {
+    isTspCalculatorVisible,
+    setIsTspCalculatorVisible,
+    tspContributionAmount,
+    setTspContributionAmount,
+    tspContributionPercentage,
+    setTspContributionPercentage,
+    tspContributionYears,
+    setTspContributionYears,
+    tspAmount,
+    setTspAmount,
+    tspType,
+    setTspType,
+    tspReturn,
+    setTspReturn,
+    tsp,
+    resetTsp,
+  };
+}
+
+function useRetirementMhaAndDisability() {
+  const [mha, setMha] = useState<string>("initial");
+  const [state, setState] = useState<string>("");
+  const [disabilityPercentage, setDisabilityPercentage] = useState<
+    DisabilityPercentage | "0%"
+  >("0%");
+  const [dependentStatus, setDependentStatus] = useState<
+    DependentStatus | "none"
+  >("none");
+
+  const {
+    data: mhaData,
+    error: mhaError,
+    isLoading: isLoadingMha,
+  } = useQuery({
+    queryKey: ["mhaData"],
+    queryFn: getMhaData,
+    staleTime: Infinity,
+  });
+
+  const {
+    data: disabilityData,
+    error: disabilityError,
+    isLoading: isLoadingDisability,
+  } = useQuery({
+    queryKey: ["disabilityData"],
+    queryFn: getDisabilityData,
+    staleTime: Infinity,
+  });
+
+  const handleMhaChange = (mhaValue: string, stateValue: string) => {
+    setMha(mhaValue);
+    setState(stateValue);
+  };
+
+  const mhaDisplayName = useMemo(() => {
+    if (mha === "initial") return "Select a state";
+    if (mha === "ON_BASE") return "ON BASE";
+    if (!mha || !mhaData) return "...";
+    for (const stateKey in mhaData) {
+      const mhaList = mhaData[stateKey] as { label: string; value: string }[];
+      const mhaObject = mhaList.find((m) => m.value === mha);
+      if (mhaObject) {
+        return mhaObject.label;
+      }
+    }
+    return "...";
+  }, [mha, mhaData]);
+
+  const handleDisabilityChange = (
+    statusValue: string,
+    percentageValue: string,
+  ) => {
+    setDependentStatus(statusValue as DependentStatus);
+    setDisabilityPercentage(percentageValue as DisabilityPercentage);
+    if (percentageValue === "0%") {
+      setDependentStatus("none");
+    }
+  };
+
+  const disabilityDisplayName = useMemo(() => {
+    if (!disabilityPercentage) return "Select disability";
+    if (disabilityPercentage === "0%") return "0% - No Disability";
+    if (!dependentStatus) return "Select a dependent status";
+    return `${disabilityPercentage} - ${dependentStatus}`;
+  }, [disabilityPercentage, dependentStatus]);
+
+  const disabilityPercentageItems = useMemo(() => {
+    if (!disabilityData || disabilityData.length === 0) return [];
+    const keys = Object.keys(disabilityData[0]).filter((key) =>
+      key.endsWith("%"),
+    );
+    keys.sort((a, b) => {
+      const numA = parseInt(a.replace("%", ""));
+      const numB = parseInt(b.replace("%", ""));
+      return numA - numB;
+    });
+    return keys;
+  }, [disabilityData]);
+
+  const disabilityPickerData = useMemo(() => {
+    if (!disabilityData) return {};
+    const groupedData: { [key: string]: { label: string; value: string }[] } = {
+      "0%": [{ label: "No Disability", value: "none" }],
+    };
+    const allStatuses = disabilityData.map((item) => ({
+      label: item.dependent_status,
+      value: item.dependent_status,
+    }));
+    const percentageKeys =
+      disabilityData.length > 0
+        ? Object.keys(disabilityData[0]).filter((key) => key.endsWith("%"))
+        : [];
+    percentageKeys.forEach((key) => {
+      if (key !== "0%") {
+        groupedData[key] = allStatuses;
+      }
+    });
+    return groupedData;
+  }, [disabilityData]);
+
+  const statusItems = useMemo(() => {
+    if (!disabilityData) return [];
+    return disabilityData.map((item) => ({
+      label: item.dependent_status,
+      value: item.dependent_status,
+    }));
+  }, [disabilityData]);
+
+  const percentageItems = [
+    { label: "10%", value: "10" },
+    { label: "20%", value: "20" },
+    { label: "30%", value: "30" },
+    { label: "40%", value: "40" },
+    { label: "50%", value: "50" },
+    { label: "60%", value: "60" },
+    { label: "70%", value: "70" },
+    { label: "80%", value: "80" },
+    { label: "90%", value: "90" },
+    { label: "100%", value: "100" },
+  ];
+
+  const resetMhaAndDisability = () => {
+    setMha("initial");
+    setState("");
+    setDisabilityPercentage("0%");
+    setDependentStatus("none");
+  };
+
+  return {
+    mha,
+    setMha,
+    state,
+    mhaData,
+    mhaError,
+    isLoadingMha,
+    handleMhaChange,
+    mhaDisplayName,
+    disabilityPercentage,
+    setDisabilityPercentage,
+    dependentStatus,
+    setDependentStatus,
+    disabilityData,
+    disabilityError,
+    isLoadingDisability,
+    percentageItems,
+    statusItems,
+    disabilityPickerData,
+    disabilityPercentageItems,
+    handleDisabilityChange,
+    disabilityDisplayName,
+    resetMhaAndDisability,
+  };
+}
+
 export const useRetirementCalculatorState = (
   initialAge: string = "",
   onSaveToProfile?: (data: { age?: string }) => void,
@@ -29,16 +266,55 @@ export const useRetirementCalculatorState = (
   const [high3PayGrade1, setHigh3PayGrade1] = useState<string | null>(null);
   const [high3PayGrade2, setHigh3PayGrade2] = useState<string | null>(null);
   const [high3PayGrade3, setHigh3PayGrade3] = useState<string | null>(null);
-  const [tspAmount, setTspAmount] = useState("");
+  const {
+    isTspCalculatorVisible,
+    setIsTspCalculatorVisible,
+    tspContributionAmount,
+    setTspContributionAmount,
+    tspContributionPercentage,
+    setTspContributionPercentage,
+    tspContributionYears,
+    setTspContributionYears,
+    tspAmount,
+    setTspAmount,
+    tspType,
+    setTspType,
+    tspReturn,
+    setTspReturn,
+    tsp,
+    resetTsp,
+  } = useRetirementTsp(retirementSystem);
+
+  const {
+    mha,
+    setMha,
+    state,
+    mhaData,
+    mhaError,
+    isLoadingMha,
+    handleMhaChange,
+    mhaDisplayName,
+    disabilityPercentage,
+    setDisabilityPercentage,
+    dependentStatus,
+    setDependentStatus,
+    disabilityData,
+    disabilityError,
+    isLoadingDisability,
+    percentageItems,
+    statusItems,
+    disabilityPickerData,
+    disabilityPercentageItems,
+    handleDisabilityChange,
+    disabilityDisplayName,
+    resetMhaAndDisability,
+  } = useRetirementMhaAndDisability();
+
+  const [yearsOfService, setYearsOfService] = useState("");
   const [servicePoints, setServicePoints] = useState("");
   const [goodYears, setGoodYears] = useState("");
-
-  // New State
-  const [yearsOfService, setYearsOfService] = useState("");
   const [filingStatus, setFilingStatus] = useState("Single");
   const [brsPayGrade, setBrsPayGrade] = useState(null);
-  const [tspType, setTspType] = useState("Roth");
-  const [tspReturn, setTspReturn] = useState(8);
 
   const [federalStandardDeduction, setFederalStandardDeduction] = useState(0);
   const [stateStandardDeduction, setStateStandardDeduction] = useState(0);
@@ -98,48 +374,9 @@ export const useRetirementCalculatorState = (
   // Calculated values
   const [pension, setPension] = useState(0);
   const [disabilityIncome, setDisabilityIncome] = useState(0);
-  const [tsp, setTsp] = useState(0);
   const [taxes, setTaxes] = useState({ federal: 0, state: 0 });
 
-  // TSP Calculator State
-  const [isTspCalculatorVisible, setIsTspCalculatorVisible] = useState(false);
-  const [tspContributionAmount, setTspContributionAmount] = useState("");
-  const [tspContributionPercentage, setTspContributionPercentage] =
-    useState("");
-  const [tspContributionYears, setTspContributionYears] = useState("");
-
-  const debouncedTspContributionAmount = useDebounce(
-    tspContributionAmount,
-    500,
-  );
-  const debouncedTspContributionPercentage = useDebounce(
-    tspContributionPercentage,
-    500,
-  );
-  const debouncedTspContributionYears = useDebounce(tspContributionYears, 500);
-
-  const [disabilityPercentage, setDisabilityPercentage] = useState<
-    DisabilityPercentage | "0%"
-  >("0%");
-  const [dependentStatus, setDependentStatus] = useState<
-    DependentStatus | "none"
-  >("none");
-
-  // MHA State
-  const [mha, setMha] = useState<string>("initial");
-  const [state, setState] = useState<string>("");
-
   // --- Data Fetching with React Query ---
-  const {
-    data: mhaData,
-    error: mhaError,
-    isLoading: isLoadingMha,
-  } = useQuery({
-    queryKey: ["mhaData"],
-    queryFn: getMhaData,
-    staleTime: Infinity,
-  });
-
   const {
     data: payGrades,
     error: payGradesError,
@@ -186,16 +423,6 @@ export const useRetirementCalculatorState = (
     staleTime: Infinity,
   });
 
-  const {
-    data: disabilityData,
-    error: disabilityError,
-    isLoading: isLoadingDisability,
-  } = useQuery({
-    queryKey: ["disabilityData"],
-    queryFn: getDisabilityData,
-    staleTime: Infinity,
-  });
-
   const isLoading =
     isLoadingMha ||
     isLoadingPayGrades ||
@@ -220,33 +447,6 @@ export const useRetirementCalculatorState = (
     qualifyingDeploymentDays,
     component,
     breakInService,
-  ]);
-
-  // This effect handles the TSP calculation logic separately to avoid infinite loops.
-  useEffect(() => {
-    const tspValue = calculateTsp(
-      tspAmount,
-      isTspCalculatorVisible,
-      Number(debouncedTspContributionAmount),
-      Number(debouncedTspContributionPercentage),
-      Number(debouncedTspContributionYears),
-      retirementSystem as "High 3" | "BRS",
-      tspReturn,
-    );
-    setTsp(tspValue);
-
-    // If the calculator is visible, sync the main TSP amount input with the calculated value.
-    if (isTspCalculatorVisible) {
-      setTspAmount(tspValue.toString());
-    }
-  }, [
-    tspAmount,
-    isTspCalculatorVisible,
-    debouncedTspContributionAmount,
-    debouncedTspContributionPercentage,
-    debouncedTspContributionYears,
-    retirementSystem,
-    tspReturn,
   ]);
 
   // This is the main calculation effect, now simplified to not include TSP logic.
@@ -373,95 +573,12 @@ export const useRetirementCalculatorState = (
     }
     return payGradesForYear2.slice(selectedIndex);
   }, [payGradesForYear2, high3PayGrade2]);
-  const disabilityPercentageItems = useMemo(() => {
-    if (!disabilityData || disabilityData.length === 0) return [];
-    const keys = Object.keys(disabilityData[0]).filter((key) =>
-      key.endsWith("%"),
-    );
-    keys.sort((a, b) => {
-      const numA = parseInt(a.replace("%", ""));
-      const numB = parseInt(b.replace("%", ""));
-      return numA - numB;
-    });
-    return keys;
-  }, [disabilityData]);
-
-  const disabilityPickerData = useMemo(() => {
-    if (!disabilityData) return {};
-    const groupedData: { [key: string]: { label: string; value: string }[] } = {
-      "0%": [{ label: "No Disability", value: "none" }],
-    };
-    const allStatuses = disabilityData.map((item) => ({
-      label: item.dependent_status,
-      value: item.dependent_status,
-    }));
-    const percentageKeys =
-      disabilityData.length > 0
-        ? Object.keys(disabilityData[0]).filter((key) => key.endsWith("%"))
-        : [];
-    percentageKeys.forEach((key) => {
-      if (key !== "0%") {
-        groupedData[key] = allStatuses;
-      }
-    });
-    return groupedData;
-  }, [disabilityData]);
 
   // Conditional Inputs
-  const [showServicePoints, setShowServicePoints] = useState(true);
-  const [showGoodYears, setShowGoodYears] = useState(true);
-  useEffect(() => {
-    if (component === "Active") {
-      setShowServicePoints(false);
-      setShowGoodYears(false);
-    } else {
-      setShowServicePoints(true);
-      setShowGoodYears(true);
-    }
-  }, [component]);
-
-  useEffect(() => {
-    if (isTspCalculatorVisible) {
-      setTspAmount("");
-    }
-  }, [isTspCalculatorVisible]);
-
-  const mhaDisplayName = useMemo(() => {
-    if (mha === "initial") return "Select a state";
-    if (mha === "ON_BASE") return "ON BASE";
-    if (!mha || !mhaData) return "...";
-    for (const stateKey in mhaData) {
-      const mhaList = mhaData[stateKey] as { label: string; value: string }[];
-      const mhaObject = mhaList.find((m) => m.value === mha);
-      if (mhaObject) {
-        return mhaObject.label;
-      }
-    }
-    return "...";
-  }, [mha, mhaData]);
-
-  const disabilityDisplayName = useMemo(() => {
-    if (!disabilityPercentage) return "Select disability";
-    if (disabilityPercentage === "0%") return "0% - No Disability";
-    if (!dependentStatus) return "Select a dependent status";
-    return `${disabilityPercentage} - ${dependentStatus}`;
-  }, [disabilityPercentage, dependentStatus]);
-
-  const handleMhaChange = (mhaValue: string, stateValue: string) => {
-    setMha(mhaValue);
-    setState(stateValue);
-  };
-
-  const handleDisabilityChange = (
-    statusValue: string,
-    percentageValue: string,
-  ) => {
-    setDependentStatus(statusValue as DependentStatus);
-    setDisabilityPercentage(percentageValue as DisabilityPercentage);
-    if (percentageValue === "0%") {
-      setDependentStatus("none");
-    }
-  };
+  const showReserveInputs = useMemo(
+    () => component === "Reserves" || component === "Guard",
+    [component],
+  );
 
   const resetState = () => {
     setComponent("Active");
@@ -469,46 +586,17 @@ export const useRetirementCalculatorState = (
     setHigh3PayGrade1(null);
     setHigh3PayGrade2(null);
     setHigh3PayGrade3(null);
-    setTspAmount("");
     setServicePoints("");
     setGoodYears("");
-    setMha("initial");
-    setState("");
-    setDisabilityPercentage("0%");
-    setDependentStatus("none");
-    setIsTspCalculatorVisible(false);
-    setTspContributionAmount("");
-    setTspContributionPercentage("");
-    setTspContributionYears("");
     setFilingStatus("Single");
     setBrsPayGrade(null);
-    setTspType("Roth");
-    setTspReturn(8);
     setBirthDateState(null);
     setServiceEntryDate(null);
     hasModifiedBirthDate.current = false;
+
+    resetTsp();
+    resetMhaAndDisability();
   };
-
-  const percentageItems = [
-    { label: "10%", value: "10" },
-    { label: "20%", value: "20" },
-    { label: "30%", value: "30" },
-    { label: "40%", value: "40" },
-    { label: "50%", value: "50" },
-    { label: "60%", value: "60" },
-    { label: "70%", value: "70" },
-    { label: "80%", value: "80" },
-    { label: "90%", value: "90" },
-    { label: "100%", value: "100" },
-  ];
-
-  const statusItems = useMemo(() => {
-    if (!disabilityData) return [];
-    return disabilityData.map((item) => ({
-      label: item.dependent_status,
-      value: item.dependent_status,
-    }));
-  }, [disabilityData]);
 
   return {
     component,
@@ -550,8 +638,8 @@ export const useRetirementCalculatorState = (
     setTspContributionPercentage,
     tspContributionYears,
     setTspContributionYears,
-    showServicePoints,
-    showGoodYears,
+    showServicePoints: showReserveInputs,
+    showGoodYears: showReserveInputs,
     disabilityPickerData,
     disabilityPercentageItems,
     handleDisabilityChange,

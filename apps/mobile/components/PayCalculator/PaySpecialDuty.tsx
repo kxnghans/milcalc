@@ -1,15 +1,10 @@
-import { useTheme } from "@repo/ui";
+import { LabelWithHelp, useTheme } from "@repo/ui";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import CurrencyInput from "../CurrencyInput";
 import InsetTextInput from "../InsetTextInput";
-import {
-  AddButton,
-  CancelButton,
-  NewLabelWithHelp,
-  RoundIconButton,
-} from "./PayUiComponents";
+import { AddButton, CancelButton, RoundIconButton } from "./PayUiComponents";
 
 interface SpecialPays {
   clothing: string;
@@ -112,10 +107,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
         {isIncomeExpanded && (
           <View style={styles.expandableContent}>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Clothing Allowance"
                 contentKey="Clothing Allowance"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -126,10 +121,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Hostile Fire Pay"
                 contentKey="Hostile Fire Pay (HFP)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -140,10 +135,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Imminent Danger Pay"
                 contentKey="Imminent Danger Pay (IDP)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -154,10 +149,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Hazardous Duty Incentive Pay"
                 contentKey="Hazardous Duty Incentive Pay (HDIP)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -168,10 +163,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Hardship Duty Pay"
                 contentKey="Hardship Duty Pay - Location (HDP-L)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -182,10 +177,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Aviation Incentive Pay"
                 contentKey="Aviation Incentive Pays (AvIP)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -196,10 +191,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Assignment Incentive Pay"
                 contentKey="Assignment Incentive Pay (AIP)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -210,10 +205,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Career Sea Pay"
                 contentKey="Career Sea Pay"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -224,10 +219,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Health Professions Officers"
                 contentKey="Health Professions Special Pays"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -238,10 +233,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Foreign Language Proficiency Bonus"
                 contentKey="Foreign Language Proficiency Bonus (FLPB)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -252,10 +247,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="Special Duty Assignment Pay"
                 contentKey="Special Duty Assignment Pay (SDAP)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -266,10 +261,10 @@ export const PaySpecialDuty: React.FC<PaySpecialDutyProps> = ({
               />
             </View>
 
-            <NewLabelWithHelp
+            <LabelWithHelp
               label="Additional Income"
               contentKey="Additional Income"
-              onHelpPress={openDetailModal}
+              onPress={openDetailModal}
             />
             {additionalIncomes.map((income, index) => (
               <View

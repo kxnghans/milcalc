@@ -1,4 +1,4 @@
-import { sanitizeError, supabase } from "./supabaseClient";
+import { handleApiError, supabase } from "./supabaseClient";
 
 export const getRetirementHelpContent = async (contentKey: string) => {
   if (!contentKey) return null;
@@ -9,10 +9,7 @@ export const getRetirementHelpContent = async (contentKey: string) => {
     .eq("title", contentKey);
 
   if (error) {
-    console.error(
-      "Error fetching retirement help content:",
-      sanitizeError(error),
-    );
+    handleApiError("Error fetching retirement help content", error);
     return null;
   }
 

@@ -1,5 +1,108 @@
-import { sanitizeError, supabase } from "./supabaseClient";
+import { handleApiError, supabase } from "./supabaseClient";
 import { Tables } from "./types";
+
+type YosFormat = "base_pay" | "reserve_drill_pay";
+
+/**
+ * Consolidates YOS column mapping for base pay and reserve drill pay.
+ * Maps 'base_pay' to `yos_over_X` or `yos_2_or_less`
+ * Maps 'reserve_drill_pay' to `yos_gt_X` or `yos_le_2`
+ */
+const getYosColumnSelector = <T extends YosFormat>(
+  years_of_service: number,
+  format: T,
+) => {
+  const isBase = format === "base_pay";
+  const p = isBase ? "yos_over_" : "yos_gt_";
+
+  if (years_of_service >= 40)
+    return `${p}40` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 38)
+    return `${p}38` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 36)
+    return `${p}36` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 34)
+    return `${p}34` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 32)
+    return `${p}32` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 30)
+    return `${p}30` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 28)
+    return `${p}28` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 26)
+    return `${p}26` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 24)
+    return `${p}24` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 22)
+    return `${p}22` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 20)
+    return `${p}20` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 18)
+    return `${p}18` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 16)
+    return `${p}16` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 14)
+    return `${p}14` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 12)
+    return `${p}12` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 10)
+    return `${p}10` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 8)
+    return `${p}8` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 6)
+    return `${p}6` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 4)
+    return `${p}4` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 3)
+    return `${p}3` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  if (years_of_service >= 2)
+    return `${p}2` as keyof Tables<
+      T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+    >;
+  return (isBase ? "yos_2_or_less" : "yos_le_2") as keyof Tables<
+    T extends "base_pay" ? "base_pay_2024" : "reserve_drill_pay"
+  >;
+};
 
 /**
  * Fetches the monthly base pay for a given pay grade and years of service.
@@ -17,28 +120,7 @@ export const getBasePay = async (
     ? pay_grade.slice(0, -1)
     : pay_grade;
 
-  let yearsColumn: keyof Tables<"base_pay_2024"> = "yos_2_or_less";
-  if (years_of_service >= 40) yearsColumn = "yos_over_40";
-  else if (years_of_service >= 38) yearsColumn = "yos_over_38";
-  else if (years_of_service >= 36) yearsColumn = "yos_over_36";
-  else if (years_of_service >= 34) yearsColumn = "yos_over_34";
-  else if (years_of_service >= 32) yearsColumn = "yos_over_32";
-  else if (years_of_service >= 30) yearsColumn = "yos_over_30";
-  else if (years_of_service >= 28) yearsColumn = "yos_over_28";
-  else if (years_of_service >= 26) yearsColumn = "yos_over_26";
-  else if (years_of_service >= 24) yearsColumn = "yos_over_24";
-  else if (years_of_service >= 22) yearsColumn = "yos_over_22";
-  else if (years_of_service >= 20) yearsColumn = "yos_over_20";
-  else if (years_of_service >= 18) yearsColumn = "yos_over_18";
-  else if (years_of_service >= 16) yearsColumn = "yos_over_16";
-  else if (years_of_service >= 14) yearsColumn = "yos_over_14";
-  else if (years_of_service >= 12) yearsColumn = "yos_over_12";
-  else if (years_of_service >= 10) yearsColumn = "yos_over_10";
-  else if (years_of_service >= 8) yearsColumn = "yos_over_8";
-  else if (years_of_service >= 6) yearsColumn = "yos_over_6";
-  else if (years_of_service >= 4) yearsColumn = "yos_over_4";
-  else if (years_of_service >= 3) yearsColumn = "yos_over_3";
-  else if (years_of_service >= 2) yearsColumn = "yos_over_2";
+  const yearsColumn = getYosColumnSelector(years_of_service, "base_pay");
 
   const { data, error } = await supabase
     .from("base_pay_2024")
@@ -47,11 +129,13 @@ export const getBasePay = async (
     .single();
 
   if (error) {
-    console.error("Error fetching base pay:", sanitizeError(error));
+    handleApiError("Error fetching base pay", error);
     return null;
   }
 
-  return data ? (data as Tables<"base_pay_2024">)[yearsColumn] : null;
+  return data
+    ? Number((data as Tables<"base_pay_2024">)[yearsColumn]) || 0
+    : null;
 };
 
 /**
@@ -59,7 +143,7 @@ export const getBasePay = async (
  * @param rank - The service member's rank (e.g., 'O-3', 'E-7').
  * @returns The BAS rate, or 0 if not found.
  */
-export const getBasRate = async (rank: string) => {
+export const getBasRate = async (rank: string): Promise<number> => {
   const rankType = rank.charAt(0).toUpperCase();
   const column: keyof Tables<"bas_rates"> =
     rankType === "O" ? "officer_rate" : "enlisted_rate";
@@ -71,11 +155,11 @@ export const getBasRate = async (rank: string) => {
     .single();
 
   if (error) {
-    console.error("Error fetching BAS rate:", sanitizeError(error));
+    handleApiError("Error fetching BAS rate", error);
     return 0;
   }
 
-  return data ? (data as Tables<"bas_rates">)[column] : 0;
+  return data ? Number((data as Tables<"bas_rates">)[column]) || 0 : 0;
 };
 
 /**
@@ -89,7 +173,7 @@ export const getMhaData = async () => {
     .eq("has_dependents", true); // Use one side of the table to get unique MHAs
 
   if (error) {
-    console.error("Error fetching MHA data:", sanitizeError(error));
+    handleApiError("Error fetching MHA data", error);
     return {};
   }
 
@@ -193,10 +277,7 @@ export const getBahRate = async (
     .single();
 
   if (error) {
-    console.error(
-      `Error fetching BAH rate from bah_rates_2026:`,
-      sanitizeError(error),
-    );
+    handleApiError("Error fetching BAH rate from bah_rates_2026", error);
     return null;
   }
 
@@ -214,7 +295,7 @@ export const getPayHelpContent = async (contentKey: string) => {
     .eq("title", contentKey);
 
   if (error) {
-    console.error("Error fetching pay help content:", sanitizeError(error));
+    handleApiError("Error fetching pay help content", error);
     return null;
   }
 
@@ -228,7 +309,7 @@ export const getFederalTaxData = async (year: number) => {
     .eq("year", year);
 
   if (error) {
-    console.error("Error fetching federal tax data:", sanitizeError(error));
+    handleApiError("Error fetching federal tax data", error);
     return [];
   }
 
@@ -242,7 +323,7 @@ export const getStateTaxData = async (year: number) => {
     .eq("year", year);
 
   if (error) {
-    console.error("Error fetching state tax data:", sanitizeError(error));
+    handleApiError("Error fetching state tax data", error);
     return [];
   }
 
@@ -270,7 +351,7 @@ export const getMaxFederalTaxYear = async () => {
     .single();
 
   if (error) {
-    console.error("Error fetching max federal tax year:", sanitizeError(error));
+    handleApiError("Error fetching max federal tax year", error);
     return null;
   }
   return data ? data.year : null;
@@ -285,7 +366,7 @@ export const getMaxStateTaxYear = async () => {
     .single();
 
   if (error) {
-    console.error("Error fetching max state tax year:", sanitizeError(error));
+    handleApiError("Error fetching max state tax year", error);
     return null;
   }
   return data ? data.year : null;
@@ -297,7 +378,7 @@ export const getPayGrades = async () => {
     .select("pay_grade");
 
   if (error) {
-    console.error("Error fetching pay grades:", sanitizeError(error));
+    handleApiError("Error fetching pay grades", error);
     return [];
   }
 
@@ -307,35 +388,17 @@ export const getPayGrades = async () => {
 export const getReserveDrillPay = async (
   pay_grade: string,
   years_of_service: number,
-) => {
+): Promise<number> => {
   if (!pay_grade) return 0;
 
   const adjusted_pay_grade = pay_grade.endsWith("E")
     ? pay_grade.slice(0, -1)
     : pay_grade;
 
-  let yearsColumn: keyof Tables<"reserve_drill_pay"> = "yos_le_2";
-  if (years_of_service >= 40) yearsColumn = "yos_gt_40";
-  else if (years_of_service >= 38) yearsColumn = "yos_gt_38";
-  else if (years_of_service >= 36) yearsColumn = "yos_gt_36";
-  else if (years_of_service >= 34) yearsColumn = "yos_gt_34";
-  else if (years_of_service >= 32) yearsColumn = "yos_gt_32";
-  else if (years_of_service >= 30) yearsColumn = "yos_gt_30";
-  else if (years_of_service >= 28) yearsColumn = "yos_gt_28";
-  else if (years_of_service >= 26) yearsColumn = "yos_gt_26";
-  else if (years_of_service >= 24) yearsColumn = "yos_gt_24";
-  else if (years_of_service >= 22) yearsColumn = "yos_gt_22";
-  else if (years_of_service >= 20) yearsColumn = "yos_gt_20";
-  else if (years_of_service >= 18) yearsColumn = "yos_gt_18";
-  else if (years_of_service >= 16) yearsColumn = "yos_gt_16";
-  else if (years_of_service >= 14) yearsColumn = "yos_gt_14";
-  else if (years_of_service >= 12) yearsColumn = "yos_gt_12";
-  else if (years_of_service >= 10) yearsColumn = "yos_gt_10";
-  else if (years_of_service >= 8) yearsColumn = "yos_gt_8";
-  else if (years_of_service >= 6) yearsColumn = "yos_gt_6";
-  else if (years_of_service >= 4) yearsColumn = "yos_gt_4";
-  else if (years_of_service >= 3) yearsColumn = "yos_gt_3";
-  else if (years_of_service >= 2) yearsColumn = "yos_gt_2";
+  const yearsColumn = getYosColumnSelector(
+    years_of_service,
+    "reserve_drill_pay",
+  );
 
   const { data, error } = await supabase
     .from("reserve_drill_pay")
@@ -344,9 +407,11 @@ export const getReserveDrillPay = async (
     .single();
 
   if (error) {
-    console.error("Error fetching reserve drill pay:", sanitizeError(error));
+    handleApiError("Error fetching reserve drill pay", error);
     return 0;
   }
 
-  return data ? (data as Tables<"reserve_drill_pay">)[yearsColumn] : 0;
+  return data
+    ? Number((data as Tables<"reserve_drill_pay">)[yearsColumn]) || 0
+    : 0;
 };

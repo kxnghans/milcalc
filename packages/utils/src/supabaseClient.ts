@@ -61,3 +61,10 @@ export const sanitizeError = (error: unknown): string => {
   }
   return message;
 };
+
+/**
+ * Standard utility to securely log and sanitize API errors across the system.
+ */
+export const handleApiError = (context: string, error: unknown): void => {
+  console.error(`${context}:`, sanitizeError(error));
+};

@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 
+import { useNumericInput } from "./useNumericInput";
 import { useTimeInput } from "./useTimeInput";
 
 /**
@@ -37,7 +38,11 @@ export function useCardioState(
     setSeconds: setRunSeconds,
   } = useTimeInput(initialRunMinutes, initialRunSeconds);
   // State for the number of shuttles completed.
-  const [shuttles, setShuttles] = useState(initialShuttles);
+  const {
+    value: shuttles,
+    onChangeText: setShuttles,
+    setValue: setShuttlesValue,
+  } = useNumericInput(initialShuttles, { max: 100 });
   // State for the minutes part of the walk time.
   const {
     minutes: walkMinutes,
@@ -58,7 +63,7 @@ export function useCardioState(
       if (nextIsExempt) {
         setRunMinutes("");
         setRunSeconds("");
-        setShuttles("");
+        setShuttlesValue("");
         setWalkMinutes("");
         setWalkSeconds("");
       }

@@ -4,6 +4,7 @@
  * demographics, including age, gender, and altitude group selection.
  */
 
+import * as Haptics from "expo-haptics";
 import { useEffect, useRef } from "react";
 import { Alert } from "react-native";
 
@@ -24,6 +25,10 @@ export function useDemographicsState(
   onSaveToProfile?: (data: { age?: string; gender?: string }) => void,
 ) {
   const { ptDemographics, setPtDemographics } = useCalculatorState();
+
+  const triggerHaptic = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
 
   // Track if the user has manually modified the fields to prevent profile hydration from overwriting their manual input.
   const hasModifiedAge = useRef(false);
@@ -83,12 +88,19 @@ export function useDemographicsState(
   };
 
   const handleSetAge = (newAge: string) => {
+    // Sanitize
+    const sanitized = newAge.replace(/[^0-9]/g, "");
+    if (sanitized !== "" && parseInt(sanitized, 10) > 120) {
+      triggerHaptic();
+      return;
+    }
+
     hasModifiedAge.current = true;
-    setPtDemographics({ age: newAge });
+    setPtDemographics({ age: sanitized });
 
     // If a valid age is entered and profile is empty, prompt to save
-    if (newAge.length >= 2 && !initialAge) {
-      promptSaveToProfile("age", newAge);
+    if (sanitized.length >= 2 && !initialAge) {
+      promptSaveToProfile("age", sanitized);
     }
   };
 
@@ -106,15 +118,53 @@ export function useDemographicsState(
   };
 
   const setWaist = (newWaist: string) => {
-    setPtDemographics({ waist: newWaist });
+    // Sanitize: allow digits and one decimal
+    let sanitized = newWaist.replace(/[^0-9.]/g, "");
+    if (sanitized.split(".").length > 2) {
+      const parts = sanitized.split(".");
+      sanitized = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    if (sanitized !== "") {
+      const val = parseFloat(sanitized);
+      if (val > 100) {
+        triggerHaptic();
+        return;
+      }
+    }
+
+    setPtDemographics({ waist: sanitized });
   };
 
   const setHeightFeet = (newFeet: string) => {
-    setPtDemographics({ heightFeet: newFeet });
+    const sanitized = newFeet.replace(/[^0-9]/g, "");
+    if (sanitized !== "") {
+      const val = parseInt(sanitized, 10);
+      // Limit feet to 7 (World's tallest people are rarely 8+ and definitely not in military PT tests usually)
+      if (val > 7) {
+        triggerHaptic();
+        return;
+      }
+    }
+    setPtDemographics({ heightFeet: sanitized });
   };
 
   const setHeightInches = (newInches: string) => {
-    setPtDemographics({ heightInches: newInches });
+    const sanitized = newInches.replace(/[^0-9]/g, "");
+    if (sanitized !== "") {
+      const val = parseInt(sanitized, 10);
+      // If we are in FT/IN mode, inches must be < 12
+      if (!ptDemographics.isHeightInInches && val >= 12) {
+        triggerHaptic();
+        return;
+      }
+      // If we are in Inches only mode, limit to reasonable max (e.g. 96 inches = 8 feet)
+      if (ptDemographics.isHeightInInches && val > 96) {
+        triggerHaptic();
+        return;
+      }
+    }
+    setPtDemographics({ heightInches: sanitized });
   };
 
   /**

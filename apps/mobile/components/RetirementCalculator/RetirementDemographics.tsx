@@ -1,11 +1,11 @@
-import { SegmentedSelector, useTheme } from "@repo/ui";
-import React from "react";
+import { LabelWithHelp, SegmentedSelector, useTheme } from "@repo/ui";
+import * as Haptics from "expo-haptics";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import NumberInput from "../NumberInput";
 import PickerInput from "../PickerInput";
 import TwoColumnPicker from "../TwoColumnPicker";
-import { LabelWithHelp } from "./RetirementUiComponents";
 
 export const componentOptions = [
   { label: "Active", value: "Active" },
@@ -61,6 +61,12 @@ interface RetirementDemographicsProps {
     { label: string; value: string | number | null }[]
   > | null;
   disabilityPercentageItems: string[];
+  qualifyingDeploymentDays: string;
+  setQualifyingDeploymentDays: (value: string) => void;
+  servicePoints: string;
+  setServicePoints: (value: string) => void;
+  goodYears: string;
+  setGoodYears: (value: string) => void;
   handleOpenHelp: (key: string) => void;
 }
 
@@ -97,73 +103,97 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
   disabilityPercentage,
   disabilityPickerData,
   disabilityPercentageItems,
+  qualifyingDeploymentDays,
+  setQualifyingDeploymentDays,
+  servicePoints,
+  setServicePoints,
+  goodYears,
+  setGoodYears,
   handleOpenHelp,
 }) => {
   const { theme } = useTheme();
 
-  const styles = StyleSheet.create({
-    fieldRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: theme.spacing.m,
-    },
-    row: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: theme.spacing.m,
-    },
-    labelRow: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    boldLabel: {
-      ...theme.typography.subtitle,
-      color: theme.colors.text,
-      marginBottom: theme.spacing.s,
-    },
-    boldLabelNoMargin: {
-      marginBottom: 0,
-    },
-    labelHelpText: {
-      ...theme.typography.subtitle,
-      color: theme.colors.text,
-      marginRight: theme.spacing.xs,
-    },
-    segmentedSelectorSpacing: {
-      marginBottom: theme.spacing.m,
-    },
-    marginHorizontalS: {
-      marginLeft: theme.spacing.s,
-    },
-    centerLabel: {
-      textAlign: "center",
-    },
-    yearColumn: {
-      flex: 1,
-      marginRight: theme.spacing.s,
-    },
-    lastYearColumn: {
-      flex: 1,
-    },
-  });
+  const handleValidatedChange = (
+    text: string,
+    setter: (val: string) => void,
+  ) => {
+    const sanitized = text.replace(/[^0-9]/g, "");
+    if (text !== sanitized) {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setter(sanitized);
+  };
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        // Vertical field block: label stacks above full-width input
+        fieldBlock: {
+          marginBottom: theme.spacing.m,
+        },
+        // Label row with help icon — horizontal label + icon inline
+        labelRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: theme.spacing.s,
+        },
+        labelHelpText: {
+          ...theme.typography.subtitle,
+          color: theme.colors.text,
+          marginRight: theme.spacing.xs,
+        },
+        boldLabel: {
+          ...theme.typography.subtitle,
+          color: theme.colors.text,
+          marginBottom: theme.spacing.s,
+        },
+        // Three-column picker row
+        pickerRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: theme.spacing.m,
+        },
+        yearColumn: {
+          flex: 1,
+          marginRight: theme.spacing.s,
+        },
+        lastYearColumn: {
+          flex: 1,
+        },
+        boldLabelNoMargin: {
+          marginBottom: 0,
+        },
+        centerLabel: {
+          textAlign: "center",
+        },
+        segmentedSpacing: {
+          marginBottom: theme.spacing.m,
+        },
+      }),
+    [theme],
+  );
 
   return (
     <>
+      {/* Component selector: Active / Reserves / Guard */}
       <SegmentedSelector
         options={componentOptions}
         ratios={componentRatios}
         selectedValues={[component]}
         onValueChange={(value) => setComponent(value)}
+        style={styles.segmentedSpacing}
       />
+
+      {/* Retirement system selector: High 3 / BRS */}
       <SegmentedSelector
-        style={styles.segmentedSelectorSpacing}
         options={retirementSystemOptions}
         selectedValues={[retirementSystem]}
         onValueChange={(value) => setRetirementSystem(value)}
+        style={styles.segmentedSpacing}
       />
 
-      <View style={styles.fieldRow}>
+      {/* Years of Service — vertical stack */}
+      <View style={styles.fieldBlock}>
         <LabelWithHelp
           label="Years of Service"
           contentKey="High-3"
@@ -175,12 +205,69 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
         <NumberInput
           placeholder="0"
           value={yearsOfService}
-          onChangeText={setYearsOfService}
-          style={styles.marginHorizontalS}
+          onChangeText={(text) =>
+            handleValidatedChange(text, setYearsOfService)
+          }
         />
       </View>
 
-      <View style={styles.row}>
+      {/* Reserve / Guard conditional fields */}
+      {(component === "Reserves" || component === "Guard") && (
+        <>
+          <View style={styles.fieldBlock}>
+            <LabelWithHelp
+              label="Service Points"
+              contentKey="Service Points"
+              onPress={handleOpenHelp}
+              style={styles.labelRow}
+              textStyle={styles.labelHelpText}
+              iconColor={theme.colors.disabled}
+            />
+            <NumberInput
+              placeholder="0"
+              value={servicePoints}
+              onChangeText={(text) =>
+                handleValidatedChange(text, setServicePoints)
+              }
+            />
+          </View>
+          <View style={styles.fieldBlock}>
+            <LabelWithHelp
+              label="Good Years"
+              contentKey="Good Years"
+              onPress={handleOpenHelp}
+              style={styles.labelRow}
+              textStyle={styles.labelHelpText}
+              iconColor={theme.colors.disabled}
+            />
+            <NumberInput
+              placeholder="0"
+              value={goodYears}
+              onChangeText={(text) => handleValidatedChange(text, setGoodYears)}
+            />
+          </View>
+          <View style={styles.fieldBlock}>
+            <LabelWithHelp
+              label="Qualifying Deployment Days"
+              contentKey="Qualifying Deployment Days"
+              onPress={handleOpenHelp}
+              style={styles.labelRow}
+              textStyle={styles.labelHelpText}
+              iconColor={theme.colors.disabled}
+            />
+            <NumberInput
+              placeholder="0"
+              value={qualifyingDeploymentDays}
+              onChangeText={(text) =>
+                handleValidatedChange(text, setQualifyingDeploymentDays)
+              }
+            />
+          </View>
+        </>
+      )}
+
+      {/* Year -2 / Year -1 / Final Year — three-column row */}
+      <View style={styles.pickerRow}>
         <View style={styles.yearColumn}>
           <Text
             style={[
@@ -237,7 +324,8 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
         </View>
       </View>
 
-      <View style={styles.fieldRow}>
+      {/* Filing Status — vertical stack */}
+      <View style={styles.fieldBlock}>
         <Text style={styles.boldLabel}>Filing Status</Text>
         <SegmentedSelector
           options={filingStatusOptions}
@@ -246,7 +334,8 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
         />
       </View>
 
-      <View style={styles.fieldRow}>
+      {/* MHA — vertical stack */}
+      <View style={styles.fieldBlock}>
         <Text style={styles.boldLabel}>MHA</Text>
         <TwoColumnPicker
           data={mhaData || null}
@@ -257,10 +346,11 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
           error={mhaError}
           primaryColumnValue={state}
           secondaryPlaceholder="Select a location"
-          style={styles.marginHorizontalS}
         />
       </View>
-      <View style={styles.fieldRow}>
+
+      {/* VA Disability — vertical stack */}
+      <View style={styles.fieldBlock}>
         <Text style={styles.boldLabel}>VA Disability</Text>
         <TwoColumnPicker
           data={
@@ -281,7 +371,6 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
           primarySort={(a, b) =>
             Number(a.replace("%", "")) - Number(b.replace("%", ""))
           }
-          style={styles.marginHorizontalS}
         />
       </View>
     </>

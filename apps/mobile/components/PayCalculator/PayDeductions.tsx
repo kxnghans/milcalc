@@ -1,15 +1,10 @@
-import { PillButton, useTheme } from "@repo/ui";
+import { LabelWithHelp, PillButton, useTheme } from "@repo/ui";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import CurrencyInput from "../CurrencyInput";
 import InsetTextInput from "../InsetTextInput";
-import {
-  AddButton,
-  CancelButton,
-  NewLabelWithHelp,
-  RoundIconButton,
-} from "./PayUiComponents";
+import { AddButton, CancelButton, RoundIconButton } from "./PayUiComponents";
 
 interface DeductionsState {
   sgli: string;
@@ -130,10 +125,10 @@ export default function PayDeductions({
             {isTaxOverride && (
               <>
                 <View style={styles.fieldRow}>
-                  <NewLabelWithHelp
+                  <LabelWithHelp
                     label="Federal Tax"
                     contentKey="Federal Tax"
-                    onHelpPress={openDetailModal}
+                    onPress={openDetailModal}
                   />
                   <CurrencyInput
                     placeholder="0.00"
@@ -144,10 +139,10 @@ export default function PayDeductions({
                   />
                 </View>
                 <View style={styles.fieldRow}>
-                  <NewLabelWithHelp
+                  <LabelWithHelp
                     label="State Tax"
                     contentKey="State Tax"
-                    onHelpPress={openDetailModal}
+                    onPress={openDetailModal}
                   />
                   <CurrencyInput
                     placeholder="0.00"
@@ -158,10 +153,10 @@ export default function PayDeductions({
                   />
                 </View>
                 <View style={styles.fieldRow}>
-                  <NewLabelWithHelp
+                  <LabelWithHelp
                     label="FICA"
                     contentKey="FICA"
-                    onHelpPress={openDetailModal}
+                    onPress={openDetailModal}
                   />
                   <CurrencyInput
                     placeholder="0.00"
@@ -175,10 +170,10 @@ export default function PayDeductions({
             )}
 
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="SGLI"
                 contentKey="Servicemembers' Group Life Insurance (SGLI)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -189,10 +184,10 @@ export default function PayDeductions({
               />
             </View>
             <View style={styles.fieldRow}>
-              <NewLabelWithHelp
+              <LabelWithHelp
                 label="TSP"
                 contentKey="Thrift Savings Plan (TSP)"
-                onHelpPress={openDetailModal}
+                onPress={openDetailModal}
               />
               <CurrencyInput
                 placeholder="0.00"
@@ -203,10 +198,10 @@ export default function PayDeductions({
               />
             </View>
 
-            <NewLabelWithHelp
+            <LabelWithHelp
               label="Additional Deductions"
               contentKey="Additional Deductions"
-              onHelpPress={openDetailModal}
+              onPress={openDetailModal}
             />
             {additionalDeductions.map((deduction, index) => (
               <View

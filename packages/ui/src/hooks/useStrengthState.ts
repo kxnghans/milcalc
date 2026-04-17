@@ -7,6 +7,8 @@
 
 import { useState } from "react";
 
+import { useNumericInput } from "./useNumericInput";
+
 /**
  * A custom hook to manage the state for the strength component section.
  * @param {string} [initialComponent='push_ups_1min'] - The initial strength exercise component to be selected.
@@ -20,7 +22,11 @@ export function useStrengthState(
   // State for the selected strength exercise component (e.g., 'push_ups_1min').
   const [pushupComponent, setPushupComponent] = useState(initialComponent);
   // State for the number of push-ups/reps performed.
-  const [pushups, setPushups] = useState(initialPushups);
+  const {
+    value: pushups,
+    onChangeText: setPushups,
+    setValue: setPushupsValue,
+  } = useNumericInput(initialPushups, { max: 200 });
   // State for the exemption status of the component.
   const [isExempt, setIsExempt] = useState(false);
 
@@ -32,7 +38,7 @@ export function useStrengthState(
     setIsExempt((current) => {
       const nextIsExempt = !current;
       if (nextIsExempt) {
-        setPushups("");
+        setPushupsValue("");
       }
       return nextIsExempt;
     });

@@ -15,8 +15,8 @@ import {
   View,
 } from "react-native";
 
-import GenderSelector from "../GenderSelector";
 import NumberInput from "../NumberInput";
+import GenderSelector from "./GenderSelector";
 
 /**
  * Props for the Demographics component.
@@ -247,7 +247,6 @@ export default function Demographics({
                 value={waist}
                 adjustment={'"'}
                 onChangeText={handleWaistChange}
-                onFocus={onFocus}
                 placeholder="inches"
                 inputStyle={[styles.numberInput, inputStyle]}
                 style={styles.ageInputStyle}
@@ -261,7 +260,6 @@ export default function Demographics({
                   value={heightInches}
                   adjustment={'"'}
                   onChangeText={setHeightInches}
-                  onFocus={onFocus}
                   placeholder="inches"
                   inputStyle={[styles.numberInput, inputStyle]}
                   style={styles.ageInputStyle}
@@ -275,7 +273,6 @@ export default function Demographics({
                       value={heightFeet}
                       adjustment={"'"}
                       onChangeText={handleHeightFeetChange}
-                      onFocus={onFocus}
                       placeholder="feet"
                       inputStyle={[styles.numberInput, inputStyle]}
                       style={styles.ageInputStyle}
@@ -288,7 +285,6 @@ export default function Demographics({
                       value={heightInches}
                       adjustment={'"'}
                       onChangeText={setHeightInches}
-                      onFocus={onFocus}
                       placeholder="in"
                       inputStyle={[styles.numberInput, inputStyle]}
                       style={styles.ageInputStyle}

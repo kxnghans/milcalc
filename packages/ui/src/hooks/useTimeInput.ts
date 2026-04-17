@@ -5,6 +5,7 @@
  * sanitize the input to ensure only numeric characters are accepted.
  */
 
+import * as Haptics from "expo-haptics";
 import { useState } from "react";
 
 /**
@@ -20,6 +21,10 @@ export function useTimeInput(
   const [minutes, setMinutes] = useState(initialMinutes);
   const [seconds, setSeconds] = useState(initialSeconds);
 
+  const triggerHaptic = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
   /**
    * Handles changes to the minutes input field.
    * It removes any non-numeric characters from the input.
@@ -27,21 +32,30 @@ export function useTimeInput(
    */
   const handleMinutesChange = (text: string) => {
     const numericValue = text.replace(/[^0-9]/g, "");
-    if (numericValue === "" || parseInt(numericValue, 10) < 60) {
-      setMinutes(numericValue);
-    }
+    // Minutes can be any numeric value for runs, but we might want to cap it eventually.
+    // For now, we just ensure it's numeric.
+    setMinutes(numericValue);
   };
 
   /**
    * Handles changes to the seconds input field.
-   * It removes any non-numeric characters from the input.
+   * It removes any non-numeric characters from the input and limits to < 60.
    * @param {string} text - The raw text from the input field.
    */
   const handleSecondsChange = (text: string) => {
     // Sanitize the input to allow only numeric characters.
     const numericValue = text.replace(/[^0-9]/g, "");
-    if (numericValue === "" || parseInt(numericValue, 10) < 60) {
+
+    if (numericValue === "") {
+      setSeconds("");
+      return;
+    }
+
+    const val = parseInt(numericValue, 10);
+    if (val < 60) {
       setSeconds(numericValue);
+    } else {
+      triggerHaptic();
     }
   };
 

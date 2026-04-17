@@ -1,4 +1,4 @@
-import { bugSupabase } from "./supabaseClient";
+import { bugSupabase, handleApiError } from "./supabaseClient";
 
 export interface BugReport {
   app_id: string;
@@ -37,7 +37,7 @@ export const submitBugReport = async (report: BugReport) => {
   ]);
 
   if (error) {
-    console.error("Failed to submit bug report:", error);
+    handleApiError("Failed to submit bug report", error);
     throw error;
   }
 

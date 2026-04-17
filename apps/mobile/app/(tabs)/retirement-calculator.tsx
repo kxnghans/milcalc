@@ -72,8 +72,6 @@ export default function RetirementCalculatorScreen() {
     setTspContributionPercentage,
     tspContributionYears,
     setTspContributionYears,
-    showServicePoints,
-    showGoodYears,
     servicePoints,
     setServicePoints,
     goodYears,
@@ -108,6 +106,8 @@ export default function RetirementCalculatorScreen() {
     disabilityIncome,
     tsp,
     taxes,
+    qualifyingDeploymentDays,
+    setQualifyingDeploymentDays,
     resetState,
   } = useRetirementCalculatorState(profileAge, (data) =>
     setProfileData(data as Partial<ProfileData>),
@@ -273,6 +273,12 @@ export default function RetirementCalculatorScreen() {
               > | null
             }
             disabilityPercentageItems={disabilityPercentageItems}
+            qualifyingDeploymentDays={qualifyingDeploymentDays}
+            setQualifyingDeploymentDays={setQualifyingDeploymentDays}
+            servicePoints={servicePoints}
+            setServicePoints={setServicePoints}
+            goodYears={goodYears}
+            setGoodYears={setGoodYears}
             handleOpenHelp={handleOpenHelp}
           />
 
@@ -310,12 +316,6 @@ export default function RetirementCalculatorScreen() {
             setServiceEntryDate={setServiceEntryDate}
             breakInService={breakInService}
             setBreakInService={setBreakInService}
-            showServicePoints={showServicePoints}
-            servicePoints={servicePoints}
-            setServicePoints={setServicePoints}
-            showGoodYears={showGoodYears}
-            goodYears={goodYears}
-            setGoodYears={setGoodYears}
             handleOpenHelp={handleOpenHelp}
           />
         </>

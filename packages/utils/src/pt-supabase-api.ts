@@ -1,5 +1,5 @@
 import { parsePerformanceRange } from "./pt-utils";
-import { sanitizeError, supabase } from "./supabaseClient";
+import { handleApiError, supabase } from "./supabaseClient";
 import { PtStandard, Tables } from "./types";
 
 /**
@@ -21,7 +21,7 @@ export const getPtStandards = async (
     .order("points", { ascending: false });
 
   if (error) {
-    console.error("Error fetching scoring standards:", sanitizeError(error));
+    handleApiError("Error fetching scoring standards", error);
     return null;
   }
 
@@ -33,7 +33,7 @@ export const getPtStandards = async (
     .order("points", { ascending: false });
 
   if (whtrError) {
-    console.error("Error fetching WHtR standards:", sanitizeError(whtrError));
+    handleApiError("Error fetching WHtR standards", whtrError);
   }
 
   const combinedData = [...(data || []), ...(whtrData || [])];
@@ -65,7 +65,7 @@ export const getPassFailStandards = async (
     .eq("age_group", age_group);
 
   if (error) {
-    console.error("Error fetching pass/fail standards:", sanitizeError(error));
+    handleApiError("Error fetching pass/fail standards", error);
     return null;
   }
 
@@ -83,7 +83,7 @@ export const getPtAltitudeCorrections = async (): Promise<
     .select("*");
 
   if (error) {
-    console.error("Error fetching altitude corrections:", sanitizeError(error));
+    handleApiError("Error fetching altitude corrections", error);
     return null;
   }
 
@@ -102,10 +102,7 @@ export const getPtAltitudeWalkThresholds = async (
     .eq("sex", gender);
 
   if (error) {
-    console.error(
-      "Error fetching altitude walk thresholds:",
-      sanitizeError(error),
-    );
+    handleApiError("Error fetching altitude walk thresholds", error);
     return null;
   }
 
@@ -139,7 +136,7 @@ export const getHelpContent = async (contentKey: string) => {
     .eq("content_key", contentKey);
 
   if (error) {
-    console.error("Error fetching help content:", sanitizeError(error));
+    handleApiError("Error fetching help content", error);
     return null;
   }
 
@@ -194,7 +191,7 @@ export const getPtStandardsBundle = async (
   });
 
   if (error || !data) {
-    console.error("Error fetching PT standards bundle:", sanitizeError(error));
+    handleApiError("Error fetching PT standards bundle", error);
     return null;
   }
 
