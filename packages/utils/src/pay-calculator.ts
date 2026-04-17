@@ -1,11 +1,6 @@
+import { sumFinancialItems, sumFinancialMap } from "./math-utils";
 import { calculateFederalTax, calculateStateTax } from "./tax-utils";
 import { DependentStatus, DisabilityPercentage, Tables } from "./types";
-const parseCurrency = (value: string | number) => {
-  if (typeof value === "number") return value;
-  if (typeof value === "string")
-    return parseFloat(value.replace(/[^\d.-]/g, "")) || 0;
-  return 0;
-};
 
 interface PayCalculatorInputs {
   basePay: number;
@@ -44,20 +39,9 @@ export const calculatePay = (
 
   const monthlyBah = bah || 0;
   const monthlyBas = bas || 0;
-  const monthlySpecialPays = Object.values(specialPays).reduce(
-    (a: number, b: string | number) => a + parseCurrency(b),
-    0,
-  );
-  const monthlyAdditionalIncomes = additionalIncomes.reduce(
-    (sum: number, item: { amount: string | number }) =>
-      sum + parseCurrency(item.amount),
-    0,
-  );
-  const monthlyAdditionalDeductions = additionalDeductions.reduce(
-    (sum: number, item: { amount: string | number }) =>
-      sum + parseCurrency(item.amount),
-    0,
-  );
+  const monthlySpecialPays = sumFinancialMap(specialPays);
+  const monthlyAdditionalIncomes = sumFinancialItems(additionalIncomes);
+  const monthlyAdditionalDeductions = sumFinancialItems(additionalDeductions);
 
   const annualBasePay = monthlyBasePay * 12;
   const annualBah = monthlyBah * 12;

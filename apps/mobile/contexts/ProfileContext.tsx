@@ -8,18 +8,9 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { ProfileData, ProfileSchema } from "@repo/utils";
 
-export interface ProfileData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  age: string;
-  gender: "male" | "female";
-  accountType: "free" | "premium";
-  hasSeenOnboarding: boolean;
-  donationTotal: number;
-}
+
 
 interface ProfileContextType extends ProfileData {
   setProfileData: (data: Partial<ProfileData>) => void;
@@ -27,17 +18,7 @@ interface ProfileContextType extends ProfileData {
   isProfileComplete: boolean;
 }
 
-const DEFAULT_PROFILE: ProfileData = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  phone: "",
-  age: "",
-  gender: "male",
-  accountType: "free",
-  hasSeenOnboarding: false,
-  donationTotal: 0,
-};
+const DEFAULT_PROFILE = ProfileSchema.parse({});
 
 const ProfileContext = createContext<ProfileContextType>({
   ...DEFAULT_PROFILE,
@@ -76,8 +57,15 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         );
 
         if (result) {
-          const parsed = JSON.parse(result.value) as Partial<ProfileData>;
-          setProfile({ ...DEFAULT_PROFILE, ...parsed });
+          const raw = JSON.parse(result.value);
+          // Use Zod to safely validate and provide defaults for missing/corrupted fields
+          const validation = ProfileSchema.safeParse(raw);
+          if (validation.success) {
+            setProfile(validation.data);
+          } else {
+            console.warn("Profile cache corrupted, using defaults:", validation.error);
+            setProfile(DEFAULT_PROFILE);
+          }
         }
       } catch (e) {
         console.error("Failed to load profile from SQLite:", e);

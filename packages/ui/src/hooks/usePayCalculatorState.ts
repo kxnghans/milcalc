@@ -13,6 +13,9 @@ import {
   getMhaData,
   getReserveDrillPay,
   getStateTaxData,
+  sumFinancialItems,
+  sumFinancialMap,
+  parseCurrency,
 } from "@repo/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -142,16 +145,7 @@ function usePayApiData(
   };
 }
 
-// A simple utility to parse currency strings into numbers
-const parseCurrency = (value: string | number) => {
-  if (typeof value === "number") {
-    return value;
-  }
-  if (typeof value === "string") {
-    return parseFloat(value.replace(/[^\d.-]/g, "")) || 0;
-  }
-  return 0; // Return 0 if value is undefined, null, etc.
-};
+
 
 const officerRanks = [
   { label: "O-1", value: "O-1" },
@@ -443,15 +437,8 @@ export const usePayCalculatorState = (
     if (paySource === "VA Disability") {
       return vaDisabilityPay;
     }
-    const specialPayTotal = Object.values(debouncedSpecialPays).reduce(
-      (sum: number, val: string | number) => sum + parseCurrency(val),
-      0,
-    );
-    const additionalIncomesTotal = debouncedAdditionalIncomes.reduce(
-      (sum: number, item: { amount: string | number }) =>
-        sum + parseCurrency(item.amount),
-      0,
-    );
+    const specialPayTotal = sumFinancialMap(debouncedSpecialPays);
+    const additionalIncomesTotal = sumFinancialItems(debouncedAdditionalIncomes);
     return (
       (Number(basePay) || 0) +
       (Number(bah) || 0) +
@@ -473,11 +460,7 @@ export const usePayCalculatorState = (
     const sgliAndTsp =
       parseCurrency(debouncedDeductions.sgli) +
       parseCurrency(debouncedDeductions.tsp);
-    const additionalDeductionsTotal = debouncedAdditionalDeductions.reduce(
-      (sum: number, item: { amount: string | number }) =>
-        sum + parseCurrency(item.amount),
-      0,
-    );
+    const additionalDeductionsTotal = sumFinancialItems(debouncedAdditionalDeductions);
 
     let taxesTotal = 0;
     if (isTaxOverride) {
@@ -518,15 +501,8 @@ export const usePayCalculatorState = (
     details.push({ label: "BAS", value: bas || 0 });
 
     const otherIncomeTotal =
-      Object.values(debouncedSpecialPays).reduce(
-        (sum: number, val: string | number) => sum + parseCurrency(val),
-        0,
-      ) +
-      debouncedAdditionalIncomes.reduce(
-        (sum: number, item: { amount: string | number }) =>
-          sum + parseCurrency(item.amount),
-        0,
-      );
+      sumFinancialMap(debouncedSpecialPays) +
+      sumFinancialItems(debouncedAdditionalIncomes);
 
     if (otherIncomeTotal > 0) {
       details.push({ label: "Other", value: otherIncomeTotal });
@@ -564,11 +540,7 @@ export const usePayCalculatorState = (
     const otherDeductionsTotal =
       parseCurrency(debouncedDeductions.sgli) +
       parseCurrency(debouncedDeductions.tsp) +
-      debouncedAdditionalDeductions.reduce(
-        (sum: number, item: { amount: string | number }) =>
-          sum + parseCurrency(item.amount),
-        0,
-      );
+      sumFinancialItems(debouncedAdditionalDeductions);
 
     if (otherDeductionsTotal > 0) {
       details.push({ label: "Other", value: otherDeductionsTotal });

@@ -130,17 +130,20 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
         // Vertical field block: label stacks above full-width input
         fieldBlock: {
           marginBottom: theme.spacing.m,
+          marginLeft: theme.spacing.s,
+          marginRight: theme.spacing.s,
         },
         // Label row with help icon — horizontal label + icon inline
         labelRow: {
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
           marginBottom: theme.spacing.s,
         },
         labelHelpText: {
           ...theme.typography.subtitle,
           color: theme.colors.text,
-          marginRight: theme.spacing.xs,
         },
         boldLabel: {
           ...theme.typography.subtitle,
@@ -152,6 +155,8 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
           flexDirection: "row",
           alignItems: "center",
           marginBottom: theme.spacing.m,
+          marginLeft: theme.spacing.s,
+          marginRight: theme.spacing.s,
         },
         yearColumn: {
           flex: 1,
@@ -168,6 +173,11 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
         },
         segmentedSpacing: {
           marginBottom: theme.spacing.m,
+        },
+        nestedSegmentedSpacing: {
+          marginBottom: theme.spacing.m,
+          marginLeft: 0,
+          marginRight: 0,
         },
       }),
     [theme],
@@ -331,6 +341,7 @@ export const RetirementDemographics: React.FC<RetirementDemographicsProps> = ({
           options={filingStatusOptions}
           selectedValues={[filingStatus]}
           onValueChange={(value) => setFilingStatus(value)}
+          style={styles.nestedSegmentedSpacing}
         />
       </View>
 

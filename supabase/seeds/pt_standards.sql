@@ -3098,7 +3098,7 @@ VALUES
   ('shuttles_20m', 'Female', '55-59', '13', 35.0, NULL),
   ('shuttles_20m', 'Female', '60+', '11', 35.0, NULL),
   ('whtr', 'Both', 'All', '<= 0.49', 20.0, 'Low Risk'),
-  ('whtr', 'Both', 'All', '0.5', 19.0, 'Moderate Risk'),
+  ('whtr', 'Both', 'All', '0.50', 19.0, 'Moderate Risk'),
   ('whtr', 'Both', 'All', '0.51', 18.0, 'Moderate Risk'),
   ('whtr', 'Both', 'All', '0.52', 17.0, 'Moderate Risk'),
   ('whtr', 'Both', 'All', '0.53', 16.0, 'Moderate Risk'),
@@ -3108,4 +3108,4 @@ VALUES
   ('whtr', 'Both', 'All', '0.57', 7.5, 'High Risk'),
   ('whtr', 'Both', 'All', '0.58', 5.0, 'High Risk'),
   ('whtr', 'Both', 'All', '0.59', 2.5, 'High Risk'),
-  ('whtr', 'Both', 'All', '>= 0.6', 0.0, 'High Risk');
+  ('whtr', 'Both', 'All', '>= 0.60', 0.0, 'High Risk');

@@ -141,9 +141,10 @@ const ScoreDisplay = ({
 
     let color = getScoreColor(componentScore, maxScore);
     if (isWhtr && riskCategory) {
-      if (riskCategory === "Low Risk") color = excellentColors.progressColor;
-      else if (riskCategory === "Moderate Risk") color = theme.colors.success;
-      else if (riskCategory === "High Risk") color = theme.colors.error;
+      const normalizedRisk = riskCategory.toLowerCase();
+      if (normalizedRisk.includes("low")) color = excellentColors.progressColor;
+      else if (normalizedRisk.includes("moderate")) color = theme.colors.warning || "#FFD600";
+      else if (normalizedRisk.includes("high")) color = theme.colors.error;
     }
 
     const scoreDisplay = (
@@ -152,8 +153,9 @@ const ScoreDisplay = ({
       </Text>
     );
 
-    // Only display the risk category label if it's not WHR
-    if (riskCategory && !isWhtr) {
+    // Only display the risk category label if it's not WHR (which is implied by color/score)
+    // or if specifically requested by the design to show the semantic label.
+    if (!isWhtr) {
       return (
         <View style={styles.riskCategoryContainer}>
           {scoreDisplay}
@@ -164,7 +166,7 @@ const ScoreDisplay = ({
               { color: theme.colors.disabled },
             ]}
           >
-            {riskCategory}
+            {riskCategory || "No Category"}
           </Text>
         </View>
       );

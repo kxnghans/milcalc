@@ -203,6 +203,8 @@ export default function RetirementCalculatorScreen() {
       StyleSheet.create({
         dividerMargin: {
           marginVertical: theme.spacing.m,
+          marginLeft: theme.spacing.s,
+          marginRight: theme.spacing.s,
         },
       }),
     [theme],

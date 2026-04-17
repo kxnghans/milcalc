@@ -64,32 +64,31 @@ export const RetirementTsp: React.FC<RetirementTspProps> = ({
         // Vertical field block
         fieldBlock: {
           marginBottom: theme.spacing.m,
+          marginLeft: theme.spacing.s,
+          marginRight: theme.spacing.s,
         },
-        // Label row: LabelWithHelp + SegmentedSelector side by side
-        tspLabelRow: {
+        // Row 1: Label + Help anchored right
+        headerRow: {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
           marginBottom: theme.spacing.s,
         },
-        labelRow: {
-          flexDirection: "row",
-          alignItems: "center",
-        },
         labelHelpText: {
           ...theme.typography.subtitle,
           color: theme.colors.text,
-          marginRight: theme.spacing.xs,
         },
-        // TSP type selector — fixed width next to label
+        // Row 2: TSP type selector — full width
         tspTypeSelector: {
-          flex: 1,
-          marginLeft: theme.spacing.s,
+          marginBottom: theme.spacing.s,
+          marginLeft: 0,
+          marginRight: 0,
         },
-        // Input row: CurrencyInput fills space, PillButton on right
+        // Row 3: Input row: CurrencyInput fills space, PillButton on right
         tspInputRow: {
           flexDirection: "row",
           alignItems: "center",
+          width: "100%",
         },
         tspAmountInput: {
           flex: 1,
@@ -105,6 +104,8 @@ export const RetirementTsp: React.FC<RetirementTspProps> = ({
           flexDirection: "row",
           alignItems: "center",
           marginBottom: theme.spacing.m,
+          marginLeft: theme.spacing.s,
+          marginRight: theme.spacing.s,
         },
         boldLabel: {
           ...theme.typography.subtitle,
@@ -138,27 +139,27 @@ export const RetirementTsp: React.FC<RetirementTspProps> = ({
 
   return (
     <>
-      {/* TSP section — label+toggle on top row, input+button on bottom row */}
+      {/* TSP section — 3-line structure: Header, Toggle, Input/Button */}
       <View style={styles.fieldBlock}>
-        {/* Row 1: "TSP ?" label + Roth/Traditional toggle */}
-        <View style={styles.tspLabelRow}>
-          <LabelWithHelp
-            label="TSP"
-            contentKey="TSP"
-            onPress={handleOpenHelp}
-            style={styles.labelRow}
-            textStyle={styles.labelHelpText}
-            iconColor={theme.colors.disabled}
-          />
-          <SegmentedSelector
-            style={styles.tspTypeSelector}
-            options={tspTypeOptions}
-            selectedValues={[tspType]}
-            onValueChange={(value) => setTspType(value)}
-          />
-        </View>
+        {/* Line 1: Label + Help anchored right */}
+        <LabelWithHelp
+          label="TSP"
+          contentKey="TSP"
+          onPress={handleOpenHelp}
+          style={styles.headerRow}
+          textStyle={styles.labelHelpText}
+          iconColor={theme.colors.disabled}
+        />
 
-        {/* Row 2: Currency input + Calculate pill button */}
+        {/* Line 2: Roth/Traditional toggle — full width */}
+        <SegmentedSelector
+          style={styles.tspTypeSelector}
+          options={tspTypeOptions}
+          selectedValues={[tspType]}
+          onValueChange={(value) => setTspType(value)}
+        />
+
+        {/* Line 3: Currency input + Calculate pill button */}
         <View style={styles.tspInputRow}>
           <CurrencyInput
             style={styles.tspAmountInput}

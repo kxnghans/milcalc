@@ -30,11 +30,12 @@ This document defines the foundational mandates and operational boundaries for A
 - **Context-Driven UI**: All interactive overlays (Help, Documents, Bug Reports) MUST be triggered via global `OverlayContext` hooks. Never declare local modal state (`isVisible`, `contentKey`) within screen files.
 - **Structural Standardization**: Primary calculator screens MUST use the `MainCalculatorLayout` and `SmartIconRow` components. Inline `IconRow` configurations with manual theme/reset logic are prohibited.
 - **Stability & Performance**: All context providers MUST memoize their value objects and functions (`useMemo`, `useCallback`). Inside components, `StyleSheet.create` MUST be moved outside the component body OR wrapped in `useMemo` if it depends on the `theme` to prevent "Maximum update depth exceeded" errors.
+- **Explicit Side-Safe Layouts**: All layouts using `NeumorphicOutset` MUST use explicit `marginLeft` and `marginRight` instead of `marginHorizontal` shorthand. This ensures values are passed correctly to each side to prevent shadow clipping within padded parent containers.
 
 ## 🚦 Operational Constraints
 
-*   **Linting**: ESLint Zero-Tolerance. Run `pnpm lint` before finishing any task.
-*   **Build Pipeline**: Use `turbo run build` to verify that cross-package dependencies are correctly resolved.
+*   **Linting**: see `@docs/lint.md`
+*   **Bug Reports**: Never modify existing bug reports. The system is designed for Append-Only (Write) or Read operations. DDL changes to the bug reporting schema are prohibited.
 *   **Documentation**: If a change alters the "Core Loop" or data schema, update `PRD.md`, `milcalc.md`, and `backend.md` immediately.
 
 ---
@@ -64,8 +65,4 @@ This document defines the foundational mandates and operational boundaries for A
 
 ## 🚀 Active To-Do
 
-- [ ] Conduct physical device performance audit (React 19 / New Architecture).
-- [ ] Configure Maestro E2E test suite for Golden Path validation.
-- [ ] Implement UI fallback logic for missing Cardio Risk Categories.
-- [ ] Extract shared `calculateFederalTax` / `calculateStateTax` into `packages/utils/src/tax-utils.ts` (DRY violation between `pay-calculator.ts` and `retirement-calculator.ts`).
-- [x] Finalize RLS security policies in Supabase production.
+see `@docs/checklist.md`

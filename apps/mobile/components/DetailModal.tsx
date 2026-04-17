@@ -1,7 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getAlphaColor, PillButton, useTheme } from "@repo/ui";
-import { getHelpContentFromSource } from "@repo/utils";
-import { Tables } from "@repo/utils";
+import { getHelpContentFromSource, Tables } from "@repo/utils";
 import { BlurView } from "expo-blur";
 import { Image as ExpoImage } from "expo-image";
 import React, { useEffect, useRef, useState } from "react";
@@ -25,10 +24,15 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type HelpContent = Tables<"pt_help_details"> &
-  Tables<"pay_help_details"> &
-  Tables<"retirement_help_details"> &
-  Tables<"best_score_help_details">;
+import { PayHelpTemplate } from "./help/PayHelpTemplate";
+import { PtHelpTemplate } from "./help/PtHelpTemplate";
+import { RetirementHelpTemplate } from "./help/RetirementHelpTemplate";
+
+type HelpItem =
+  | Tables<"pt_help_details">
+  | Tables<"pay_help_details">
+  | Tables<"retirement_help_details">
+  | Tables<"best_score_help_details">;
 
 interface DetailModalProps {
   isVisible: boolean;
@@ -46,7 +50,7 @@ export default function DetailModal({
   mascotAsset,
 }: DetailModalProps) {
   const { theme } = useTheme();
-  const [content, setContent] = useState<HelpContent[] | null>(null);
+  const [content, setContent] = useState<HelpItem[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showTopChevron, setShowTopChevron] = useState(false);
   const [showBottomChevron, setShowBottomChevron] = useState(false);
@@ -79,7 +83,7 @@ export default function DetailModal({
         setShowTopChevron(false);
         setShowBottomChevron(false);
         const data = await getHelpContentFromSource(source, contentKey);
-        setContent(data as HelpContent[]);
+        setContent(data);
         setIsLoading(false);
       };
       fetchContent();
@@ -117,7 +121,7 @@ export default function DetailModal({
   const CHEVRON_HEIGHT = 24 + theme.spacing.s;
   const TITLE_HEIGHT = theme.typography.title.fontSize + theme.spacing.xs;
   const HEADER_HEIGHT = theme.mascot.height + TITLE_HEIGHT + CHEVRON_HEIGHT;
-  const FOOTER_HEIGHT = CHEVRON_HEIGHT + 44 + theme.spacing.l; // chevron + button height + padding
+  const FOOTER_HEIGHT = CHEVRON_HEIGHT + 44 + theme.spacing.l;
   const MAX_SCROLL_HEIGHT =
     Dimensions.get("window").height * 0.85 -
     HEADER_HEIGHT -
@@ -176,36 +180,12 @@ export default function DetailModal({
           maxHeight: MAX_SCROLL_HEIGHT,
           paddingHorizontal: theme.spacing.l,
         },
-        sectionHeader: {
-          ...theme.typography.subtitle,
-          color: theme.colors.text,
-          marginTop: theme.spacing.m,
-          marginBottom: theme.spacing.s,
-          textAlign: "left",
-        },
-        sectionContent: {
-          ...theme.typography.body,
-          color: theme.colors.text,
-          textAlign: "left",
-        },
         footerContainer: {
           width: "100%",
           alignItems: "center",
           paddingBottom: theme.spacing.l,
           paddingHorizontal: theme.spacing.l,
           backgroundColor: theme.colors.surface,
-        },
-        boldText: {
-          fontWeight: "bold",
-        },
-        italicText: {
-          fontStyle: "italic",
-        },
-        underlineText: {
-          textDecorationLine: "underline",
-        },
-        markdownParagraph: {
-          marginBottom: theme.spacing.s,
         },
         loadingIndicator: {
           marginVertical: theme.spacing.xl,
@@ -214,122 +194,35 @@ export default function DetailModal({
     [theme, MAX_SCROLL_HEIGHT, CHEVRON_HEIGHT],
   );
 
-  const parseMarkdown = (text: string) => {
-    if (!text) return null;
-    // Handle literal \n string sequences that may come from DB/JSON escaping
-    const cleanedText = text.replace(/\\n/g, "\n");
-    const paragraphs = cleanedText.split("\n\n");
-    return paragraphs.map((paragraph, pIndex) => {
-      const parts =
-        paragraph.match(/[^*_]+|(\*\*.*?\*\*|\*.*?\*|_.*?_)/g) || [];
-      const styledText = parts.map((part, index) => {
-        if (part.startsWith("**") && part.endsWith("**")) {
-          return (
-            <Text key={index} style={styles.boldText}>
-              {part.slice(2, -2)}
-            </Text>
-          );
-        } else if (part.startsWith("*") && part.endsWith("*")) {
-          return (
-            <Text key={index} style={styles.italicText}>
-              {part.slice(1, -1)}
-            </Text>
-          );
-        } else if (part.startsWith("_") && part.endsWith("_")) {
-          return (
-            <Text key={index} style={styles.underlineText}>
-              {part.slice(1, -1)}
-            </Text>
-          );
-        }
-        return <Text key={index}>{part}</Text>;
-      });
-      return (
-        <Text
-          key={pIndex}
-          style={[styles.sectionContent, styles.markdownParagraph]}
-        >
-          {styledText}
-        </Text>
-      );
-    });
-  };
+  const renderContentTemplate = () => {
+    if (!content || content.length === 0) return null;
 
-  const renderSections = (item: HelpContent) => {
-    const sections: React.ReactElement[] = [];
-    const createSection = (header: string, content: string, key: string) => {
-      sections.push(
-        <View key={key}>
-          <Text style={styles.sectionHeader}>{header}</Text>
-          {parseMarkdown(content)}
-        </View>,
-      );
-    };
     switch (source) {
       case "pt":
       case "best_score":
-        if (item.section_header && item.section_content) {
-          createSection(
-            item.section_header,
-            item.section_content,
-            item.section_header,
-          );
-        }
-        break;
+        return (
+          <PtHelpTemplate
+            content={
+              content as (
+                | Tables<"pt_help_details">
+                | Tables<"best_score_help_details">
+              )[]
+            }
+          />
+        );
       case "pay":
-        if (item.purpose_description) {
-          createSection(
-            "Purpose Description",
-            item.purpose_description,
-            "purpose_description",
-          );
-        }
-        if (item.calculation_details) {
-          createSection(
-            "Calculation Details",
-            item.calculation_details,
-            "calculation_details",
-          );
-        }
-        if (item.example) {
-          createSection("Example", item.example, "example");
-        }
-        if (item.recipient_group) {
-          createSection(
-            "Recipient Group",
-            item.recipient_group,
-            "recipient_group",
-          );
-        }
-        if (item.report_section) {
-          createSection(
-            "Report Section",
-            item.report_section,
-            "report_section",
-          );
-        }
-        break;
+        return (
+          <PayHelpTemplate content={content as Tables<"pay_help_details">[]} />
+        );
       case "retirement":
-        if (item.purpose_description) {
-          createSection(
-            "Purpose Description",
-            item.purpose_description,
-            "purpose_description",
-          );
-        }
-        if (item.calculation_details) {
-          createSection(
-            "Calculation Details",
-            item.calculation_details,
-            "calculation_details",
-          );
-        }
-        if (item.example) {
-          createSection("Example", item.example, "example");
-        }
-        break;
+        return (
+          <RetirementHelpTemplate
+            content={content as Tables<"retirement_help_details">[]}
+          />
+        );
+      default:
+        return null;
     }
-    return sections;
   };
 
   return (
@@ -391,27 +284,8 @@ export default function DetailModal({
                     setScrollViewHeight(height);
                   }}
                   scrollEventThrottle={16}
-                  contentContainerStyle={{}}
                 >
-                  {[...content]
-                    .sort((a, b) => {
-                      const sectionOrder = [
-                        "Performance",
-                        "Resting",
-                        "Scoring",
-                        "Exemption",
-                      ];
-                      const aIndex = sectionOrder.indexOf(
-                        a.section_header || "",
-                      );
-                      const bIndex = sectionOrder.indexOf(
-                        b.section_header || "",
-                      );
-                      return aIndex - bIndex;
-                    })
-                    .map((item, index) => (
-                      <View key={index}>{renderSections(item)}</View>
-                    ))}
+                  {renderContentTemplate()}
                 </ScrollView>
               </View>
 

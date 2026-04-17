@@ -3,11 +3,12 @@ import {
   LabelWithHelp,
   NeumorphicInset,
   PillButton,
-  StyledTextInput,
   useTheme,
 } from "@repo/ui";
 import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+
+import NumberInput from "../NumberInput";
 
 interface RetirementAgeProps {
   isRetirementAgeCalculatorVisible: boolean;
@@ -42,26 +43,29 @@ export const RetirementAge: React.FC<RetirementAgeProps> = ({
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        // Header row: label+help left | pill button right
+        // Row 1: Label + Help anchored right
         headerRow: {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: theme.spacing.s,
-        },
-        labelRow: {
-          flexDirection: "row",
-          alignItems: "center",
+          marginBottom: theme.spacing.xs,
+          marginLeft: theme.spacing.s,
+          marginRight: theme.spacing.s,
         },
         labelHelpText: {
           ...theme.typography.subtitle,
           color: theme.colors.text,
-          marginRight: theme.spacing.xs,
+        },
+        // Row 2: Pill Button container
+        buttonRow: {
+          alignItems: "center",
+          marginBottom: theme.spacing.s,
+          marginLeft: theme.spacing.s,
+          marginRight: theme.spacing.s,
         },
         pillButton: {
-          paddingHorizontal: theme.spacing.s,
-          paddingVertical: theme.spacing.xs,
-          flexShrink: 1,
+          paddingHorizontal: theme.spacing.m,
+          paddingVertical: theme.spacing.s,
         },
         // Calculated age display — shown below the header row
         retirementAgeDisplay: {
@@ -69,13 +73,17 @@ export const RetirementAge: React.FC<RetirementAgeProps> = ({
           color: theme.colors.primary,
           fontWeight: "bold",
           textAlign: "right",
-          marginBottom: theme.spacing.m,
+          marginBottom: theme.spacing.s,
+          marginLeft: theme.spacing.s,
+          marginRight: theme.spacing.s,
         },
         // Expanded sub-inputs row: Birth Date | Entry Date | Break (Yrs)
         pickerRow: {
           flexDirection: "row",
           alignItems: "flex-start",
-          marginBottom: theme.spacing.m,
+          marginBottom: theme.spacing.s,
+          marginLeft: theme.spacing.s,
+          marginRight: theme.spacing.s,
         },
         birthDateColumn: {
           flex: 1.25,
@@ -100,10 +108,9 @@ export const RetirementAge: React.FC<RetirementAgeProps> = ({
           justifyContent: "center",
           paddingVertical: theme.spacing.s,
           paddingHorizontal: theme.spacing.m,
-          height: 48,
         },
         pressableText: {
-          ...theme.typography.bodybold,
+          ...theme.typography.label,
           color: theme.colors.text,
           textAlign: "center",
         },
@@ -120,16 +127,18 @@ export const RetirementAge: React.FC<RetirementAgeProps> = ({
 
   return (
     <>
-      {/* Header: "Retirement Age ?" label on left, pill button on right */}
-      <View style={styles.headerRow}>
-        <LabelWithHelp
-          label="Retirement Age"
-          contentKey="Retirement Age"
-          onPress={handleOpenHelp}
-          style={styles.labelRow}
-          textStyle={styles.labelHelpText}
-          iconColor={theme.colors.disabled}
-        />
+      {/* Line 1: Label + Help anchored right */}
+      <LabelWithHelp
+        label="Retirement Age"
+        contentKey="Retirement Age"
+        onPress={handleOpenHelp}
+        style={styles.headerRow}
+        textStyle={styles.labelHelpText}
+        iconColor={theme.colors.disabled}
+      />
+
+      {/* Line 2: Pill Action Button — full width */}
+      <View style={styles.buttonRow}>
         <PillButton
           title={
             isRetirementAgeCalculatorVisible
@@ -232,18 +241,11 @@ export const RetirementAge: React.FC<RetirementAgeProps> = ({
           {/* Break in Service (Years) */}
           <View style={styles.breakColumn}>
             <Text style={styles.columnLabel}>Break (Yrs)</Text>
-            <NeumorphicInset
-              containerStyle={{ borderRadius: theme.borderRadius.m }}
-              contentStyle={styles.pressableContent}
-            >
-              <StyledTextInput
-                keyboardType="number-pad"
-                value={breakInService || ""}
-                onChangeText={setBreakInService}
-                placeholder="0"
-                style={[styles.pressableText, styles.breakInput]}
-              />
-            </NeumorphicInset>
+            <NumberInput
+              placeholder="0"
+              value={breakInService || ""}
+              onChangeText={setBreakInService}
+            />
           </View>
         </View>
       )}
