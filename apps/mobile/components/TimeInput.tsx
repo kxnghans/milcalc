@@ -4,9 +4,15 @@
  * It uses neumorphic styling and provides a seamless user experience by auto-focusing the next field.
  */
 
-import React, { useRef, useMemo } from 'react';
-import { TextInput, Text, StyleProp, ViewStyle, View } from 'react-native';
-import { NeumorphicInset, StyledTextInput, useTheme, ExemptButton } from '@repo/ui';
+import {
+  ExemptButton,
+  getAlphaColor,
+  NeumorphicInset,
+  StyledTextInput,
+  useTheme,
+} from "@repo/ui";
+import React, { useMemo, useRef } from "react";
+import { StyleProp, Text, TextInput, View, ViewStyle } from "react-native";
 
 /**
  * Props for the TimeInput component.
@@ -87,77 +93,89 @@ const TimeInput: React.FC<TimeInputProps> = ({
     }
   };
 
-  const styles = useMemo(() => ({
-    container: {
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      paddingLeft: theme.spacing.s,
-      paddingRight: theme.spacing.s,
-      paddingVertical: theme.spacing.s,
-      backgroundColor: 'transparent',
-    },
-    separator: {
-      ...theme.typography.label,
-      color: theme.colors.text,
-      marginHorizontal: 2,
-    },
-    input: {
-      borderWidth: 0,
-      padding: 0,
-      margin: 0,
-      textAlign: 'center' as const,
-      flex: 1,
-      ...theme.typography.label,
-      color: theme.colors.text,
-      backgroundColor: 'transparent',
-    },
-    leftContainer: {
-      flex: onToggleExempt ? 1 : 0,
-      alignItems: 'flex-start' as const,
-      justifyContent: 'center' as const,
-    },
-    rightGroup: {
-      flex: onToggleExempt ? 2 : 1,
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-    },
-    inputGroup: {
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      flex: 1,
-      left: onToggleExempt ? ('-15%' as const) : ('0%' as const),
-    },
-    rightContentContainer: {
-      position: 'absolute' as const,
-      right: 0,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-    },
-    adjustment: {
-      color: theme.colors.success,
-      ...theme.typography.label,
-      paddingRight: theme.spacing.s,
-      backgroundColor: 'transparent',
-    }
-  }), [theme, onToggleExempt]);
+  const styles = useMemo(
+    () => ({
+      container: {
+        flexDirection: "row" as const,
+        alignItems: "center" as const,
+        paddingLeft: theme.spacing.s,
+        paddingRight: theme.spacing.s,
+        paddingVertical: theme.spacing.s,
+        backgroundColor: getAlphaColor("#000000", 0),
+      },
+      outerContainer: {
+        flexDirection: "row" as const,
+        alignItems: "center" as const,
+      },
+      insetContainer: {
+        flex: 1,
+      },
+      separator: {
+        ...theme.typography.label,
+        color: theme.colors.text,
+        marginHorizontal: 2,
+      },
+      input: {
+        borderWidth: 0,
+        padding: 0,
+        margin: 0,
+        textAlign: "center" as const,
+        flex: 1,
+        ...theme.typography.label,
+        color: theme.colors.text,
+        backgroundColor: getAlphaColor("#000000", 0),
+      },
+      leftContainer: {
+        flex: onToggleExempt ? 1 : 0,
+        alignItems: "flex-start" as const,
+        justifyContent: "center" as const,
+      },
+      rightGroup: {
+        flex: onToggleExempt ? 2 : 1,
+        flexDirection: "row" as const,
+        alignItems: "center" as const,
+        justifyContent: "center" as const,
+      },
+      inputGroup: {
+        flexDirection: "row" as const,
+        alignItems: "center" as const,
+        justifyContent: "center" as const,
+        flex: 1,
+        left: onToggleExempt ? ("-15%" as const) : ("0%" as const),
+      },
+      rightContentContainer: {
+        position: "absolute" as const,
+        right: 0,
+        alignItems: "center" as const,
+        justifyContent: "center" as const,
+      },
+      adjustment: {
+        color: theme.colors.success,
+        ...theme.typography.label,
+        paddingRight: theme.spacing.s,
+        backgroundColor: getAlphaColor("#000000", 0),
+      },
+    }),
+    [theme, onToggleExempt],
+  );
 
   // When exempt, show 'xx' as the placeholder. Otherwise, use the placeholder from props.
-  const currentMinutesPlaceholder = isExempt ? 'xx' : minutesPlaceholder;
-  const currentSecondsPlaceholder = isExempt ? 'xx' : secondsPlaceholder;
+  const currentMinutesPlaceholder = isExempt ? "xx" : minutesPlaceholder;
+  const currentSecondsPlaceholder = isExempt ? "xx" : secondsPlaceholder;
 
   return (
-    <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
-      <NeumorphicInset containerStyle={{ flex: 1 }} contentStyle={styles.container}>
+    <View style={[styles.outerContainer, style]}>
+      <NeumorphicInset
+        containerStyle={styles.insetContainer}
+        contentStyle={styles.container}
+      >
         {onToggleExempt ? (
           <View style={styles.leftContainer}>
-            <ExemptButton
-              onPress={onToggleExempt}
-              isActive={!!isExempt}
-            />
+            <ExemptButton onPress={onToggleExempt} isActive={!!isExempt} />
           </View>
-        ) : <View style={styles.leftContainer} />}
+        ) : (
+          <View style={styles.leftContainer} />
+        )}
 
         <View style={styles.rightGroup}>
           <View style={styles.inputGroup}>

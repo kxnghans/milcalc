@@ -1,27 +1,28 @@
-import React, { useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Animated, 
-  Easing 
-} from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
-import NeumorphicOutset from './NeumorphicOutset';
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+import { useTheme } from "../contexts/ThemeContext";
+import NeumorphicOutset from "./NeumorphicOutset";
 
 interface SlideToggleProps {
   value: boolean;
   onValueChange: (value: boolean) => void;
   label?: string;
-  labelPosition?: 'right' | 'bottom';
+  labelPosition?: "right" | "bottom";
 }
 
-export const SlideToggle: React.FC<SlideToggleProps> = ({ 
-  value, 
-  onValueChange, 
+export const SlideToggle: React.FC<SlideToggleProps> = ({
+  value,
+  onValueChange,
   label,
-  labelPosition = 'right'
+  labelPosition = "right",
 }) => {
   const { theme } = useTheme();
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
@@ -48,44 +49,51 @@ export const SlideToggle: React.FC<SlideToggleProps> = ({
 
   // Actually user said: "when its off color the circle blue when active ilke how the bar is filled and the circle our normal bg color"
   // Let's use theme.colors.primary (which is teal/blue) for "blue".
-  
+
   const thumbColor = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [theme.colors.primary, theme.colors.surface],
   });
 
-  const isBottom = labelPosition === 'bottom';
+  const isBottom = labelPosition === "bottom";
 
   return (
     <View style={[styles.container, isBottom && styles.containerVertical]}>
-      <TouchableOpacity 
-        activeOpacity={0.8} 
+      <TouchableOpacity
+        activeOpacity={0.8}
         onPress={() => onValueChange(!value)}
       >
-        <NeumorphicOutset 
-            containerStyle={styles.track} 
-            style={styles.neumorphicStyle}
+        <NeumorphicOutset
+          containerStyle={styles.track}
+          style={styles.neumorphicStyle}
         >
-          <Animated.View style={[styles.trackFill, { backgroundColor: trackBackgroundColor }]} />
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.thumb, 
+              styles.trackFill,
+              { backgroundColor: trackBackgroundColor },
+            ]}
+          />
+          <Animated.View
+            style={[
+              styles.thumb,
               styles.thumbBorder,
-              { 
+              {
                 transform: [{ translateX }],
                 backgroundColor: thumbColor,
                 borderColor: theme.colors.primary, // Always a distinct primary border
-              }
-            ]} 
+              },
+            ]}
           />
         </NeumorphicOutset>
       </TouchableOpacity>
       {label && (
-        <Text style={[
-          styles.label, 
-          { color: theme.colors.text },
-          isBottom && styles.labelBottom
-        ]}>
+        <Text
+          style={[
+            styles.label,
+            { color: theme.colors.text },
+            isBottom && styles.labelBottom,
+          ]}
+        >
           {label}
         </Text>
       )}
@@ -95,18 +103,18 @@ export const SlideToggle: React.FC<SlideToggleProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   containerVertical: {
-    flexDirection: 'column',
+    flexDirection: "column",
     gap: 2,
   },
   label: {
     fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
+    fontWeight: "700",
+    textTransform: "uppercase",
   },
   labelBottom: {
     marginTop: 2,
@@ -115,8 +123,8 @@ const styles = StyleSheet.create({
     width: 44,
     height: 24,
     borderRadius: 15,
-    justifyContent: 'center',
-    overflow: 'hidden',
+    justifyContent: "center",
+    overflow: "hidden",
     padding: 2,
   },
   trackFill: {

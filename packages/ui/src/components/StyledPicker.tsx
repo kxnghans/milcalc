@@ -4,10 +4,11 @@
  * It wraps the `@react-native-picker/picker` component to provide a consistent look and feel.
  */
 
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Picker, PickerProps } from "@react-native-picker/picker";
+import React from "react";
+import { StyleSheet } from "react-native";
+
 import { useTheme } from "../contexts/ThemeContext";
-import { Picker, PickerProps } from '@react-native-picker/picker';
 
 /**
  * Props for the StyledPicker component.
@@ -27,34 +28,47 @@ interface StyledPickerProps<T> extends PickerProps<T> {
  * @param {StyledPickerProps} props - The props for the component.
  * @returns {JSX.Element} The rendered Picker component.
  */
-export const StyledPicker = <T extends string | number | null>({ selectedValue, onValueChange, items, placeholder, style, ...props }: StyledPickerProps<T>) => {
+export const StyledPicker = <T extends string | number | null>({
+  selectedValue,
+  onValueChange,
+  items,
+  placeholder,
+  style,
+  ...props
+}: StyledPickerProps<T>) => {
   // Use the useTheme hook to get the current theme, ensuring the component is dynamic.
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
     picker: {
-        // These styles are now dynamically applied based on the current theme.
-        borderRadius: theme.borderRadius.m,
-        color: theme.colors.text, // Ensure text color matches the theme.
+      // These styles are now dynamically applied based on the current theme.
+      borderRadius: theme.borderRadius.m,
+      color: theme.colors.text, // Ensure text color matches the theme.
     },
     pickerItem: {
-        color: theme.colors.text,
+      color: theme.colors.text,
     },
   });
 
   return (
     <Picker
-        selectedValue={selectedValue}
-        onValueChange={onValueChange}
-        style={[styles.picker, style]}
-        itemStyle={styles.pickerItem}
-        {...props}
+      selectedValue={selectedValue}
+      onValueChange={onValueChange}
+      style={[styles.picker, style]}
+      itemStyle={styles.pickerItem}
+      {...props}
     >
-        {/* Render a disabled placeholder item if one is provided. */}
-        {placeholder && <Picker.Item label={placeholder} value={null as T} enabled={false} />}
-        {items.map((item) => (
-            <Picker.Item key={String(item.value)} label={item.label} value={item.value} />
-        ))}
+      {/* Render a disabled placeholder item if one is provided. */}
+      {placeholder && (
+        <Picker.Item label={placeholder} value={null as T} enabled={false} />
+      )}
+      {items.map((item) => (
+        <Picker.Item
+          key={String(item.value)}
+          label={item.label}
+          value={item.value}
+        />
+      ))}
     </Picker>
   );
 };

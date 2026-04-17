@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { useTheme, Card, SmartIconRow, SmartAction } from '@repo/ui';
-import ScreenHeader from './ScreenHeader';
-import DismissKeyboardView from './DismissKeyboardView';
+import { Card, SmartAction, SmartIconRow, useTheme } from "@repo/ui";
+import React from "react";
+import { StyleSheet, View, ViewStyle } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+
+import DismissKeyboardView from "./DismissKeyboardView";
+import ScreenHeader from "./ScreenHeader";
 
 interface MainCalculatorLayoutProps {
   title: string;
@@ -31,33 +32,35 @@ const MainCalculatorLayout: React.FC<MainCalculatorLayoutProps> = ({
   const { theme } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }, containerStyle]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.background },
+        containerStyle,
+      ]}
+    >
       <ScreenHeader title={title} isLoading={isLoading} />
-      
+
       <View style={styles.content}>
         <DismissKeyboardView style={styles.dismissKeyboard}>
-          <Card containerStyle={styles.summaryCard}>
-            {summaryContent}
-          </Card>
-          
-          <SmartIconRow 
-            actions={actions} 
-            onReset={onReset} 
-            onHelp={onHelp} 
-            onDocument={onDocument} 
+          <Card containerStyle={styles.summaryCard}>{summaryContent}</Card>
+
+          <SmartIconRow
+            actions={actions}
+            onReset={onReset}
+            onHelp={onHelp}
+            onDocument={onDocument}
           />
         </DismissKeyboardView>
 
         <Card style={styles.flex1}>
-          <KeyboardAwareScrollView 
-            enableOnAndroid 
-            contentContainerStyle={styles.scrollView} 
-            showsVerticalScrollIndicator={false} 
+          <KeyboardAwareScrollView
+            enableOnAndroid
+            contentContainerStyle={styles.scrollView}
+            showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <DismissKeyboardView>
-              {inputContent}
-            </DismissKeyboardView>
+            <DismissKeyboardView>{inputContent}</DismissKeyboardView>
           </KeyboardAwareScrollView>
         </Card>
       </View>
@@ -80,7 +83,7 @@ const styles = StyleSheet.create({
   },
   dismissKeyboard: {
     flex: 0,
-    width: '100%',
+    width: "100%",
   },
   flex1: {
     flex: 1,

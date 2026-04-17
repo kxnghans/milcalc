@@ -4,8 +4,9 @@
  * It serves as a reusable and consistently styled input field across the app.
  */
 
-import React, { useMemo } from 'react';
-import { TextInput, StyleSheet, TextInputProps } from 'react-native';
+import React, { useMemo } from "react";
+import { StyleSheet, TextInput, TextInputProps } from "react-native";
+
 import { useTheme } from "../contexts/ThemeContext";
 
 /**
@@ -15,49 +16,58 @@ import { useTheme } from "../contexts/ThemeContext";
  * @param {React.Ref<TextInput>} ref - The ref to be forwarded to the TextInput component.
  * @returns {JSX.Element} The styled TextInput component.
  */
-export const StyledTextInput = React.forwardRef<TextInput, TextInputProps>(({ style, onFocus, selectTextOnFocus, value, ...props }, ref) => {
-  const { theme } = useTheme();
-  const internalRef = React.useRef<TextInput>(null);
-  const resolvedRef = (ref as React.RefObject<TextInput>) ?? internalRef;
+export const StyledTextInput = React.forwardRef<TextInput, TextInputProps>(
+  ({ style, onFocus, selectTextOnFocus, value, ...props }, ref) => {
+    const { theme } = useTheme();
+    const internalRef = React.useRef<TextInput>(null);
+    const resolvedRef = (ref as React.RefObject<TextInput>) ?? internalRef;
 
-  const styles = useMemo(() => StyleSheet.create({
-    input: {
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: theme.borderRadius.m,
-      padding: theme.spacing.m,
-      ...theme.typography.label,
-      backgroundColor: theme.colors.surface,
-      color: theme.colors.text,
-      textAlign: 'center',
-      textAlignVertical: 'center',
-    },
-  }), [theme]);
+    const styles = useMemo(
+      () =>
+        StyleSheet.create({
+          input: {
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            borderRadius: theme.borderRadius.m,
+            padding: theme.spacing.m,
+            ...theme.typography.label,
+            backgroundColor: theme.colors.surface,
+            color: theme.colors.text,
+            textAlign: "center",
+            textAlignVertical: "center",
+          },
+        }),
+      [theme],
+    );
 
-  const handleFocus = React.useCallback((e: Parameters<NonNullable<TextInputProps['onFocus']>>[0]) => {
-    // Cross-platform select-all on focus. selectTextOnFocus is Android-only in RN,
-    // so we replicate the behaviour for iOS via setNativeProps after a brief delay.
-    if (selectTextOnFocus) {
-      setTimeout(() => {
-        resolvedRef.current?.setNativeProps({
-          selection: { start: 0, end: value?.length ?? 999 },
-        });
-      }, 50);
-    }
-    onFocus?.(e);
-  }, [selectTextOnFocus, onFocus, value, resolvedRef]);
+    const handleFocus = React.useCallback(
+      (e: Parameters<NonNullable<TextInputProps["onFocus"]>>[0]) => {
+        // Cross-platform select-all on focus. selectTextOnFocus is Android-only in RN,
+        // so we replicate the behaviour for iOS via setNativeProps after a brief delay.
+        if (selectTextOnFocus) {
+          setTimeout(() => {
+            resolvedRef.current?.setNativeProps({
+              selection: { start: 0, end: value?.length ?? 999 },
+            });
+          }, 50);
+        }
+        onFocus?.(e);
+      },
+      [selectTextOnFocus, onFocus, value, resolvedRef],
+    );
 
-  return (
-    <TextInput
-      ref={resolvedRef}
-      style={[styles.input, style]}
-      placeholderTextColor={theme.colors.placeholder}
-      selectionColor={theme.colors.primary}
-      value={value}
-      onFocus={handleFocus}
-      {...props}
-    />
-  );
-});
+    return (
+      <TextInput
+        ref={resolvedRef}
+        style={[styles.input, style]}
+        placeholderTextColor={theme.colors.placeholder}
+        selectionColor={theme.colors.primary}
+        value={value}
+        onFocus={handleFocus}
+        {...props}
+      />
+    );
+  },
+);
 
-StyledTextInput.displayName = 'StyledTextInput';
+StyledTextInput.displayName = "StyledTextInput";

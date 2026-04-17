@@ -4,8 +4,9 @@
  * It achieves this by using two overlapping shadows: a dark shadow for the bottom/right and a light highlight for the top/left.
  */
 
-import React, { ReactNode } from 'react';
-import { View, StyleSheet, Platform, ViewStyle, StyleProp } from 'react-native';
+import React, { ReactNode } from "react";
+import { Platform, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+
 import { useTheme } from "../contexts/ThemeContext";
 
 /**
@@ -67,51 +68,61 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
   // Safely extract all border radius properties
   const getBorderRadii = () => {
     // Flatten styles to reliably get the values
-    const flattenedContainerStyle = StyleSheet.flatten(containerStyle || {}) as ViewStyle;
-    const flattenedContentStyle = StyleSheet.flatten(contentStyle || {}) as ViewStyle;
+    const flattenedContainerStyle = StyleSheet.flatten(
+      containerStyle || {},
+    ) as ViewStyle;
+    const flattenedContentStyle = StyleSheet.flatten(
+      contentStyle || {},
+    ) as ViewStyle;
     const flattenedStyle = StyleSheet.flatten(style || {}) as ViewStyle;
 
     // If a general borderRadius is defined, use it as the base, but allow specific corners to override it
     // if they are explicitly defined in a higher-priority style.
     // However, if borderRadius is defined in Content, and TopLeft is in Container, Content's borderRadius should probably win for all corners?
     // Let's stick to the cascade: explicit property wins.
-    
+
     // Actually, simple fallback logic:
     // 1. Start with theme default.
     // 2. Override with 'style' prop values (borderRadius sets all, specific sets specific).
     // 3. Override with 'containerStyle'.
     // 4. Override with 'contentStyle'.
     // This mimics how we want the outer shadow (Android container) to match the inner content.
-    
+
     const baseRadii: {
-        borderRadius: number;
-        borderTopLeftRadius?: number;
-        borderTopRightRadius?: number;
-        borderBottomLeftRadius?: number;
-        borderBottomRightRadius?: number;
+      borderRadius: number;
+      borderTopLeftRadius?: number;
+      borderTopRightRadius?: number;
+      borderBottomLeftRadius?: number;
+      borderBottomRightRadius?: number;
     } = {
-        borderRadius: theme.borderRadius.m,
-        borderTopLeftRadius: undefined,
-        borderTopRightRadius: undefined,
-        borderBottomLeftRadius: undefined,
-        borderBottomRightRadius: undefined,
+      borderRadius: theme.borderRadius.m,
+      borderTopLeftRadius: undefined,
+      borderTopRightRadius: undefined,
+      borderBottomLeftRadius: undefined,
+      borderBottomRightRadius: undefined,
     };
 
     // Merge in order of precedence (lowest to highest) to build the final shape
     const mergeStyle = (source: ViewStyle) => {
-        if (source.borderRadius !== undefined) {
-            baseRadii.borderRadius = source.borderRadius as number;
-            // When borderRadius is set, it resets specific corners in standard CSS/RN behavior IF they aren't explicitly re-declared.
-            // But here we just update the base.
-            baseRadii.borderTopLeftRadius = undefined;
-            baseRadii.borderTopRightRadius = undefined;
-            baseRadii.borderBottomLeftRadius = undefined;
-            baseRadii.borderBottomRightRadius = undefined;
-        }
-        if (source.borderTopLeftRadius !== undefined) baseRadii.borderTopLeftRadius = source.borderTopLeftRadius as number;
-        if (source.borderTopRightRadius !== undefined) baseRadii.borderTopRightRadius = source.borderTopRightRadius as number;
-        if (source.borderBottomLeftRadius !== undefined) baseRadii.borderBottomLeftRadius = source.borderBottomLeftRadius as number;
-        if (source.borderBottomRightRadius !== undefined) baseRadii.borderBottomRightRadius = source.borderBottomRightRadius as number;
+      if (source.borderRadius !== undefined) {
+        baseRadii.borderRadius = source.borderRadius as number;
+        // When borderRadius is set, it resets specific corners in standard CSS/RN behavior IF they aren't explicitly re-declared.
+        // But here we just update the base.
+        baseRadii.borderTopLeftRadius = undefined;
+        baseRadii.borderTopRightRadius = undefined;
+        baseRadii.borderBottomLeftRadius = undefined;
+        baseRadii.borderBottomRightRadius = undefined;
+      }
+      if (source.borderTopLeftRadius !== undefined)
+        baseRadii.borderTopLeftRadius = source.borderTopLeftRadius as number;
+      if (source.borderTopRightRadius !== undefined)
+        baseRadii.borderTopRightRadius = source.borderTopRightRadius as number;
+      if (source.borderBottomLeftRadius !== undefined)
+        baseRadii.borderBottomLeftRadius =
+          source.borderBottomLeftRadius as number;
+      if (source.borderBottomRightRadius !== undefined)
+        baseRadii.borderBottomRightRadius =
+          source.borderBottomRightRadius as number;
     };
 
     mergeStyle(flattenedStyle);
@@ -121,7 +132,13 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
     return baseRadii;
   };
 
-  const { borderRadius, borderTopLeftRadius, borderTopRightRadius, borderBottomLeftRadius, borderBottomRightRadius } = getBorderRadii();
+  const {
+    borderRadius,
+    borderTopLeftRadius,
+    borderTopRightRadius,
+    borderBottomLeftRadius,
+    borderBottomRightRadius,
+  } = getBorderRadii();
 
   const styles = StyleSheet.create({
     // The outer container applies the main (dark) shadow and handles Android elevation.
@@ -133,15 +150,18 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
       ...Platform.select({
         ios: {
           shadowColor: shadowColor || theme.colors.neumorphic.outset.shadow,
-          shadowOffset: shadowOffset || theme.colors.neumorphic.outset.shadowOffset,
-          shadowOpacity: shadowOpacity || theme.colors.neumorphic.outset.shadowOpacity,
-          shadowRadius: shadowRadius || theme.colors.neumorphic.outset.shadowRadius,
+          shadowOffset:
+            shadowOffset || theme.colors.neumorphic.outset.shadowOffset,
+          shadowOpacity:
+            shadowOpacity || theme.colors.neumorphic.outset.shadowOpacity,
+          shadowRadius:
+            shadowRadius || theme.colors.neumorphic.outset.shadowRadius,
         },
         android: {
           // On Android, a single elevation value is used to create the shadow.
           // Elevation REQUIRES a background color to work.
           elevation: elevation || theme.colors.neumorphic.outset.elevation,
-          backgroundColor: theme.colors.background, 
+          backgroundColor: theme.colors.background,
           borderRadius,
           borderTopLeftRadius,
           borderTopRightRadius,
@@ -153,18 +173,23 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
     // A nested view to apply the highlight shadow (light color, opposite offset).
     // This is only applied on iOS, as Android's elevation doesn't support multiple shadows.
     highlight: {
-        ...Platform.select({
-            ios: {
-                shadowColor: highlightColor || theme.colors.neumorphic.outset.highlight,
-                shadowOffset: highlightOffset || theme.colors.neumorphic.outset.highlightOffset,
-                shadowOpacity: highlightOpacity || theme.colors.neumorphic.outset.highlightOpacity,
-                shadowRadius: highlightRadius || shadowRadius || theme.colors.neumorphic.outset.shadowRadius,
-            },
-        }),
+      ...Platform.select({
+        ios: {
+          shadowColor:
+            highlightColor || theme.colors.neumorphic.outset.highlight,
+          shadowOffset:
+            highlightOffset || theme.colors.neumorphic.outset.highlightOffset,
+          shadowOpacity:
+            highlightOpacity || theme.colors.neumorphic.outset.highlightOpacity,
+          shadowRadius:
+            highlightRadius ||
+            shadowRadius ||
+            theme.colors.neumorphic.outset.shadowRadius,
+        },
+      }),
     },
     // The view that holds the actual content.
-    content: {
-    },
+    content: {},
   });
 
   return (
@@ -173,11 +198,9 @@ const NeumorphicOutset: React.FC<NeumorphicOutsetProps> = ({
     // Middle view -> light highlight
     // Inner view -> content
     <View style={[styles.container, containerStyle]}>
-        <View style={[styles.highlight, highlightStyle]}>
-            <View style={[styles.content, style, contentStyle]}>
-                {children}
-            </View>
-        </View>
+      <View style={[styles.highlight, highlightStyle]}>
+        <View style={[styles.content, style, contentStyle]}>{children}</View>
+      </View>
     </View>
   );
 };

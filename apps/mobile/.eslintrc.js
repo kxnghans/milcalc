@@ -16,6 +16,5 @@ module.exports = {
   ],
   rules: {
     // Add any app-specific rules here
-    "react-native/no-inline-styles": "off", // You use inline styles in your components
   },
 };

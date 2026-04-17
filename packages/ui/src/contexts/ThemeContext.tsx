@@ -5,9 +5,10 @@
  * It supports 'light', 'dark', and 'auto' (system) theme modes.
  */
 
-import React, { createContext, useState, useContext, useMemo } from 'react';
-import { useColorScheme } from 'react-native';
-import { theme as defaultTheme, lightColors, darkColors } from '../theme';
+import React, { createContext, useContext, useMemo, useState } from "react";
+import { useColorScheme } from "react-native";
+
+import { darkColors, lightColors, theme as defaultTheme } from "../theme";
 
 interface ThemeContextType {
   theme: typeof defaultTheme;
@@ -23,8 +24,8 @@ interface ThemeContextType {
  */
 export const ThemeContext = createContext<ThemeContextType>({
   theme: defaultTheme,
-  themeMode: 'light', // The current theme mode ('light', 'dark', or 'auto').
-  isDarkMode: false,  // A boolean flag indicating if the dark mode is currently active.
+  themeMode: "light", // The current theme mode ('light', 'dark', or 'auto').
+  isDarkMode: false, // A boolean flag indicating if the dark mode is currently active.
   toggleTheme: () => {}, // A function to cycle through the theme modes.
   setThemeMode: () => {}, // A function to explicitly set the theme mode.
 });
@@ -43,16 +44,16 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   // `useColorScheme` from React Native detects the user's system theme preference.
   const systemTheme = useColorScheme();
   // State to manage the current theme mode. Can be 'auto', 'light', or 'dark'.
-  const [themeMode, setThemeMode] = useState('auto');
+  const [themeMode, setThemeMode] = useState("auto");
 
   // `useMemo` is used to recalculate `isDarkMode` only when `themeMode` or `systemTheme` changes.
   const isDarkMode = useMemo(() => {
-    if (themeMode === 'auto') {
+    if (themeMode === "auto") {
       // In 'auto' mode, the theme follows the system setting.
-      return systemTheme === 'dark';
+      return systemTheme === "dark";
     }
     // Otherwise, it's based on the user's explicit selection.
-    return themeMode === 'dark';
+    return themeMode === "dark";
   }, [themeMode, systemTheme]);
 
   // `useMemo` is used to create the final theme object. It merges the base theme with the
@@ -66,24 +67,25 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
    * A function to cycle through the available theme modes: auto -> light -> dark -> auto.
    */
   const toggleTheme = React.useCallback(() => {
-    setThemeMode(prevMode => {
-      if (prevMode === 'auto') return 'light';
-      if (prevMode === 'light') return 'dark';
-      return 'auto';
+    setThemeMode((prevMode) => {
+      if (prevMode === "auto") return "light";
+      if (prevMode === "light") return "dark";
+      return "auto";
     });
   }, []);
 
-  const value = React.useMemo(() => ({
-    theme,
-    themeMode,
-    isDarkMode,
-    toggleTheme,
-    setThemeMode,
-  }), [theme, themeMode, isDarkMode, toggleTheme]);
+  const value = React.useMemo(
+    () => ({
+      theme,
+      themeMode,
+      isDarkMode,
+      toggleTheme,
+      setThemeMode,
+    }),
+    [theme, themeMode, isDarkMode, toggleTheme],
+  );
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
-  };
+};

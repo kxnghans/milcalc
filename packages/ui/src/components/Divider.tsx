@@ -3,9 +3,10 @@
  * @description This file defines a styled horizontal divider component with a neumorphic inset effect.
  */
 
-import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+import React from "react";
+import { StyleSheet, View, ViewStyle } from "react-native";
+
+import { useTheme } from "../contexts/ThemeContext";
 
 /**
  * Props for the Divider component.
@@ -41,7 +42,5 @@ export default function Divider({ style }: DividerProps) {
     },
   });
 
-  return (
-    <View style={[styles.divider, style]} />
-  );
+  return <View style={[styles.divider, style]} />;
 }

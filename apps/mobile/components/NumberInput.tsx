@@ -4,15 +4,24 @@
  * "pressed-in" neumorphic effect. It's a specialized wrapper around the StyledTextInput.
  */
 
-import React, { useMemo } from 'react';
-import { TextInput, TextInputProps, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
-import { useTheme, ExemptButton } from '@repo/ui';
-import InsetTextInput from './InsetTextInput';
+import { ExemptButton, useTheme } from "@repo/ui";
+import React, { useMemo } from "react";
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  TextStyle,
+  ViewStyle,
+} from "react-native";
+
+import InsetTextInput from "./InsetTextInput";
 
 /**
  * Props for the NumberInput component.
  */
-interface NumberInputProps extends Omit<TextInputProps, 'style'> {
+interface NumberInputProps extends Omit<TextInputProps, "style"> {
   /** Optional custom styles for the outer container. */
   style?: StyleProp<ViewStyle>;
   /** Optional custom styles for the input field itself. */
@@ -32,45 +41,55 @@ interface NumberInputProps extends Omit<TextInputProps, 'style'> {
  * @param {React.Ref<TextInput>} ref - The ref to be forwarded to the TextInput component.
  * @returns {JSX.Element} The rendered number input component.
  */
-const NumberInput = React.forwardRef<TextInput, NumberInputProps>(({ style, inputStyle, adjustment, onToggleExempt, isExempt, ...props }, ref) => {
-  const { theme } = useTheme();
+const NumberInput = React.forwardRef<TextInput, NumberInputProps>(
+  (
+    { style, inputStyle, adjustment, onToggleExempt, isExempt, ...props },
+    ref,
+  ) => {
+    const { theme } = useTheme();
 
-  const styles = useMemo(() => StyleSheet.create({
-    input: {
-      textAlign: 'center',
-    },
-    adjustment: {
-      color: theme.colors.success,
-      ...theme.typography.label,
-      paddingRight: theme.spacing.s,
-    },
-  }), [theme]);
+    const styles = useMemo(
+      () =>
+        StyleSheet.create({
+          input: {
+            textAlign: "center",
+          },
+          adjustment: {
+            color: theme.colors.success,
+            ...theme.typography.label,
+            paddingRight: theme.spacing.s,
+          },
+        }),
+      [theme],
+    );
 
-  // When exempt, show 'xx' as the placeholder. Otherwise, use the placeholder from props.
-  const placeholder = isExempt ? 'xx' : props.placeholder;
+    // When exempt, show 'xx' as the placeholder. Otherwise, use the placeholder from props.
+    const placeholder = isExempt ? "xx" : props.placeholder;
 
-  return (
-    <InsetTextInput
-      ref={ref}
-      style={style}
-      inputStyle={[styles.input, inputStyle]}
-      leftContent={onToggleExempt ? (
-        <ExemptButton
-          onPress={onToggleExempt}
-          isActive={!!isExempt}
-        />
-      ) : undefined}
-      rightContent={adjustment ? (
-        <Text style={styles.adjustment}>{adjustment}</Text>
-      ) : undefined}
-      {...props}
-      placeholder={placeholder}
-      editable={!isExempt}
-      keyboardType="numeric"
-    />
-  );
-});
+    return (
+      <InsetTextInput
+        ref={ref}
+        style={style}
+        inputStyle={[styles.input, inputStyle]}
+        leftContent={
+          onToggleExempt ? (
+            <ExemptButton onPress={onToggleExempt} isActive={!!isExempt} />
+          ) : undefined
+        }
+        rightContent={
+          adjustment ? (
+            <Text style={styles.adjustment}>{adjustment}</Text>
+          ) : undefined
+        }
+        {...props}
+        placeholder={placeholder}
+        editable={!isExempt}
+        keyboardType="numeric"
+      />
+    );
+  },
+);
 
-NumberInput.displayName = 'NumberInput';
+NumberInput.displayName = "NumberInput";
 
 export default NumberInput;

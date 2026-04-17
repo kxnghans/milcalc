@@ -4,7 +4,8 @@
  * Using a single source of truth for asset URLs makes maintenance easier.
  */
 
-const BASE_URL = 'https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/milcalc_public/mascot';
+const BASE_URL =
+  "https://lixmvlfmwxkfbvnnhxzh.supabase.co/storage/v1/object/public/milcalc_public/mascot";
 
 export const MASCOT_URLS = {
   ALTITUDE: `${BASE_URL}/3d_altitude.png`,

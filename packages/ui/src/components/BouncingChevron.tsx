@@ -1,16 +1,16 @@
 import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
 } from "react-native-reanimated";
 
-import { Icon } from "./Icon";
-import { ICONS, ICON_SETS } from "../icons";
 import { useTheme } from "../contexts/ThemeContext";
+import { ICON_SETS, ICONS } from "../icons";
+import { Icon } from "./Icon";
 
 interface BouncingChevronProps {
   direction?: "up" | "down";

@@ -4,34 +4,38 @@
  * It acts as a central state aggregator, composing several smaller state management hooks.
  */
 
-import { useState, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import {
   calculatePtScore,
-  getMinMaxValues,
-  getCardioMinMaxValues,
-  getPerformanceForScore,
   getAgeGroupString,
+  getCardioMinMaxValues,
+  getMinMaxValues,
+  getPerformanceForScore,
   getPtStandardsBundle,
-} from '@repo/utils';
-import { useDebounce } from './useDebounce';
-import { useDemographicsState } from './useDemographicsState';
-import { useStrengthState } from './useStrengthState';
-import { useCoreState } from './useCoreState';
-import { useCardioState } from './useCardioState';
+} from "@repo/utils";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+
+import { useCardioState } from "./useCardioState";
+import { useCoreState } from "./useCoreState";
+import { useDebounce } from "./useDebounce";
+import { useDemographicsState } from "./useDemographicsState";
+import { useStrengthState } from "./useStrengthState";
 
 export function usePtCalculatorState(
-  initialAge: string = '', 
-  initialGender: string = 'male', 
-  initialAltitudeGroup: string = 'normal',
-  onSaveToProfile?: (data: { age?: string; gender?: string }) => void
+  initialAge: string = "",
+  initialGender: string = "male",
+  initialAltitudeGroup: string = "normal",
+  onSaveToProfile?: (data: { age?: string; gender?: string }) => void,
 ) {
-  const demographics = useDemographicsState(initialAge, initialGender, initialAltitudeGroup, onSaveToProfile);
+  const demographics = useDemographicsState(
+    initialAge,
+    initialGender,
+    initialAltitudeGroup,
+    onSaveToProfile,
+  );
   const strength = useStrengthState();
   const core = useCoreState();
   const cardio = useCardioState();
-
-
 
   const [score, setScore] = useState<{
     totalScore: number;
@@ -43,26 +47,29 @@ export function usePtCalculatorState(
     walkPassed: string;
     cardioRiskCategory: string | null;
     whtrRiskCategory: string | null;
-  }>({ 
-    totalScore: 0, 
-    cardioScore: 0, 
-    pushupScore: 0, 
-    coreScore: 0, 
-    whtrScore: 0, 
-    isPass: false, 
-    walkPassed: 'n/a',
+  }>({
+    totalScore: 0,
+    cardioScore: 0,
+    pushupScore: 0,
+    coreScore: 0,
+    whtrScore: 0,
+    isPass: false,
+    walkPassed: "n/a",
     cardioRiskCategory: null,
-    whtrRiskCategory: null
+    whtrRiskCategory: null,
   });
-  
+
   const debouncedAge = useDebounce(demographics.age, 300);
   const debouncedGender = useDebounce(demographics.gender, 300);
   const debouncedAltitudeGroup = useDebounce(demographics.altitudeGroup, 300);
   const debouncedWaist = useDebounce(demographics.waist, 500);
   const debouncedHeightFeet = useDebounce(demographics.heightFeet, 500);
   const debouncedHeightInches = useDebounce(demographics.heightInches, 500);
-  const debouncedIsHeightInInches = useDebounce(demographics.isHeightInInches, 500);
-  
+  const debouncedIsHeightInInches = useDebounce(
+    demographics.isHeightInInches,
+    500,
+  );
+
   const debouncedPushupComponent = useDebounce(strength.pushupComponent, 300);
   const debouncedPushups = useDebounce(strength.pushups, 500);
   const debouncedStrengthExempt = useDebounce(strength.isExempt, 300);
@@ -84,12 +91,13 @@ export function usePtCalculatorState(
 
   const ageNum = parseInt(debouncedAge);
   const ageGroup = getAgeGroupString(ageNum);
-  const capitalizedGender = debouncedGender.charAt(0).toUpperCase() + debouncedGender.slice(1);
+  const capitalizedGender =
+    debouncedGender.charAt(0).toUpperCase() + debouncedGender.slice(1);
 
   // Consolidate data fetching into a single bundled RPC call
   const { data: bundle, isFetching: isFetchingBundle } = useQuery({
-    queryKey: ['ptStandardsBundle', capitalizedGender, ageGroup],
-    queryFn: () => getPtStandardsBundle(capitalizedGender, ageGroup || ''),
+    queryKey: ["ptStandardsBundle", capitalizedGender, ageGroup],
+    queryFn: () => getPtStandardsBundle(capitalizedGender, ageGroup || ""),
     enabled: !!capitalizedGender && !!ageGroup,
     staleTime: 1000 * 60 * 5,
   });
@@ -103,121 +111,190 @@ export function usePtCalculatorState(
 
   const { minMax, cardioMinMax } = useMemo(() => {
     if (!standards || !passFailStandards) {
-        return { 
-            minMax: { pushups: {min: 0, max: 0}, core: {min: 0, max: 0}, whtr: {min: 0, max: 0}}, 
-            cardioMinMax: { min: 0, max: 0 } 
-        };
+      return {
+        minMax: {
+          pushups: { min: 0, max: 0 },
+          core: { min: 0, max: 0 },
+          whtr: { min: 0, max: 0 },
+        },
+        cardioMinMax: { min: 0, max: 0 },
+      };
     }
     const pushupValues = getMinMaxValues(standards, debouncedPushupComponent);
     const coreValues = getMinMaxValues(standards, debouncedCoreComponent);
-    const whtrValues = getMinMaxValues(standards, 'whtr');
-    const cardioValues = getCardioMinMaxValues(standards, passFailStandards, debouncedCardioComponent);
-    return { 
-        minMax: {pushups: pushupValues, core: coreValues, whtr: whtrValues}, 
-        cardioMinMax: cardioValues 
+    const whtrValues = getMinMaxValues(standards, "whtr");
+    const cardioValues = getCardioMinMaxValues(
+      standards,
+      passFailStandards,
+      debouncedCardioComponent,
+    );
+    return {
+      minMax: { pushups: pushupValues, core: coreValues, whtr: whtrValues },
+      cardioMinMax: cardioValues,
     };
-  }, [standards, passFailStandards, debouncedPushupComponent, debouncedCoreComponent, debouncedCardioComponent]);
+  }, [
+    standards,
+    passFailStandards,
+    debouncedPushupComponent,
+    debouncedCoreComponent,
+    debouncedCardioComponent,
+  ]);
 
   const ninetyPercentileThresholds = useMemo(() => {
-      if (!standards) {
-          return { pushups: 0, core: 0, cardio: 0 };
+    if (!standards) {
+      return { pushups: 0, core: 0, cardio: 0 };
+    }
+    const pushupThreshold = getPerformanceForScore(
+      standards,
+      debouncedPushupComponent,
+      13.5,
+    ); // 90% of 15
+    const coreThreshold = getPerformanceForScore(
+      standards,
+      debouncedCoreComponent,
+      13.5,
+    ); // 90% of 15
+    const cardioThreshold = getPerformanceForScore(
+      standards,
+      debouncedCardioComponent,
+      45,
+    ); // 90% of 50
+    return {
+      pushups: pushupThreshold,
+      core: coreThreshold,
+      cardio: cardioThreshold,
+    };
+  }, [
+    standards,
+    debouncedPushupComponent,
+    debouncedCoreComponent,
+    debouncedCardioComponent,
+  ]);
+
+  const calculatedWhtr = useMemo(() => {
+    const waistNum = parseFloat(debouncedWaist) || 0;
+    let heightNum = 0;
+
+    if (debouncedIsHeightInInches) {
+      heightNum = parseFloat(debouncedHeightInches) || 0;
+    } else {
+      const feet = parseFloat(debouncedHeightFeet) || 0;
+      const inches = parseFloat(debouncedHeightInches) || 0;
+      heightNum = feet * 12 + inches;
+    }
+
+    if (waistNum > 0 && heightNum > 0) {
+      // Round to 2 decimal places to match standards exactly
+      return Math.round((waistNum / heightNum) * 100) / 100;
+    }
+    return 0;
+  }, [
+    debouncedWaist,
+    debouncedHeightFeet,
+    debouncedHeightInches,
+    debouncedIsHeightInInches,
+  ]);
+
+  useEffect(() => {
+    const runCalculations = () => {
+      if (
+        ageNum &&
+        debouncedGender &&
+        standards &&
+        passFailStandards &&
+        altitudeCorrections &&
+        walkAltThresholds
+      ) {
+        try {
+          const result = calculatePtScore(
+            {
+              age: ageNum || 0,
+              gender: debouncedGender,
+              altitudeGroup: debouncedAltitudeGroup,
+              pushupComponent: debouncedPushupComponent,
+              pushups: parseInt(debouncedPushups) || 0,
+              isStrengthExempt: debouncedStrengthExempt,
+              coreComponent: debouncedCoreComponent,
+              situps: parseInt(debouncedSitups) || 0,
+              reverseCrunches: parseInt(debouncedReverseCrunches) || 0,
+              plankMinutes: parseInt(debouncedPlankMinutes) || 0,
+              plankSeconds: parseInt(debouncedPlankSeconds) || 0,
+              isCoreExempt: debouncedCoreExempt,
+              cardioComponent: debouncedCardioComponent,
+              runMinutes: parseInt(debouncedRunMinutes) || 0,
+              runSeconds: parseInt(debouncedRunSeconds) || 0,
+              shuttles: parseInt(debouncedShuttles) || 0,
+              walkMinutes: parseInt(debouncedWalkMinutes) || 0,
+              walkSeconds: parseInt(debouncedWalkSeconds) || 0,
+              isCardioExempt: debouncedCardioExempt,
+              whtr: calculatedWhtr,
+              isWhtrExempt: false,
+            },
+            standards,
+            passFailStandards,
+            altitudeCorrections,
+            walkAltThresholds,
+          );
+          setScore(result);
+        } catch (e) {
+          console.error("Error during calculation: ", e);
+        }
+      } else if (!isLoading) {
+        // If we're not loading but conditions aren't met, or if demographics are missing, reset.
+        setScore({
+          totalScore: 0,
+          cardioScore: 0,
+          pushupScore: 0,
+          coreScore: 0,
+          whtrScore: 0,
+          isPass: false,
+          walkPassed: "n/a",
+          cardioRiskCategory: null,
+          whtrRiskCategory: null,
+        });
+      } else if (isLoading && !standards) {
+        // If we ARE loading and have no standards yet for this age group, clear old score to avoid stale results.
+        setScore({
+          totalScore: 0,
+          cardioScore: "...",
+          pushupScore: "...",
+          coreScore: "...",
+          whtrScore: "...",
+          isPass: false,
+          walkPassed: "n/a",
+          cardioRiskCategory: null,
+          whtrRiskCategory: null,
+        });
       }
-      const pushupThreshold = getPerformanceForScore(standards, debouncedPushupComponent, 13.5); // 90% of 15
-      const coreThreshold = getPerformanceForScore(standards, debouncedCoreComponent, 13.5); // 90% of 15
-      const cardioThreshold = getPerformanceForScore(standards, debouncedCardioComponent, 45); // 90% of 50
-      return {
-          pushups: pushupThreshold,
-          core: coreThreshold,
-          cardio: cardioThreshold,
-      };
-  }, [standards, debouncedPushupComponent, debouncedCoreComponent, debouncedCardioComponent]);
-
-    const calculatedWhtr = useMemo(() => {
-        const waistNum = parseFloat(debouncedWaist) || 0;
-        let heightNum = 0;
-        
-        if (debouncedIsHeightInInches) {
-            heightNum = parseFloat(debouncedHeightInches) || 0;
-        } else {
-            const feet = parseFloat(debouncedHeightFeet) || 0;
-            const inches = parseFloat(debouncedHeightInches) || 0;
-            heightNum = (feet * 12) + inches;
-        }
-        
-        if (waistNum > 0 && heightNum > 0) {
-            // Round to 2 decimal places to match standards exactly
-            return Math.round((waistNum / heightNum) * 100) / 100;
-        }
-        return 0;
-    }, [debouncedWaist, debouncedHeightFeet, debouncedHeightInches, debouncedIsHeightInInches]);
-
-    useEffect(() => {
-        const runCalculations = () => {
-            if (ageNum && debouncedGender && standards && passFailStandards && altitudeCorrections && walkAltThresholds) {
-                try {
-                    const result = calculatePtScore({
-                        age: ageNum || 0,
-                        gender: debouncedGender,
-                        altitudeGroup: debouncedAltitudeGroup,
-                        pushupComponent: debouncedPushupComponent,
-                        pushups: parseInt(debouncedPushups) || 0,
-                        isStrengthExempt: debouncedStrengthExempt,
-                        coreComponent: debouncedCoreComponent,
-                        situps: parseInt(debouncedSitups) || 0,
-                        reverseCrunches: parseInt(debouncedReverseCrunches) || 0,
-                        plankMinutes: parseInt(debouncedPlankMinutes) || 0,
-                        plankSeconds: parseInt(debouncedPlankSeconds) || 0,
-                        isCoreExempt: debouncedCoreExempt,
-                        cardioComponent: debouncedCardioComponent,
-                        runMinutes: parseInt(debouncedRunMinutes) || 0,
-                        runSeconds: parseInt(debouncedRunSeconds) || 0,
-                        shuttles: parseInt(debouncedShuttles) || 0,
-                        walkMinutes: parseInt(debouncedWalkMinutes) || 0,
-                        walkSeconds: parseInt(debouncedWalkSeconds) || 0,
-                        isCardioExempt: debouncedCardioExempt,
-                        whtr: calculatedWhtr,
-                        isWhtrExempt: false,
-                    }, standards, passFailStandards, altitudeCorrections, walkAltThresholds);
-                    setScore(result);
-                } catch (e) {
-                    console.error("Error during calculation: ", e);
-                }
-            } else if (!isLoading) {
-                // If we're not loading but conditions aren't met, or if demographics are missing, reset.
-                setScore({ 
-                    totalScore: 0, 
-                    cardioScore: 0, 
-                    pushupScore: 0, 
-                    coreScore: 0, 
-                    whtrScore: 0, 
-                    isPass: false, 
-                    walkPassed: 'n/a',
-                    cardioRiskCategory: null,
-                    whtrRiskCategory: null
-                });
-            } else if (isLoading && !standards) {
-                // If we ARE loading and have no standards yet for this age group, clear old score to avoid stale results.
-                setScore({ 
-                    totalScore: 0, 
-                    cardioScore: '...', 
-                    pushupScore: '...', 
-                    coreScore: '...', 
-                    whtrScore: '...', 
-                    isPass: false, 
-                    walkPassed: 'n/a',
-                    cardioRiskCategory: null,
-                    whtrRiskCategory: null
-                });
-            }
-        }
-        runCalculations();
-    }, [
-    debouncedAge, debouncedGender, debouncedAltitudeGroup,
-    debouncedPushupComponent, debouncedPushups, debouncedStrengthExempt,
-    debouncedCoreComponent, debouncedSitups, debouncedReverseCrunches, debouncedPlankMinutes, debouncedPlankSeconds, debouncedCoreExempt,
-    debouncedCardioComponent, debouncedRunMinutes, debouncedRunSeconds, debouncedShuttles, debouncedWalkMinutes, debouncedWalkSeconds, debouncedCardioExempt,
+    };
+    runCalculations();
+  }, [
+    debouncedAge,
+    debouncedGender,
+    debouncedAltitudeGroup,
+    debouncedPushupComponent,
+    debouncedPushups,
+    debouncedStrengthExempt,
+    debouncedCoreComponent,
+    debouncedSitups,
+    debouncedReverseCrunches,
+    debouncedPlankMinutes,
+    debouncedPlankSeconds,
+    debouncedCoreExempt,
+    debouncedCardioComponent,
+    debouncedRunMinutes,
+    debouncedRunSeconds,
+    debouncedShuttles,
+    debouncedWalkMinutes,
+    debouncedWalkSeconds,
+    debouncedCardioExempt,
     calculatedWhtr,
-    standards, passFailStandards, altitudeCorrections, walkAltThresholds, ageNum, isLoading
+    standards,
+    passFailStandards,
+    altitudeCorrections,
+    walkAltThresholds,
+    ageNum,
+    isLoading,
   ]);
 
   return {
@@ -230,10 +307,10 @@ export function usePtCalculatorState(
     minMax,
     cardioMinMax,
     ninetyPercentileThresholds,
-    altitudeData: { 
-        run: altitudeCorrections || [], 
-        walk: walkAltThresholds || [], 
-        hamr: altitudeCorrections || [] 
+    altitudeData: {
+      run: altitudeCorrections || [],
+      walk: walkAltThresholds || [],
+      hamr: altitudeCorrections || [],
     },
   };
 }

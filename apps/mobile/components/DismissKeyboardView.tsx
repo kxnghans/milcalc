@@ -1,9 +1,17 @@
-import React from 'react';
-import { TouchableWithoutFeedback, Keyboard, View, StyleSheet } from 'react-native';
-import type { ViewProps } from 'react-native';
+import React from "react";
+import type { ViewProps } from "react-native";
+import {
+  Keyboard,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 const DismissKeyboardView = ({ children, ...props }: ViewProps) => (
-  <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} accessible={false}>
+  <TouchableWithoutFeedback
+    onPress={() => Keyboard.dismiss()}
+    accessible={false}
+  >
     <View {...props} style={[styles.container, props.style]}>
       {children}
     </View>

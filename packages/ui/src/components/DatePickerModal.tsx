@@ -1,9 +1,10 @@
-import React from 'react';
-import { Modal, View, Pressable, StyleSheet } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useTheme } from '../contexts/ThemeContext';
-import { PillButton } from './PillButton';
-import { getAlphaColor } from '../theme';
+import DateTimePicker from "@react-native-community/datetimepicker";
+import React from "react";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
+
+import { useTheme } from "../contexts/ThemeContext";
+import { getAlphaColor } from "../theme";
+import { PillButton } from "./PillButton";
 
 interface DatePickerModalProps {
   visible: boolean;
@@ -12,7 +13,12 @@ interface DatePickerModalProps {
   value: Date | undefined;
 }
 
-export const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, onClose, onDone, value }) => {
+export const DatePickerModal: React.FC<DatePickerModalProps> = ({
+  visible,
+  onClose,
+  onDone,
+  value,
+}) => {
   const { theme } = useTheme();
   const [tempDate, setTempDate] = React.useState(value);
 
@@ -22,7 +28,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, onClo
     }
   }, [value, visible]);
 
-  const overlayColor = getAlphaColor('#000000', 0.5);
+  const overlayColor = getAlphaColor("#000000", 0.5);
 
   return (
     <Modal
@@ -31,10 +37,21 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, onClo
       visible={visible}
       onRequestClose={onClose}
     >
-      <Pressable style={[styles.overlay, { backgroundColor: overlayColor }]} onPress={onClose}>
+      <Pressable
+        style={[styles.overlay, { backgroundColor: overlayColor }]}
+        onPress={onClose}
+      >
         <View style={styles.modalContainer}>
           <Pressable>
-            <View style={[styles.modalContent, { backgroundColor: theme.colors.background, padding: theme.spacing.m }]}>
+            <View
+              style={[
+                styles.modalContent,
+                {
+                  backgroundColor: theme.colors.background,
+                  padding: theme.spacing.m,
+                },
+              ]}
+            >
               <View style={styles.pickerContainer}>
                 <DateTimePicker
                   style={styles.picker}
@@ -66,21 +83,21 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   modalContent: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   pickerContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   picker: {
-    width: '100%',
+    width: "100%",
     transform: [{ scale: 0.95 }],
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
 });

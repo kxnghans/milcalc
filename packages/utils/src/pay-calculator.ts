@@ -1,8 +1,9 @@
-import { Tables, DependentStatus, DisabilityPercentage } from './types';
-
+import { calculateFederalTax, calculateStateTax } from "./tax-utils";
+import { DependentStatus, DisabilityPercentage, Tables } from "./types";
 const parseCurrency = (value: string | number) => {
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string') return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
+  if (typeof value === "number") return value;
+  if (typeof value === "string")
+    return parseFloat(value.replace(/[^\d.-]/g, "")) || 0;
   return 0;
 };
 
@@ -20,27 +21,42 @@ interface PayCalculatorInputs {
 
 export const calculatePay = (
   inputs: PayCalculatorInputs,
-  federalTaxData: Tables<'federal_tax_data'>[],
-  stateTaxData: Tables<'state_tax_data'>[]
+  federalTaxData: Tables<"federal_tax_data">[],
+  stateTaxData: Tables<"state_tax_data">[],
 ) => {
-  const { basePay, bah, bas, specialPays, additionalIncomes, filingStatus, additionalDeductions, state } = inputs;
+  const {
+    basePay,
+    bah,
+    bas,
+    specialPays,
+    additionalIncomes,
+    filingStatus,
+    additionalDeductions,
+    state,
+  } = inputs;
 
   const monthlyBasePayRaw = basePay || 0;
   // Statutory Senior Officer Pay Cap (Executive Level II)
   // For 2024, the cap is $18,444.17 monthly ($221,330 annually)
   const LEVEL_II_CAP = 18444.17;
-  const monthlyBasePay = monthlyBasePayRaw > LEVEL_II_CAP ? LEVEL_II_CAP : monthlyBasePayRaw;
+  const monthlyBasePay =
+    monthlyBasePayRaw > LEVEL_II_CAP ? LEVEL_II_CAP : monthlyBasePayRaw;
 
   const monthlyBah = bah || 0;
   const monthlyBas = bas || 0;
-  const monthlySpecialPays = Object.values(specialPays).reduce((a: number, b: string | number) => a + parseCurrency(b), 0);
+  const monthlySpecialPays = Object.values(specialPays).reduce(
+    (a: number, b: string | number) => a + parseCurrency(b),
+    0,
+  );
   const monthlyAdditionalIncomes = additionalIncomes.reduce(
-    (sum: number, item: { amount: string | number }) => sum + parseCurrency(item.amount),
-    0
+    (sum: number, item: { amount: string | number }) =>
+      sum + parseCurrency(item.amount),
+    0,
   );
   const monthlyAdditionalDeductions = additionalDeductions.reduce(
-    (sum: number, item: { amount: string | number }) => sum + parseCurrency(item.amount),
-    0
+    (sum: number, item: { amount: string | number }) =>
+      sum + parseCurrency(item.amount),
+    0,
   );
 
   const annualBasePay = monthlyBasePay * 12;
@@ -51,7 +67,8 @@ export const calculatePay = (
   const annualAdditionalDeductions = monthlyAdditionalDeductions * 12;
 
   // 1. Correctly define taxable and non-taxable income
-  const taxableIncome = annualBasePay + annualSpecialPays + annualAdditionalIncomes;
+  const taxableIncome =
+    annualBasePay + annualSpecialPays + annualAdditionalIncomes;
   const nonTaxableIncome = annualBah + annualBas;
   const totalIncome = taxableIncome + nonTaxableIncome;
 
@@ -60,123 +77,93 @@ export const calculatePay = (
   const ficaTax = annualBasePay * FICA_RATE;
 
   // 3. Calculate Federal and State tax based on taxable income
-  const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
-  const federalStandardDeduction = federalTaxData.find(row => row.filing_status === capitalizedFilingStatus)?.standard_deduction || 0;
-  const stateStandardDeduction = stateTaxData.find(row => row.state === state && row.filing_status === capitalizedFilingStatus)?.standard_deduction || 0;
+  const capitalizedFilingStatus =
+    filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
+  const federalStandardDeduction =
+    federalTaxData.find((row) => row.filing_status === capitalizedFilingStatus)
+      ?.standard_deduction || 0;
+  const stateStandardDeduction =
+    stateTaxData.find(
+      (row) =>
+        row.state === state && row.filing_status === capitalizedFilingStatus,
+    )?.standard_deduction || 0;
 
-  const federalTaxableIncomeForBrackets = Math.max(0, taxableIncome - federalStandardDeduction - annualAdditionalDeductions);
-  const stateTaxableIncomeForBrackets = Math.max(0, taxableIncome - stateStandardDeduction - annualAdditionalDeductions);
+  const federalTaxableIncomeForBrackets = Math.max(
+    0,
+    taxableIncome - federalStandardDeduction - annualAdditionalDeductions,
+  );
+  const stateTaxableIncomeForBrackets = Math.max(
+    0,
+    taxableIncome - stateStandardDeduction - annualAdditionalDeductions,
+  );
 
-  const federalTax = calculateFederalTax(federalTaxableIncomeForBrackets, filingStatus, federalTaxData);
-  const stateTax = calculateStateTax(stateTaxableIncomeForBrackets, filingStatus, state, stateTaxData);
+  const federalTax = calculateFederalTax(
+    federalTaxableIncomeForBrackets,
+    filingStatus,
+    federalTaxData,
+  );
+  const stateTax = calculateStateTax(
+    stateTaxableIncomeForBrackets,
+    filingStatus,
+    state,
+    stateTaxData,
+  );
 
   // 4. Return all calculated values
-  return { totalIncome: totalIncome / 12, federalTax: federalTax / 12, stateTax: stateTax / 12, ficaTax: ficaTax / 12, federalStandardDeduction, stateStandardDeduction };
+  return {
+    totalIncome: totalIncome / 12,
+    federalTax: federalTax / 12,
+    stateTax: stateTax / 12,
+    ficaTax: ficaTax / 12,
+    federalStandardDeduction,
+    stateStandardDeduction,
+  };
 };
 
 export const calculateDisabilityIncome = (
-    disabilityPercentage: DisabilityPercentage,
-    dependentStatus: DependentStatus,
-    disabilityData: Tables<'veterans_disability_compensation'>[]
-  ): number => {
-    if (!disabilityPercentage || disabilityPercentage === '0%' || !dependentStatus || dependentStatus === 'none' || !disabilityData) {
-      return 0;
-    }
-  
-    const row = disabilityData.find(d => d.dependent_status.trim().toLowerCase() === dependentStatus.trim().toLowerCase());
-  
-    if (row) {
-      // disabilityPercentage is narrowed here to NOT be "0%", but TS might still complain if we index directly
-      // because Tables<'veterans_disability_compensation'> Row type doesn't have "0%" as a key.
-      const rate = row[disabilityPercentage as Exclude<DisabilityPercentage, '0%'>];
-      return rate === null ? 0 : rate;
-    } else {
-      return 0;
-    }
-  };
-
-  export const calculateNetPayWithDisability = (
-    militaryPay: number,
-    vaDisabilityPay: number
-  ) => {
-    if (vaDisabilityPay > militaryPay) {
-      return {
-        paySource: 'VA Disability',
-        takeHomePay: vaDisabilityPay,
-      };
-    }
-    return {
-      paySource: 'Military',
-      takeHomePay: militaryPay,
-    };
-  };
-
-const calculateFederalTax = (
-  taxableIncome: number,
-  filingStatus: string,
-  federalTaxData: Tables<'federal_tax_data'>[]
-) => {
-  const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
-  const brackets = federalTaxData
-    .filter(row => row.filing_status === capitalizedFilingStatus)
-    .sort((a, b) => (a.income_bracket_low || 0) - (b.income_bracket_low || 0));
-
-  let tax = 0;
-  let remainingIncome = taxableIncome;
-
-  for (const bracket of brackets) {
-    if (remainingIncome <= 0) break;
-
-    const bracketMin = bracket.income_bracket_low || 0;
-    const bracketMax = bracket.income_bracket_high === 'inf' ? Infinity : parseFloat(bracket.income_bracket_high || '0');
-    const taxRate = bracket.tax_rate || 0;
-
-    const incomeInBracket = Math.min(remainingIncome, bracketMax - bracketMin);
-    tax += incomeInBracket * taxRate;
-    remainingIncome -= incomeInBracket;
-  }
-
-  return tax;
-};
-
-const calculateStateTax = (
-  taxableIncome: number,
-  filingStatus: string,
-  state: string,
-  stateTaxData: Tables<'state_tax_data'>[]
-) => {
-  const capitalizedFilingStatus = filingStatus.charAt(0).toUpperCase() + filingStatus.slice(1);
-  const rawBrackets = stateTaxData
-    .filter(row => row.state === state && row.filing_status === capitalizedFilingStatus)
-    .sort((a, b) => (a.income_bracket_low || 0) - (b.income_bracket_low || 0));
-
-  if (rawBrackets.length === 0) {
+  disabilityPercentage: DisabilityPercentage,
+  dependentStatus: DependentStatus,
+  disabilityData: Tables<"veterans_disability_compensation">[],
+): number => {
+  if (
+    !disabilityPercentage ||
+    disabilityPercentage === "0%" ||
+    !dependentStatus ||
+    dependentStatus === "none" ||
+    !disabilityData
+  ) {
     return 0;
   }
 
-  // Reconstruct brackets from the flawed data structure
-  const brackets = rawBrackets.map((bracket, index) => {
-    const nextBracket = rawBrackets[index + 1];
-    const rate = bracket.tax_rate || 0;
+  const row = disabilityData.find(
+    (d) =>
+      d.dependent_status.trim().toLowerCase() ===
+      dependentStatus.trim().toLowerCase(),
+  );
 
-    return {
-      min: bracket.income_bracket_low || 0,
-      max: nextBracket ? (nextBracket.income_bracket_low || 0) - 1 : Infinity, // -1 to make it non-overlapping
-      rate: rate,
-    };
-  });
-
-  let tax = 0;
-  let remainingIncome = taxableIncome;
-
-  for (const bracket of brackets) {
-    if (remainingIncome <= 0) break;
-
-    const bracketSize = bracket.max - bracket.min + 1;
-    const incomeInBracket = Math.min(remainingIncome, bracketSize);
-    tax += incomeInBracket * bracket.rate;
-    remainingIncome -= incomeInBracket;
+  if (row) {
+    // disabilityPercentage is narrowed here to NOT be "0%", but TS might still complain if we index directly
+    // because Tables<'veterans_disability_compensation'> Row type doesn't have "0%" as a key.
+    const rate =
+      row[disabilityPercentage as Exclude<DisabilityPercentage, "0%">];
+    return rate === null ? 0 : rate;
+  } else {
+    return 0;
   }
+};
 
-  return tax;
+export const calculateNetPayWithDisability = (
+  militaryPay: number,
+  vaDisabilityPay: number,
+) => {
+  if (vaDisabilityPay > militaryPay) {
+    return {
+      paySource: "VA Disability",
+      takeHomePay: vaDisabilityPay,
+    };
+  }
+  return {
+    paySource: "Military",
+    takeHomePay: militaryPay,
+  };
 };

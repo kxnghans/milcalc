@@ -1,9 +1,16 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { ImageSourcePropType } from 'react-native';
+import React, { createContext, useCallback, useContext, useState } from "react";
+import { ImageSourcePropType } from "react-native";
 
-export type OverlayType = 'MENU' | 'PROFILE' | 'SETTINGS' | 'BUG_REPORT' | 'ACCOUNT' | 'PAYWALL' | null;
-export type DocumentCategory = 'PAY' | 'PT' | 'RETIREMENT' | null;
-export type HelpSource = 'pt' | 'pay' | 'retirement' | 'best_score' | null;
+export type OverlayType =
+  | "MENU"
+  | "PROFILE"
+  | "SETTINGS"
+  | "BUG_REPORT"
+  | "ACCOUNT"
+  | "PAYWALL"
+  | null;
+export type DocumentCategory = "PAY" | "PT" | "RETIREMENT" | null;
+export type HelpSource = "pt" | "pay" | "retirement" | "best_score" | null;
 
 interface OverlayContextType {
   // Main Overlay (BottomSheet)
@@ -20,7 +27,11 @@ interface OverlayContextType {
   helpContentKey: string | null;
   helpMascot: ImageSourcePropType | null;
   helpSource: HelpSource;
-  openHelp: (key: string, source: HelpSource, mascot?: ImageSourcePropType) => void;
+  openHelp: (
+    key: string,
+    source: HelpSource,
+    mascot?: ImageSourcePropType,
+  ) => void;
   closeHelp: () => void;
 
   // Global Documents (DocumentModal)
@@ -54,7 +65,9 @@ const OverlayContext = createContext<OverlayContextType>({
 
 export const useOverlay = () => useContext(OverlayContext);
 
-export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   // Main Overlay State
   const [overlayType, setOverlayType] = useState<OverlayType>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -63,11 +76,14 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Global Help State
   const [helpContentKey, setHelpContentKey] = useState<string | null>(null);
-  const [helpMascot, setHelpMascot] = useState<ImageSourcePropType | null>(null);
+  const [helpMascot, setHelpMascot] = useState<ImageSourcePropType | null>(
+    null,
+  );
   const [helpSource, setHelpSource] = useState<HelpSource>(null);
 
   // Global Documents State
-  const [documentCategory, setDocumentCategory] = useState<DocumentCategory>(null);
+  const [documentCategory, setDocumentCategory] =
+    useState<DocumentCategory>(null);
   const [isDocumentVisible, setIsDocumentVisible] = useState(false);
 
   const openOverlay = useCallback((type: OverlayType) => {
@@ -87,11 +103,14 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, 300);
   }, []);
 
-  const openHelp = useCallback((key: string, source: HelpSource, mascot?: ImageSourcePropType) => {
-    setHelpContentKey(key);
-    setHelpSource(source);
-    if (mascot) setHelpMascot(mascot);
-  }, []);
+  const openHelp = useCallback(
+    (key: string, source: HelpSource, mascot?: ImageSourcePropType) => {
+      setHelpContentKey(key);
+      setHelpSource(source);
+      if (mascot) setHelpMascot(mascot);
+    },
+    [],
+  );
 
   const closeHelp = useCallback(() => {
     setHelpContentKey(null);
@@ -110,47 +129,48 @@ export const OverlayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setTimeout(() => setDocumentCategory(null), 300);
   }, []);
 
-  const value = React.useMemo(() => ({
-    overlayType,
-    isVisible,
-    openOverlay,
-    closeOverlay,
-    snapToIndex,
-    setSnapToIndex,
-    overlayFooter,
-    setOverlayFooter,
-    helpContentKey,
-    helpMascot,
-    helpSource,
-    openHelp,
-    closeHelp,
-    documentCategory,
-    isDocumentVisible,
-    openDocuments,
-    closeDocuments,
-  }), [
-    overlayType,
-    isVisible,
-    openOverlay,
-    closeOverlay,
-    snapToIndex,
-    setSnapToIndex,
-    overlayFooter,
-    setOverlayFooter,
-    helpContentKey,
-    helpMascot,
-    helpSource,
-    openHelp,
-    closeHelp,
-    documentCategory,
-    isDocumentVisible,
-    openDocuments,
-    closeDocuments,
-  ]);
+  const value = React.useMemo(
+    () => ({
+      overlayType,
+      isVisible,
+      openOverlay,
+      closeOverlay,
+      snapToIndex,
+      setSnapToIndex,
+      overlayFooter,
+      setOverlayFooter,
+      helpContentKey,
+      helpMascot,
+      helpSource,
+      openHelp,
+      closeHelp,
+      documentCategory,
+      isDocumentVisible,
+      openDocuments,
+      closeDocuments,
+    }),
+    [
+      overlayType,
+      isVisible,
+      openOverlay,
+      closeOverlay,
+      snapToIndex,
+      setSnapToIndex,
+      overlayFooter,
+      setOverlayFooter,
+      helpContentKey,
+      helpMascot,
+      helpSource,
+      openHelp,
+      closeHelp,
+      documentCategory,
+      isDocumentVisible,
+      openDocuments,
+      closeDocuments,
+    ],
+  );
 
   return (
-    <OverlayContext.Provider value={value}>
-      {children}
-    </OverlayContext.Provider>
+    <OverlayContext.Provider value={value}>{children}</OverlayContext.Provider>
   );
 };

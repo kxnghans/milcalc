@@ -1,19 +1,26 @@
-import React, { useMemo, useEffect, useState } from 'react';
-import { StyleSheet, View, useWindowDimensions, StyleProp, TextStyle } from 'react-native';
+import { getAlphaColor } from "@repo/ui";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  StyleProp,
+  StyleSheet,
+  TextStyle,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
-  withDelay,
-  Easing,
   cancelAnimation,
-} from 'react-native-reanimated';
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
 // Types for the component props
 interface SeasonalEffectsProps {
-  season: 'spring' | 'summer' | 'fall' | 'winter';
+  season: "spring" | "summer" | "fall" | "winter";
 }
 
 interface ParticleConfig {
@@ -56,56 +63,56 @@ const Particle = ({
   useEffect(() => {
     // Reset initial position
     translateY.value = -0.1 * containerHeight;
-    
+
     const startAnimation = () => {
-        // Fall Animation
-        translateY.value = withDelay(
-          config.fallDelay,
-          withRepeat(
-            withTiming(containerHeight * 1.1, {
-              duration: config.fallDuration,
-              easing: Easing.linear,
-            }),
-            -1, // Infinite
-            false // Do not reverse
-          )
-        );
+      // Fall Animation
+      translateY.value = withDelay(
+        config.fallDelay,
+        withRepeat(
+          withTiming(containerHeight * 1.1, {
+            duration: config.fallDuration,
+            easing: Easing.linear,
+          }),
+          -1, // Infinite
+          false, // Do not reverse
+        ),
+      );
 
-        // Spin Animation
-        rotate.value = withDelay(
-          config.spinDelay,
-          withRepeat(
-            withTiming(360, {
-              duration: config.spinDuration,
-              easing: Easing.linear,
-            }),
-            -1,
-            false
-          )
-        );
+      // Spin Animation
+      rotate.value = withDelay(
+        config.spinDelay,
+        withRepeat(
+          withTiming(360, {
+            duration: config.spinDuration,
+            easing: Easing.linear,
+          }),
+          -1,
+          false,
+        ),
+      );
 
-        // Sway Animation (Horizontal)
-        translateX.value = withDelay(
-            config.horizontalDelay,
-            withRepeat(
-                withSequence(
-                    withTiming(config.swayAmplitude * config.initialSwayDirection, {
-                        duration: config.horizontalDuration,
-                        easing: Easing.inOut(Easing.sin),
-                    }),
-                    withTiming(-config.swayAmplitude * config.initialSwayDirection, {
-                        duration: config.horizontalDuration * 2, // Double duration for full swing across
-                        easing: Easing.inOut(Easing.sin),
-                    }),
-                    withTiming(0, {
-                        duration: config.horizontalDuration,
-                        easing: Easing.inOut(Easing.sin),
-                    })
-                ),
-                -1,
-                false // Do not reverse the sequence itself
-            )
-        );
+      // Sway Animation (Horizontal)
+      translateX.value = withDelay(
+        config.horizontalDelay,
+        withRepeat(
+          withSequence(
+            withTiming(config.swayAmplitude * config.initialSwayDirection, {
+              duration: config.horizontalDuration,
+              easing: Easing.inOut(Easing.sin),
+            }),
+            withTiming(-config.swayAmplitude * config.initialSwayDirection, {
+              duration: config.horizontalDuration * 2, // Double duration for full swing across
+              easing: Easing.inOut(Easing.sin),
+            }),
+            withTiming(0, {
+              duration: config.horizontalDuration,
+              easing: Easing.inOut(Easing.sin),
+            }),
+          ),
+          -1,
+          false, // Do not reverse the sequence itself
+        ),
+      );
     };
 
     // Immediate start since parent ensures we are ready
@@ -125,10 +132,10 @@ const Particle = ({
         { translateX: translateX.value },
         { rotate: `${rotate.value}deg` },
       ],
-      position: 'absolute',
+      position: "absolute",
     };
   });
-  
+
   return (
     <Animated.View style={[animatedContainerStyle, { left: initialX }]}>
       <Animated.Text style={[style, { fontSize: config.size }]}>
@@ -139,22 +146,32 @@ const Particle = ({
 };
 
 // Summer Particle Component with specific opacity animation
-const SummerParticle = ({ i, config, containerWidth, containerHeight }: { i: number; config: ParticleConfig; containerWidth: number; containerHeight: number }) => {
+const SummerParticle = ({
+  i,
+  config,
+  containerWidth,
+  containerHeight,
+}: {
+  i: number;
+  config: ParticleConfig;
+  containerWidth: number;
+  containerHeight: number;
+}) => {
   const opacity = useSharedValue(0.5);
 
   useEffect(() => {
     opacity.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 1500 }),
-        withTiming(0.5, { duration: 1500 })
+        withTiming(0.5, { duration: 1500 }),
       ),
       -1,
-      true
+      true,
     );
   }, [opacity]);
 
   const animatedOpacityStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value
+    opacity: opacity.value,
   }));
 
   return (
@@ -175,10 +192,10 @@ const SeasonalEffects = React.memo(({ season }: SeasonalEffectsProps) => {
 
   useEffect(() => {
     if (width > 0 && height > 0) {
-        const timer = setTimeout(() => {
-            setIsReady(true);
-        }, 100);
-        return () => clearTimeout(timer);
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [width, height]);
 
@@ -188,9 +205,9 @@ const SeasonalEffects = React.memo(({ season }: SeasonalEffectsProps) => {
     return Array.from({ length: 50 }).map((_, i) => {
       // Generate random configuration for this particle instance
       // Using a deterministic approach per season-switch to ensure variety
-      
-      const minSize = season === 'fall' || season === 'spring' ? 10 : 10;
-      const maxSize = season === 'fall' || season === 'spring' ? 26 : 18;
+
+      const minSize = season === "fall" || season === "spring" ? 10 : 10;
+      const maxSize = season === "fall" || season === "spring" ? 26 : 18;
 
       const config: ParticleConfig = {
         initialXPercent: Math.random(), // 0 to 1
@@ -206,64 +223,70 @@ const SeasonalEffects = React.memo(({ season }: SeasonalEffectsProps) => {
       };
 
       const props = {
-          config,
-          containerWidth: width,
-          containerHeight: height,
+        config,
+        containerWidth: width,
+        containerHeight: height,
       };
 
-      if (season === 'winter') {
+      if (season === "winter") {
         return (
-          <Particle 
-            key={`winter-${i}`} 
-            emoji="❄️" 
-            style={styles.snowflake} 
+          <Particle
+            key={`winter-${i}`}
+            emoji="❄️"
+            style={styles.snowflake}
             {...props}
           />
         );
       }
-      if (season === 'fall') {
-        const leafColor = ['#ff8c00', '#d2691e', '#a0522d'][Math.floor(Math.random() * 3)];
+      if (season === "fall") {
+        const leafColor = ["#ff8c00", "#d2691e", "#a0522d"][
+          Math.floor(Math.random() * 3)
+        ];
         return (
-          <Particle 
-            key={`fall-${i}`} 
-            emoji="🍂" 
-            style={[styles.leaf, { color: leafColor }]} 
+          <Particle
+            key={`fall-${i}`}
+            emoji="🍂"
+            style={[styles.leaf, { color: leafColor }]}
             {...props}
           />
         );
       }
-      if (season === 'spring') {
+      if (season === "spring") {
         return (
-          <Particle 
-            key={`spring-${i}`} 
-            emoji="🌸" 
-            style={styles.flower} 
+          <Particle
+            key={`spring-${i}`}
+            emoji="🌸"
+            style={styles.flower}
             {...props}
           />
         );
       }
-      if (season === 'summer') {
+      if (season === "summer") {
         return <SummerParticle key={`summer-${i}`} i={i} {...props} />;
       }
       return null;
     });
   }, [season, isReady, width, height]);
 
-  return <View style={[StyleSheet.absoluteFill]} pointerEvents="none">{particles}</View>;
+  return (
+    <View style={[StyleSheet.absoluteFill]} pointerEvents="none">
+      {particles}
+    </View>
+  );
 });
 
-SeasonalEffects.displayName = 'SeasonalEffects';
+SeasonalEffects.displayName = "SeasonalEffects";
 
 const styles = StyleSheet.create({
   snowflake: {
-    color: 'white',
+    color: getAlphaColor("#FFFFFF", 1),
   },
   leaf: {},
   flower: {
-    color: '#ffc0cb',
+    color: getAlphaColor("#ffc0cb", 1),
   },
   sun: {
-    color: '#ffd700',
+    color: getAlphaColor("#ffd700", 1),
   },
 });
 

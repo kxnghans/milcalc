@@ -5,7 +5,7 @@
  * In this app, it's used to prevent expensive calculations from running on every keystroke.
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
 /**
  * A custom hook that debounces a value. It will only update the returned value after a specified delay

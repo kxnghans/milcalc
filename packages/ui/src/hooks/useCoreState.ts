@@ -5,8 +5,9 @@
  * values, and the exemption status.
  */
 
-import { useState } from 'react';
-import { useTimeInput } from './useTimeInput';
+import { useState } from "react";
+
+import { useTimeInput } from "./useTimeInput";
 
 /**
  * A custom hook to manage the state for the core component section.
@@ -18,11 +19,11 @@ import { useTimeInput } from './useTimeInput';
  * @returns An object containing all the state variables and their respective setters.
  */
 export function useCoreState(
-  initialComponent: string = 'sit_ups_1min',
-  initialSitups: string = '',
-  initialCrunches: string = '',
-  initialPlankMinutes: string = '',
-  initialPlankSeconds: string = ''
+  initialComponent: string = "sit_ups_1min",
+  initialSitups: string = "",
+  initialCrunches: string = "",
+  initialPlankMinutes: string = "",
+  initialPlankSeconds: string = "",
 ) {
   // State for the selected core exercise component (e.g., 'sit_ups_1min').
   const [coreComponent, setCoreComponent] = useState(initialComponent);
@@ -31,7 +32,12 @@ export function useCoreState(
   // State for the number of reverse crunches.
   const [reverseCrunches, setReverseCrunches] = useState(initialCrunches);
   // State for the minutes part of the plank time.
-  const { minutes: plankMinutes, setMinutes: setPlankMinutes, seconds: plankSeconds, setSeconds: setPlankSeconds } = useTimeInput(initialPlankMinutes, initialPlankSeconds);
+  const {
+    minutes: plankMinutes,
+    setMinutes: setPlankMinutes,
+    seconds: plankSeconds,
+    setSeconds: setPlankSeconds,
+  } = useTimeInput(initialPlankMinutes, initialPlankSeconds);
   // State for the exemption status of the component.
   const [isExempt, setIsExempt] = useState(false);
 
@@ -40,13 +46,13 @@ export function useCoreState(
    * When exempted, it clears all core input values.
    */
   const toggleExempt = () => {
-    setIsExempt(current => {
+    setIsExempt((current) => {
       const nextIsExempt = !current;
       if (nextIsExempt) {
-        setSitups('');
-        setReverseCrunches('');
-        setPlankMinutes('');
-        setPlankSeconds('');
+        setSitups("");
+        setReverseCrunches("");
+        setPlankMinutes("");
+        setPlankSeconds("");
       }
       return nextIsExempt;
     });

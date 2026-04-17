@@ -1,5 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
-import { Database } from './types';
+import { createClient } from "@supabase/supabase-js";
+
+import { Database } from "./types";
 
 // Main Project (PT, Pay, Taxes)
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -11,21 +12,26 @@ const bugSupabaseAnonKey = process.env.EXPO_PUBLIC_BUG_SUPABASE_ANON_KEY;
 
 // Check if the main variables are loaded
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Main Supabase URL and/or Anon Key are missing from your environment variables.');
+  throw new Error(
+    "Main Supabase URL and/or Anon Key are missing from your environment variables.",
+  );
 }
 
 // Check if the bug reporting variables are loaded
 if (!bugSupabaseUrl || !bugSupabaseAnonKey) {
-  console.warn('Bug Reporting Supabase URL and/or Anon Key are missing. Bug reporting will be disabled.');
+  console.warn(
+    "Bug Reporting Supabase URL and/or Anon Key are missing. Bug reporting will be disabled.",
+  );
 }
 
 // Create and export the main Supabase client
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Create and export the bug reporting Supabase client
-export const bugSupabase = bugSupabaseUrl && bugSupabaseAnonKey 
-  ? createClient<Database>(bugSupabaseUrl, bugSupabaseAnonKey)
-  : null;
+export const bugSupabase =
+  bugSupabaseUrl && bugSupabaseAnonKey
+    ? createClient<Database>(bugSupabaseUrl, bugSupabaseAnonKey)
+    : null;
 
 /**
  * Sanitizes error messages from Supabase/Cloudflare.
@@ -33,21 +39,25 @@ export const bugSupabase = bugSupabaseUrl && bugSupabaseAnonKey
  * it returns a user-friendly 'Service Unavailable' message.
  */
 export const sanitizeError = (error: unknown): string => {
-  if (!error) return 'Unknown error';
-  let message = '';
-  
-  if (typeof error === 'string') {
+  if (!error) return "Unknown error";
+  let message = "";
+
+  if (typeof error === "string") {
     message = error;
   } else if (error instanceof Error) {
     message = error.message;
-  } else if (typeof error === 'object' && error !== null && 'message' in error) {
+  } else if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error
+  ) {
     message = String((error as { message: unknown }).message);
   } else {
     message = JSON.stringify(error);
   }
 
-  if (message.includes('<!DOCTYPE html>')) {
-    return 'Service Unavailable (Supabase is waking up)';
+  if (message.includes("<!DOCTYPE html>")) {
+    return "Service Unavailable (Supabase is waking up)";
   }
   return message;
 };

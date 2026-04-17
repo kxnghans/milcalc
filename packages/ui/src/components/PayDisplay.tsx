@@ -1,7 +1,15 @@
-import React from 'react';
-import { View, Text, StyleSheet, StyleProp, ViewStyle, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import React from "react";
+import {
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  View,
+  ViewStyle,
+} from "react-native";
+
+import { useTheme } from "../contexts/ThemeContext";
 
 interface PayDetail {
   label: string;
@@ -9,6 +17,7 @@ interface PayDetail {
 }
 
 interface PayDisplayProps {
+  title?: string;
   annualPay: number;
   monthlyPay: number;
   payDetails: PayDetail[];
@@ -22,20 +31,33 @@ interface PayDisplayProps {
   onHelpPress?: () => void;
 }
 
-export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, payDetails, deductions, containerStyle, federalStandardDeduction, stateStandardDeduction, isStandardDeductionsExpanded, onToggleStandardDeductions, paySource, onHelpPress }) => {
+export const PayDisplay: React.FC<PayDisplayProps> = ({
+  title,
+  annualPay,
+  monthlyPay,
+  payDetails,
+  deductions,
+  containerStyle,
+  federalStandardDeduction,
+  stateStandardDeduction,
+  isStandardDeductionsExpanded,
+  onToggleStandardDeductions,
+  paySource,
+  onHelpPress,
+}) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
     container: {
-      alignItems: 'center',
+      alignItems: "center",
     },
     totalPayContainer: {
-      alignItems: 'center',
-      width: '100%',
+      alignItems: "center",
+      width: "100%",
       marginBottom: theme.spacing.m,
     },
     helpIconContainer: {
-      position: 'absolute',
+      position: "absolute",
       top: 0,
       right: 0,
     },
@@ -45,28 +67,28 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
     },
     totalPayLabel: {
       color: theme.colors.text,
-      textTransform: 'uppercase',
-      ...theme.typography.label
+      textTransform: "uppercase",
+      ...theme.typography.label,
     },
     totalPayValue: {
       ...theme.typography.title,
       color: theme.colors.primary,
     },
     payRow: {
-      flexDirection: 'row',
-      alignItems: 'baseline',
+      flexDirection: "row",
+      alignItems: "baseline",
     },
     monthlyPayRow: {
       marginTop: theme.spacing.s,
     },
     columnHeader: {
-        ...theme.typography.subtitle,
-        color: theme.colors.text,
-        textTransform: 'uppercase',
+      ...theme.typography.subtitle,
+      color: theme.colors.text,
+      textTransform: "uppercase",
     },
     detailRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      justifyContent: "space-between",
       marginBottom: theme.spacing.s,
     },
     detailLabel: {
@@ -75,25 +97,12 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
     },
     detailValue: {
       ...theme.typography.label,
-      fontWeight: '500',
+      fontWeight: "500",
       color: theme.colors.text,
     },
-    pressableInput: {
-        paddingVertical: theme.spacing.s,
-        paddingHorizontal: theme.spacing.s,
-    },
-    pressableText: {
-        ...theme.typography.body,
-        color: theme.colors.text,
-        textAlign: 'left',
-    },
-    placeholderText: {
-        color: theme.colors.placeholder,
-        textAlign: 'left',
-    },
     columnsContainer: {
-      flexDirection: 'row',
-      width: '100%',
+      flexDirection: "row",
+      width: "100%",
     },
     leftColumn: {
       flex: 1,
@@ -108,62 +117,25 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
     },
     fullWidthCentered: {
       marginTop: 0,
-      width: '100%',
-      alignItems: 'center',
+      width: "100%",
+      alignItems: "center",
     },
     helpfulInfoContainer: {
       marginTop: theme.spacing.m,
-      width: '100%',
+      width: "100%",
     },
-    fullWidth: {
-      marginTop: 0,
-      width: '100%',
-    },
-    retirementCalculatorContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      width: '100%',
-      marginTop: 0,
-    },
-    datePickerContainer: {
-      flex: 1,
-      marginRight: theme.spacing.s,
-    },
-    serviceEntryDatePickerContainer: {
-      flex: 1,
-      marginLeft: theme.spacing.s,
-      marginRight: theme.spacing.s,
-    },
-    serviceBreakContainer: {
-      flex: 1,
-      marginLeft: theme.spacing.s,
-    },
-    dateLabel: {
-      marginBottom: theme.spacing.s,
-      marginTop: theme.spacing.s,
-    },
-    marginBottomS: {
-      marginBottom: theme.spacing.s,
-    },
-    serviceBreakInput: {
-      textAlign: 'center',
-      borderWidth: 0,
-      backgroundColor: 'transparent',
-      padding: 0,
-      borderRadius: 0,
-    }
   });
 
   const renderCurrency = (value: number) => {
     if (value === null || value === undefined || isNaN(value)) {
-      return 'N/A';
+      return "N/A";
     }
-    return `${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const renderNumber = (value: number) => {
     if (value === null || value === undefined || isNaN(value)) {
-      return 'N/A';
+      return "N/A";
     }
     return value.toLocaleString();
   };
@@ -171,6 +143,7 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
   return (
     <View style={[styles.container, containerStyle]}>
       <View style={styles.totalPayContainer}>
+        {title && <Text style={styles.columnHeader}>{title}</Text>}
         <View style={styles.payRow}>
           <Text style={styles.annualLabel}>ANNUAL: </Text>
           <Text style={styles.totalPayValue}>{renderCurrency(annualPay)}</Text>
@@ -181,40 +154,58 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
         </View>
         {onHelpPress && (
           <Pressable onPress={onHelpPress} style={styles.helpIconContainer}>
-            <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.text} />
+            <MaterialCommunityIcons
+              name="help-circle-outline"
+              size={16}
+              color={theme.colors.text}
+            />
           </Pressable>
         )}
       </View>
       <View style={styles.columnsContainer}>
         {/* Left Column: Income */}
         <View style={styles.leftColumn}>
-            <Text style={styles.columnHeader}>{paySource === 'Military' ? 'Military Income' : 'Tax-Free Income'}</Text>
-            <View style={styles.marginTopS}>
-                {payDetails.map((detail, index) => (
-                <View key={index} style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{detail.label.toUpperCase()}</Text>
-                    <Text style={styles.detailValue}>{renderCurrency(detail.value)}</Text>
-                </View>
-                ))}
-            </View>
+          <Text style={styles.columnHeader}>
+            {paySource === "Military" ? "Military Income" : "Tax-Free Income"}
+          </Text>
+          <View style={styles.marginTopS}>
+            {payDetails.map((detail, index) => (
+              <View key={index} style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  {detail.label.toUpperCase()}
+                </Text>
+                <Text style={styles.detailValue}>
+                  {renderCurrency(detail.value)}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
         {/* Right Column: Deductions */}
         <View style={styles.rightColumn}>
-            <Text style={styles.columnHeader}>Deductions</Text>
-            <View style={styles.marginTopS}>
-                {deductions.map((deduction, index) => (
-                <View key={index} style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{deduction.label.toUpperCase()}</Text>
-                    <Text style={styles.detailValue}>{renderCurrency(deduction.value)}</Text>
-                </View>
-                ))}
-            </View>
+          <Text style={styles.columnHeader}>Deductions</Text>
+          <View style={styles.marginTopS}>
+            {deductions.map((deduction, index) => (
+              <View key={index} style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  {deduction.label.toUpperCase()}
+                </Text>
+                <Text style={styles.detailValue}>
+                  {renderCurrency(deduction.value)}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
       </View>
       {!isStandardDeductionsExpanded && (
         <View style={styles.fullWidthCentered}>
           <Pressable onPress={onToggleStandardDeductions}>
-            <MaterialCommunityIcons name='chevron-down' size={24} color={theme.colors.primary} />
+            <MaterialCommunityIcons
+              name="chevron-down"
+              size={24}
+              color={theme.colors.primary}
+            />
           </Pressable>
         </View>
       )}
@@ -222,18 +213,26 @@ export const PayDisplay: React.FC<PayDisplayProps> = ({ annualPay, monthlyPay, p
         <View style={styles.helpfulInfoContainer}>
           <Text style={styles.columnHeader}>Helpful Info</Text>
           <View style={styles.marginTopS}>
-              <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Federal Std Deduction</Text>
-                  <Text style={styles.detailValue}>${renderNumber(federalStandardDeduction)}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>State Std Deduction</Text>
-                  <Text style={styles.detailValue}>${renderNumber(stateStandardDeduction)}</Text>
-              </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Federal Std Deduction</Text>
+              <Text style={styles.detailValue}>
+                ${renderNumber(federalStandardDeduction)}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>State Std Deduction</Text>
+              <Text style={styles.detailValue}>
+                ${renderNumber(stateStandardDeduction)}
+              </Text>
+            </View>
           </View>
           <View style={styles.fullWidthCentered}>
             <Pressable onPress={onToggleStandardDeductions}>
-              <MaterialCommunityIcons name='chevron-up' size={24} color={theme.colors.primary} />
+              <MaterialCommunityIcons
+                name="chevron-up"
+                size={24}
+                color={theme.colors.primary}
+              />
             </Pressable>
           </View>
         </View>

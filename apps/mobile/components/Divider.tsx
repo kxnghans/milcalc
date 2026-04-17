@@ -3,9 +3,9 @@
  * @description This file defines a styled horizontal divider component with a neumorphic inset effect.
  */
 
-import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import { useTheme } from '@repo/ui';
+import { useTheme } from "@repo/ui";
+import React from "react";
+import { StyleSheet, View, ViewStyle } from "react-native";
 
 /**
  * Props for the Divider component.
@@ -23,25 +23,27 @@ interface DividerProps {
  */
 export default function Divider({ style }: DividerProps) {
   const { theme } = useTheme();
-  const styles = React.useMemo(() => StyleSheet.create({
-    divider: {
-      height: 5,
-      backgroundColor: theme.colors.darkenColor,
-      borderRadius: theme.borderRadius.s,
-      // The inset effect is created by applying different colored borders
-      // to the top/left and bottom/right, simulating an inner shadow and highlight.
-      borderTopWidth: theme.colors.neumorphic.inset.borderWidth,
-      borderLeftWidth: theme.colors.neumorphic.inset.borderWidth,
-      borderTopColor: theme.colors.neumorphic.inset.shadow,
-      borderLeftColor: theme.colors.neumorphic.inset.shadow,
-      borderBottomWidth: theme.colors.neumorphic.inset.borderWidth,
-      borderRightWidth: theme.colors.neumorphic.inset.borderWidth,
-      borderBottomColor: theme.colors.neumorphic.inset.highlight,
-      borderRightColor: theme.colors.neumorphic.inset.highlight,
-    },
-  }), [theme]);
-
-  return (
-    <View style={[styles.divider, style]} />
+  const styles = React.useMemo(
+    () =>
+      StyleSheet.create({
+        divider: {
+          height: 5,
+          backgroundColor: theme.colors.darkenColor,
+          borderRadius: theme.borderRadius.s,
+          // The inset effect is created by applying different colored borders
+          // to the top/left and bottom/right, simulating an inner shadow and highlight.
+          borderTopWidth: theme.colors.neumorphic.inset.borderWidth,
+          borderLeftWidth: theme.colors.neumorphic.inset.borderWidth,
+          borderTopColor: theme.colors.neumorphic.inset.shadow,
+          borderLeftColor: theme.colors.neumorphic.inset.shadow,
+          borderBottomWidth: theme.colors.neumorphic.inset.borderWidth,
+          borderRightWidth: theme.colors.neumorphic.inset.borderWidth,
+          borderBottomColor: theme.colors.neumorphic.inset.highlight,
+          borderRightColor: theme.colors.neumorphic.inset.highlight,
+        },
+      }),
+    [theme],
   );
+
+  return <View style={[styles.divider, style]} />;
 }

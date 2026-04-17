@@ -16,11 +16,11 @@ module.exports = {
   rules: {
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
-    "react-native/no-unused-styles": "warn",
-    "react-native/split-platform-components": "off",
-    "react-native/no-inline-styles": "warn",
-    "react-native/no-color-literals": "off",
-    "react-native/no-raw-text": "off",
+    "react-native/no-unused-styles": "off",
+    "react-native/split-platform-components": "warn",
+    "react-native/no-inline-styles": "error",
+    "react-native/no-color-literals": "error",
+    "react-native/no-raw-text": "error",
   },
   settings: {
     react: {

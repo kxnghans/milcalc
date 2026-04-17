@@ -1,23 +1,25 @@
-import React, { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import * as SQLite from 'expo-sqlite';
-import { getSyncMetadata, SYNC_METADATA_QUERY_KEYS } from '@repo/utils';
+import { getSyncMetadata, SYNC_METADATA_QUERY_KEYS } from "@repo/utils";
+import { useQueryClient } from "@tanstack/react-query";
+import * as SQLite from "expo-sqlite";
+import React, { useEffect } from "react";
 
-const SYNC_METADATA_STORAGE_KEY = 'last_synced_metadata';
-const LAST_SYNC_TIMESTAMP_KEY = 'last_sync_timestamp';
+const SYNC_METADATA_STORAGE_KEY = "last_synced_metadata";
+const LAST_SYNC_TIMESTAMP_KEY = "last_sync_timestamp";
 const SYNC_TTL_MS = 24 * 60 * 60 * 1000; // 24 Hours
 
 const db = SQLite.openDatabaseSync("milcalc-cache.db");
 
 // Initialize schema immediately to prevent "no such table" errors
-db.execSync("CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, value TEXT)");
+db.execSync(
+  "CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, value TEXT)",
+);
 
 // Helper for metadata persistence in SQLite
 const getStoredValue = (key: string): string | null => {
   try {
     const result = db.getFirstSync<{ value: string }>(
       "SELECT value FROM cache WHERE key = ?",
-      [key]
+      [key],
     );
     return result ? result.value : null;
   } catch (e) {
@@ -28,16 +30,18 @@ const getStoredValue = (key: string): string | null => {
 
 const setStoredValue = (key: string, value: string) => {
   try {
-    db.runSync(
-      "INSERT OR REPLACE INTO cache (key, value) VALUES (?, ?)",
-      [key, value]
-    );
+    db.runSync("INSERT OR REPLACE INTO cache (key, value) VALUES (?, ?)", [
+      key,
+      value,
+    ]);
   } catch (e) {
     console.error(`Error saving ${key} to SQLite:`, e);
   }
 };
 
-export const SyncManager: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SyncManager: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -48,7 +52,6 @@ export const SyncManager: React.FC<{ children: React.ReactNode }> = ({ children 
         const now = Date.now();
 
         if (now - lastSync < SYNC_TTL_MS) {
-          console.log(`Sync skipped: TTL active. Next sync in ${((SYNC_TTL_MS - (now - lastSync)) / 3600000).toFixed(2)} hours.`);
           return;
         }
 
@@ -56,21 +59,28 @@ export const SyncManager: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!cloudMetadata) return;
 
         const storedMetadataStr = getStoredValue(SYNC_METADATA_STORAGE_KEY);
-        const storedMetadata = storedMetadataStr ? JSON.parse(storedMetadataStr) : {};
+        const storedMetadata: Record<string, string> = storedMetadataStr
+          ? (JSON.parse(storedMetadataStr) as Record<string, string>)
+          : {};
         let hasUpdates = false;
-        const newStoredMetadata = { ...storedMetadata };
+        const newStoredMetadata: Record<string, string> = { ...storedMetadata };
 
         for (const entry of cloudMetadata) {
           const tableName = entry.table_name;
           const cloudUpdatedAt = entry.last_updated_at;
           const storedUpdatedAt = storedMetadata[tableName];
 
-          if (cloudUpdatedAt && (!storedUpdatedAt || new Date(cloudUpdatedAt) > new Date(storedUpdatedAt))) {
+          if (
+            cloudUpdatedAt &&
+            (!storedUpdatedAt ||
+              new Date(cloudUpdatedAt) > new Date(storedUpdatedAt))
+          ) {
             // Found an update!
             const queryKeys = SYNC_METADATA_QUERY_KEYS[tableName];
             if (queryKeys) {
-              console.log(`Invalidating query keys for table: ${tableName}`);
-              queryKeys.forEach(key => queryClient.invalidateQueries({ queryKey: [key] }));
+              queryKeys.forEach((key) =>
+                queryClient.invalidateQueries({ queryKey: [key] }),
+              );
               hasUpdates = true;
             }
             newStoredMetadata[tableName] = cloudUpdatedAt;
@@ -78,13 +88,16 @@ export const SyncManager: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         if (hasUpdates) {
-          setStoredValue(SYNC_METADATA_STORAGE_KEY, JSON.stringify(newStoredMetadata));
+          setStoredValue(
+            SYNC_METADATA_STORAGE_KEY,
+            JSON.stringify(newStoredMetadata),
+          );
         }
-        
+
         // Update the timestamp even if no data changed, to respect the TTL
         setStoredValue(LAST_SYNC_TIMESTAMP_KEY, now.toString());
       } catch (error) {
-        console.error('Error during background sync check:', error);
+        console.error("Error during background sync check:", error);
       }
     };
 

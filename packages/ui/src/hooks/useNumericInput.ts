@@ -4,7 +4,7 @@
  * that should only accept numeric characters.
  */
 
-import { useState } from 'react';
+import { useState } from "react";
 
 /**
  * A custom hook to manage state for a numeric input field.
@@ -12,7 +12,7 @@ import { useState } from 'react';
  * @param {string} [initialValue=''] - The initial value for the input.
  * @returns An object containing the current `value`, the `onChangeText` handler, and the raw `setValue` function.
  */
-export function useNumericInput(initialValue: string = '') {
+export function useNumericInput(initialValue: string = "") {
   const [value, setValue] = useState(initialValue);
 
   /**
@@ -21,7 +21,7 @@ export function useNumericInput(initialValue: string = '') {
    */
   const handleChangeText = (text: string) => {
     // Use a regular expression to remove any characters that are not digits (0-9).
-    const numericValue = text.replace(/[^0-9]/g, '');
+    const numericValue = text.replace(/[^0-9]/g, "");
     setValue(numericValue);
   };
 

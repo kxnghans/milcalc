@@ -4,8 +4,9 @@
  * for different score categories (e.g., excellent, pass, fail).
  */
 
-import { useTheme } from '../contexts/ThemeContext';
-import { ScoreCategory } from '@repo/utils';
+import { ScoreCategory } from "@repo/utils";
+
+import { useTheme } from "../contexts/ThemeContext";
 
 /**
  * A custom hook that returns a background color and a progress color based on a score category.
@@ -21,16 +22,16 @@ export const useScoreColors = (category: ScoreCategory) => {
 
   switch (category) {
     // For 'excellent' scores (90+).
-    case 'excellent':
+    case "excellent":
       return { backgroundColor, progressColor: theme.colors.ninetyPlus };
     // For passing scores.
-    case 'pass':
+    case "pass":
       return { backgroundColor, progressColor: theme.colors.success };
     // For failing scores.
-    case 'fail':
+    case "fail":
       return { backgroundColor, progressColor: theme.colors.error };
     // For scores that are not applicable or zero.
-    case 'none':
+    case "none":
     default:
       return { backgroundColor, progressColor: theme.colors.secondary };
   }

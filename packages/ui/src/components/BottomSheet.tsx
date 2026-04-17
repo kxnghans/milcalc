@@ -1,34 +1,35 @@
 import * as Haptics from "expo-haptics";
-import React, { useMemo, useEffect, useState, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
   Dimensions,
-  TouchableWithoutFeedback,
   Keyboard,
   Platform,
   ScrollView,
-  TouchableOpacity,
-  TextStyle,
   StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
   Extrapolation,
+  interpolate,
   runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ICONS, ICON_SETS } from "../icons";
 import { useTheme } from "../contexts/ThemeContext";
-import NeumorphicOutset from "./NeumorphicOutset";
+import { ICON_SETS, ICONS } from "../icons";
+import { getAlphaColor } from "../theme";
 import { BouncingChevron } from "./BouncingChevron";
 import { Icon } from "./Icon";
+import NeumorphicOutset from "./NeumorphicOutset";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -120,7 +121,8 @@ export function BottomSheet({
   const snapPoints = useMemo(() => {
     // Respect the ScreenHeader height (44 minHeight + 8 spacing.s)
     const HEADER_CONTENT_HEIGHT = 44;
-    const effectiveHeaderHeight = headerHeight > 0 ? headerHeight : insets.top + HEADER_CONTENT_HEIGHT;
+    const effectiveHeaderHeight =
+      headerHeight > 0 ? headerHeight : insets.top + HEADER_CONTENT_HEIGHT;
 
     const maxSnap = SCREEN_HEIGHT - effectiveHeaderHeight;
     const peekSnap = peekHeight > 0 ? peekHeight : 0;
@@ -130,11 +132,7 @@ export function BottomSheet({
     }
 
     return (
-      providedSnapPoints ?? [
-        40 + insets.bottom,
-        SCREEN_HEIGHT * 0.4,
-        maxSnap,
-      ]
+      providedSnapPoints ?? [40 + insets.bottom, SCREEN_HEIGHT * 0.4, maxSnap]
     );
   }, [
     providedSnapPoints,
@@ -255,7 +253,6 @@ export function BottomSheet({
       }
     });
 
-
   const animatedStyle = useAnimatedStyle(() => ({
     height: height.value,
   }));
@@ -289,7 +286,7 @@ export function BottomSheet({
   const styles = StyleSheet.create({
     backdrop: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: "black",
+      backgroundColor: getAlphaColor("#000000", 1),
       zIndex: 9999,
     },
     container: {
@@ -440,7 +437,9 @@ export function BottomSheet({
             </View>
           )}
 
-          {!footer && insets.bottom > 0 && <View style={{ height: insets.bottom }} />}
+          {!footer && insets.bottom > 0 && (
+            <View style={{ height: insets.bottom }} />
+          )}
 
           {footer && (
             <View

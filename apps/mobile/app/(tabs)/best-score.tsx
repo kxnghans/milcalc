@@ -1,30 +1,47 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import {
-  useTheme,
-  SegmentedSelector,
-  Icon,
-  useScoreColors,
-  useDemographicsState,
-  useBestScoreState,
   ExemptButton,
+  Icon,
+  IconRow,
   MASCOT_URLS,
-  IconRow
-} from '@repo/ui';
-import { ICONS } from '@repo/ui/icons';
-import { getScoreCategory } from '@repo/utils';
-import ScoreDisplay from '../../components/ScoreDisplay';
-import NumberInput from '../../components/NumberInput';
-import TimeInput from '../../components/TimeInput';
-import Demographics from '../../components/Demographics';
-import AltitudeAdjustmentComponent from "../../components/AltitudeAdjustmentComponent";
-import Divider from '../../components/Divider';
-import MainCalculatorLayout from '../../components/MainCalculatorLayout';
-import { useOverlay } from '../../contexts/OverlayContext';
+  SegmentedSelector,
+  useBestScoreState,
+  useDemographicsState,
+  useScoreColors,
+  useTheme,
+} from "@repo/ui";
+import { ICONS } from "@repo/ui/icons";
+import { getScoreCategory } from "@repo/utils";
+import React from "react";
+import {
+  ImageSourcePropType,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+import Divider from "../../components/Divider";
+import MainCalculatorLayout from "../../components/MainCalculatorLayout";
+import NumberInput from "../../components/NumberInput";
+import AltitudeAdjustmentComponent from "../../components/PtCalculator/AltitudeAdjustmentComponent";
+import Demographics from "../../components/PtCalculator/Demographics";
+import ScoreDisplay from "../../components/PtCalculator/ScoreDisplay";
+import TimeInput from "../../components/TimeInput";
+import { useOverlay } from "../../contexts/OverlayContext";
 
 type BestScoreExercise =
-  | { label: string; value: string; type: 'number'; onValueChange: (val: string) => void }
-  | { label: string; value: string; type: 'time'; onValueChange: (val: { minutes: string; seconds: string }) => void };
+  | {
+      label: string;
+      value: string;
+      type: "number";
+      onValueChange: (val: string) => void;
+    }
+  | {
+      label: string;
+      value: string;
+      type: "time";
+      onValueChange: (val: { minutes: string; seconds: string }) => void;
+    };
 
 interface BestScoreSectionProps {
   title: string;
@@ -58,64 +75,80 @@ const BestScoreSection = ({
   maxScore,
   isExempt,
   onToggleExempt,
-  openHelp
+  openHelp,
 }: BestScoreSectionProps) => {
   const { theme } = useTheme();
 
-  const excellentColors = useScoreColors('excellent');
-  const passColors = useScoreColors('pass');
-  const failColors = useScoreColors('fail');
+  const excellentColors = useScoreColors("excellent");
+  const passColors = useScoreColors("pass");
+  const failColors = useScoreColors("fail");
 
-  const getScoreColor = React.useCallback((score: number | string, maxScore: number) => {
-    const numericScore = typeof score === 'number' ? score : parseFloat(String(score)) || 0;
-    const category = getScoreCategory(numericScore, maxScore);
-    if (category === 'excellent') return excellentColors.progressColor;
-    if (category === 'pass') return passColors.progressColor;
-    if (category === 'fail') return failColors.progressColor;
-    return theme.colors.text;
-  }, [excellentColors.progressColor, passColors.progressColor, failColors.progressColor, theme.colors.text]);
+  const getScoreColor = React.useCallback(
+    (score: number | string, maxScore: number) => {
+      const numericScore =
+        typeof score === "number" ? score : parseFloat(String(score)) || 0;
+      const category = getScoreCategory(numericScore, maxScore);
+      if (category === "excellent") return excellentColors.progressColor;
+      if (category === "pass") return passColors.progressColor;
+      if (category === "fail") return failColors.progressColor;
+      return theme.colors.text;
+    },
+    [
+      excellentColors.progressColor,
+      passColors.progressColor,
+      failColors.progressColor,
+      theme.colors.text,
+    ],
+  );
 
-  const styles = React.useMemo(() => StyleSheet.create({
-// ... (rest of styles)
-    sectionHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    cardTitle: {
-      ...theme.typography.title,
-      color: theme.colors.text,
-      marginLeft: theme.spacing.s,
-      marginRight: 'auto',
-    },
-    gridContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-    },
-    gridColumn: {
-      flex: 1,
-      alignItems: 'center',
-      gap: theme.spacing.s,
-      marginHorizontal: theme.spacing.s,
-      marginVertical: theme.spacing.xs,
-    },
-    scoreRow: {
-      width: '100%',
-    },
-    scoreBreakdownText: {
-      ...theme.typography.subtitle,
-      textShadowColor: theme.colors.neumorphic.outset.shadow,
-      textShadowRadius: 0.1,
-      textShadowOffset: { width: 0, height: 0 },
-    },
-    helpIcon: {
-      margin: theme.spacing.s,
-    },
-    fullWidth: {
-      width: '100%',
-    },
-  }), [theme]);
+  const styles = React.useMemo(
+    () =>
+      StyleSheet.create({
+        // ... (rest of styles)
+        sectionHeader: {
+          flexDirection: "row",
+          alignItems: "center",
+        },
+        cardTitle: {
+          ...theme.typography.title,
+          color: theme.colors.text,
+          marginLeft: theme.spacing.s,
+          marginRight: "auto",
+        },
+        gridContainer: {
+          flexDirection: "row",
+          justifyContent: "space-around",
+        },
+        gridColumn: {
+          flex: 1,
+          alignItems: "center",
+          gap: theme.spacing.s,
+          marginHorizontal: theme.spacing.s,
+          marginVertical: theme.spacing.xs,
+        },
+        scoreRow: {
+          width: "100%",
+        },
+        scoreBreakdownText: {
+          ...theme.typography.subtitle,
+          textShadowColor: theme.colors.neumorphic.outset.shadow,
+          textShadowRadius: 0.1,
+          textShadowOffset: { width: 0, height: 0 },
+        },
+        helpIcon: {
+          margin: theme.spacing.s,
+        },
+        fullWidth: {
+          width: "100%",
+        },
+      }),
+    [theme],
+  );
 
-  const maxNumericScore = Math.max(0, ...scores.filter((s): s is number => typeof s === 'number'));
+  const maxNumericScore = Math.max(
+    0,
+    ...scores.filter((s): s is number => typeof s === "number"),
+  );
   let selectedExerciseValues: string[] = [];
 
   if (maxNumericScore > 0 && !isExempt) {
@@ -130,35 +163,64 @@ const BestScoreSection = ({
   return (
     <View>
       <View style={styles.sectionHeader}>
-        <TouchableOpacity onPress={() => openHelp(`best_score_${title.toLowerCase()}`, getMascot(title))}>
-          <Icon name={ICONS.HELP} size={16} color={theme.colors.disabled} style={styles.helpIcon} />
+        <TouchableOpacity
+          onPress={() =>
+            openHelp(`best_score_${title.toLowerCase()}`, getMascot(title))
+          }
+        >
+          <Icon
+            name={ICONS.HELP}
+            size={16}
+            color={theme.colors.disabled}
+            style={styles.helpIcon}
+          />
         </TouchableOpacity>
         <Text style={styles.cardTitle}>{title}</Text>
         <ExemptButton onPress={onToggleExempt} isActive={isExempt} />
       </View>
       <SegmentedSelector
-        options={exercises.map(e => ({ label: e.label, value: e.value }))}
+        options={exercises.map((e) => ({ label: e.label, value: e.value }))}
         selectedValues={selectedExerciseValues}
-        onValueChange={() => { }}
+        onValueChange={() => {}}
         isTouchable={false}
       />
       <View style={styles.gridContainer}>
         {exercises.map((exercise, index) => {
           const exerciseValue = bestValues[exercise.value];
-          const isTimeType = exercise.type === 'time' && typeof exerciseValue === 'object';
+          const isTimeType =
+            exercise.type === "time" && typeof exerciseValue === "object";
           return (
             <View key={index} style={styles.gridColumn}>
-              {exercise.type === 'number' ?
-                <NumberInput value={exerciseValue as string} onChangeText={exercise.onValueChange as (text: string) => void} placeholder='--' style={styles.fullWidth} isExempt={isExempt} /> :
-                <TimeInput
-                  minutes={isTimeType ? exerciseValue.minutes : ''}
-                  seconds={isTimeType ? exerciseValue.seconds : ''}
-                  setMinutes={(minutes) => exercise.onValueChange({ minutes, seconds: isTimeType ? exerciseValue.seconds : '' })}
-                  setSeconds={(seconds) => exercise.onValueChange({ minutes: isTimeType ? exerciseValue.minutes : '', seconds })}
+              {exercise.type === "number" ? (
+                <NumberInput
+                  value={exerciseValue as string}
+                  onChangeText={
+                    exercise.onValueChange as (text: string) => void
+                  }
+                  placeholder="--"
                   style={styles.fullWidth}
                   isExempt={isExempt}
                 />
-              }
+              ) : (
+                <TimeInput
+                  minutes={isTimeType ? exerciseValue.minutes : ""}
+                  seconds={isTimeType ? exerciseValue.seconds : ""}
+                  setMinutes={(minutes) =>
+                    exercise.onValueChange({
+                      minutes,
+                      seconds: isTimeType ? exerciseValue.seconds : "",
+                    })
+                  }
+                  setSeconds={(seconds) =>
+                    exercise.onValueChange({
+                      minutes: isTimeType ? exerciseValue.minutes : "",
+                      seconds,
+                    })
+                  }
+                  style={styles.fullWidth}
+                  isExempt={isExempt}
+                />
+              )}
             </View>
           );
         })}
@@ -166,26 +228,27 @@ const BestScoreSection = ({
       <View style={styles.scoreRow}>
         <IconRow
           icons={scores.map((s, index) => {
-            const isWalk = exercises[index]?.value === 'walk';
-            let text = s ? String(s) : '--';
+            const isWalk = exercises[index]?.value === "walk";
+            let text = s ? String(s) : "--";
             let color = theme.colors.text;
 
             if (isExempt) {
-              text = 'Exempt';
+              text = "Exempt";
               color = theme.colors.disabled;
             } else if (isWalk) {
-              if (s === 'pass') {
+              if (s === "pass") {
                 color = passColors.progressColor;
-                text = 'Pass';
-              } else if (s === 'fail') {
+                text = "Pass";
+              } else if (s === "fail") {
                 color = failColors.progressColor;
-                text = 'Fail';
+                text = "Fail";
               } else {
-                text = 'N/A';
+                text = "N/A";
                 color = theme.colors.disabled;
               }
             } else {
-              const isBestNumeric = typeof s === 'number' && s === maxNumericScore;
+              const isBestNumeric =
+                typeof s === "number" && s === maxNumericScore;
               if (isBestNumeric) {
                 if (s === 0) {
                   color = failColors.progressColor;
@@ -212,71 +275,190 @@ export default function BestScoreScreen() {
   const { theme } = useTheme();
   const { openHelp, openDocuments } = useOverlay();
 
-  const handleOpenHelp = React.useCallback((key: string, mascot?: ImageSourcePropType) => {
-    openHelp(key, 'best_score', mascot);
-  }, [openHelp]);
+  const handleOpenHelp = React.useCallback(
+    (key: string, mascot?: ImageSourcePropType) => {
+      openHelp(key, "best_score", mascot);
+    },
+    [openHelp],
+  );
 
-  const { 
-    age, setAge, 
-    gender, setGender, 
-    altitudeGroup, setAltitudeGroup,
-    waist, setWaist,
-    heightFeet, setHeightFeet,
-    heightInches, setHeightInches,
-    isHeightInInches, setIsHeightInInches,
-    calculatedWhtr
+  const {
+    age,
+    setAge,
+    gender,
+    setGender,
+    altitudeGroup,
+    setAltitudeGroup,
+    waist,
+    setWaist,
+    heightFeet,
+    setHeightFeet,
+    heightInches,
+    setHeightInches,
+    isHeightInInches,
+    setIsHeightInInches,
+    calculatedWhtr,
   } = useDemographicsState();
-  const { inputs, outputs, exemptions } = useBestScoreState(age, gender, altitudeGroup, calculatedWhtr);
+  const { inputs, outputs, exemptions } = useBestScoreState(
+    age,
+    gender,
+    altitudeGroup,
+    calculatedWhtr,
+  );
   const { isLoading } = outputs;
 
-  const styles = React.useMemo(() => StyleSheet.create({
-    divider: {
-      marginTop: theme.spacing.s,
-      marginBottom: theme.spacing.s,
-    }
-  }), [theme]);
+  const styles = React.useMemo(
+    () =>
+      StyleSheet.create({
+        divider: {
+          marginTop: theme.spacing.s,
+          marginBottom: theme.spacing.s,
+        },
+      }),
+    [theme],
+  );
 
-  const strengthExercises: BestScoreExercise[] = React.useMemo(() => [
-    { label: '1-Min Push-ups', value: 'push_ups_1min', type: 'number', onValueChange: inputs.setPushUps },
-    { label: '2-Min HR Push-ups', value: 'hand_release_pushups_2min', type: 'number', onValueChange: inputs.setHrPushUps },
-  ], [inputs]);
+  const strengthExercises: BestScoreExercise[] = React.useMemo(
+    () => [
+      {
+        label: "1-Min Push-ups",
+        value: "push_ups_1min",
+        type: "number",
+        onValueChange: inputs.setPushUps,
+      },
+      {
+        label: "2-Min HR Push-ups",
+        value: "hand_release_pushups_2min",
+        type: "number",
+        onValueChange: inputs.setHrPushUps,
+      },
+    ],
+    [inputs],
+  );
 
-  const strengthScores = React.useMemo(() => [outputs.scores.push_ups_1min || 0, outputs.scores.hand_release_pushups_2min || 0], [outputs]);
-  const strengthBestValues = React.useMemo(() => ({ push_ups_1min: inputs.pushUps, hand_release_pushups_2min: inputs.hrPushUps }), [inputs]);
+  const strengthScores = React.useMemo(
+    () => [
+      outputs.scores.push_ups_1min || 0,
+      outputs.scores.hand_release_pushups_2min || 0,
+    ],
+    [outputs],
+  );
+  const strengthBestValues = React.useMemo(
+    () => ({
+      push_ups_1min: inputs.pushUps,
+      hand_release_pushups_2min: inputs.hrPushUps,
+    }),
+    [inputs],
+  );
 
-  const coreExercises: BestScoreExercise[] = React.useMemo(() => [
-    { label: '1-Min Sit-ups', value: 'sit_ups_1min', type: 'number', onValueChange: inputs.setSitUps },
-    { label: '2-Min CL Crunch', value: 'cross_leg_reverse_crunch_2min', type: 'number', onValueChange: inputs.setCrunches },
-    { label: 'Forearm Planks', value: 'forearm_plank_time', type: 'time', onValueChange: (value: { minutes: string; seconds: string }) => { inputs.setPlankMinutes(value.minutes); inputs.setPlankSeconds(value.seconds); } },
-  ], [inputs]);
+  const coreExercises: BestScoreExercise[] = React.useMemo(
+    () => [
+      {
+        label: "1-Min Sit-ups",
+        value: "sit_ups_1min",
+        type: "number",
+        onValueChange: inputs.setSitUps,
+      },
+      {
+        label: "2-Min CL Crunch",
+        value: "cross_leg_reverse_crunch_2min",
+        type: "number",
+        onValueChange: inputs.setCrunches,
+      },
+      {
+        label: "Forearm Planks",
+        value: "forearm_plank_time",
+        type: "time",
+        onValueChange: (value: { minutes: string; seconds: string }) => {
+          inputs.setPlankMinutes(value.minutes);
+          inputs.setPlankSeconds(value.seconds);
+        },
+      },
+    ],
+    [inputs],
+  );
 
-  const coreScores = React.useMemo(() => [outputs.scores.sit_ups_1min || 0, outputs.scores.cross_leg_reverse_crunch_2min || 0, outputs.scores.forearm_plank_time || 0], [outputs]);
-  const coreBestValues = React.useMemo(() => ({ sit_ups_1min: inputs.sitUps, cross_leg_reverse_crunch_2min: inputs.crunches, forearm_plank_time: { minutes: inputs.plankMinutes, seconds: inputs.plankSeconds } }), [inputs]);
+  const coreScores = React.useMemo(
+    () => [
+      outputs.scores.sit_ups_1min || 0,
+      outputs.scores.cross_leg_reverse_crunch_2min || 0,
+      outputs.scores.forearm_plank_time || 0,
+    ],
+    [outputs],
+  );
+  const coreBestValues = React.useMemo(
+    () => ({
+      sit_ups_1min: inputs.sitUps,
+      cross_leg_reverse_crunch_2min: inputs.crunches,
+      forearm_plank_time: {
+        minutes: inputs.plankMinutes,
+        seconds: inputs.plankSeconds,
+      },
+    }),
+    [inputs],
+  );
 
-  const cardioExercises: BestScoreExercise[] = React.useMemo(() => [
-    { label: '2-Mile Run', value: 'run', type: 'time', onValueChange: (value: { minutes: string; seconds: string }) => { inputs.setRunMinutes(value.minutes); inputs.setRunSeconds(value.seconds); } },
-    { label: '20m HAMR', value: 'shuttles', type: 'number', onValueChange: inputs.setShuttles },
-    { label: '2-km Walk', value: 'walk', type: 'time', onValueChange: (value: { minutes: string; seconds: string }) => { inputs.setWalkMinutes(value.minutes); inputs.setWalkSeconds(value.seconds); } },
-  ], [inputs]);
+  const cardioExercises: BestScoreExercise[] = React.useMemo(
+    () => [
+      {
+        label: "2-Mile Run",
+        value: "run",
+        type: "time",
+        onValueChange: (value: { minutes: string; seconds: string }) => {
+          inputs.setRunMinutes(value.minutes);
+          inputs.setRunSeconds(value.seconds);
+        },
+      },
+      {
+        label: "20m HAMR",
+        value: "shuttles",
+        type: "number",
+        onValueChange: inputs.setShuttles,
+      },
+      {
+        label: "2-km Walk",
+        value: "walk",
+        type: "time",
+        onValueChange: (value: { minutes: string; seconds: string }) => {
+          inputs.setWalkMinutes(value.minutes);
+          inputs.setWalkSeconds(value.seconds);
+        },
+      },
+    ],
+    [inputs],
+  );
 
-  const cardioScores = React.useMemo(() => [outputs.scores.run || 0, outputs.scores.shuttles || 0, outputs.scores.walk || 'N/A'], [outputs]);
-  const cardioBestValues = React.useMemo(() => ({ run: { minutes: inputs.runMinutes, seconds: inputs.runSeconds }, shuttles: inputs.shuttles, walk: { minutes: inputs.walkMinutes, seconds: inputs.walkSeconds } }), [inputs]);
-
+  const cardioScores = React.useMemo(
+    () => [
+      outputs.scores.run || 0,
+      outputs.scores.shuttles || 0,
+      outputs.scores.walk || "N/A",
+    ],
+    [outputs],
+  );
+  const cardioBestValues = React.useMemo(
+    () => ({
+      run: { minutes: inputs.runMinutes, seconds: inputs.runSeconds },
+      shuttles: inputs.shuttles,
+      walk: { minutes: inputs.walkMinutes, seconds: inputs.walkSeconds },
+    }),
+    [inputs],
+  );
 
   return (
     <MainCalculatorLayout
       title="Best PT Score Calculator"
       isLoading={isLoading}
-      actions={['home', 'document', 'theme']}
-      onDocument={() => openDocuments('PT')}
+      actions={["home", "document", "theme"]}
+      onDocument={() => openDocuments("PT")}
       summaryContent={
-        <ScoreDisplay 
-          score={{ 
-            totalScore: outputs.bestScore, 
+        <ScoreDisplay
+          score={{
+            totalScore: outputs.bestScore,
             isPass: outputs.bestScore >= 75,
-            ...outputs.componentScores
-          }} 
-          showBreakdown={true} 
+            ...outputs.componentScores,
+          }}
+          showBreakdown={true}
         />
       }
       inputContent={

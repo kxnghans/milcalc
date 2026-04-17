@@ -1,34 +1,44 @@
-import { supabase } from './supabaseClient';
+import { supabase } from "./supabaseClient";
 
-type HelpTableName = 'pt_help_details' | 'pay_help_details' | 'retirement_help_details' | 'best_score_help_details';
+type HelpTableName =
+  | "pt_help_details"
+  | "pay_help_details"
+  | "retirement_help_details"
+  | "best_score_help_details";
 
-export const getHelpContentFromSource = async (source: 'pt' | 'pay' | 'retirement' | 'best_score', contentKey: string) => {
+export const getHelpContentFromSource = async (
+  source: "pt" | "pay" | "retirement" | "best_score",
+  contentKey: string,
+) => {
   let tableName: HelpTableName;
   switch (source) {
-    case 'pt':
-      tableName = 'pt_help_details';
+    case "pt":
+      tableName = "pt_help_details";
       break;
-    case 'pay':
-      tableName = 'pay_help_details';
+    case "pay":
+      tableName = "pay_help_details";
       break;
-    case 'retirement':
-      tableName = 'retirement_help_details';
+    case "retirement":
+      tableName = "retirement_help_details";
       break;
-    case 'best_score':
-      tableName = 'best_score_help_details';
+    case "best_score":
+      tableName = "best_score_help_details";
       break;
     default:
       return null;
   }
 
-  const queryColumn = source === 'pay' ? 'title' : 'content_key';
+  const queryColumn = source === "pay" ? "title" : "content_key";
   const { data, error } = await supabase
     .from(tableName)
-    .select('*')
+    .select("*")
     .eq(queryColumn, contentKey);
 
   if (error) {
-    console.error(`Error fetching help content from ${tableName} for key ${contentKey}:`, error);
+    console.error(
+      `Error fetching help content from ${tableName} for key ${contentKey}:`,
+      error,
+    );
     return null;
   }
 

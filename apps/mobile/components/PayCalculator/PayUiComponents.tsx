@@ -1,7 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
-import { useTheme } from '@repo/ui';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { getAlphaColor, useTheme } from "@repo/ui";
+import React from "react";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 // Corrected LabelWithHelp for extraction
 interface NewLabelWithHelpProps {
@@ -10,29 +16,38 @@ interface NewLabelWithHelpProps {
   onHelpPress: (contentKey: string) => void;
 }
 
-export const NewLabelWithHelp: React.FC<NewLabelWithHelpProps> = ({ label, contentKey, onHelpPress }) => {
+export const NewLabelWithHelp: React.FC<NewLabelWithHelpProps> = ({
+  label,
+  contentKey,
+  onHelpPress,
+}) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
     labelRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: theme.spacing.s,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: theme.spacing.s,
     },
-    labelStyle: { // Based on original usage of `styles.boldLabel`
-        ...theme.typography.subtitle,
-        color: theme.colors.text,
-        marginBottom: theme.spacing.s,
+    labelStyle: {
+      // Based on original usage of `styles.boldLabel`
+      ...theme.typography.subtitle,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.s,
     },
   });
 
   return (
     <View style={styles.labelRow}>
-        <Text style={styles.labelStyle}>{label}</Text>
-        <Pressable onPress={() => onHelpPress(contentKey)}>
-            <MaterialCommunityIcons name="help-circle-outline" size={16} color={theme.colors.disabled} />
-        </Pressable>
+      <Text style={styles.labelStyle}>{label}</Text>
+      <Pressable onPress={() => onHelpPress(contentKey)}>
+        <MaterialCommunityIcons
+          name="help-circle-outline"
+          size={16}
+          color={theme.colors.disabled}
+        />
+      </Pressable>
     </View>
   );
 };
@@ -46,31 +61,39 @@ interface RoundIconButtonProps {
   iconColor?: string;
 }
 
-export const RoundIconButton: React.FC<RoundIconButtonProps> = ({ onPress, iconName, backgroundColor, size = 24, iconSize = 16, iconColor = '#FFFFFF' }) => {
-    const styles = StyleSheet.create({
-        button: {
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            backgroundColor: backgroundColor,
-            justifyContent: 'center',
-            alignItems: 'center',
-            elevation: 2,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.2,
-            shadowRadius: 1,
-        }
-    });
+export const RoundIconButton: React.FC<RoundIconButtonProps> = ({
+  onPress,
+  iconName,
+  backgroundColor,
+  size = 24,
+  iconSize = 16,
+  iconColor = "#FFFFFF",
+}) => {
+  const styles = StyleSheet.create({
+    button: {
+      width: size,
+      height: size,
+      borderRadius: size / 2,
+      backgroundColor: backgroundColor,
+      justifyContent: "center",
+      alignItems: "center",
+      elevation: 2,
+      shadowColor: getAlphaColor("#000000", 1),
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 1,
+    },
+  });
 
-    return (
-        <TouchableOpacity
-            onPress={onPress}
-            style={styles.button}
-        >
-            <MaterialCommunityIcons name={iconName} size={iconSize} color={iconColor} />
-        </TouchableOpacity>
-    );
+  return (
+    <TouchableOpacity onPress={onPress} style={styles.button}>
+      <MaterialCommunityIcons
+        name={iconName}
+        size={iconSize}
+        color={iconColor}
+      />
+    </TouchableOpacity>
+  );
 };
 
 interface AddButtonProps {
@@ -81,19 +104,19 @@ export const AddButton: React.FC<AddButtonProps> = ({ onPress }) => {
   const { theme } = useTheme();
   const styles = StyleSheet.create({
     addIconContainer: {
-        alignItems: 'center',
-        marginBottom: theme.spacing.s,
-    }
+      alignItems: "center",
+      marginBottom: theme.spacing.s,
+    },
   });
   return (
     <View style={styles.addIconContainer}>
-        <RoundIconButton
-            onPress={onPress}
-            iconName="plus"
-            backgroundColor={theme.colors.primary}
-            size={20}
-            iconSize={14}
-        />
+      <RoundIconButton
+        onPress={onPress}
+        iconName="plus"
+        backgroundColor={theme.colors.primary}
+        size={20}
+        iconSize={14}
+      />
     </View>
   );
 };
@@ -103,16 +126,16 @@ interface CancelButtonProps {
 }
 
 export const CancelButton: React.FC<CancelButtonProps> = ({ onPress }) => {
-    const { theme } = useTheme();
-    return (
-        <RoundIconButton
-            onPress={onPress}
-            iconName="close"
-            backgroundColor={theme.colors.error}
-            size={20}
-            iconSize={14}
-        />
-    );
+  const { theme } = useTheme();
+  return (
+    <RoundIconButton
+      onPress={onPress}
+      iconName="close"
+      backgroundColor={theme.colors.error}
+      size={20}
+      iconSize={14}
+    />
+  );
 };
 
 export default NewLabelWithHelp;

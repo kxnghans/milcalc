@@ -5,16 +5,23 @@
  * NOTE: This file is a duplicate of the ThemeProvider in `@repo/ui`. It's recommended to use the shared provider.
  */
 
-import React, { createContext, useState, useContext, useMemo, ReactNode, useCallback } from 'react';
-import { Appearance } from 'react-native';
-import { theme as defaultTheme, lightColors, darkColors } from '@repo/ui';
+import { darkColors, lightColors, theme as defaultTheme } from "@repo/ui";
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
+import { Appearance } from "react-native";
 
 /**
  * The context that holds the theme information and toggle function.
  */
 export const ThemeContext = createContext({
   theme: defaultTheme,
-  themeMode: 'light', // The current theme mode ('light', 'dark', or 'auto').
+  themeMode: "light", // The current theme mode ('light', 'dark', or 'auto').
   toggleTheme: () => {}, // A function to cycle through the theme modes.
 });
 
@@ -31,18 +38,19 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   // Get the system's color scheme preference.
   const systemTheme = Appearance.getColorScheme();
   // State to manage the current theme mode: 'auto', 'light', or 'dark'.
-  const [themeMode, setThemeMode] = useState('auto');
+  const [themeMode, setThemeMode] = useState("auto");
 
   // `useMemo` is used to create the final theme object. It only recalculates when the theme mode or system theme changes.
   const theme = useMemo(() => {
     let colors;
-    if (themeMode === 'light') {
+    if (themeMode === "light") {
       colors = lightColors;
-    } else if (themeMode === 'dark') {
+    } else if (themeMode === "dark") {
       colors = darkColors;
-    } else { // 'auto' mode
+    } else {
+      // 'auto' mode
       // In 'auto' mode, the theme follows the system setting.
-      colors = systemTheme === 'dark' ? darkColors : lightColors;
+      colors = systemTheme === "dark" ? darkColors : lightColors;
     }
     return { ...defaultTheme, colors };
   }, [themeMode, systemTheme]);
@@ -51,22 +59,23 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
    * A function to cycle through the available theme modes: auto -> light -> dark -> auto.
    */
   const toggleTheme = useCallback(() => {
-    setThemeMode(prevMode => {
-      if (prevMode === 'auto') return 'light';
-      if (prevMode === 'light') return 'dark';
-      return 'auto';
+    setThemeMode((prevMode) => {
+      if (prevMode === "auto") return "light";
+      if (prevMode === "light") return "dark";
+      return "auto";
     });
   }, []);
 
-  const value = useMemo(() => ({
-    theme,
-    themeMode,
-    toggleTheme
-  }), [theme, themeMode, toggleTheme]);
+  const value = useMemo(
+    () => ({
+      theme,
+      themeMode,
+      toggleTheme,
+    }),
+    [theme, themeMode, toggleTheme],
+  );
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 };

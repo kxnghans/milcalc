@@ -5,8 +5,9 @@
  * values, and the exemption status.
  */
 
-import { useState } from 'react';
-import { useTimeInput } from './useTimeInput';
+import { useState } from "react";
+
+import { useTimeInput } from "./useTimeInput";
 
 /**
  * A custom hook to manage the state for the cardio component section.
@@ -19,21 +20,31 @@ import { useTimeInput } from './useTimeInput';
  * @returns An object containing all the state variables and their respective setters.
  */
 export function useCardioState(
-  initialComponent: string = 'run',
-  initialRunMinutes: string = '',
-  initialRunSeconds: string = '',
-  initialShuttles: string = '',
-  initialWalkMinutes: string = '',
-  initialWalkSeconds: string = ''
+  initialComponent: string = "run",
+  initialRunMinutes: string = "",
+  initialRunSeconds: string = "",
+  initialShuttles: string = "",
+  initialWalkMinutes: string = "",
+  initialWalkSeconds: string = "",
 ) {
   // State for the selected cardio exercise component (e.g., 'run', 'shuttles', 'walk').
   const [cardioComponent, setCardioComponent] = useState(initialComponent);
   // State for the minutes part of the run time.
-  const { minutes: runMinutes, setMinutes: setRunMinutes, seconds: runSeconds, setSeconds: setRunSeconds } = useTimeInput(initialRunMinutes, initialRunSeconds);
+  const {
+    minutes: runMinutes,
+    setMinutes: setRunMinutes,
+    seconds: runSeconds,
+    setSeconds: setRunSeconds,
+  } = useTimeInput(initialRunMinutes, initialRunSeconds);
   // State for the number of shuttles completed.
   const [shuttles, setShuttles] = useState(initialShuttles);
   // State for the minutes part of the walk time.
-  const { minutes: walkMinutes, setMinutes: setWalkMinutes, seconds: walkSeconds, setSeconds: setWalkSeconds } = useTimeInput(initialWalkMinutes, initialWalkSeconds);
+  const {
+    minutes: walkMinutes,
+    setMinutes: setWalkMinutes,
+    seconds: walkSeconds,
+    setSeconds: setWalkSeconds,
+  } = useTimeInput(initialWalkMinutes, initialWalkSeconds);
   // State for the exemption status of the component.
   const [isExempt, setIsExempt] = useState(false);
 
@@ -42,14 +53,14 @@ export function useCardioState(
    * When exempted, it clears all cardio input values.
    */
   const toggleExempt = () => {
-    setIsExempt(current => {
+    setIsExempt((current) => {
       const nextIsExempt = !current;
       if (nextIsExempt) {
-        setRunMinutes('');
-        setRunSeconds('');
-        setShuttles('');
-        setWalkMinutes('');
-        setWalkSeconds('');
+        setRunMinutes("");
+        setRunSeconds("");
+        setShuttles("");
+        setWalkMinutes("");
+        setWalkSeconds("");
       }
       return nextIsExempt;
     });

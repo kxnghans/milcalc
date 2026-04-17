@@ -4,10 +4,17 @@
  * It has distinct styles for its active (exempt) and inactive states.
  */
 
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
-import NeumorphicOutset from './NeumorphicOutset';
+import React from "react";
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
+
+import { useTheme } from "../contexts/ThemeContext";
+import NeumorphicOutset from "./NeumorphicOutset";
 
 interface ExemptButtonProps {
   /** The function to call when the button is pressed. */
@@ -22,21 +29,25 @@ interface ExemptButtonProps {
  * A button component used to mark a PT component as exempt.
  * It changes its appearance based on whether it is active.
  */
-export const ExemptButton: React.FC<ExemptButtonProps> = ({ onPress, isActive, style }) => {
+export const ExemptButton: React.FC<ExemptButtonProps> = ({
+  onPress,
+  isActive,
+  style,
+}) => {
   const { theme, isDarkMode } = useTheme();
 
   const styles = StyleSheet.create({
     container: {
       paddingVertical: 6,
       paddingHorizontal: theme.spacing.s,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       borderRadius: theme.borderRadius.m,
     },
     text: {
       ...theme.typography.caption,
       color: theme.colors.text,
-      fontWeight: '500',
+      fontWeight: "500",
     },
     activeText: {
       color: theme.colors.primaryText,
@@ -47,19 +58,33 @@ export const ExemptButton: React.FC<ExemptButtonProps> = ({ onPress, isActive, s
     },
     outsetContent: {
       borderRadius: theme.borderRadius.m,
-      overflow: 'hidden',
+      overflow: "hidden",
     },
   });
 
-  const backgroundColor = isActive ? theme.colors.primary : theme.colors.background;
+  const backgroundColor = isActive
+    ? theme.colors.primary
+    : theme.colors.background;
 
   return (
     <NeumorphicOutset
       containerStyle={[style, styles.outsetContainer]}
       contentStyle={[styles.outsetContent, { backgroundColor }]}
-      shadowOpacity={isActive ? (isDarkMode ? 0.5 : 0.3) : (isDarkMode ? 0.5 : 0.2)}
-      highlightColor={isActive ? (isDarkMode ? theme.colors.neumorphic.outset.highlight : 'white') : (isDarkMode ? theme.colors.neumorphic.outset.highlight : 'white')}
-      highlightOpacity={isActive ? (isDarkMode ? 0.3 : 1) : (isDarkMode ? 0.15 : 0.9)}
+      shadowOpacity={
+        isActive ? (isDarkMode ? 0.5 : 0.3) : isDarkMode ? 0.5 : 0.2
+      }
+      highlightColor={
+        isActive
+          ? isDarkMode
+            ? theme.colors.neumorphic.outset.highlight
+            : "white"
+          : isDarkMode
+            ? theme.colors.neumorphic.outset.highlight
+            : "white"
+      }
+      highlightOpacity={
+        isActive ? (isDarkMode ? 0.3 : 1) : isDarkMode ? 0.15 : 0.9
+      }
     >
       <TouchableOpacity onPress={onPress} style={styles.container}>
         <Text style={[styles.text, isActive && styles.activeText]}>EXEMPT</Text>

@@ -11,12 +11,12 @@
  * 'fail' - For scores below the passing criteria.
  * 'none' - For scores that are not applicable or zero.
  */
-export type ScoreCategory = 'excellent' | 'pass' | 'fail' | 'none';
+export type ScoreCategory = "excellent" | "pass" | "fail" | "none";
 
 /**
  * Defines the possible categories for a raw performance value (e.g., reps, time).
  */
-export type PerformanceCategory = 'excellent' | 'pass' | 'fail' | 'none';
+export type PerformanceCategory = "excellent" | "pass" | "fail" | "none";
 
 /**
  * Determines the category of a score based on its value relative to the maximum possible score.
@@ -24,29 +24,33 @@ export type PerformanceCategory = 'excellent' | 'pass' | 'fail' | 'none';
  * @param maxScore - The maximum possible score for the component.
  * @returns The `ScoreCategory` for the given score.
  */
-export const getScoreCategory = (score: number | string, maxScore: number, treatZeroAsFail: boolean = false): ScoreCategory => {
+export const getScoreCategory = (
+  score: number | string,
+  maxScore: number,
+  treatZeroAsFail: boolean = false,
+): ScoreCategory => {
   // Handle special string-based scores first (e.g., from the walk component).
-  if (typeof score === 'string') {
-    if (score === 'pass') return 'pass';
-    if (score === 'fail') return 'fail';
-    return 'none';
+  if (typeof score === "string") {
+    if (score === "pass") return "pass";
+    if (score === "fail") return "fail";
+    return "none";
   }
 
   // Now score is narrowed to number
   if (score === 0 && !treatZeroAsFail) {
-    return 'none';
+    return "none";
   }
 
   // Define thresholds based on percentages of the max score.
   const ninetyPercent = maxScore * 0.9;
 
   if (score >= ninetyPercent) {
-    return 'excellent';
+    return "excellent";
   }
   if (score > 0) {
-    return 'pass';
+    return "pass";
   }
-  return 'fail';
+  return "fail";
 };
 
 /**
@@ -61,17 +65,19 @@ export const getPerformanceCategory = (
   value: number,
   passThreshold: number,
   ninetyPercentileThreshold: number,
-  invertScale: boolean = false
+  invertScale: boolean = false,
 ): PerformanceCategory => {
-  if (value === 0) return 'none';
+  if (value === 0) return "none";
 
-  if (invertScale) { // Lower values are better (e.g., time).
-    if (value > passThreshold) return 'fail';
-    if (value <= ninetyPercentileThreshold) return 'excellent';
-    return 'pass';
-  } else { // Higher values are better (e.g., reps).
-    if (value < passThreshold) return 'fail';
-    if (value >= ninetyPercentileThreshold) return 'excellent';
-    return 'pass';
+  if (invertScale) {
+    // Lower values are better (e.g., time).
+    if (value > passThreshold) return "fail";
+    if (value <= ninetyPercentileThreshold) return "excellent";
+    return "pass";
+  } else {
+    // Higher values are better (e.g., reps).
+    if (value < passThreshold) return "fail";
+    if (value >= ninetyPercentileThreshold) return "excellent";
+    return "pass";
   }
 };

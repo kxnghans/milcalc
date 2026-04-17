@@ -5,7 +5,8 @@
  */
 
 import React, { ReactNode } from "react";
-import { StyleSheet, ViewStyle, StyleProp } from "react-native";
+import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+
 import { useTheme } from "../contexts/ThemeContext";
 import NeumorphicOutset from "./NeumorphicOutset";
 
@@ -18,7 +19,15 @@ import NeumorphicOutset from "./NeumorphicOutset";
  * @param {StyleProp<ViewStyle>} [props.containerStyle] - Alias for style, for consistency with other components.
  * @returns {React.JSX.Element} The rendered Card component.
  */
-export function Card({ children, style, containerStyle }: { children: ReactNode, style?: StyleProp<ViewStyle>, containerStyle?: StyleProp<ViewStyle> }): React.JSX.Element {
+export function Card({
+  children,
+  style,
+  containerStyle,
+}: {
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
+}): React.JSX.Element {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -26,14 +35,21 @@ export function Card({ children, style, containerStyle }: { children: ReactNode,
       padding: theme.spacing.m,
       borderRadius: theme.borderRadius.m,
       backgroundColor: theme.colors.background,
-      overflow: 'hidden', // Ensures the content respects the border radius.
+      overflow: "hidden", // Ensures the content respects the border radius.
     },
   });
 
   // The Card is built upon the NeumorphicOutset component to maintain a consistent visual style.
   return (
-    <NeumorphicOutset containerStyle={[style, containerStyle, { borderRadius: theme.borderRadius.m }]} contentStyle={styles.cardContent}>
-        {children}
+    <NeumorphicOutset
+      containerStyle={[
+        style,
+        containerStyle,
+        { borderRadius: theme.borderRadius.m },
+      ]}
+      contentStyle={styles.cardContent}
+    >
+      {children}
     </NeumorphicOutset>
   );
 }

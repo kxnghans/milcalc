@@ -1,4 +1,4 @@
-import { Tables } from './supabase';
+import { Tables } from "./supabase";
 
 export const Constants = {
   public: {
@@ -45,11 +45,28 @@ export interface PtInputs {
   altitudeGroup?: string;
 }
 
-export type DependentStatus = 'Veteran alone' | 'With spouse only' | 'With spouse and 1 parent' | 'With spouse and 2 parents' | 'With 1 parent only' | 'none';       
-export type DisabilityPercentage = "0%" | "10%" | "20%" | "30%" | "40%" | "50%" | "60%" | "70%" | "80%" | "90%" | "100%";
+export type DependentStatus =
+  | "Veteran alone"
+  | "With spouse only"
+  | "With spouse and 1 parent"
+  | "With spouse and 2 parents"
+  | "With 1 parent only"
+  | "none";
+export type DisabilityPercentage =
+  | "0%"
+  | "10%"
+  | "20%"
+  | "30%"
+  | "40%"
+  | "50%"
+  | "60%"
+  | "70%"
+  | "80%"
+  | "90%"
+  | "100%";
 
 export type AltitudeAdjustments = {
-    run: Tables<'run_altitude_adjustments'>[];
-    hamr: Tables<'hamr_altitude_adjustments'>[];
-    walk: Tables<'walk_altitude_adjustments'>[];
+  run: Tables<"run_altitude_adjustments">[];
+  hamr: Tables<"hamr_altitude_adjustments">[];
+  walk: Tables<"walk_altitude_adjustments">[];
 };

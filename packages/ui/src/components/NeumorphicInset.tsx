@@ -5,9 +5,10 @@
  * to simulate an inner shadow and highlight.
  */
 
-import React, { ReactNode } from 'react';
-import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+import React, { ReactNode } from "react";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+
+import { useTheme } from "../contexts/ThemeContext";
 
 /**
  * Props for the NeumorphicInset component.
@@ -27,7 +28,12 @@ interface NeumorphicInsetProps {
  * A component that wraps its children in a container with a "pressed-in" or "inset"
  * neumorphic visual effect.
  */
-const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style, containerStyle, contentStyle }) => {
+const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({
+  children,
+  style,
+  containerStyle,
+  contentStyle,
+}) => {
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -44,15 +50,13 @@ const NeumorphicInset: React.FC<NeumorphicInsetProps> = ({ children, style, cont
       borderRightWidth: theme.colors.neumorphic.inset.borderWidth,
       borderBottomColor: theme.colors.neumorphic.inset.highlight,
       borderRightColor: theme.colors.neumorphic.inset.highlight,
-      overflow: 'hidden',
+      overflow: "hidden",
     },
   });
 
   return (
     <View style={[styles.container, containerStyle]}>
-      <View style={[style, contentStyle]}>
-        {children}
-      </View>
+      <View style={[style, contentStyle]}>{children}</View>
     </View>
   );
 };

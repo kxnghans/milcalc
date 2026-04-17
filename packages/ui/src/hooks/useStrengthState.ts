@@ -5,7 +5,7 @@
  * the number of repetitions, and the exemption status.
  */
 
-import { useState } from 'react';
+import { useState } from "react";
 
 /**
  * A custom hook to manage the state for the strength component section.
@@ -13,7 +13,10 @@ import { useState } from 'react';
  * @param {string} [initialPushups=''] - The initial value for the push-up repetitions input.
  * @returns An object containing the state variables and their setters.
  */
-export function useStrengthState(initialComponent: string = 'push_ups_1min', initialPushups: string = '') {
+export function useStrengthState(
+  initialComponent: string = "push_ups_1min",
+  initialPushups: string = "",
+) {
   // State for the selected strength exercise component (e.g., 'push_ups_1min').
   const [pushupComponent, setPushupComponent] = useState(initialComponent);
   // State for the number of push-ups/reps performed.
@@ -26,10 +29,10 @@ export function useStrengthState(initialComponent: string = 'push_ups_1min', ini
    * When exempted, it clears the input value.
    */
   const toggleExempt = () => {
-    setIsExempt(current => {
+    setIsExempt((current) => {
       const nextIsExempt = !current;
       if (nextIsExempt) {
-        setPushups('');
+        setPushups("");
       }
       return nextIsExempt;
     });
