@@ -40,6 +40,7 @@ interface CardioComponentProps {
         hamr: Tables<'pt_altitude_corrections'>[] | null | undefined;
         walk: Tables<'pt_altitude_walk_thresholds'>[] | null | undefined;
     };
+    onFocus?: () => void;
 }
 
 /**
@@ -73,6 +74,7 @@ export default function CardioComponent({
     openDetailModal,
     score,
     altitudeData,
+    onFocus,
 }: CardioComponentProps) {
     const { theme } = useTheme();
     // State to hold the calculated altitude adjustment text to be displayed to the user.
@@ -253,6 +255,7 @@ export default function CardioComponent({
                         setMinutes={setRunMinutes}
                         seconds={runSeconds}
                         setSeconds={setRunSeconds}
+                        onFocus={onFocus}
                         adjustment={adjustment || undefined}
                         minutesPlaceholder="Minutes"
                         secondsPlaceholder="Seconds"
@@ -267,6 +270,7 @@ export default function CardioComponent({
                     <NumberInput
                         value={shuttles}
                         onChangeText={setShuttles}
+                        onFocus={onFocus}
                         placeholder="Enter shuttle count"
                         adjustment={adjustment || undefined}
                         style={styles.inputMargin}
@@ -281,6 +285,7 @@ export default function CardioComponent({
                         setMinutes={setWalkMinutes}
                         seconds={walkSeconds}
                         setSeconds={setWalkSeconds}
+                        onFocus={onFocus}
                         adjustment={adjustment || undefined}
                         minutesPlaceholder="Minutes"
                         secondsPlaceholder="Seconds"

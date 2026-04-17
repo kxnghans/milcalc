@@ -6,7 +6,7 @@
 
 import React, { useRef } from 'react';
 import { View, Text, StyleSheet, StyleProp, TextStyle, TextInput } from 'react-native';
-import { useTheme, SlideToggle, NeumorphicOutset, ProgressBar } from '@repo/ui';
+import { useTheme, SlideToggle } from '@repo/ui';
 import NumberInput from './NumberInput';
 import GenderSelector from './GenderSelector';
 
@@ -40,14 +40,8 @@ interface DemographicsProps {
     isHeightInInches?: boolean;
     /** Optional function to toggle Height input mode */
     setIsHeightInInches?: (val: boolean) => void;
-    /** Whether to show progress bars */
-    showProgressBars?: boolean;
-    /** Min/Max thresholds for WHtR */
-    minMax?: { whtr: { min: number; max: number } };
-    /** Current calculated scores */
-    score?: { whtrScore: number | string };
-    /** Calculated WHtR value */
-    calculatedWhtr?: number;
+    /** Optional function to call when an input is focused */
+    onFocus?: () => void;
 }
 
 /**
@@ -58,7 +52,7 @@ interface DemographicsProps {
 export default function Demographics({ 
     age, setAge, gender, setGender, inputStyle,
     waist, setWaist, heightFeet, setHeightFeet, heightInches, setHeightInches, isHeightInInches, setIsHeightInInches,
-    showProgressBars, minMax, score, calculatedWhtr
+    onFocus
 }: DemographicsProps) {
     const { theme } = useTheme();
 
@@ -141,10 +135,6 @@ export default function Demographics({
             color: theme.colors.text,
             textAlign: 'center',
             marginBottom: theme.spacing.s,
-        },
-        progressBarWrapper: {
-            marginTop: theme.spacing.s,
-            marginBottom: theme.spacing.xs,
         }
     }), [theme, waistFlex, heightFlex, toggleFlex]);
 
@@ -193,6 +183,7 @@ export default function Demographics({
                     <NumberInput
                         value={age}
                         onChangeText={setAge}
+                        onFocus={onFocus}
                         placeholder="--"
                         inputStyle={[styles.numberInput, inputStyle]}
                         style={styles.ageInputStyle}
@@ -229,6 +220,7 @@ export default function Demographics({
                                 value={waist}
                                 adjustment={'"'}
                                 onChangeText={handleWaistChange}
+                                onFocus={onFocus}
                                 placeholder="inches"
                                 inputStyle={[styles.numberInput, inputStyle]}
                                 style={styles.ageInputStyle}
@@ -242,6 +234,7 @@ export default function Demographics({
                                     value={heightInches}
                                     adjustment={'"'}
                                     onChangeText={setHeightInches}
+                                    onFocus={onFocus}
                                     placeholder="inches"
                                     inputStyle={[styles.numberInput, inputStyle]}
                                     style={styles.ageInputStyle}
@@ -255,6 +248,7 @@ export default function Demographics({
                                             value={heightFeet}
                                             adjustment={"'"}
                                             onChangeText={handleHeightFeetChange}
+                                            onFocus={onFocus}
                                             placeholder="feet"
                                             inputStyle={[styles.numberInput, inputStyle]}
                                             style={styles.ageInputStyle}
@@ -267,6 +261,7 @@ export default function Demographics({
                                             value={heightInches}
                                             adjustment={'"'}
                                             onChangeText={setHeightInches}
+                                            onFocus={onFocus}
                                             placeholder="in"
                                             inputStyle={[styles.numberInput, inputStyle]}
                                             style={styles.ageInputStyle}
@@ -284,24 +279,8 @@ export default function Demographics({
                             />
                         </View>
                     </View>
-
-                    {showProgressBars && minMax && score && calculatedWhtr !== undefined && (
-                        <View style={styles.progressBarWrapper}>
-                            <NeumorphicOutset>
-                                <ProgressBar
-                                    value={calculatedWhtr}
-                                    passThreshold={minMax.whtr.min}
-                                    maxPointsThreshold={minMax.whtr.max}
-                                    invertScale={true}
-                                    score={typeof score.whtrScore === 'number' ? score.whtrScore : 0}
-                                    maxScore={20}
-                                />
-                            </NeumorphicOutset>
-                        </View>
-                    )}
                 </View>
             )}
         </View>
     );
 }
-

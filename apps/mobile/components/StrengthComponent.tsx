@@ -21,6 +21,7 @@ interface StrengthComponentProps {
     toggleExempt: () => void;
     openDetailModal: (key: string, mascot?: ImageSourcePropType) => void;
     score: { totalScore: number; pushupScore: number | string; isPass: boolean };
+    onFocus?: () => void;
 }
 
 /**
@@ -42,6 +43,7 @@ export default function StrengthComponent({
     toggleExempt,
     openDetailModal,
     score,
+    onFocus,
 }: StrengthComponentProps) {
     const { theme } = useTheme();
     const styles = React.useMemo(() => StyleSheet.create({
@@ -112,6 +114,7 @@ export default function StrengthComponent({
                 <NumberInput
                     value={pushups}
                     onChangeText={setPushups}
+                    onFocus={onFocus}
                     placeholder="Enter push-up count"
                     style={styles.inputMargin}
                     onToggleExempt={toggleExempt}

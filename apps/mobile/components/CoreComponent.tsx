@@ -29,6 +29,7 @@ interface CoreComponentProps {
     toggleExempt: () => void;
     openDetailModal: (key: string, mascot?: ImageSourcePropType) => void;
     score: { totalScore: number; coreScore: number | string; isPass: boolean };
+    onFocus?: () => void;
 }
 
 /**
@@ -56,6 +57,7 @@ export default function CoreComponent({
     toggleExempt,
     openDetailModal,
     score,
+    onFocus,
 }: CoreComponentProps) {
     const { theme } = useTheme();
     const styles = React.useMemo(() => StyleSheet.create({
@@ -156,6 +158,7 @@ export default function CoreComponent({
                     <NumberInput
                         value={situps}
                         onChangeText={setSitups}
+                        onFocus={onFocus}
                         placeholder="Enter sit-up count"
                         style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
@@ -167,6 +170,7 @@ export default function CoreComponent({
                     <NumberInput
                         value={reverseCrunches}
                         onChangeText={setReverseCrunches}
+                        onFocus={onFocus}
                         placeholder="Enter crunch count"
                         style={styles.inputMargin}
                         onToggleExempt={toggleExempt}
@@ -180,6 +184,7 @@ export default function CoreComponent({
                         setMinutes={setPlankMinutes}
                         seconds={plankSeconds}
                         setSeconds={setPlankSeconds}
+                        onFocus={onFocus}
                         minutesPlaceholder="Minutes"
                         secondsPlaceholder="Seconds"
                         style={styles.inputMargin}

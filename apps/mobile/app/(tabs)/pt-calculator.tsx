@@ -1,5 +1,6 @@
 import * as React from "react";
 import { StyleSheet, ImageSourcePropType } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { usePtCalculatorState, useTheme, useCalculatorState } from "@repo/ui";
 import ScoreDisplay from "../../components/ScoreDisplay";
 import StrengthComponent from "../../components/StrengthComponent";
@@ -18,6 +19,9 @@ export default function PTCalculator() {
   const { age, gender, setProfileData } = useProfile();
   const { resetPtDemographics } = useCalculatorState();
 
+  const [showProgress, setShowProgress] = React.useState(false);
+  const [startedWithBlankProfile, setStartedWithBlankProfile] = React.useState(false);
+
     const {
       demographics,
       strength,
@@ -35,7 +39,47 @@ export default function PTCalculator() {
       openHelp(key, 'pt', mascot);
     }, [openHelp]);
 
-    const showProgressBars = !!(demographics.age && demographics.gender);
+    // Reset logic on screen focus
+    useFocusEffect(
+      React.useCallback(() => {
+        setShowProgress(false);
+        // Determine if profile was already complete when we entered this screen session
+        setStartedWithBlankProfile(!(age && gender));
+      }, [age, gender])
+    );
+
+    // Condition 2: If we started with a blank profile, show once Age is populated
+    React.useEffect(() => {
+      if (startedWithBlankProfile && demographics.age) {
+        setShowProgress(true);
+      }
+    }, [demographics.age, startedWithBlankProfile]);
+
+    // Condition 1: If we started with a profile, show once an exercise value is populated
+    React.useEffect(() => {
+      if (!startedWithBlankProfile) {
+        const hasExerciseValue = 
+          strength.pushups || 
+          core.situps || core.reverseCrunches || core.plankMinutes || core.plankSeconds ||
+          cardio.runMinutes || cardio.runSeconds || cardio.shuttles || cardio.walkMinutes || cardio.walkSeconds;
+        
+        if (hasExerciseValue) {
+          setShowProgress(true);
+        }
+      }
+    }, [
+      startedWithBlankProfile,
+      strength.pushups,
+      core.situps, core.reverseCrunches, core.plankMinutes, core.plankSeconds,
+      cardio.runMinutes, cardio.runSeconds, cardio.shuttles, cardio.walkMinutes, cardio.walkSeconds
+    ]);
+
+    // Points of contact: Trigger on focus if age/gender are present
+    const triggerProgressBars = React.useCallback(() => {
+      if (demographics.age && demographics.gender) {
+        setShowProgress(true);
+      }
+    }, [demographics.age, demographics.gender]);
 
   const styles = React.useMemo(() => StyleSheet.create({
     dividerMargin: {
@@ -76,14 +120,11 @@ export default function PTCalculator() {
                 setHeightInches={demographics.setHeightInches}
                 isHeightInInches={demographics.isHeightInInches}
                 setIsHeightInInches={demographics.setIsHeightInInches}
-                showProgressBars={false}
-                minMax={minMax}
-                score={score}
-                calculatedWhtr={demographics.calculatedWhtr}
+                onFocus={triggerProgressBars}
             />
             <Divider style={styles.dividerMargin} />
             <StrengthComponent 
-                showProgressBars={showProgressBars}
+                showProgressBars={showProgress}
                 minMax={minMax}
                 pushups={strength.pushups}
                 setPushups={strength.setPushups}
@@ -94,10 +135,11 @@ export default function PTCalculator() {
                 toggleExempt={strength.toggleExempt}
                 openDetailModal={handleOpenHelp}
                 score={score}
+                onFocus={triggerProgressBars}
             />
             <Divider style={styles.dividerMargin} />
             <CoreComponent
-                showProgressBars={showProgressBars}
+                showProgressBars={showProgress}
                 minMax={minMax}
                 coreComponent={core.coreComponent}
                 setCoreComponent={core.setCoreComponent}
@@ -114,10 +156,11 @@ export default function PTCalculator() {
                 toggleExempt={core.toggleExempt}
                 openDetailModal={handleOpenHelp}
                 score={score}
+                onFocus={triggerProgressBars}
             />
             <Divider style={styles.dividerMargin} />
             <CardioComponent
-                showProgressBars={showProgressBars}
+                showProgressBars={showProgress}
                 cardioMinMax={cardioMinMax}
                 cardioComponent={cardio.cardioComponent}
                 setCardioComponent={cardio.setCardioComponent}
@@ -140,6 +183,7 @@ export default function PTCalculator() {
                 score={score}
                 altitudeData={altitudeData}
                 openDetailModal={handleOpenHelp}
+                onFocus={triggerProgressBars}
             />
             <Divider style={styles.lastDividerMargin} />
             <AltitudeAdjustmentComponent 

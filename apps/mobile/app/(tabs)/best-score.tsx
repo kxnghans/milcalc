@@ -294,7 +294,6 @@ export default function BestScoreScreen() {
             setHeightInches={setHeightInches}
             isHeightInInches={isHeightInInches}
             setIsHeightInInches={setIsHeightInInches}
-            showProgressBars={false}
           />
           <Divider style={styles.divider} />
           <BestScoreSection

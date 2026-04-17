@@ -32,6 +32,8 @@ interface TimeInputProps {
   onToggleExempt?: () => void;
   /** Whether the component is currently exempt. When true, the input is non-editable and shows 'xx'. */
   isExempt?: boolean;
+  /** Optional function to call when the input is focused. */
+  onFocus?: () => void;
   /** Optional testID for minutes input */
   minutesTestID?: string;
   /** Optional testID for seconds input */
@@ -54,6 +56,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
   secondsPlaceholder = "ss",
   onToggleExempt,
   isExempt,
+  onFocus,
   minutesTestID,
   secondsTestID,
 }) => {
@@ -161,6 +164,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
             <StyledTextInput
               value={minutes}
               onChangeText={handleMinutesChange}
+              onFocus={onFocus}
               placeholder={currentMinutesPlaceholder}
               maxLength={2}
               keyboardType="numeric"
@@ -174,6 +178,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
               ref={secondsInput}
               value={seconds}
               onChangeText={handleSecondsChange}
+              onFocus={onFocus}
               onBlur={handleSecondsBlur}
               placeholder={currentSecondsPlaceholder}
               maxLength={2}
